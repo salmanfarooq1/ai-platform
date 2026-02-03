@@ -1,0 +1,41 @@
+[
+    {
+        "input": 10000,
+        "range": {
+            "current_memory_bytes": 80,
+            "peak_memory_bytes": 128,
+            "object_size_bytes": 48
+        },
+        "list": {
+            "current_memory_bytes": 391832,
+            "peak_memory_bytes": 391960,
+            "object_size_bytes": 80056
+        }
+    },
+    {
+        "input": 100000,
+        "range": {
+            "current_memory_bytes": 80,
+            "peak_memory_bytes": 128,
+            "object_size_bytes": 48
+        },
+        "list": {
+            "current_memory_bytes": 3991832,
+            "peak_memory_bytes": 3991960,
+            "object_size_bytes": 800056
+        }
+    },
+    {
+        "input": 1000000,
+        "range": {
+            "current_memory_bytes": 80,
+            "peak_memory_bytes": 128,
+            "object_size_bytes": 48
+        },
+        "list": {
+            "current_memory_bytes": 39991832,
+            "peak_memory_bytes": 39991960,
+            "object_size_bytes": 8000056
+        }
+    }
+]
