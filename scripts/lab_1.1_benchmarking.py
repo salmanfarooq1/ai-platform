@@ -18,12 +18,13 @@ def use_list(n):
 # Define function to measure memory usage
 
 def measure_memory(func, n):
+    # start memory tracking
     tracemalloc.start()
-
+    # call the function
     result_object = func(n)
-
+    # get memory usage
     current_memory, peak_memory = tracemalloc.get_traced_memory()
-
+    # stop memory tracking
     tracemalloc.stop()
 
     return current_memory, peak_memory, getsizeof(result_object)

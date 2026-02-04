@@ -1,0 +1,12 @@
+{
+    "before_gc": {
+        "current_memory": "122.07 MB",
+        "peak_memory": "130.12 MB",
+        "leaks": 1000000
+    },
+    "after_gc": {
+        "current_memory": "0.00 MB",
+        "peak_memory": "130.12 MB",
+        "leaks": 0
+    }
+}
