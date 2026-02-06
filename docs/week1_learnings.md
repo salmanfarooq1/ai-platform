@@ -57,3 +57,43 @@ getsizeof() returns the size of the object in memory, and it only gives the size
 
 - **Real World Impact:** in our RAG pipeline, we will be processing large volumes of data, and if we create circular references, it will lead to memory leaks, and will cause OOM errors. We should avoid creating circular references, and if we do, we should use gc.collect() to collect the garbage. This can be a reason of silent production crashes
 
+## Lab 1.3: File Chunk Iterator
+
+**Question**
+How can we process files larger than our available RAM without causing *Out of Memory (OOM)* errors? What is the impact of *"Eager Loading"* vs *"Lazy Loading"* on system resources?
+
+**Hypothesis**
+Reading a file using standard `f.read()` will consume memory proportional to the file size O(N),because it will load entire file in memory, and will cause OOM errors. Implementing a custom *Iterator pattern* with a fixed chunk size will allow us to process files of any size with constant memory usage O(1), as only one chunk exists in memory at a time.
+
+---
+
+**Experiment**
+1.  *Data Generation:* Generated a *100MB dummy binary file* to simulate a large dataset.
+2.  *Implementation:* Created a custom `FileChunkIterator` class supporting:
+    - *Iteration Protocol:* `(__iter__, __next__)` to yield data in small chunks.
+    - *Context Management:* `(__enter__, __exit__)` to ensure resource cleanup/file closing even on errors.
+3.  *Test Scenarios:*
+    - *Ad-hoc (The Hog):* Opens the file and reads all bytes into a single variable.
+    - *Smart (The Iterator):* Uses the custom class to read the file in *1KB chunks*, discarding data after measurement.
+4.  *Measurement:* Used `tracemalloc` to record Peak Memory usage for both approaches.
+
+---
+
+**Results**
+
+| Metric | Ad-hoc (Read All) | Smart (Chunk Iterator) |
+| :--- | :--- | :--- |
+| **Peak Memory (MB)** | ~95.47 MB | ~0.007 MB (7.4 KB) |
+| **Current Memory (MB)** | ~95.46 MB | ~0.0003 MB |
+| **Efficiency Gain** | - | **~13,000x Lower Memory** |
+
+---
+
+**Explanation**
+* **The "Ad-hoc" method:** Forces the OS to allocate a contiguous block of RAM to hold the entire 100MB file content. Memory usage scales linearly with file size. This mayb be fine for small files, but in large data pipelines, RAG, ingestions, it will definitely lead to OOM errors.
+* **The "Smart" method:** Uses **Lazy Evaluation**. It only keeps a single chunk (1024 bytes) in memory at any given millisecond. As soon as the loop moves to the next iteration, the previous chunk is discarded and garbage collected, keeping the memory footprint flat regardless of file size. This way our pipeline is scalable, highly memory optimized and stable.
+
+**Real World Impact**
+In our **RAG (Retrieval-Augmented Generation) pipeline**, we process massive PDFs and continuous data streams. 
+* **Risk:** If a worker attempts to load a 2GB PDF entirely into RAM to split it, it will crash (OOM). 
+* **Solution:** Using this Iterator pattern ensures our pipeline is scalable and stable, allowing a 2GB RAM worker to process a 100GB file without breaking, crashing or throwing OOM errors. This is crucial for a smart, scalable and robust RAG pipeline.

@@ -1,0 +1,5 @@
+.env
+__pycache__
+.venv/
+scripts/test_data/
+scripts/create_100mb_dummy_txt_file.py

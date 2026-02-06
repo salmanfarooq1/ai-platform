@@ -1,0 +1,10 @@
+{
+    "adhoc": {
+        "peak_memory_adhoc": "100104869 bytes, 97758.6611328125 kb, 95.4674425125122 mb",
+        "current_memory_adhoc": "100100437 bytes, 97754.3330078125 kb, 95.4632158279419 mb"
+    },
+    "smart": {
+        "peak_memory_smart": "7598 bytes, 7.419921875 kb, 0.0072460174560546875 mb",
+        "current_memory_smart": "400 bytes, 0.390625 kb, 0.0003814697265625 mb"
+    }
+}
