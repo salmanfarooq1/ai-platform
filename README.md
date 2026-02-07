@@ -13,3 +13,5 @@ A production-ready AI backend platform with memory-efficient RAG ingestion, hybr
     Built a production-ready iterator/context manager to process massive datasets with constant $O(1)$ memory usage.
 * **Lab 1.4 - Generator Pipeline:** 
     Built a production-ready generator pipeline to process massive datasets with constant $O(1)$ memory usage.
+* **Lab 1.5 - Module Integration Test:** 
+    Integrated all the modules from the previous labs into a single pipeline and tested it.

@@ -134,3 +134,118 @@ Above single file reading concept can be expanded into multi-step pipeline, but 
 
 **Real World Impact**
 In our **RAG pipeline**, while processing massive PDFs and continous data streams, using generator based pipelines can process massive files with constant memory usage (O(1)), which is a lot more efficient and cost effective than using eager loading (O(N)).
+
+## Lab 1.5: Production Module Architecture
+
+**Problem**
+We have scattered code in multiple files, essentially the scripts. The problem would definitely be much more visible when the codebase grows and we need to reuse the same functions in multiple places. 
+
+**Challenge**
+Transform isolated code into a production-ready Python package that others (including future me) can import and use.
+
+---
+
+**Architecture Decisions**
+
+1. **Separation of Concerns**
+   - `readers.py`: This file would contain all the file reading related functions, and classes. *FileChunkIterator* and *read_chunks* for now.
+   - `processors.py`: Processing functions. *clean_chunks* for now.
+   - `embedders.py`: Embedding functions. *embed_chunks* for now.
+   - `__init__.py`: This file would contain the public API for the package, and essentially convert /ingestion folder into a module.
+
+2. **Why This Structure?**
+
+   - When I need to add PDFReader next week, I only touch `readers.py`. 
+   - The processors and embedders won't care WHERE the chunks are coming from.
+   
+   - When I swap OpenAI embeddings for Cohere, I only touch `embedders.py`.
+   - The readers and processors don't care HOW I create vectors.
+   
+   - This is **Separation of Concerns** - each module has ONE job:
+   - readers: Get data IN
+   - processors: Transform data
+   - embedders: Create semantic representations
+
+
+3. **Public API Design**
+   - What we expose: `FileChunkIterator`, `read_chunks`, `clean_chunks`, `embed_chunks`
+   - Why these specifically: `FileChunkIterator` and `read_chunks` are exposed as they would be used to read the file, and `clean_chunks` and `embed_chunks` are exposed as they would be used to process the file.
+
+---
+
+**Implementation**
+
+**Directory Structure Created:**
+```
+core/
+└── ingestion/
+    ├── __init__.py       # __all__
+    ├── readers.py        # FileChunkIterator and read_chunks
+    ├── processors.py     # clean_chunks
+    └── embedders.py      # embed_chunks
+```
+
+**Key Implementation Choices:**
+- Absolute imports: Better readability, less chance of import errors. 
+- One key consideration was about using both FileChunkIterator and read_chunks. FileChunkIterator is a class, and read_chunks is a function. I decided to expose both:
+  - FileChunkIterator: as it is a class, can be better customized for future ( such as adding indexes etc.)
+  - read_chunks: as it is a simpler generator function, can be quickly used without overhead.
+  - Since I am thinking of it as Library, and Libraries provide OPTIONS!  
+
+---
+
+**Integration Test**
+
+**Test File:** `scripts/lab_1.5_integration_test.py`
+
+**What We Tested:**
+1. Imports work correctly
+2. Pipeline executes without errors
+3. Output format is correct (128-dim embeddings)
+4. Processes large file successfully
+
+**Test Results:**
+```
+✓ Imports test PASSED
+✓ Successfully processed 97,754 chunks
+✓ Module integration test PASSED
+```
+
+**What This Proves:**
+- Processing 97,754 chunks successfully proves:
+1. Imports work across package boundaries - Python can find our module
+2. Generators chain correctly - Data flows through the pipeline
+3. Most importantly, someone else can now do
+```python
+from core.ingestion import read_chunks, clean_chunks
+```
+
+---
+
+**Key Learnings**
+
+1. **Module vs Script**
+   - module is a package, can be imported anywhere in the code, and it provides a single source of truth.
+   - script is simply a file, that requires code duplication if needed to be reused, and introduces maintanance overhead.
+
+2. **The `__init__.py` Pattern**
+   - It is a great way to control what is exposed to the public API.
+
+3. **Import Errors I Hit** 
+   - When I tried to import from `core.ingestion` and 
+   got "ModuleNotFoundError", I realized Python doesn't magically know about my project structure.
+   - So I added an empty __init__.py file to the core folder as well, and I ran *export PYTHONPATH=$PYTHONPATH:.* to fix, it is like explicitly telling python where to look for modules.
+   - mostly in production, it is handeled automatically by package managers, but knowing the PATH fundamentals is important.
+
+4. **Code Reusability**
+   - Before Lab 1.5: Would need to copy paste code from scripts into other files.
+   - After Lab 1.5: Can import the functions from the module. and this approach is much cleaner.
+
+---
+
+**Real-World Impact**
+
+In production RAG systems:
+- We would need to import multiple functions from multiple modules, we may need the file reading functionality in multiple places, or the chunking functionality, or the embedding functionality, or all of them.
+- While we swap embedding model, we just need to go to the module and edit the function, even if it is imported and being used in multiple locations. Even better, we would have secret management for constants, which would further make code updates even more easier 
+- This greatly helps while working in a team, as everyone can access all the resources in a single place, and work with that. this ensures zero ambiguity, or confusion.
