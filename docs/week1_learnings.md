@@ -97,3 +97,40 @@ Reading a file using standard `f.read()` will consume memory proportional to the
 In our **RAG (Retrieval-Augmented Generation) pipeline**, we process massive PDFs and continuous data streams. 
 * **Risk:** If a worker attempts to load a 2GB PDF entirely into RAM to split it, it will crash (OOM). 
 * **Solution:** Using this Iterator pattern ensures our pipeline is scalable and stable, allowing a 2GB RAM worker to process a 100GB file without breaking, crashing or throwing OOM errors. This is crucial for a smart, scalable and robust RAG pipeline.
+
+## Lab 1.4: Generator Pipeline
+
+**Question**
+What if we need to process a large file that requires multiple steps as in a pipeline, using as less memory as we can? 
+
+**Hypothesis**
+Above single file reading concept can be expanded into multi-step pipeline, but instead of creating own iterator classes, we can use generators, and chain them together to create a pipeline.
+
+---
+
+**Experiment**
+1.  *Data:* Used the existing 100MB dummy file from Lab 1.3
+2.  *Implementation:* Implemented a generator pipeline using `read_chunks`, `clean_chunks` and `embed_chunks` functions. Each of these functions is a generator function, they use yield.
+3.  *Test Scenarios:*
+    - *Naive (The Hog):* Reads entire file at once, creates separate list for each step ( cleaning, chunking, embedding).
+    - *Smart (The Generator Pipeline):* Uses the generator pipeline to read the file in *1KB chunks*, discarding data after measurement.
+4.  *Measurement:* Used `tracemalloc` to record Peak Memory usage for both approaches.
+
+---
+
+**Results**
+
+| Metric | Naive (The Hog) | Smart (Generator Pipeline) |
+| :--- | :--- | :--- |
+| **Peak Memory (MB)** | ~196.39 MB | ~0.04 MB (45.35 KB) |
+| **Current Memory (MB)** | ~196.39 MB | ~ 0.01 MB (5.90 KB) |
+| **Efficiency Gain** | - | **~4800x Lower Memory** |
+
+---
+
+**Explanation**
+* **The "Naive" method:** Uses much more memory ( would crash for large files) as it creates multiple lists in memory, one for each step. This adds up, and can lead to OOM crashes
+* **The "Smart" method:** Uses **Lazy Evaluation**. Efficiently chains multiple steps into a single pipeline where only one chunk is being processed at a time, which means there is only one chunk in the memory at one time, discarded after being processed (this can be stored in a database or a file, or sent to a queue, or processed in real time). This is a memory efficient way to process large files. 
+
+**Real World Impact**
+In our **RAG pipeline**, while processing massive PDFs and continous data streams, using generator based pipelines can process massive files with constant memory usage (O(1)), which is a lot more efficient and cost effective than using eager loading (O(N)).

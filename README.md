@@ -11,3 +11,5 @@ A production-ready AI backend platform with memory-efficient RAG ingestion, hybr
     Investigated how circular references bypass reference counting and how to mitigate leaks using garbage collection.
 * **Lab 1.3 - File Chunk Iterator:** 
     Built a production-ready iterator/context manager to process massive datasets with constant $O(1)$ memory usage.
+* **Lab 1.4 - Generator Pipeline:** 
+    Built a production-ready generator pipeline to process massive datasets with constant $O(1)$ memory usage.

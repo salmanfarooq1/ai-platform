@@ -1,0 +1,10 @@
+{
+    "naive": {
+        "peak_memory_naive": "205927607 bytes, 201101.18 KB, 196.39 MB",
+        "current_memory_naive": "205913270 bytes, 201087.18 KB, 196.37 MB"
+    },
+    "generator": {
+        "peak_memory_generator": "46438 bytes, 45.35 KB, 0.04 MB",
+        "current_memory_generator": "6044 bytes, 5.90 KB, 0.01 MB"
+    }
+}
