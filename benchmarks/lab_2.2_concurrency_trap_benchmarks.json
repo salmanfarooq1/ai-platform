@@ -1,0 +1,72 @@
+[
+    {
+        "concurrency": 1,
+        "throughput_rps": 0.41,
+        "response_time_seconds": 2.47,
+        "success_count": 1,
+        "success_percentage": 100.0
+    },
+    {
+        "concurrency": 5,
+        "throughput_rps": 1.56,
+        "response_time_seconds": 3.2,
+        "success_count": 5,
+        "success_percentage": 100.0
+    },
+    {
+        "concurrency": 10,
+        "throughput_rps": 2.95,
+        "response_time_seconds": 3.39,
+        "success_count": 10,
+        "success_percentage": 100.0
+    },
+    {
+        "concurrency": 25,
+        "throughput_rps": 4.31,
+        "response_time_seconds": 5.8,
+        "success_count": 25,
+        "success_percentage": 100.0
+    },
+    {
+        "concurrency": 50,
+        "throughput_rps": 4.79,
+        "response_time_seconds": 10.44,
+        "success_count": 50,
+        "success_percentage": 100.0
+    },
+    {
+        "concurrency": 100,
+        "throughput_rps": 9.72,
+        "response_time_seconds": 10.29,
+        "success_count": 99,
+        "success_percentage": 99.0
+    },
+    {
+        "concurrency": 200,
+        "throughput_rps": 18.18,
+        "response_time_seconds": 11.0,
+        "success_count": 199,
+        "success_percentage": 99.5
+    },
+    {
+        "concurrency": 500,
+        "throughput_rps": 45.46,
+        "response_time_seconds": 11.0,
+        "success_count": 499,
+        "success_percentage": 99.8
+    },
+    {
+        "concurrency": 1000,
+        "throughput_rps": 90.82,
+        "response_time_seconds": 11.01,
+        "success_count": 574,
+        "success_percentage": 57.4
+    },
+    {
+        "concurrency": 2000,
+        "throughput_rps": 181.42,
+        "response_time_seconds": 11.02,
+        "success_count": 546,
+        "success_percentage": 27.3
+    }
+]

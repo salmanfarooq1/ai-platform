@@ -8,6 +8,9 @@ authors = [
 readme = "README.md"
 requires-python = "^3.11"
 dependencies = [
+    "aiohttp (>=3.13.3,<4.0.0)",
+    "matplotlib (>=3.10.8,<4.0.0)",
+    "numpy (>=2.4.2,<3.0.0)"
 ]
 
 

@@ -22,3 +22,5 @@ A production-ready AI backend platform with memory-efficient RAG ingestion, hybr
 
 * **Lab 2.1 - Event Loop Deep Dive:** 
     Explored the asyncio event loop, proved it's single-threaded, and understood how it handles concurrency.
+* **Lab 2.2 - Concurrency Trap:** 
+    Investigated the concurrency trap and understood the key point "*over concurrency HURTS performance*".
