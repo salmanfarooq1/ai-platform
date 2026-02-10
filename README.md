@@ -15,3 +15,10 @@ A production-ready AI backend platform with memory-efficient RAG ingestion, hybr
     Built a production-ready generator pipeline to process massive datasets with constant $O(1)$ memory usage.
 * **Lab 1.5 - Module Integration Test:** 
     Integrated all the modules from the previous labs into a single pipeline and tested it.
+
+## Week 2 Learnings
+
+[see `docs/week2_learnings.md`](docs/week2_learnings.md) for detailed learnings.
+
+* **Lab 2.1 - Event Loop Deep Dive:** 
+    Explored the asyncio event loop, proved it's single-threaded, and understood how it handles concurrency.
