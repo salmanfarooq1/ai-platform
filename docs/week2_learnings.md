@@ -74,3 +74,71 @@ What is the concurrency trap? Does increasing concurrency always improve perform
 **Real-World Impact:**
 
 - In our RAG platform, while making api calls for embeddings and context, using high concurrency would lead to server overload and dropped packets. We must prioritize success rate over throughput.
+
+
+---
+
+## Lab 2.3: Controlled Concurrency
+
+**Question:**  
+How does limiting concurrency come in action, why do we use semaphores, how does it limit concurrency?
+
+**Hypothesis:**  
+I expect that limiting concurrency using semaphores will improve the success rate and response time, because it will prevent the server from being overloaded.
+
+**Experiment:**
+- Implemented rate limiting using semaphore to limit the concurrency.
+- Used semaphore to limit the concurrency to 10, 25, 50, 100, 200, 500, 1000, 2000.
+- Variables: Semaphores ([10, 25, 50, 100, 200, 500])
+
+**Results:**
+
+| Semaphore Limit | Time (s) | Throughput (req/s) | Success Rate |
+|-----------------|----------|--------------------|--------------|
+| 10              | 95.49    | 10.47              | 100.0%       |
+| 25              | 39.84    | 25.10              | 100.0%       |
+| 50              | 20.11    | 49.73              | 99.9%        |
+| 100             | 11.22    | 89.10              | 99.8%        |
+| 200             | 10.59    | 94.44              | 100.0%       |
+| 500             | 10.48    | 95.39              | 100.0%       |
+
+![Lab 2.3: Controlled Concurrency Results](../benchmarks/lab_2.3_controlled_concurrency_benchmarks.png)
+
+
+**Key Findings:**
+
+ The semaphore approach greatly increases the consistency and success rate, it even makes us able to get 100% success rate on 500 as semphore value, and using 1000 as concurrency limit.
+
+
+**Explanation:**
+
+Rate limiting is one of the best practices to prevent server overloadp and possible program crashes. Using semaphore is one of the ways to implement rate limiting. It works by limiting the number of tasks that can run concurrently.
+
+**Errors I faced:**
+
+- *Bug:* i used semaphore creation inside the fetching function, which killed the concurrency → *Learned:* always create semaphore outside the fetching function and open session with semaphore, inside make as many concurrent calls, but you would be limited by the semaphore value.
+
+**Real-World Impact:**
+
+- In our RAG platform, while making api calls for embeddings and context, rate limiting would be one of the best practices to prevent server overload and possible program crashes. if I call openAI embedding api without any rate limiting, i may face broken responses, which would definitely affect the quality of embeddings, and overall performance of the RAG system.
+
+## Comparison: Lab 2.2 vs Lab 2.3
+
+**Lab 2.2 (Unlimited Concurrency) vs Lab 2.3 (Semaphore-Controlled Concurrency)**
+
+| Metric | Lab 2.2 (Concurrency: 1000) | Lab 2.3 (Semaphore: 500, Total: 1000) |
+|--------|----------------------------|---------------------------------------|
+| Throughput | 90.82 req/s | 95.39 req/s |
+| Success Rate | **57.4%** | **100.0%** |
+| Response Time | 11.01s | 10.48s |
+
+![Lab 2.2 vs Lab 2.3 Comparison](../benchmarks/comparison_lab_2.2_vs_2.3.png)
+
+**Key Insights:**
+
+Without rate limiting (Lab 2.2), pushing 1000 concurrent requests resulted in only 57.4% success rate and degraded further to 27.3% at 2000 concurrency. The server became overloaded and started rejecting requests.
+
+With semaphore-based rate limiting (Lab 2.3), we achieved 100% success rate while processing the same 1000 requests. By limiting concurrency to 500, we actually got *better* throughput (95.39 vs 90.82 req/s) and *faster* response times (10.48s vs 11.01s).
+
+**Conclusion:** Controlled concurrency through semaphores prevents server overload, leading to higher success rates, better throughput, and more predictable performance. The trade-off of slightly limiting parallelism is far outweighed by the gains in reliability and consistency.
+---

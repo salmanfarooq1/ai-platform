@@ -24,3 +24,5 @@ A production-ready AI backend platform with memory-efficient RAG ingestion, hybr
     Explored the asyncio event loop, proved it's single-threaded, and understood how it handles concurrency.
 * **Lab 2.2 - Concurrency Trap:** 
     Investigated the concurrency trap and understood the key point "*over concurrency HURTS performance*".
+* **Lab 2.3 - Controlled Concurrency:** 
+    In Lab 2.2, we saw 1000 concurrent requests fail with 57% success. By using Semaphore(500), we achieved 100% success with nearly identical throughput (95 req/s vs 90 req/s), proving controlled concurrency is superior to unbounded.

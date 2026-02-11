@@ -1,0 +1,38 @@
+[
+    {
+        "Sem Limit": 10,
+        "Time": 95.49,
+        "Throuput": 10.47,
+        "Success_rate": "1000/1000 (100.0%"
+    },
+    {
+        "Sem Limit": 25,
+        "Time": 39.84,
+        "Throuput": 25.1,
+        "Success_rate": "1000/1000 (100.0%"
+    },
+    {
+        "Sem Limit": 50,
+        "Time": 20.11,
+        "Throuput": 49.73,
+        "Success_rate": "999/1000 (99.9%"
+    },
+    {
+        "Sem Limit": 100,
+        "Time": 11.22,
+        "Throuput": 89.1,
+        "Success_rate": "998/1000 (99.8%"
+    },
+    {
+        "Sem Limit": 200,
+        "Time": 10.59,
+        "Throuput": 94.44,
+        "Success_rate": "1000/1000 (100.0%"
+    },
+    {
+        "Sem Limit": 500,
+        "Time": 10.48,
+        "Throuput": 95.39,
+        "Success_rate": "1000/1000 (100.0%"
+    }
+]
