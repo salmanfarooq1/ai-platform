@@ -1,0 +1,71 @@
+{
+  "timestamp": "2026-02-18 15:01:55",
+  "concurrency_scaling": [
+    {
+      "max_concurrent": 5,
+      "total_requests": 50,
+      "time": 2.18,
+      "throughput": 22.92,
+      "success_rate": 100.0,
+      "successes": 50
+    },
+    {
+      "max_concurrent": 10,
+      "total_requests": 50,
+      "time": 1.5,
+      "throughput": 33.37,
+      "success_rate": 100.0,
+      "successes": 50
+    },
+    {
+      "max_concurrent": 25,
+      "total_requests": 50,
+      "time": 0.98,
+      "throughput": 51.24,
+      "success_rate": 100.0,
+      "successes": 50
+    },
+    {
+      "max_concurrent": 50,
+      "total_requests": 50,
+      "time": 1.39,
+      "throughput": 35.85,
+      "success_rate": 100.0,
+      "successes": 50
+    }
+  ],
+  "retry_effectiveness": [
+    {
+      "max_retries": 0,
+      "total_requests": 5,
+      "successes": 0,
+      "success_rate": 0.0,
+      "total_time": 0.0,
+      "avg_time_per_request": 0.0
+    },
+    {
+      "max_retries": 1,
+      "total_requests": 5,
+      "successes": 4,
+      "success_rate": 80.0,
+      "total_time": 0.59,
+      "avg_time_per_request": 0.12
+    },
+    {
+      "max_retries": 2,
+      "total_requests": 5,
+      "successes": 4,
+      "success_rate": 80.0,
+      "total_time": 1.73,
+      "avg_time_per_request": 0.35
+    },
+    {
+      "max_retries": 3,
+      "total_requests": 5,
+      "successes": 4,
+      "success_rate": 80.0,
+      "total_time": 4.08,
+      "avg_time_per_request": 0.82
+    }
+  ]
+}

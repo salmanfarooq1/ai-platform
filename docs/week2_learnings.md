@@ -142,3 +142,38 @@ With semaphore-based rate limiting (Lab 2.3), we achieved 100% success rate whil
 
 **Conclusion:** Controlled concurrency through semaphores prevents server overload, leading to higher success rates, better throughput, and more predictable performance. The trade-off of slightly limiting parallelism is far outweighed by the gains in reliability and consistency.
 ---
+
+## Lab 2.4: Production-Ready Async HTTP Client
+
+**Challenge:**  
+
+Build a reusable async HTTP client class for production use.
+
+**What I Built:**
+
+- created a class AsyncHttpClient.
+- implemented context manager protocol, using __aenter__ and __aexit__. why? because it guarantees that no resources leak, and resources are managed automatically.
+- implemented async fetch() method, using semaphore to limit concurrency, using a retry loop( for transient failures), with exponential backoff ( to give server time to recover), handeled exceptions( connection errors, timeout errors) and server errors ( 5xx).
+- implemented async fetch_batch() method, using gather( for concurrent execution), used CRITICAL *return_exceptions=True* to return all responses, even if some failed, without this, gather would return on first exception
+
+**Key Design Decisions:**
+
+- Session created in __aenter__, not __init__, as ClientSession() requires async context.
+- Return error dict instead of raising, which allows batch processing to continue on failures.
+
+**What I Learned:**
+
+- Used *return* self.session.close() in ____aexit__, but then i understood that return would only return the coroutine, and will not execute the close(), so I used *await* instead.
+
+- Defined semaphore without the value, which would logically kill the purpose of it, corrected it by defining it like this : self.semaphore = asyncio.Semaphore(self.max_concurrency)
+
+- *await asyncio.sleep(attempt ** 2)*, a subtle syntax bug which makes it quadratic instead of exponential, corrected it with *await asyncio.sleep(2 ** attempt)*
+
+**Real-World Impact:**
+
+- this client pattern is used in production RAG systems for:
+
+- *Embedding generation:* Batch process 1,000 documents with OpenAI API with controlled concurrency.
+
+- *Context retrieval:* Fetch from multiple vector DBs concurrently with retry protection
+- *LLM API calls:* Handle rate limits and transient failures gracefully
