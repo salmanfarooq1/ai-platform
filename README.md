@@ -28,3 +28,11 @@ A production-ready AI backend platform with memory-efficient RAG ingestion, hybr
     In Lab 2.2, we saw 1000 concurrent requests fail with 57% success. By using Semaphore(500), we achieved 100% success with nearly identical throughput (95 req/s vs 90 req/s), proving controlled concurrency is superior to unbounded.
 * **Lab 2.4 - Production-Ready Async HTTP Client:** 
     Production async HTTP client - handles 1000s of API calls with automatic retries, rate limiting, and graceful error handling
+* **Lab 2.5: Integration Pipeline ✅**
+    - End-to-end async ingestion:
+        - read → clean → batch → embed → store
+    - Integrated Week 1 + Week 2 components
+    - batch_generator() bridges sync generators with async HTTP
+    - 100% success rate
+    - 34 chunks/s throughput
+    - Memory-efficient streaming (constant memory regardless of file size)

@@ -161,7 +161,7 @@ Build a reusable async HTTP client class for production use.
 - Session created in __aenter__, not __init__, as ClientSession() requires async context.
 - Return error dict instead of raising, which allows batch processing to continue on failures.
 
-**What I Learned:**
+**What I Learned(Bugs & Fixes):**
 
 - Used *return* self.session.close() in ____aexit__, but then i understood that return would only return the coroutine, and will not execute the close(), so I used *await* instead.
 
@@ -177,3 +177,92 @@ Build a reusable async HTTP client class for production use.
 
 - *Context retrieval:* Fetch from multiple vector DBs concurrently with retry protection
 - *LLM API calls:* Handle rate limits and transient failures gracefully
+
+## Lab 2.5: Integration Pipeline
+
+**Challenge:**  
+Integrate memory-efficient ingestion from week 1 with async HTTP client from week 2 into a production-ready end-to-end pipeline.
+
+
+**What I Built:**
+- *batch_generator()*: to effectively bridge sync generators with async code using itertools.islice.
+- *ingestion_pipeline()*: End-to-end async function that orchestrates File reading (generators from Week 1), Text cleaning (generators from Week 1), Batch processing (new helper function), Concurrent API calls (AsyncHttpClient from Week 2), Result storage (streaming to file)
+
+**Key Design Decisions:**
+- *sync + async* : generators are synchronous while HTTP client is asynchronous. batch_generator solves this by collecting one batch at a time with list(islice(iterator, n)), giving a concrete list to asyncio.gather. Generator state is preserved between calls. 
+
+- *memory efficiency* : memory stays constant, using generators, each batch is read, processed, stored and then discarded, without loading the entire file into memory. Generator chain stays lazy throughout the pipeline.
+
+- *concurrency control* : AsyncHttpClient class already implements Semaphore, so there is no need to implement external rate limiting, although semaphore value can be overriden by passing it as an argument to the constructor. and batch size automatically groups API calls.
+
+**What I Learned:**
+
+- *Bugs & Fixes*
+
+- mistakenly overwritten successful_chunks variable with = instead of +=, which resulted in 0 successful chunks.
+
+- initially, i was catching errors but not the Exceptions, which resulted in TypeError. Fixed it by using isinstance() to effectively handle all kinds of errors, coming from API calls.
+
+- learnt a very intresting generator batching through itertools.islice, which allows us to get yields in batches while retaining the state.
+
+-*Concepts*: 
+
+- islice, takes in an iterable, start, stop, step, and returns an iterator that yields items from the iterable. By effieciently using indexes, we can create batches of yeild without loading the entire file into memory.
+
+- to stream results into a file, simply use append mode.
+
+- from benchmarks, one observation is that generators DO keep memory constant, but increasing concurrency increases memory usage, this is because tasks list has to be kept in memory before executing the .gather().
+this is a minor trade off, but very imporatant to consider.
+
+**Performance Results:**
+```
+File: 1MB (1,024 chunks × 1KB)
+Batch size: 50 | Max concurrent: 25
+Success rate: 100%
+Throughput: ~17 chunks/s (with tracemalloc overhead)
+Total time: ~60s
+Peak memory: ~7.8 MB
+Memory used: ~413 KB above baseline
+```
+
+**Benchmark Results:**
+
+### Batch Size Impact (max_concurrent=25)
+
+| Batch Size | Throughput | Total Time | Peak Memory |
+|:----------:|:----------:|:----------:|:-----------:|
+| 25 | 12.75 chunks/s | 1m 20s | 7.25 MB |
+| 50 | 9.20 chunks/s | 1m 51s | 7.50 MB |
+| 100 | 16.30 chunks/s | 1m 3s | 8.03 MB |
+
+### Concurrency Impact (batch_size=50)
+
+| Max Concurrent | Throughput | Total Time | Peak Memory |
+|:--------------:|:----------:|:----------:|:-----------:|
+| 10 | 6.39 chunks/s | 2m 40s | 3.74 MB |
+| 25 | 7.32 chunks/s | 2m 20s | 7.58 MB |
+| 50 | 21.72 chunks/s | 47s | 14.18 MB |
+
+![Lab 2.5 Benchmarks](../benchmarks/lab_2.5_benchmarks.png)
+
+**Key Findings:**
+
+*Throughput*: Higher batch sizes improved throughput (peaked at 16.30 chunks/s for batch=100). Larger batches amortize overhead across more chunks. For concurrency, jumping from 25 to 50 gave biggest gain (7.32 → 21.72 chunks/s).
+
+**Memory - Two separate behaviors**:
+
+1. *Input-size independence*: With same concurrency, memory barely changed as batch size tripled (7.25 MB → 8.03 MB, ~10% spread). This proves the pipeline doesn't accumulate data from input file - it processes one batch and discards it. Memory would stay same even for 100GB files.
+
+2. *Concurrency/memory tradeoff*: Memory scales with max_concurrent (3.74 MB at 10 → 14.18 MB at 50). This is expected - asyncio.gather holds all in-flight responses until last one completes. More concurrency = more buffers in memory at once.
+
+These are independent: generators solve input-size scaling, concurrency memory is a separate cost you accept for throughput.
+
+**Real-World Impact:**
+At TB scale, generator architecture keeps RAM bounded regardless of dataset size. Only concurrent connections and response sizes determine peak memory. This means you can run on modest hardware (16GB instance) without splitting input files.
+
+Concurrency becomes the main tuning knob - more RAM allows higher max_concurrent which drives throughput. Batch size is secondary, affecting overhead rather than peak memory.
+
+
+
+
+

@@ -5,3 +5,5 @@ scripts/test_data/
 scripts/create_100mb_dummy_txt_file.py
 __pycache__/*
 .pyc
+benchmarks/*.jsonl
+config.py

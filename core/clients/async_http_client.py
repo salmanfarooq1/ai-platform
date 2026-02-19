@@ -57,3 +57,26 @@ class AsyncHttpClient:
             tasks.append(self.fetch(url))
         logging.info(f"Fetching {len(urls)} URLs with max_concurrent={self.max_concurrent}")
         return await asyncio.gather(*tasks, return_exceptions = True)
+
+    # let's create a post method as well
+    async def post(self, url : str, data : dict, headers : Optional[dict] = None, timeout : Optional[int] = None):
+        timeout = timeout or self.timeout
+        if not headers:
+            headers = {'Content-type':'application/json'}
+
+        last_error = None
+        for attempt in range(self.max_retries):
+            try:
+                async with self.semaphore:
+                    async with self.session.post(url, json = data, headers=headers, timeout = timeout ) as response:
+                        if response.status == 200 or response.status == 201:
+                            return await response.json()
+                        else:
+                            last_error = f'error code : {response.status}'
+            except Exception as e:
+                last_error = str(e)
+
+            if attempt < self.max_retries - 1:
+                await asyncio.sleep(2**attempt)
+
+        return {'error':last_error, 'url':url}
