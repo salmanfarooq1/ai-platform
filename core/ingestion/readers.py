@@ -6,7 +6,7 @@ class FileChunkIterator:
         # using 'open' function, we are essentially creating our own context manager wrapper.
         self.file_path = file_path
         self.chunk_size = chunk_size
-        self.file = open(file_path, 'rb') 
+        self.file = None
 
     # now we define the __iter__ method, which is used to get an iterator from the FileChunkIterator class.
     # it would essentially convert our FileChunkIterator class into an iterator.
@@ -33,6 +33,9 @@ class FileChunkIterator:
     # it would essentially return the iterator object.
     
     def __enter__(self):
+        self.file = open(self.file_path, 'rb')
+        if self.file is None:
+            raise RuntimeError("Use 'with FileChunkIterator(...) as it:' to iterate")
         return self
   
     # now we define the __exit__ method, which is for the context manager, it is called automatically to close the file.

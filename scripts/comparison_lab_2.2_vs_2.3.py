@@ -13,11 +13,10 @@ def load_benchmarks():
     """Load both lab 2.2 and lab 2.3 benchmark results"""
     
     # Load Lab 2.2 (raw concurrency)
-    with open("./benchmarks/lab_2.2_concurrency_trap_benchmarks.json", "r") as f:
-        lab_2_2 = json.load(f)
+    with open("../benchmarks/lab_2.2_concurrency_trap_benchmarks.json", "r") as f:        lab_2_2 = json.load(f)
     
     # Load Lab 2.3 (semaphore-controlled)
-    with open("./benchmarks/lab_2.3_controlled_concurrency_benchmarks.json", "r") as f:
+    with open("../benchmarks/lab_2.3_controlled_concurrency_benchmarks.json", "r") as f:
         lab_2_3 = json.load(f)
     
     return lab_2_2, lab_2_3
@@ -200,8 +199,8 @@ def plot_comparison(lab_2_2, lab_2_3):
     )
     
     plt.tight_layout(rect=[0, 0, 1, 0.90])
-    plt.savefig("./benchmarks/Lab_2.3_comparison.png", dpi=160, bbox_inches="tight")
-    print("✅ Saved ./benchmarks/Lab_2.3_comparison.png")
+    plt.savefig("../benchmarks/Lab_2.3_comparison.png", dpi=160, bbox_inches="tight")
+    print("✅ Saved ../benchmarks/Lab_2.3_comparison.png")
     plt.show()
 
 

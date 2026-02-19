@@ -7,3 +7,4 @@ __pycache__/*
 .pyc
 benchmarks/*.jsonl
 config.py
+project_mental_model.md

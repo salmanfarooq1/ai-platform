@@ -1,7 +1,6 @@
 import asyncio
 import time
 import json
-import aiohttp
 from itertools import islice
 from core.clients.async_http_client import AsyncHttpClient
 from core.ingestion.readers import read_chunks

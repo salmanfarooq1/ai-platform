@@ -7,7 +7,7 @@ class AsyncHttpClient:
     def __init__(self, max_concurrent : int = 10, max_retries : int = 3, timeout : int = 10) -> None:
         self.max_concurrent = max_concurrent
         self.max_retries = max_retries
-        self.timeout = timeout
+        self.timeout = aiohttp.ClientTimeout(total=timeout)  # int → aiohttp type, used by all request methods
         self.session : Optional[aiohttp.ClientSession] = None
         self.semaphore : Optional[asyncio.Semaphore] = None
 
@@ -33,7 +33,7 @@ class AsyncHttpClient:
     # note that it only makes one request
     async def fetch(self, url: str) -> dict:
         last_error = None
-        for attempt in range(self.max_retries):
+        for attempt in range(max(1, self.max_retries)):
             try:
                 async with self.semaphore:
                     async with self.session.get(url, timeout = self.timeout) as response:
@@ -59,13 +59,13 @@ class AsyncHttpClient:
         return await asyncio.gather(*tasks, return_exceptions = True)
 
     # let's create a post method as well
-    async def post(self, url : str, data : dict, headers : Optional[dict] = None, timeout : Optional[int] = None):
+    async def post(self, url : str, data : dict, headers : Optional[dict] = None, timeout : Optional[int] = None) -> dict:
         timeout = timeout or self.timeout
         if not headers:
-            headers = {'Content-type':'application/json'}
+            headers = {'Content-Type':'application/json'}
 
         last_error = None
-        for attempt in range(self.max_retries):
+        for attempt in range(max(1, self.max_retries)):
             try:
                 async with self.semaphore:
                     async with self.session.post(url, json = data, headers=headers, timeout = timeout ) as response:
