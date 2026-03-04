@@ -1,0 +1,18 @@
+{
+  "num_rows": 10000,
+  "embedding_dimensions": 128,
+  "library": "asyncpg",
+  "approaches": [
+    {
+      "name": "row_by_row_asyncpg",
+      "time_s": 22.107,
+      "throughput_rows_per_s": 452.34
+    },
+    {
+      "name": "copy_asyncpg",
+      "time_s": 0.098,
+      "throughput_rows_per_s": 102106.32,
+      "speedup": "225.73x"
+    }
+  ]
+}

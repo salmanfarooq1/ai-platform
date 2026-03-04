@@ -1,0 +1,24 @@
+{
+  "num_rows": 10000,
+  "embedding_dimensions": 128,
+  "library": "psycopg2",
+  "approaches": [
+    {
+      "name": "row_by_row",
+      "time_s": 6.742,
+      "throughput_rows_per_s": 1483.24
+    },
+    {
+      "name": "executemany",
+      "time_s": 6.542,
+      "throughput_rows_per_s": 1528.58,
+      "speedup_vs_row_by_row": "1.03x"
+    },
+    {
+      "name": "execute_batch",
+      "time_s": 2.972,
+      "throughput_rows_per_s": 3365.01,
+      "speedup_vs_row_by_row": "2.27x"
+    }
+  ]
+}
