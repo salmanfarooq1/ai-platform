@@ -7,3 +7,4 @@ __pycache__/*
 .pyc
 benchmarks/*.jsonl
 project_mental_model.md
+v2_unified_portfolio.md
