@@ -12,6 +12,7 @@ This is a 12-week structured learning project. Each lab isolates one concept, br
 
 - Python 3.11+
 - Poetry
+- Docker Desktop (with WSL 2 backend on Windows)
 
 ---
 
@@ -44,12 +45,17 @@ python scripts/lab_2.5_integration_test.py
 core/
 ├── clients/
 │   └── async_http_client.py   # async HTTP with retries, semaphore, timeout
+├── database/
+│   ├── pool.py                # asyncpg connection pool with pgvector
+│   ├── bulk_ops.py            # COPY-based bulk insert
+│   └── schema.sql             # documents table definition
 ├── ingestion/
 │   ├── readers.py             # lazy file chunk generator
 │   ├── processors.py          # text cleaning generator
-│   └── embedders.py           # embedding helpers
+│   └── embedders.py           # embedding generator (768-dim)
 └── pipeline/
-    └── async_ingest.py        # end-to-end async ingestion
+    ├── async_ingest.py        # HTTP-based async ingestion (Week 2)
+    └── db_ingest.py           # database-backed ingestion (Week 3)
 ```
 
 ---
@@ -63,6 +69,8 @@ core/
 | 1.4 | Generator pipeline memory | 4,800× reduction |
 | 2.3 | Semaphore vs unbounded | 100% vs 57% success |
 | 2.5 | Async pipeline memory | Constant at any file size |
+| 3.3 | COPY vs row-by-row INSERT | 226× faster (102K rows/s) |
+| 3.4 | Connection pooling | 1.6× faster, zero overhead |
 
 ---
 
@@ -108,10 +116,26 @@ Combined Week 1 + Week 2 into full async pipeline: read → clean → batch → 
 
 ---
 
+## Week 3: PostgreSQL + pgvector
+
+Full notes: [`docs/week3_learnings.md`](docs/week3_learnings.md)
+
+### Lab 3.1 — Database Setup
+Set up PostgreSQL + pgvector via Docker. Connected with psycopg2 (sync) first, then asyncpg (async). Registered pgvector extension and created vector(768) schema.
+
+### Lab 3.2 — Row-by-Row vs Bulk Insert
+Benchmarked three psycopg2 approaches. `executemany` is a lie (1.03x). `execute_batch` gives 2.27x. Both still too slow for production.
+
+### Lab 3.3 — asyncpg COPY
+asyncpg's `copy_records_to_table()` hit 102,106 rows/s — a 226x speedup over row-by-row. COPY bypasses SQL parsing entirely.
+
+### Lab 3.4 — Connection Pooling + Integration
+Built `asyncpg.create_pool()` with `init=register_vector`. Pool concurrent (0.63s) beats fresh-connect-per-batch (0.99s). Integrated everything into `db_ingest.py`: read → clean → embed → COPY to postgres. 1,297 chunks/sec, all rows verified in DB.
+
+---
+
 ## What's Next
 
-Week 3: Vector embeddings and storage (pgvector/Pinecone integration)
-
-Week 4: Basic RAG retrieval pipeline
+Week 4: RAG retrieval pipeline (similarity search, query processing)
 
 Weeks 5-12: LangGraph agents, hybrid retrieval, production deployment

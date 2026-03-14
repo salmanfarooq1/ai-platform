@@ -21,7 +21,14 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from core.pipeline.async_ingest import ingestion_pipeline
-from config import API_URL, API_KEY, INPUT_FILE, OUTPUT_DIR, BATCH_SIZE, MAX_CONCURRENT
+
+# Hardcoded configuration values
+API_URL = "https://httpbin.org/post"
+API_KEY = ""
+INPUT_FILE = "scripts/test_data/1mb_test.txt"
+OUTPUT_DIR = "benchmarks"
+BATCH_SIZE = 50
+MAX_CONCURRENT = 25
 
 # ── Terminal colour helpers ───────────────────────────────────────────────────
 

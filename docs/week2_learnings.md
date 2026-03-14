@@ -141,6 +141,7 @@ Without rate limiting (Lab 2.2), pushing 1000 concurrent requests resulted in on
 With semaphore-based rate limiting (Lab 2.3), we achieved 100% success rate while processing the same 1000 requests. By limiting concurrency to 500, we actually got *better* throughput (95.39 vs 90.82 req/s) and *faster* response times (10.48s vs 11.01s).
 
 **Conclusion:** Controlled concurrency through semaphores prevents server overload, leading to higher success rates, better throughput, and more predictable performance. The trade-off of slightly limiting parallelism is far outweighed by the gains in reliability and consistency.
+
 ---
 
 ## Lab 2.4: Production-Ready Async HTTP Client
@@ -197,7 +198,7 @@ Integrate memory-efficient ingestion from week 1 with async HTTP client from wee
 
 **What I Learned:**
 
-- *Bugs & Fixes*
+-*Bugs & Fixes*
 
 - mistakenly overwritten successful_chunks variable with = instead of +=, which resulted in 0 successful chunks.
 
