@@ -1,4 +1,7 @@
 .env
+.env.local
+.env.demo
+.env.prod
 __pycache__
 .venv/
 scripts/test_data/
@@ -8,3 +11,4 @@ __pycache__/*
 benchmarks/*.jsonl
 project_mental_model.md
 v2_unified_portfolio.md
+v5_sprint_plan.md
