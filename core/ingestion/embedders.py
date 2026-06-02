@@ -4,7 +4,8 @@ def embed_chunks(cleaned_chunks: list[str]) -> Generator[tuple[str, list[int]], 
     '''
     Yield (chunk, embedding) tuples, fake embeddings until a real model is wired in.
 
-    768 dimensions matches production models, so no schema migration is needed when swapping in real embeddings.
+    768 dimensions matches nomic-embed-text (local/demo) and is the standardized
+    dimension across all deployment modes. See config.py EMBEDDING_DIM.
     hash() keeps values deterministic, sufficient for testing pipeline plumbing.
     '''
     for chunk in cleaned_chunks:
