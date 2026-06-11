@@ -1,0 +1,40 @@
+{
+  "lab": "4.3 \u2014 Hybrid Async + Multiprocessing",
+  "description": "Proves that CPU work inside async coroutines blocks the event loop. run_in_executor() offloads CPU to a process pool, keeping the event loop responsive. The probe coroutine measures event loop delay \u2014 high delay = loop was blocked.",
+  "n_docs": 4,
+  "time_unit": "seconds for pipeline total, milliseconds for probe delays",
+  "naive": {
+    "mode": "naive (CPU blocks event loop)",
+    "total_seconds": 1.026,
+    "probe_delays_ms": [
+      0.56,
+      621.83,
+      622.31,
+      622.87,
+      623.41,
+      623.96,
+      624.92,
+      625.43
+    ],
+    "avg_probe_delay_ms": 545.66,
+    "max_probe_delay_ms": 625.43
+  },
+  "hybrid": {
+    "mode": "hybrid (CPU in process pool)",
+    "total_seconds": 0.405,
+    "probe_delays_ms": [
+      0.63,
+      1.53,
+      1.93,
+      2.18,
+      2.57,
+      3.42,
+      3.73,
+      4.65
+    ],
+    "avg_probe_delay_ms": 2.58,
+    "max_probe_delay_ms": 4.65
+  },
+  "speedup": 2.533,
+  "event_loop_improvement": "avg delay reduced from 545.66ms to 2.58ms"
+}

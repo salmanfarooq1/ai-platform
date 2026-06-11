@@ -1,0 +1,8 @@
+{
+  "n_workers": 4,
+  "sequential": "1.3505sec",
+  "threads": "1.433sec",
+  "processes": "0.552sec",
+  "thread_vs_sequential_ratio": "1.061x",
+  "process_speedup_ratio": "2.446x"
+}

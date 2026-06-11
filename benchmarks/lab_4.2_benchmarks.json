@@ -1,0 +1,54 @@
+{
+  "lab": "4.2 \u2014 Serialization Overhead",
+  "description": "Measures pickle/unpickle cost of sending data across process boundaries. Finds break-even data size where multiprocessing starts paying off over sequential.",
+  "workload": "hashlib.sha256 x50 iterations per task",
+  "n_workers": 4,
+  "time_unit": "milliseconds (ms)",
+  "ratio_explanation": "proc_speedup_ratio = sequential_ms / processes_ms. >1.0 means processes win. <1.0 means sequential wins (pickle overhead dominates).",
+  "results": [
+    {
+      "label": "1KB",
+      "data_size_bytes": 1024,
+      "data_size_human": "1KB",
+      "n_workers": 4,
+      "sequential_ms": 0.379,
+      "processes_ms": 27.318,
+      "proc_speedup_ratio": 0.0139,
+      "winner": "sequential",
+      "interpretation": "sequential is 72.04x faster \u2014 pickle overhead dominates"
+    },
+    {
+      "label": "100KB",
+      "data_size_bytes": 102400,
+      "data_size_human": "100KB",
+      "n_workers": 4,
+      "sequential_ms": 15.487,
+      "processes_ms": 18.861,
+      "proc_speedup_ratio": 0.8211,
+      "winner": "sequential",
+      "interpretation": "sequential is 1.22x faster \u2014 pickle overhead dominates"
+    },
+    {
+      "label": "10MB",
+      "data_size_bytes": 10485760,
+      "data_size_human": "10MB",
+      "n_workers": 4,
+      "sequential_ms": 1448.213,
+      "processes_ms": 594.549,
+      "proc_speedup_ratio": 2.4358,
+      "winner": "processes",
+      "interpretation": "processes are 2.44x faster than sequential"
+    },
+    {
+      "label": "100MB",
+      "data_size_bytes": 104857600,
+      "data_size_human": "100MB",
+      "n_workers": 4,
+      "sequential_ms": 14337.58,
+      "processes_ms": 5536.435,
+      "proc_speedup_ratio": 2.5897,
+      "winner": "processes",
+      "interpretation": "processes are 2.59x faster than sequential"
+    }
+  ]
+}
