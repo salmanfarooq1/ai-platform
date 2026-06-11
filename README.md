@@ -62,7 +62,7 @@ core/
 
 ## Key Results
 
-| Lab | What I Proved | Result |
+| Lab | What is Proved | Result |
 |-----|---------------|--------|
 | 1.1 | `range` vs `list` memory | 381 MB → 0.0001 MB |
 | 1.3 | Chunk iterator memory | 13,000× reduction |
@@ -71,6 +71,9 @@ core/
 | 2.5 | Async pipeline memory | Constant at any file size |
 | 3.3 | COPY vs row-by-row INSERT | 226× faster (102K rows/s) |
 | 3.4 | Connection pooling | 1.6× faster, zero overhead |
+| 4.1 | GIL limits CPU-bound threading | Threads ≈ Sequential, Processes ≈ 4x faster |
+| 4.2 | Serialization break-even point | Sequential wins <1MB, Processes win >10MB (2.44x at 10MB) |
+| 4.3 | Event loop responsiveness | Naive: 545ms avg delay → Hybrid: 2.58ms avg delay (2.53x pipeline speedup) |
 
 ---
 
@@ -133,9 +136,24 @@ asyncpg's `copy_records_to_table()` hit 102,106 rows/s — a 226x speedup over r
 Built `asyncpg.create_pool()` with `init=register_vector`. Pool concurrent (0.63s) beats fresh-connect-per-batch (0.99s). Integrated everything into `db_ingest.py`: read → clean → embed → COPY to postgres. 1,297 chunks/sec, all rows verified in DB.
 
 ---
+## Week 4: GIL, Multiprocessing & Hybrid Concurrency
+
+### Lab 4.1 — GIL Proof
+
+Proved the GIL prevents parallel execution for CPU-bound threads. Four threads running sum(i*i for i in range(5M)) takes the same time as sequential. Four processes take ~4x less. The fix for CPU-bound work is ProcessPoolExecutor, not ThreadPoolExecutor.
+
+### Lab 4.2 — Serialization Overhead
+
+Every process boundary has a pickle cost. Found the break-even: sequential wins below ~1MB-10MB of data per task, processes win above ~10MB. Small tasks (DB writes, tiny cleanups) should never use multiprocessing — the overhead dominates. Large tasks (embedding batches, chunking large docs) benefit from it.
+
+### Lab 4.3 — Hybrid Async + Multiprocessing
+
+Proved that CPU work called directly inside an async coroutine blocks the entire event loop — average 545ms delay, nothing else can run. run_in_executor() offloads CPU work to a process pool while immediately returning control to the event loop. Result: 2.58ms average delay, 2.53x pipeline speedup. This is the production pattern for core/pipeline/.
 
 ## What's Next
 
-Week 4: RAG retrieval pipeline (similarity search, query processing)
+- Week 4 completes the concurrency foundation. core/ now has the patterns needed to handle all three workload types correctly: I/O-bound (async), CPU-bound (process pool), and the hybrid pattern that combines them.
 
-Weeks 5-12: LangGraph agents, hybrid retrieval, production deployment
+- Week 5: Multi-strategy chunking + OpenAPI-aware chunker. Complete core/ingestion/chunkers.py with the CHUNKER_REGISTRY dispatch pattern.
+
+- Weeks 6–12: FastAPI layer, LangGraph agents, hybrid RAG retrieval, evals with RAGAS, production deployment.

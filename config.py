@@ -2,23 +2,13 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
 # Embedding dimensions: 768 is the universal compatibility point.
 # - Ollama nomic-embed-text: 768 native
 # - Azure text-embedding-3-small: 1536 native, called with dimensions=768
 # - GCP text-embedding-005: 768 native
 # - GCP gemini-embedding-001: 3072 native, called with outputDimensionality=768
 EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", 768))
-
-#--------- DATABASE CONFIG ---------#
-
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", 5432))
-POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
-POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
-MIN_POOL_SIZE = int(os.getenv("MIN_POOL_SIZE", 2))
-MAX_POOL_SIZE = int(os.getenv("MAX_POOL_SIZE", 10))
-
 
 #--------- DEPLOYMENT MODES CONFIG ---------#
 
