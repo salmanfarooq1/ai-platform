@@ -2,8 +2,10 @@ import time
 from itertools import islice
 from typing import Generator, Iterator
 from asyncpg import Pool
-from core.ingestion import read_chunks, clean_chunks, embed_chunks
+from core.ingestion.chunkers import ChunkRecord, get_chunker
+from core.ingestion.embedders import embed_chunks
 from core.database import create_pool, bulk_insert
+from pathlib import Path
 
 
 def batch_generator(iterable: Iterator, batch_size: int = 50) -> Generator[list, None, None]:
@@ -11,7 +13,7 @@ def batch_generator(iterable: Iterator, batch_size: int = 50) -> Generator[list,
     Yield fixed-size batches from any iterable.
 
     islice() reads from a lazy generator without materializing it.
-    iter() before the loop ensures batches are sequential, each call advances the same shared position, not re-read from start.
+    iter() before the loop ensures batches are sequential, each call increments the same shared position, not re-read from start.
     '''
     iterator = iter(iterable)
 
@@ -23,44 +25,51 @@ def batch_generator(iterable: Iterator, batch_size: int = 50) -> Generator[list,
         yield batch
 
 
-async def ingestion_pipeline(input_file_path: str, batch_size: int = 50) -> dict:
+
+async def ingestion_pipeline(
+    input_file_path: str,
+    document_id: str,
+    namespace: str = "default",
+    batch_size: int = 50,
+    pool: Pool = None,       # API passes its shared pool; standalone runs create one
+) -> dict:
     '''
-    Read a file, clean and embed chunks, bulk-write to PostgreSQL.
+    Chunk → embed → bulk insert into PostgreSQL.
 
-    Week 2 called an HTTP API and wrote to JSONL.
-    This version: embeddings generated in-process, storage via COPY to PostgreSQL.
-
-    Pool is created once per run, connection cost paid once, reused across all batches.
-    batch_size=50 is a RAM vs round-trip tradeoff.
+    Accepts an external pool so the API's shared pool is reused across requests.
+    If no pool is passed, creates one locally — preserves standalone script usage.
     '''
     start_time = time.perf_counter()
 
-    # Week 1 generators, memory stays flat regardless of file size
-    chunks = read_chunks(input_file_path, chunk_size=1024)
-    cleaned_chunks = clean_chunks(chunks)
+    # Resolve chunker from file extension — dispatch table in chunkers.py
+    ext = Path(input_file_path).suffix.lstrip(".")
+    chunker = get_chunker(ext)
+
+    # Read full file text — chunkers operate on strings, not byte streams
+    # This is a conscious tradeoff: chunkers need the full text to detect
+    # headers, paragraph boundaries, etc. Generator streaming doesn't apply here.
+    text = Path(input_file_path).read_text(encoding="utf-8")
+    chunks: list[ChunkRecord] = chunker(text, source=input_file_path)
 
     total_chunks = 0
+    owns_pool = pool is None
 
-    # create pool once, all batches share the same set of live connections
-    pool: Pool = await create_pool()
+    if owns_pool:
+        pool = await create_pool()
 
-    for batch in batch_generator(cleaned_chunks, batch_size):
-        # embed_chunks returns (chunk, embedding) tuples, one per chunk in the batch
-        embedding_tuple_list = list(embed_chunks(batch))
-
-        # acquire borrows a connection from the pool and returns it automatically on exit
-        # this means no connection overhead per batch, pool keeps connections alive
+    for batch in batch_generator(chunks, batch_size):
+        embedded_batch = await embed_chunks(batch)
         async with pool.acquire() as conn:
-            await bulk_insert(conn, embedding_tuple_list)
+            await bulk_insert(conn, embedded_batch, document_id=document_id, namespace=namespace)
+        total_chunks += len(embedded_batch)
 
-        total_chunks += len(embedding_tuple_list)
-
-    await pool.close()  # release all connections cleanly, important in scripts, less so in long-running servers
+    if owns_pool:
+        await pool.close()
 
     elapsed_time = time.perf_counter() - start_time
 
     return {
         'total_chunks': total_chunks,
         'total_time_seconds': round(elapsed_time, 3),
-        'throughput_chunks_per_second': round(total_chunks / elapsed_time, 2)
+        'throughput_chunks_per_second': round(total_chunks / elapsed_time, 2) if elapsed_time > 0 else 0,
     }

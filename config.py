@@ -46,10 +46,10 @@ LLM_CONFIG = {
 
 DATABASE_CONFIG = {
     "url": os.getenv("DATABASE_URL", {
-        "local": "postgresql://postgres:postgres@localhost:5432/aiplatform",
-        "demo":  "postgresql://user:pass@ep-xxx.neon.tech/aiplatform?sslmode=require",
-        "prod":  "postgresql://user:pass@ai-platform.postgres.database.azure.com/aiplatform",
-    }.get(MODE, "postgresql://postgres:postgres@localhost:5432/aiplatform")),
+        "local": "postgresql://postgres:postgres@localhost:5432/rag_platform",
+        "demo":  "postgresql://user:pass@ep-xxx.neon.tech/rag_platform?sslmode=require",
+        "prod":  "postgresql://user:pass@ai-platform.postgres.database.azure.com/rag_platform",
+    }.get(MODE, "postgresql://postgres:postgres@localhost:5432/rag_platform")),
     "pool_size": 5 if MODE == "demo" else 20,
 }
 

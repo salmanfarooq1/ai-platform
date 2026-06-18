@@ -1,13 +1,27 @@
-from typing import Generator
+import litellm
+from core.ingestion.chunkers import ChunkRecord
+from config import LLM_CONFIG
 
-def embed_chunks(cleaned_chunks: list[str]) -> Generator[tuple[str, list[int]], None, None]:
+async def embed_chunks(chunks: list[ChunkRecord]) -> list[ChunkRecord]:
     '''
-    Yield (chunk, embedding) tuples, fake embeddings until a real model is wired in.
+    Send a batch of chunks to the AI via LiteLLM and fill their embedding fields.
+    Uses the embedding model defined in config.py based on the deployment MODE.
+    '''
+    if not chunks:
+        return []
 
-    768 dimensions matches nomic-embed-text (local/demo) and is the standardized
-    dimension across all deployment modes. See config.py EMBEDDING_DIM.
-    hash() keeps values deterministic, sufficient for testing pipeline plumbing.
-    '''
-    for chunk in cleaned_chunks:
-        embedding = [hash(chunk + str(i)) % 1000 for i in range(768)]
-        yield (chunk, embedding)
+    texts = [chunk.content for chunk in chunks]
+
+    # Dynamically grab the model (e.g., ollama/nomic-embed-text or azure/...)
+    target_model = LLM_CONFIG["embedding_model"]
+
+    # Make a single async batch request
+    response = await litellm.aembedding(
+        model=target_model,
+        input=texts
+    )
+
+    for i, data in enumerate(response.data):
+        chunks[i].embedding = data["embedding"]
+
+    return chunks

@@ -1,18 +1,28 @@
+
+import json
 from asyncpg import Connection
+from core.ingestion.chunkers import ChunkRecord
 
-async def bulk_insert(conn: Connection, batch: list[tuple[str, list]]) -> None:
+async def bulk_insert(conn: Connection, batch: list[ChunkRecord], document_id: str, namespace: str = "default") -> None:
     '''
-    COPY a batch of (chunk, embedding) tuples into the documents table.
-
-    conn comes in from outside, keeps the pool benefit, no TCP handshake per call.
-    document_id is "unknown" until real file metadata is wired in.
+    COPY a batch of ChunkRecords into the documents table.
+    
+    metadata dict serialized to JSON string — asyncpg expects a string
+    for JSONB columns, not a Python dict.
     '''
-    # each record maps to one row: (document_id, content, embedding, metadata)
-    # metadata is None for now - JSONB column will be used for source, page, etc. later
-    records = [("unknown", chunk, embedding, None) for chunk, embedding in batch]
+    records = [
+        (
+            document_id,
+            namespace,
+            chunk.content,
+            chunk.embedding,
+            json.dumps(chunk.metadata),
+        )
+        for chunk in batch
+    ]
 
     await conn.copy_records_to_table(
         'documents',
-        records = records,
-        columns = ['document_id', 'content', 'embedding', 'metadata']
+        records=records,
+        columns=['document_id', 'namespace', 'content', 'embedding', 'metadata']
     )
