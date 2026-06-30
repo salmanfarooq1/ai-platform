@@ -150,10 +150,23 @@ Every process boundary has a pickle cost. Found the break-even: sequential wins 
 
 Proved that CPU work called directly inside an async coroutine blocks the entire event loop — average 545ms delay, nothing else can run. run_in_executor() offloads CPU work to a process pool while immediately returning control to the event loop. Result: 2.58ms average delay, 2.53x pipeline speedup. This is the production pattern for core/pipeline/.
 
+## Week 5: RAG API & Structured Outputs
+
+Full notes: [`docs/week5_learnings.md`](docs/week5_learnings.md)
+
+### Lab 5.1 — The FastAPI LIFO Onion
+Built the API layer with robust middlewares. Proved that FastAPI mounts middleware in Last-In-First-Out (LIFO) order, and fixed our `FinOpsMiddleware` by strictly ordering it after the Request ID generation.
+
+### Lab 5.2 — LiteLLM Abstraction
+Replaced raw provider SDKs with LiteLLM. Moving between local Ollama and production GPT-4o is now a single config change without rewriting the core `acompletion` logic.
+
+### Lab 5.3 — Structured Pydantic Outputs
+Forced the LLM into returning a strict `GeneratedAnswer` schema to eliminate regex parsing. Eradicated silent database corruption by catching hallucinations loudly at the Pydantic validation boundary.
+
+### Lab 5.4 — Math & Mislabeled Files
+Updated the vector search to use Cosine Distance (`<=>`) for accurate similarity scoring (`1.0 - distance`), and bulletproofed the chunker routing against mislabeled or unknown file extensions.
+
 ## What's Next
 
-- Week 4 completes the concurrency foundation. core/ now has the patterns needed to handle all three workload types correctly: I/O-bound (async), CPU-bound (process pool), and the hybrid pattern that combines them.
-
-- Week 5: Multi-strategy chunking + OpenAPI-aware chunker. Complete core/ingestion/chunkers.py with the CHUNKER_REGISTRY dispatch pattern.
-
-- Weeks 6–12: FastAPI layer, LangGraph agents, hybrid RAG retrieval, evals with RAGAS, production deployment.
+- **Week 6: Caching & Redis** — Implementing Cache-Aside and Semantic Caching to eliminate redundant LLM calls and reduce API spend.
+- Weeks 7–12: LangGraph agents, hybrid RAG retrieval, evals with RAGAS, production deployment.

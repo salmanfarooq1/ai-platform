@@ -41,14 +41,13 @@ async def ingestion_pipeline(
     '''
     start_time = time.perf_counter()
 
-    # Resolve chunker from file extension — dispatch table in chunkers.py
-    ext = Path(input_file_path).suffix.lstrip(".")
-    chunker = get_chunker(ext)
-
-    # Read full file text — chunkers operate on strings, not byte streams
-    # This is a conscious tradeoff: chunkers need the full text to detect
-    # headers, paragraph boundaries, etc. Generator streaming doesn't apply here.
+    # Read full file text first so we can use it for content sniffing if the extension is missing/wrong
     text = Path(input_file_path).read_text(encoding="utf-8")
+
+    # Resolve chunker from file extension (with text fallback) — dispatch table in chunkers.py
+    ext = Path(input_file_path).suffix.lstrip(".")
+    chunker = get_chunker(ext, text=text)
+
     chunks: list[ChunkRecord] = chunker(text, source=input_file_path)
 
     total_chunks = 0

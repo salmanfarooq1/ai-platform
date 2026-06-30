@@ -572,28 +572,36 @@ CHUNKER_REGISTRY: dict[str, _ChunkerFn | None] = {
 }
 
 
-def get_chunker(extension: str) -> _ChunkerFn:
+def get_chunker(extension: str, text: str = "") -> _ChunkerFn:
     """
-    Return the chunker function for a given file extension.
+    Return the chunker function for a given file extension, with a fallback
+    to content sniffing if the extension is unknown or wrong.
 
-    Raises ValueError for unknown extensions.
     Raises NotImplementedError for known-but-unbuilt types (e.g. pdf).
-
-    Why two different exceptions:
-      ValueError  = caller passed something we've never heard of (bad input)
-      NotImplementedError = we know about this type, it's on the roadmap
     """
     ext = extension.lower().lstrip(".")
-    if ext not in CHUNKER_REGISTRY:
-        supported = [f".{k}" for k, v in CHUNKER_REGISTRY.items() if v is not None]
-        raise ValueError(
-            f"No chunker registered for .{ext}. "
-            f"Supported: {supported}"
-        )
-    chunker = CHUNKER_REGISTRY[ext]
-    if chunker is None:
-        raise NotImplementedError(
-            f"Chunker for .{ext} is planned but not yet implemented. "
-            f"See Week 13 (Docling multimodal ingestion)."
-        )
-    return chunker
+    
+    # 1. Content Sniffing Fallback: Is this actually a JSON file masquerading as a .txt?
+    if text:
+        text_stripped = text.strip()
+        # Fast heuristic to avoid parsing huge non-JSON texts
+        if text_stripped.startswith("{") or text_stripped.startswith("["):
+            try:
+                _json.loads(text)
+                return CHUNKER_REGISTRY["json"]
+            except _json.JSONDecodeError:
+                pass
+
+    # 2. Match exactly on extension
+    if ext in CHUNKER_REGISTRY:
+        chunker = CHUNKER_REGISTRY[ext]
+        if chunker is None:
+            raise NotImplementedError(
+                f"Chunker for .{ext} is planned but not yet implemented. "
+                f"See Week 13 (Docling multimodal ingestion)."
+            )
+        return chunker
+        
+    # 3. Default fallback — if we have no idea what this is, assume it's plain text.
+    # We no longer crash the pipeline on `.log` or extensionless files.
+    return CHUNKER_REGISTRY["txt"]

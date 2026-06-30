@@ -2,8 +2,15 @@ import litellm
 import json
 from api.models.schemas import GeneratedAnswer, Citation
 from config import LLM_CONFIG
+import logging
 
-# A strict prompt forcing the AI to act as a structured system.
+logger = logging.getLogger("api.llm")
+
+# Auto-log all LLM calls — tracks spend, latency, and failure rates
+# In production: litellm.success_callback = ["langfuse"]
+# For now: custom callback that logs to structured logger
+litellm.success_callback = ["log"]
+litellm.set_verbose = False  # Turn off LiteLLM's internal debug logging
 GENERATION_PROMPT = """You are an expert Q&A system.
 Answer the user's question based ONLY on the provided context chunks.
 You MUST cite which chunk IDs you used to form your answer.

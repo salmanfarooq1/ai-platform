@@ -26,10 +26,10 @@ async def search(
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Embedding Provider failed: {str(e)}")
     
-    # 2. Vector Similarity Search (<-> is pgvector's Euclidean distance operator)
+    # 2. Vector Similarity Search (<=> is pgvector's Cosine distance operator)
     query_sql = """
         SELECT document_id, namespace, content, metadata,
-               embedding <-> $1::vector AS distance
+               embedding <=> $1::vector AS distance
         FROM documents
         WHERE namespace = $2
         ORDER BY distance ASC
@@ -44,7 +44,9 @@ async def search(
             "document_id": r["document_id"],
             "source_filename": r["metadata"].get("header_path", "unknown") if r["metadata"] else "unknown",
             "text": r["content"],
-            "score": 1.0 - (r["distance"] / 100.0) 
+            # pgvector cosine distance is (1 - cosine_similarity). 
+            # We convert it back to similarity (1.0 = perfect match).
+            "score": 1.0 - r["distance"] 
         }
         for r in records
     ]

@@ -1,21 +1,29 @@
 # Architecture Decisions
 
-## Decision 1: run_in_executor for CPU-Bound Work (Week 4)
-**Context:** FastAPI is single-threaded async. CPU-heavy functions block the event loop.
-**Problem:** Calling chunkers or embedding preprocessing directly in a route handler
-             freezes all other requests for the duration.
-**Solution:** `core/processing/cpu_offload.run_cpu_bound()` — wraps any callable in
-             `loop.run_in_executor(ProcessPoolExecutor)`. Event loop stays free.
-**Trade-off:** Process pool has fixed spawn cost. Only worth it for tasks >~10ms of CPU.
-             Small tasks (DB writes, JSON parsing) stay as plain awaits.
+## Decision 1: run_in_executor for CPU-bound work (Week 4)
+**Context:** Fast API is single-threaded, running CPU bound tasks directly would block the event loop.
+**Decision:** `run_in_executor()` runs CPU-bound tasks in a saperate process, event loop stays free.
+**Trade-off:** cost, pickle and unpickle overhead, only tasks taking more than ~10ms are worth it. 
 
 ## Decision 2: Domain-Specific Chunking Strategy (Week 4)
-**Context:** Generic recursive chunking treats API docs the same as prose text.
-**Problem:** OpenAPI specs have natural semantic boundaries at the endpoint level.
-             Splitting across endpoints breaks retrieval for "how do I call X?" queries.
-**Solution:** CHUNKER_REGISTRY dispatches by file extension:
-               .txt/.md → recursive/header-aware split
-               .json    → chunk_openapi_spec (one operation = one chunk)
-**Trade-off:** Must detect document type at ingestion time via file extension.
-**AIDA application:** AIDA ingests API documentation — endpoint-level chunking
-             improves retrieval quality for "how do I call endpoint X?" queries.
+**Context:** Single chunking strategy is inefficient for all document types. An OpenAPI spec needs different chunking than a regular pdf document. 
+**Decision:** `CHUNKER_REGISTRY` dispatches by file extension. 
+- .txt/.md: `recursive`/`header-aware split`.
+- .json : `chunk_openapi_spec` (one operation per chunk)
+**Trade-off:** Document type has to be detected at ingestion time, a mislabled file with wrong extension would fall back to default chunker.
+
+## Decision 3: LiteLLM over Langchain/custom LLM router (Week 5)
+**Context:** Each LLM provider has it's own auth, response format etc. yet LLM calls must be standardized. The goal is replace code changes with config changes. 
+**Decision:** LiteLLM, provides `acompletion()` function, standard way to call any LLM. Any future model change would require a simple config change.
+**Trade-off:** LiteLLM is still a dependency that might break, mitigated by pinning the version.
+ - Why not Langchain: Langchain is an orchestration layer.LiteLLM is just a model access layer. Langchain has its provider routing coupled with own objects such as `BaseMessage`, `Runnables`, which add abstraction and complexity, while limiting our flexibility.   
+
+## Decision 4: Structured Outputs over regex parsing (Week 5)
+**Context:** LLM outputs need to be parsed, but they are prone to hallucinations and inconsistent formatting. Regex is brittle in these scenerios.
+**Decision:** Structured outputs by using `GeneratedAnswer = response_format()`. LLM output is constrained at decoding level and validated by Pydantic.
+**Trade-off:** Not every llm supports structured outputs, the fallback is Json mode with validation. There is still a risk of well-structured hallucination, it may provide a fabricated chunk_id.
+
+## Decision 5: Inline citations, RAGAS vs user trust (Week 5)
+**Context:** RAGAS already measures faithfulness, yet it is developer-facing. We need a user-facing trust system, most of regulated industries need this for audit trails and compliance.
+**Decision:** Inline citations, this provides answers traced back to actual sources through chunk_id. 
+**Trade-off:** Citations add 20% more tokens, including chunk_ids and instructions. Another option is post-hoc citation matching with embedding similarity, this saves tokens but adds extra layer with moving parts, adding a dependency on similarity search. Inline citations also are prone to hallucination, LLM can provide a chunk_id that does not actually back up the source, and RAGAS cannot verify this because it looks in different direction.
