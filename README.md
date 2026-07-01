@@ -79,8 +79,6 @@ core/
 
 ## Week 1: Memory-Efficient Ingestion
 
-Full notes: [`docs/week1_learnings.md`](docs/week1_learnings.md)
-
 ### Lab 1.1 — Memory Experiments
 Proved lazy evaluation (`range`) saves massive memory vs eager loading (`list`). This prevents OOM errors in pipelines.
 
@@ -100,8 +98,6 @@ Integrated all Week 1 modules and tested end-to-end.
 
 ## Week 2: Async HTTP & Concurrency
 
-Full notes: [`docs/week2_learnings.md`](docs/week2_learnings.md)
-
 ### Lab 2.1 — Event Loop Deep Dive
 Explored asyncio event loop, proved it's single-threaded, understood how it handles concurrency without threads.
 
@@ -120,8 +116,6 @@ Combined Week 1 + Week 2 into full async pipeline: read → clean → batch → 
 ---
 
 ## Week 3: PostgreSQL + pgvector
-
-Full notes: [`docs/week3_learnings.md`](docs/week3_learnings.md)
 
 ### Lab 3.1 — Database Setup
 Set up PostgreSQL + pgvector via Docker. Connected with psycopg2 (sync) first, then asyncpg (async). Registered pgvector extension and created vector(768) schema.
@@ -151,8 +145,6 @@ Every process boundary has a pickle cost. Found the break-even: sequential wins 
 Proved that CPU work called directly inside an async coroutine blocks the entire event loop — average 545ms delay, nothing else can run. run_in_executor() offloads CPU work to a process pool while immediately returning control to the event loop. Result: 2.58ms average delay, 2.53x pipeline speedup. This is the production pattern for core/pipeline/.
 
 ## Week 5: RAG API & Structured Outputs
-
-Full notes: [`docs/week5_learnings.md`](docs/week5_learnings.md)
 
 ### Lab 5.1 — The FastAPI LIFO Onion
 Built the API layer with robust middlewares. Proved that FastAPI mounts middleware in Last-In-First-Out (LIFO) order, and fixed our `FinOpsMiddleware` by strictly ordering it after the Request ID generation.

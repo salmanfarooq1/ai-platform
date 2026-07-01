@@ -24,10 +24,10 @@ MODE = os.getenv("MODE", "local")
 
 LLM_CONFIG = {
     "model": os.getenv("LLM_MODEL", {
-        "local": "ollama/llama4",
+        "local": "ollama/qwen2.5",
         "demo":  "groq/llama-4-scout",
         "prod":  "azure/gpt-4o",
-    }.get(MODE, "ollama/llama4")),
+    }.get(MODE, "ollama/qwen2.5")),
 
     # Note: Groq has no embedding API — Ollama serves embeddings for both local and demo.
     # CAVEAT: In demo mode, if Ollama goes down, there is no embedding fallback.

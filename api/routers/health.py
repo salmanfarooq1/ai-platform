@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request
 from api.models.schemas import HealthResponse
+from api.services.cache import redis_health
 
 # APIRouter is FastAPI's way of grouping related routes.
 # Instead of defining all routes on the app directly, we create mini-routers
@@ -18,8 +19,10 @@ async def health_check(request: Request) -> HealthResponse:
     except Exception as e:
         db_status = f"error: {str(e)}"
 
+    redis_status = await redis_health()
     return HealthResponse(
-        status="ok" if db_status == "ok" else "degraded",
+        status="ok" if db_status == "ok" and redis_status == "ok" else "degraded",
         db=db_status,
+        redis=redis_status,
         version="0.1.0",
     )

@@ -41,6 +41,7 @@ class SearchResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str                  # "ok" or "degraded"
     db: str                      # "ok" or "error: <reason>"
+    redis: str                   # "ok" or "error: <reason>"
     version: str
 
 class Citation(BaseModel):
