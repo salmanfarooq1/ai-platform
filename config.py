@@ -1,7 +1,13 @@
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 
-load_dotenv()
+# Load .env.local if it exists, otherwise fallback to .env
+env_local = Path(".env.local")
+if env_local.exists():
+    load_dotenv(dotenv_path=".env.local", override=True)
+else:
+    load_dotenv()
 
 # Embedding dimensions: 768 is the universal compatibility point.
 # - Ollama nomic-embed-text: 768 native
@@ -24,10 +30,10 @@ MODE = os.getenv("MODE", "local")
 
 LLM_CONFIG = {
     "model": os.getenv("LLM_MODEL", {
-        "local": "ollama/qwen2.5",
-        "demo":  "groq/llama-4-scout",
+        "local": "groq/meta-llama/llama-4-scout-17b-16e-instruct", # For complex reasoning
+        "demo":  "groq/meta-llama/llama-4-scout-17b-16e-instruct",
         "prod":  "azure/gpt-4o",
-    }.get(MODE, "ollama/qwen2.5")),
+    }.get(MODE, "groq/meta-llama/llama-4-scout-17b-16e-instruct")),
 
     # Note: Groq has no embedding API — Ollama serves embeddings for both local and demo.
     # CAVEAT: In demo mode, if Ollama goes down, there is no embedding fallback.
@@ -41,7 +47,9 @@ LLM_CONFIG = {
     "api_base": os.getenv("AZURE_OAI_BASE", None),
     "api_key":  os.getenv("AZURE_OAI_KEY",  None),
     "groq_key": os.getenv("GROQ_API_KEY",   None),
-    "fallbacks": ["ollama/llama3"] if MODE != "local" else [],
+    
+    # Simple queries route to fallbacks[0]
+    "fallbacks": ["ollama/qwen2.5"] if MODE == "local" else ["ollama/llama3"],
 }
 
 DATABASE_CONFIG = {
