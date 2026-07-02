@@ -27,3 +27,15 @@
 **Context:** RAGAS already measures faithfulness, yet it is developer-facing. We need a user-facing trust system, most of regulated industries need this for audit trails and compliance.
 **Decision:** Inline citations, this provides answers traced back to actual sources through chunk_id. 
 **Trade-off:** Citations add 20% more tokens, including chunk_ids and instructions. Another option is post-hoc citation matching with embedding similarity, this saves tokens but adds extra layer with moving parts, adding a dependency on similarity search. Inline citations also are prone to hallucination, LLM can provide a chunk_id that does not actually back up the source, and RAGAS cannot verify this because it looks in different direction.
+
+## Decision 6: Why semantic cache over string-only cache
+**Context:** Exact-match cache misses on paraphrases
+**Problem:** "What is AI?" and "Explain artificial intelligence" are the same intent
+**Solution:** Redis vector index with cosine similarity threshold 0.95
+**Trade-off:** Requires embedding computation before cache check (but you already need it for search)
+
+## Decision 7: Why model routing by query complexity
+**Context:** Not every query needs the most expensive model
+**Problem:** GPT-4o costs 17x more per output token than Groq Llama 3.1 70B
+**Solution:** Heuristic classifier routes simple queries to cheap models
+**Trade-off:** Risk of quality degradation on misclassified queries

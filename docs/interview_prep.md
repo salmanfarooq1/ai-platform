@@ -36,3 +36,12 @@ This is why Python has a secondary Garbage Collector (GC), which specifically hu
 
 **Your Defense:**
 "The entire ingestion pipeline is built using **generators (yield)** instead of eager loading (lists). We never load the entire file into memory. We yield one chunk, clean that chunk, embed that chunk, and stream it to the database. The memory profile of our pipeline remains $O(1)$ constant, strictly bounded by our batch size (e.g., 50 chunks at a time), regardless of whether the file is 1MB or 100GB."
+
+## 6. Reducing LLM Costs in Production
+**Interviewer:** "How do you reduce LLM costs in production?"
+
+**Your Defense:**
+"To drastically reduce LLM costs without sacrificing quality, we implement a layered cost-optimization stack. 
+First, we use an **Exact Cache** (O(1) Redis lookup) to instantly return answers for identical queries at $0 cost. 
+Second, we deploy a **Semantic Cache** using Redis HNSW vectors to catch paraphrased queries (e.g., 'What is AI?' vs 'Explain AI'). Because users rarely ask the same question the exact same way, the semantic cache pushes our hit rate from around 40% up to 60-70%. 
+Finally, for all remaining cache misses, we use **Model Routing**. A lightweight classifier evaluates query complexity, routing simple factual lookups to cheap, fast models (like local Qwen2.5 or Llama 8B) and reserving expensive models (like GPT-4o) solely for complex reasoning tasks. By stacking these three layers, we bypass the LLM entirely for most queries and minimize the cost of the ones that do get through."

@@ -1,0 +1,12 @@
+{
+  "lab": "6.2_semantic_cache",
+  "threshold": 0.65,
+  "embedding_model": "ollama/nomic-embed-text",
+  "domain": "enterprise_legal_compliance",
+  "paraphrase_hit_rate": 1.0,
+  "avg_semantic_lookup_ms": 0.666,
+  "simulated_pipeline_ms": 850,
+  "speedup_factor": 1276.1,
+  "cost_per_llm_call_usd": 0.0031,
+  "cost_per_cache_hit_usd": 0.0
+}

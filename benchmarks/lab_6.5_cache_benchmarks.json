@@ -1,0 +1,29 @@
+{
+  "lab": "6.5_week6_final_benchmark",
+  "n_queries": 100,
+  "traffic_profile": "50% repeated, 50% unique, 50% simple/50% complex",
+  "pricing_mode": "prod_simulated",
+  "costs_usd": {
+    "no_cache": 0.5,
+    "exact_cache": 0.25,
+    "semantic": 0.15,
+    "both_routing": 0.0856
+  },
+  "latencies_ms": {
+    "no_cache": 21790,
+    "exact_cache": 10921.0,
+    "semantic": 2262.6,
+    "both_routing": 1391.0
+  },
+  "savings_vs_no_cache_pct": 82.9,
+  "latency_speedup_exact_vs_pipeline": 2.0,
+  "classification_accuracy": {
+    "simple": 0.85,
+    "complex": 1.0
+  },
+  "cache_hit_rates": {
+    "exact": 1.0,
+    "semantic": 0.4,
+    "mixed_traffic": 0.5
+  }
+}

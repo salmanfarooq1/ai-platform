@@ -1,0 +1,10 @@
+{
+  "lab": "6.3_model_routing_actual",
+  "simple_classification_accuracy": 0.85,
+  "complex_classification_accuracy": 1.0,
+  "no_routing_cost_usd": 0.0,
+  "with_routing_cost_usd": 0.0,
+  "cost_savings_pct": 0.0,
+  "simple_model": "ollama/qwen2.5",
+  "complex_model": "groq/meta-llama/llama-4-scout-17b-16e-instruct"
+}
