@@ -9,7 +9,7 @@ from api.routers.ingest import router as ingest_router
 from api.routers.search import router as search_router
 from api.middleware.logging import RequestIDMiddleware, LatencyMiddleware, LoggingMiddleware
 from api.middleware.finops import FinOpsMiddleware
-from api.services.cache import get_redis, close_redis
+from api.services.cache import get_redis, close_redis, create_semantic_cache_index
 
 # --- Lifespan ---
 # FastAPI needs to know what to do when the server starts and stops.
@@ -24,7 +24,8 @@ async def lifespan(app: FastAPI):
     # app.state is FastAPI's built-in dict for storing app-level shared state.
     app.state.db_pool = await create_pool()
     app.state.redis = await get_redis()
-    print(f"[startup] DB pool and Redis pool created") # replaced with logging in prod
+    await create_semantic_cache_index()  # idempotent — safe on every restart
+    print(f"[startup] DB pool, Redis, semantic cache index ready") # replaced with logging in prod
     
     yield  # server is running, handling requests
     
