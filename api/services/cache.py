@@ -1,13 +1,22 @@
 import hashlib
 import json
+import logging
 import redis.asyncio as redis
+from redis.exceptions import ResponseError
 import numpy as np
 from uuid import uuid4
 import time
 import litellm
 from config import CACHE_CONFIG, LLM_CONFIG
 
+logger = logging.getLogger("api.cache")
+
 CACHE_TTL_SECONDS = 3600  # 1 hour
+
+# Bump this whenever the shape of SearchResponse changes (e.g. new field, type change).
+# Old cache entries with a different version prefix become unreachable and expire via TTL.
+# This prevents Pydantic validation errors when deserializing stale cached responses.
+CACHE_SCHEMA_VERSION = 1
 
 # --- Connection management ---
 
@@ -19,7 +28,7 @@ async def get_redis() -> redis.Redis:
     if _redis_pool is None:
         _redis_pool = redis.from_url(
             CACHE_CONFIG["url"],
-            decode_responses=True,  # returns str not bytes — no .decode() needed
+            decode_responses=True,  # returns str not bytes so we don't need .decode()
             max_connections=10,
         )
     return _redis_pool
@@ -54,14 +63,15 @@ def cache_key(query: str, namespace: str, top_k: int) -> str:
 
     SHA-256 truncated to 16 hex chars (64 bits):
     - Prevents raw query text leaking into Redis key space (PII concern)
-    - Collision probability negligible for a cache use case
-    - Prefix 'cache:' namespaces keys — when you add sessions or rate
-      limits to Redis later, they won't collide with cache entries
+
+    CACHE_SCHEMA_VERSION prefix:
+    - Bumping the version makes all old entries unreachable without a FLUSHALL.
+    - Old entries expire naturally via TTL (1 hour). Zero-downtime schema migration.
     """
     normalized = query.lower().strip()
     raw = f"{normalized}:{namespace}:{top_k}"
     hash_hex = hashlib.sha256(raw.encode()).hexdigest()
-    return f"cache:{hash_hex[:16]}"
+    return f"cache:v{CACHE_SCHEMA_VERSION}:{hash_hex[:16]}"
 
 
 # --- Cache-aside operations ---
@@ -71,8 +81,7 @@ async def get_cached_response(query: str, namespace: str, top_k: int) -> dict | 
     Cache-aside read.
 
     Returns parsed dict on HIT, None on MISS or any Redis failure.
-    Cache is never in the correctness path — None is always safe,
-    caller just falls through to the full pipeline.
+    
     """
     try:
         r = await get_redis()
@@ -84,7 +93,8 @@ async def get_cached_response(query: str, namespace: str, top_k: int) -> dict | 
 
         return json.loads(value)  # already str because decode_responses=True
 
-    except redis.RedisError:
+    except redis.RedisError as e:
+        logger.warning(f"[cache] Redis unavailable on exact lookup: {e}. Degrading gracefully.")
         return None  # degrade gracefully — cache miss, not a crash
 
 
@@ -97,17 +107,18 @@ async def set_cached_response(
     """
     Cache-aside write. Fire-and-forget.
 
-    SET with ex= is one atomic operation — never SET then EXPIRE separately.
-    If the process crashes between two calls, the key never expires.
-    That is a Redis memory leak that only shows up under load.
+    SET with ex= is one atomic operation.
+
+    setting and expiring the key in different commands is not atomic and it can cause a redis 
+    memory leak if the process crashes between the two calls.
     """
     try:
         r = await get_redis()
         key = cache_key(query, namespace, top_k)
         await r.set(key, json.dumps(response), ex=CACHE_TTL_SECONDS)
 
-    except redis.RedisError:
-        pass  # fire-and-forget — response already returned to client
+    except redis.RedisError as e:
+        logger.warning(f"[cache] Redis unavailable on exact cache write: {e}. Response already returned.")
 
 # --- Semantic Cache ---
 
@@ -117,6 +128,9 @@ SEMANTIC_CACHE_TTL = 3600
 async def create_semantic_cache_index() -> None:
     """
     Create RediSearch HNSW vector index for semantic cache.
+    Idempotent — safe to call on every restart (including multi-worker).
+    Only catches the specific 'Index already exists' ResponseError.
+    All other errors are re-raised so startup fails loudly on real problems.
     """
     try:
         r = await get_redis()
@@ -134,9 +148,17 @@ async def create_semantic_cache_index() -> None:
             "namespace", "TAG",
             "created_at", "NUMERIC",
         )
-        print("[cache] Semantic cache index created")
-    except Exception:
-        pass  # Index already exists — idempotent, safe to ignore
+        logger.info("[cache] Semantic cache index created")
+    except ResponseError as e:
+        if "Index already exists" in str(e):
+            logger.debug("[cache] Semantic cache index already exists — skipping (idempotent)")
+        else:
+            # Real Redis misconfiguration — wrong DIM, unsupported Redis version, etc.
+            logger.error(f"[cache] Unexpected error creating semantic cache index: {e}")
+            raise
+    except Exception as e:
+        logger.error(f"[cache] Failed to create semantic cache index: {e}")
+        raise
 
 async def embed_query(query: str) -> list[float]:
     """Embed a single query string using LiteLLM."""
@@ -186,10 +208,11 @@ async def semantic_cache_lookup(
         if similarity < SEMANTIC_CACHE_THRESHOLD:
             return None
 
-        print(f"[semantic cache] HIT — similarity={similarity:.4f} for query='{field_dict.get('query', '')}'")
+        logger.info(f"[cache] Semantic HIT — similarity={similarity:.4f} query='{field_dict.get('query', '')}'")
         return json.loads(field_dict["response"])
 
-    except redis.RedisError:
+    except redis.RedisError as e:
+        logger.warning(f"[cache] Redis unavailable on semantic lookup: {e}. Degrading gracefully.")
         return None
 
 async def semantic_cache_store(
@@ -198,20 +221,27 @@ async def semantic_cache_store(
     query_embedding: list[float],
     response: dict,
 ) -> None:
-    """Store query embedding + response in Redis HASH for semantic indexing."""
+    """
+    Store query embedding + response in Redis HASH for semantic indexing.
+
+    Uses a pipeline (MULTI/EXEC transaction) to make HSET + EXPIRE atomic.
+    Without this, a crash between the two commands leaves a permanent entry
+    with no TTL — a Redis memory leak.
+    """
     try:
         r = await get_redis()
         key = f"semcache:{uuid4().hex}"
 
-        await r.hset(key, mapping={
-            "embedding": _to_bytes(query_embedding),
-            "response": json.dumps(response),
-            "query": query,
-            "namespace": namespace,
-            "created_at": int(time.time()),
-        })
-        await r.expire(key, SEMANTIC_CACHE_TTL)
+        async with r.pipeline(transaction=True) as pipe:
+            await pipe.hset(key, mapping={
+                "embedding": _to_bytes(query_embedding),
+                "response": json.dumps(response),
+                "query": query,
+                "namespace": namespace,
+                "created_at": int(time.time()),
+            })
+            await pipe.expire(key, SEMANTIC_CACHE_TTL)
+            await pipe.execute()
 
-    except redis.RedisError:
-        pass  # fire-and-forget
-    
+    except redis.RedisError as e:
+        logger.warning(f"[cache] Redis unavailable on semantic cache store: {e}.")

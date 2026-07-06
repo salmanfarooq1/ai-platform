@@ -52,11 +52,26 @@ async def generate_with_citations(
         max_tokens=1000
     )
 
-    # 3. LiteLLM returns a string containing the JSON. We parse it back into our Pydantic model.
+    # 3. Check if the model was cut off mid-answer by max_tokens.
+    # finish_reason == 'length' means the output was truncated, not naturally complete.
+    # A truncated JSON string will fail model_validate_json with a cryptic parse error.
+    # We surface it explicitly here instead.
+    finish_reason = response.choices[0].finish_reason
+    if finish_reason == "length":
+        logger.warning(
+            f"[llm] Response truncated at max_tokens limit. "
+            f"model={model_to_use} query='{query[:60]}'"
+        )
+        raise ValueError(
+            f"LLM response was truncated (finish_reason=length). "
+            f"Query may require a longer answer. Consider increasing max_tokens or reducing top_k."
+        )
+
+    # 4. LiteLLM returns a string containing the JSON. We parse it back into our Pydantic model.
     raw_content = response.choices[0].message.content
     answer_obj = GeneratedAnswer.model_validate_json(raw_content)
 
-    # 4. Map the AI's generic citations (e.g., "chunk_0") back to the real DB records
+    # 5. Map the AI's generic citations (e.g., "chunk_0") back to the real DB records
     hydrated_citations = []
     for cit in answer_obj.citations:
         try:
@@ -70,7 +85,14 @@ async def generate_with_citations(
                 excerpt=real_chunk["text"][:100],
             ))
         except (IndexError, TypeError):
-            continue  # The AI hallucinated a chunk index that doesn't exist
+            # LLM cited a chunk_index that doesn't exist in the retrieved chunks.
+            # Log it so we can track hallucination frequency — silent drops are invisible.
+            logger.warning(
+                f"[citations] Hallucinated chunk_index={cit.chunk_index} "
+                f"(chunks available: {len(chunks)}) "
+                f"query='{query[:60]}'"
+            )
+            continue
             
     answer_obj.citations = hydrated_citations
 
