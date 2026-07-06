@@ -5,9 +5,13 @@ import logging
 logger = logging.getLogger("api.finops")
 
 # Prices are per 1,000,000 tokens
+# IMPORTANT: Add new models here as they are onboarded.
+# An unknown model silently reports $0.00 — always verify after adding a new model.
 PRICING = {
-    "azure/gpt-4o":         {"input": 2.50, "output": 10.00},
-    "groq/llama-3.1-70b":   {"input": 0.59, "output": 0.79},
+    "azure/gpt-4o":                                        {"input": 2.50,  "output": 10.00},
+    "groq/llama-3.1-70b-versatile":                        {"input": 0.59,  "output": 0.79},
+    "groq/meta-llama/llama-4-scout-17b-16e-instruct":      {"input": 0.11,  "output": 0.34},
+    "groq/meta-llama/llama-4-maverick-17b-128e-instruct":  {"input": 0.20,  "output": 0.60},
 }
 
 class FinOpsMiddleware(BaseHTTPMiddleware):
@@ -26,12 +30,20 @@ class FinOpsMiddleware(BaseHTTPMiddleware):
             completion_tokens = usage.get("completion_tokens", 0)
             model = usage.get("model", "unknown")
             
-            # 2. Look up the pricing rates. 
-            # If it's a local Ollama model, it's always free.
+            # 2. Look up the pricing rates.
             if model.startswith("ollama/"):
+                # Local Ollama inference is always free — expected zero, not a gap.
+                rates = {"input": 0.0, "output": 0.0}
+            elif model not in PRICING:
+                # Unknown cloud model — cost is genuinely unknown, not free.
+                # Log a warning so the PRICING dict gets updated.
+                logger.warning(
+                    f"[finops] Unknown model '{model}' not in PRICING dict. "
+                    f"Cost reported as $0.00. Add pricing entry to finops.py."
+                )
                 rates = {"input": 0.0, "output": 0.0}
             else:
-                rates = PRICING.get(model, {"input": 0.0, "output": 0.0})
+                rates = PRICING[model]
             
             # 3. Calculate the dollar cost
             input_cost = (prompt_tokens / 1_000_000) * rates["input"]

@@ -39,3 +39,16 @@
 **Problem:** GPT-4o costs 17x more per output token than Groq Llama 3.1 70B
 **Solution:** Heuristic classifier routes simple queries to cheap models
 **Trade-off:** Risk of quality degradation on misclassified queries
+
+## Decision 8: Data Freshness SLA and Cache Invalidation Strategy
+**Context:** Cached answers may become stale if source documents change after they are cached.
+**Problem:** A user could receive a cached answer based on an outdated legal policy document, which in regulated industries is a compliance risk.
+**Decision:** Documents are treated as append-or-replace, not in-place update. When a document changes, the old document_id is deleted and a new one is ingested. Cache TTL = 3600s (1 hour) — this is the maximum staleness window acceptable for current document change frequency (legal policies update quarterly).
+**Trade-off:** Full CDC-style cache invalidation (tagging each cache entry with source document_id and deleting on document change) is architecturally sound but deferred. The 1-hour TTL is the interim mitigation.
+
+## Known Open Gaps (Deferred by Design)
+
+- **Citation content validation:** Code checks that chunk_index exists, not that the cited chunk truly supports the answer. Resolved in Week 7 via RAGAS faithfulness scoring.
+- **Budget hard stop:** Monthly LLM spend is tracked in logs but not enforced with a hard cap. Redis counter approach planned for Week 9.
+- **Semantic cache quality monitoring:** No automated check that 0.65 threshold isn't serving wrong answers. Manual log review interim. Automated spot-checking deferred to Week 8.
+- **Full CDC cache invalidation:** Cache invalidation on document update deferred to Week 10. TTL=3600s mitigates for low-change-frequency documents.
