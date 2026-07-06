@@ -1,7 +1,11 @@
 import asyncpg
+import logging
+import os
 from asyncpg import Pool
 from pgvector.asyncpg import register_vector
 from config import DATABASE_CONFIG
+
+logger = logging.getLogger("api.db")
 
 async def create_pool() -> Pool:
     '''
@@ -22,4 +26,14 @@ async def create_pool() -> Pool:
         max_size = pool_size,                # ceiling on simultaneous connections
         init = register_vector               # called on every new connection the pool creates
     )
+
+    # Log total connection budget so multi-worker deployments are visible.
+    # Formula: total_db_connections = pool_size_per_worker × worker_count
+    # Set WEB_CONCURRENCY env var to match your actual Uvicorn --workers value.
+    workers = int(os.getenv("WEB_CONCURRENCY", 1))
+    logger.info(
+        f"[db] Pool ready: {pool_size} connections/worker × {workers} worker(s) "
+        f"= {pool_size * workers} total DB connections"
+    )
+
     return pool
