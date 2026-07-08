@@ -1,4 +1,5 @@
 
+
 import json
 from asyncpg import Connection
 from core.ingestion.chunkers import ChunkRecord
@@ -7,8 +8,7 @@ async def bulk_insert(conn: Connection, batch: list[ChunkRecord], document_id: s
     '''
     COPY a batch of ChunkRecords into the documents table.
     
-    metadata dict serialized to JSON string — asyncpg expects a string
-    for JSONB columns, not a Python dict.
+    metadata dict is manually serialized to JSON string via json.dumps before COPY.
     '''
     records = [
         (

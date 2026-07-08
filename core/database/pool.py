@@ -5,6 +5,9 @@ from asyncpg import Pool
 from pgvector.asyncpg import register_vector
 from config import DATABASE_CONFIG
 
+async def init_connection(conn):
+    await register_vector(conn)
+
 logger = logging.getLogger("api.db")
 
 async def create_pool() -> Pool:
@@ -24,7 +27,7 @@ async def create_pool() -> Pool:
         dsn = DATABASE_CONFIG["url"],
         min_size = max(1, pool_size // 4),   # keep 25% of max alive when idle
         max_size = pool_size,                # ceiling on simultaneous connections
-        init = register_vector               # called on every new connection the pool creates
+        init = init_connection               # called on every new connection the pool creates
     )
 
     # Log total connection budget so multi-worker deployments are visible.
