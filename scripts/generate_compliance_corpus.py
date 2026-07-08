@@ -146,6 +146,20 @@ Transfers of personal data outside the European Economic Area are only permitted
 where adequate protections are in place. Approved mechanisms include adequacy
 decisions, Standard Contractual Clauses, and Binding Corporate Rules. All
 international transfers must be documented in the Records of Processing Activities.
+
+## Article 5: Data Minimization Principle
+Under GDPR Article 5, the data minimization principle dictates that personal data must be adequate, relevant, and limited to what is necessary in relation to the purposes for which they are processed. Our engineering teams must enforce this principle by never collecting extraneous fields from users.
+
+## Legitimate Interest Assessment
+Processing under legitimate interests requires a formal legitimate interest assessment (LIA) as guided by GDPR Recital 47. Recital 47 clarifies that the processing of personal data strictly necessary for the purposes of preventing fraud also constitutes a legitimate interest.
+
+## CCPA Compliance
+### CCPA Fines (Section 1798.155)
+Under the California Consumer Privacy Act (CCPA), the attorney general can levy fines. Specifically, the maximum fine under CCPA section 1798.155 is $7,500 per intentional violation, and $2,500 per unintentional violation. 
+
+## HIPAA Applicability
+### Exempt Entities
+It is critical to understand who is subject to the Health Insurance Portability and Accountability Act. Notably, HIPAA does NOT apply to entities such as life insurers, employers, workers compensation carriers, many schools and school districts, and many state agencies like child protective service agencies.
 """
 
 # ── 2. Plain text → recursive_split ───────────────────────────────────────────

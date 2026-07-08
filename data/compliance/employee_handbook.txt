@@ -1,0 +1,139 @@
+EMPLOYEE HANDBOOK — INFORMATION SECURITY AND DATA PROTECTION
+
+SECTION 1: INTRODUCTION AND SCOPE
+
+This handbook applies to all employees, contractors, consultants, and temporary
+workers who have access to company information systems or personal data. Compliance
+with the policies described in this handbook is a condition of employment. Violations
+may result in disciplinary action up to and including termination and legal prosecution.
+
+The organization is committed to protecting the personal data of employees, customers,
+and business partners. We recognize that privacy is a fundamental right and that
+responsible data stewardship is essential to maintaining trust.
+
+SECTION 2: ACCEPTABLE USE OF INFORMATION SYSTEMS
+
+All information systems, including computers, mobile devices, email, and cloud
+services, are provided for business purposes. Limited personal use is permitted
+provided it does not interfere with work duties, consume excessive resources, or
+create legal or security risks for the organization.
+
+Employees must not use company systems to access, store, or distribute material
+that is illegal, offensive, or in violation of company policies. This includes
+but is not limited to: pirated software, inappropriate content, or confidential
+competitor information.
+
+All activity on company systems may be monitored and recorded for security and
+compliance purposes. Employees should have no expectation of privacy when using
+company-provided systems or networks.
+
+SECTION 3: PASSWORD AND ACCESS CONTROL POLICY
+
+Passwords must be at least 14 characters long and contain a combination of
+uppercase and lowercase letters, numbers, and special characters. Passwords
+must not contain dictionary words, personal information, or sequences. Passwords
+must be changed every 90 days and must not be reused for at least 12 cycles.
+
+Multi-factor authentication is mandatory for all systems containing personal data
+or classified information. Employees must not share passwords under any circumstances,
+including with IT support staff. IT staff will never ask for your password.
+
+Access to systems and data must follow the principle of least privilege. Employees
+should only have access to data and systems necessary for their job function.
+Access rights must be reviewed quarterly by department managers.
+
+SECTION 4: HANDLING PERSONAL DATA
+
+Personal data must only be collected for specified, explicit, and legitimate
+purposes. It must not be processed in a manner incompatible with those purposes.
+Employees must not collect more data than is necessary for the stated purpose.
+
+Personal data must be kept accurate and up to date. Employees who become aware
+of inaccurate personal data must correct it promptly or report it to the data
+owner. Data subjects have the right to have inaccurate data corrected without
+undue delay.
+
+Personal data must be protected with appropriate technical and organizational
+measures. This includes encryption of data at rest and in transit, access
+controls, and regular security assessments. Sensitive personal data requires
+additional protection measures.
+
+SECTION 5: INCIDENT REPORTING PROCEDURES
+
+All security incidents and suspected breaches must be reported immediately.
+Do not attempt to investigate or resolve security incidents independently.
+Contact the Information Security team via the dedicated incident hotline or
+the security incident portal. In the event of ransomware or active attack,
+disconnect your device from the network immediately before reporting.
+
+A security incident includes: unauthorized access to systems or data, lost or
+stolen devices containing company data, malware infections, phishing attempts
+that may have been successful, and accidental disclosure of personal data to
+unauthorized parties.
+
+After reporting, preserve all evidence and do not delete files, emails, or
+logs related to the incident. The Information Security team will provide
+guidance on next steps. Full cooperation with incident investigation is required.
+
+SECTION 6: REMOTE WORKING AND MOBILE DEVICE POLICY
+
+Employees working remotely must use the company VPN for all access to internal
+systems and data. Public WiFi networks must never be used without VPN protection.
+Home networks should be secured with WPA3 encryption and a strong unique password.
+
+Company laptops and mobile devices must have full disk encryption enabled at all
+times. Devices must be locked when unattended, even at home. Screen lock must
+activate after no more than 5 minutes of inactivity.
+
+Personal devices may only be used for work purposes if enrolled in the Mobile
+Device Management system and subject to company security policies. The organization
+reserves the right to remotely wipe enrolled devices if they are lost or stolen
+or if the employee leaves the organization.
+
+SECTION 7: DATA CLASSIFICATION AND HANDLING
+
+The organization uses four data classification levels. Public data may be freely
+shared and requires no special handling. Internal data is for employee use only
+and must not be shared externally without authorization. Confidential data
+requires encryption in transit and at rest and may only be shared with authorized
+parties under NDA. Restricted data includes personal data and trade secrets and
+requires the highest level of protection including access logging.
+
+Documents containing confidential or restricted data must be clearly labeled.
+Physical documents must be stored in locked cabinets and shredded when no longer
+needed. Electronic documents must be stored in approved secure locations and not
+on local drives or personal cloud storage.
+
+SECTION 8: THIRD PARTY AND VENDOR MANAGEMENT
+
+All vendors and third parties with access to company data or systems must be
+assessed for security and privacy compliance before engagement. The procurement
+team must involve Information Security and Legal in vendor selection when data
+access is required.
+
+Vendor contracts must include appropriate data protection clauses, right to audit
+provisions, and breach notification requirements. Vendors must be reassessed
+annually and whenever there are material changes to their services or security posture.
+
+SECTION 9: TRAINING AND AWARENESS
+
+All employees must complete mandatory information security and data protection
+training within 30 days of joining the organization. Annual refresher training
+is required for all staff. Additional role-specific training is required for
+employees handling sensitive personal data or with elevated system access.
+
+Phishing simulation exercises are conducted quarterly. Employees who repeatedly
+fail phishing simulations will be required to complete additional training.
+Security awareness communications are sent monthly and must be read and acknowledged.
+
+SECTION 10: DISCIPLINARY PROCEDURES
+
+Violations of information security and data protection policies will be treated
+seriously. Minor violations may result in additional training and a formal warning.
+Serious violations including deliberate data breaches, sharing of credentials,
+or unauthorized access to data will result in immediate suspension pending
+investigation and may result in termination and referral to regulatory authorities.
+
+Employees are encouraged to report policy violations by colleagues without fear
+of retaliation. Reports may be made anonymously through the whistleblowing hotline.
+All reports will be investigated promptly and confidentially.

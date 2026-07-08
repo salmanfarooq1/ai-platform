@@ -1,0 +1,648 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Compliance Management API",
+    "version": "2.1.0",
+    "description": "Internal API for managing compliance records, data subject requests, and incident reporting."
+  },
+  "paths": {
+    "/api/v1/data-subject-requests": {
+      "post": {
+        "operationId": "createDataSubjectRequest",
+        "summary": "Submit a new data subject request",
+        "description": "Creates a GDPR data subject request (access, erasure, portability, or rectification). The request is assigned to the DPO queue and must be fulfilled within 30 days.",
+        "tags": [
+          "Data Subject Rights"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "request_type",
+                  "subject_email",
+                  "identity_verified"
+                ],
+                "properties": {
+                  "request_type": {
+                    "type": "string",
+                    "enum": [
+                      "access",
+                      "erasure",
+                      "portability",
+                      "rectification"
+                    ]
+                  },
+                  "subject_email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "identity_verified": {
+                    "type": "boolean"
+                  },
+                  "additional_notes": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Request created successfully. Reference ID returned."
+          },
+          "400": {
+            "description": "Invalid request type or missing required fields."
+          },
+          "422": {
+            "description": "Identity verification required before processing."
+          }
+        }
+      },
+      "get": {
+        "operationId": "listDataSubjectRequests",
+        "summary": "List all pending data subject requests",
+        "description": "Returns all open data subject requests. Requires DPO role. Results are paginated.",
+        "tags": [
+          "Data Subject Rights"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "in_progress",
+                "completed",
+                "overdue"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of data subject requests with pagination metadata."
+          },
+          "403": {
+            "description": "Insufficient permissions. DPO role required."
+          }
+        }
+      }
+    },
+    "/api/v1/data-subject-requests/{request_id}": {
+      "get": {
+        "operationId": "getDataSubjectRequest",
+        "summary": "Get details of a specific data subject request",
+        "tags": [
+          "Data Subject Rights"
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full request details including timeline and assigned handler."
+          },
+          "404": {
+            "description": "Request not found."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateDataSubjectRequest",
+        "summary": "Update status or add notes to a data subject request",
+        "tags": [
+          "Data Subject Rights"
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "in_progress",
+                      "completed",
+                      "rejected"
+                    ]
+                  },
+                  "handler_notes": {
+                    "type": "string"
+                  },
+                  "completion_evidence": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request updated successfully."
+          },
+          "404": {
+            "description": "Request not found."
+          },
+          "422": {
+            "description": "Invalid status transition."
+          }
+        }
+      }
+    },
+    "/api/v1/incidents": {
+      "post": {
+        "operationId": "reportSecurityIncident",
+        "summary": "Report a new security incident or data breach",
+        "description": "Creates a security incident record. If the incident involves personal data, GDPR breach notification workflow is automatically triggered. The 72-hour regulatory clock starts from incident creation time.",
+        "tags": [
+          "Incident Management"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "incident_type",
+                  "description",
+                  "discovery_timestamp",
+                  "involves_personal_data"
+                ],
+                "properties": {
+                  "incident_type": {
+                    "type": "string",
+                    "enum": [
+                      "data_breach",
+                      "unauthorized_access",
+                      "ransomware",
+                      "lost_device",
+                      "phishing",
+                      "other"
+                    ]
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "discovery_timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "involves_personal_data": {
+                    "type": "boolean"
+                  },
+                  "estimated_records_affected": {
+                    "type": "integer"
+                  },
+                  "affected_systems": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Incident created. If personal data involved, breach notification workflow initiated."
+          },
+          "400": {
+            "description": "Missing required fields."
+          },
+          "422": {
+            "description": "Invalid incident type or timestamp format."
+          }
+        }
+      },
+      "get": {
+        "operationId": "listIncidents",
+        "summary": "List security incidents",
+        "description": "Returns security incidents filtered by status, type, or date range. Requires Security Officer role.",
+        "tags": [
+          "Incident Management"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "investigating",
+                "contained",
+                "resolved",
+                "reported_to_authority"
+              ]
+            }
+          },
+          {
+            "name": "involves_personal_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of incidents with summary statistics."
+          },
+          "403": {
+            "description": "Security Officer role required."
+          }
+        }
+      }
+    },
+    "/api/v1/incidents/{incident_id}/notify": {
+      "post": {
+        "operationId": "sendBreachNotification",
+        "summary": "Send GDPR breach notification to supervisory authority",
+        "description": "Submits formal breach notification. Must be called within 72 hours of breach discovery. Late notifications require a justification field. Generates audit trail entry.",
+        "tags": [
+          "Incident Management"
+        ],
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "authority_name",
+                  "notification_content",
+                  "data_categories",
+                  "approximate_subjects_affected"
+                ],
+                "properties": {
+                  "authority_name": {
+                    "type": "string"
+                  },
+                  "notification_content": {
+                    "type": "string"
+                  },
+                  "data_categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "approximate_subjects_affected": {
+                    "type": "integer"
+                  },
+                  "late_notification_justification": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification submitted. Reference number and timestamp returned."
+          },
+          "400": {
+            "description": "Missing required notification fields."
+          },
+          "409": {
+            "description": "Notification already submitted for this incident."
+          },
+          "422": {
+            "description": "Late notification requires justification field."
+          }
+        }
+      }
+    },
+    "/api/v1/retention-policies": {
+      "get": {
+        "operationId": "listRetentionPolicies",
+        "summary": "List all data retention policies",
+        "description": "Returns all configured data retention policies by data category. Used by automated deletion jobs.",
+        "tags": [
+          "Data Retention"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of retention policies with retention periods and deletion methods."
+          },
+          "403": {
+            "description": "DPO or Compliance Officer role required."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createRetentionPolicy",
+        "summary": "Create a new data retention policy",
+        "description": "Defines retention period and deletion method for a data category. Requires DPO approval workflow.",
+        "tags": [
+          "Data Retention"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data_category",
+                  "retention_period_days",
+                  "deletion_method",
+                  "legal_basis"
+                ],
+                "properties": {
+                  "data_category": {
+                    "type": "string"
+                  },
+                  "retention_period_days": {
+                    "type": "integer"
+                  },
+                  "deletion_method": {
+                    "type": "string",
+                    "enum": [
+                      "cryptographic_erasure",
+                      "physical_destruction",
+                      "secure_overwrite",
+                      "anonymization"
+                    ]
+                  },
+                  "legal_basis": {
+                    "type": "string"
+                  },
+                  "review_frequency_days": {
+                    "type": "integer",
+                    "default": 365
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Policy created. Pending DPO approval."
+          },
+          "400": {
+            "description": "Invalid deletion method or missing required fields."
+          },
+          "409": {
+            "description": "Policy for this data category already exists."
+          }
+        }
+      }
+    },
+    "/api/v1/consent-records": {
+      "post": {
+        "operationId": "recordConsent",
+        "summary": "Record user consent for data processing",
+        "description": "Creates an immutable consent record. Consent records are append-only for audit purposes. Withdrawals are recorded as separate entries, not deletions.",
+        "tags": [
+          "Consent Management"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "subject_id",
+                  "processing_purpose",
+                  "consent_given",
+                  "consent_method"
+                ],
+                "properties": {
+                  "subject_id": {
+                    "type": "string"
+                  },
+                  "processing_purpose": {
+                    "type": "string"
+                  },
+                  "consent_given": {
+                    "type": "boolean"
+                  },
+                  "consent_method": {
+                    "type": "string",
+                    "enum": [
+                      "explicit_checkbox",
+                      "written_signature",
+                      "verbal_recorded",
+                      "opt_in_email"
+                    ]
+                  },
+                  "consent_text_version": {
+                    "type": "string"
+                  },
+                  "ip_address": {
+                    "type": "string",
+                    "format": "ipv4"
+                  },
+                  "parent_guardian_id": {
+                    "type": "string",
+                    "description": "Required for subjects under 16"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Consent record created with timestamp and unique consent ID."
+          },
+          "400": {
+            "description": "Missing required fields or invalid consent method."
+          },
+          "422": {
+            "description": "Parent guardian ID required for minors."
+          }
+        }
+      },
+      "get": {
+        "operationId": "getConsentHistory",
+        "summary": "Get full consent history for a data subject",
+        "description": "Returns complete consent audit trail for a subject, including all grants and withdrawals with timestamps.",
+        "tags": [
+          "Consent Management"
+        ],
+        "parameters": [
+          {
+            "name": "subject_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full consent history with timestamps and consent text versions."
+          },
+          "404": {
+            "description": "No consent records found for this subject."
+          }
+        }
+      }
+    },
+    "/api/v1/audit-log": {
+      "get": {
+        "operationId": "getAuditLog",
+        "summary": "Query the compliance audit log",
+        "description": "Returns tamper-evident audit log entries for compliance reporting. Supports filtering by actor, action type, and date range. Required for regulatory inspections.",
+        "tags": [
+          "Audit"
+        ],
+        "parameters": [
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "data_access",
+                "data_deletion",
+                "consent_change",
+                "breach_report",
+                "policy_change"
+              ]
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated audit log entries with cryptographic hash chain for tamper detection."
+          },
+          "403": {
+            "description": "Compliance Officer or DPO role required."
+          }
+        }
+      }
+    }
+  }
+}
