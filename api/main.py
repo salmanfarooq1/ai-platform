@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     # app.state is FastAPI's built-in dict for storing app-level shared state.
     app.state.db_pool = await create_pool()
     app.state.redis = await get_redis()
-    await create_semantic_cache_index()  # idempotent — safe on every restart
+    await create_semantic_cache_index()  # idempotent, safe on every restart
     print(f"[startup] DB pool, Redis, semantic cache index ready") # replaced with logging in prod
     
     yield  # server is running, handling requests

@@ -11,6 +11,7 @@ from api.services.cache import (
     semantic_cache_store,
     embed_query,
 )
+from api.services.retriever import retrieve, RetrieverConfig
 from config import LLM_CONFIG
 
 router = APIRouter()
@@ -26,8 +27,8 @@ async def search(
     payload: SearchRequest,
     pool: Pool = Depends(get_db_pool),
 ):
-    # ── Step 1: Exact cache check ─────────────────────────────────────────
-    # Cheapest possible check — pure Redis GET, no embedding, no DB, no LLM.
+    # Step 1: Exact cache check 
+    # Cheapest possible check with pure Redis GET, no embedding, no DB, no LLM.
     # If this hits, we're done in ~1ms.
     exact_hit = await get_cached_response(payload.query, payload.namespace, payload.top_k)
     if exact_hit:
@@ -38,15 +39,15 @@ async def search(
         response.headers["X-Cost-USD"] = "0.000000"
         return response
 
-    # ── Step 2: Embed query ───────────────────────────────────────────────
+    # Step 2: Embed query 
     # Embedding is needed for both semantic cache lookup AND vector search.
-    # Compute once, use twice — don't embed twice.
+    # Compute once, use twice but don't embed twice.
     try:
         query_embedding = await embed_query(payload.query)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Embedding provider failed: {str(e)}")
 
-    # ── Step 3: Semantic cache check ──────────────────────────────────────
+    # Step 3: Semantic cache check 
     # Slightly more expensive than exact (vector search in Redis) but still
     # orders of magnitude cheaper than a DB + LLM round trip.
     semantic_hit = await semantic_cache_lookup(payload.query, payload.namespace, query_embedding)
@@ -58,43 +59,38 @@ async def search(
         response.headers["X-Cost-USD"] = "0.000000"
         return response
 
-    # ── Step 4: Full pipeline — cache miss ────────────────────────────────
-    query_sql = """
-        SELECT document_id, namespace, content, metadata,
-               embedding <=> $1::vector AS distance
-        FROM documents
-        WHERE namespace = $2
-        ORDER BY distance ASC
-        LIMIT $3;
-    """
+    # Step 4: Full pipeline on cache MISS — hybrid retrieval + LLM generation
+    retriever_config = RetrieverConfig(
+        top_k=payload.top_k,
+        mode="hybrid",
+        rerank=True,  # C.5: confirmed safe via lab_7.5_rerank_event_loop.py
+    )
 
-    async with pool.acquire() as conn:
-        records = await conn.fetch(
-            query_sql,
-            query_embedding,
-            payload.namespace,
-            payload.top_k,
-        )
+    raw_chunks = await retrieve(
+        pool=pool,
+        query=payload.query,
+        query_embedding=query_embedding,
+        namespace=payload.namespace,
+        config=retriever_config,
+    )
 
-    if not records:
+    if not raw_chunks:
         raise HTTPException(
             status_code=404,
             detail=f"No documents found in namespace '{payload.namespace}'. Ingest documents first."
         )
 
+    # Normalise retriever output to the shape generate_with_routing expects:
+    # keys: document_id, source_filename, text, score
     db_chunks = [
         {
-            "document_id": r["document_id"],
-            # metadata is a JSON string from asyncpg — parse it
-            "source_filename": (
-                r["metadata"].get("filename", "unknown")
-                if isinstance(r["metadata"], dict)
-                else "unknown"
-            ),
-            "text": r["content"],
-            "score": 1.0 - float(r["distance"]),
+            "document_id": c["document_id"],
+            "source_filename": c.get("source_filename") or "unknown",
+            "text": c["content"],
+            # rrf_score is present for hybrid; fall back to vector_score or bm25_score
+            "score": c.get("rrf_score") or c.get("vector_score") or c.get("bm25_score") or 0.0,
         }
-        for r in records
+        for c in raw_chunks
     ]
 
     try:
@@ -127,8 +123,8 @@ async def search(
         total_results=len(results),
     ).model_dump()
 
-    # ── Step 5: Store in both caches ──────────────────────────────────────
-    # Fire-and-forget — cache writes never block the response
+    # Step 5: Store in both caches 
+    # Fire-and-forget pattern here so that cache writes never block the response
     await set_cached_response(payload.query, payload.namespace, payload.top_k, response_data)
     await semantic_cache_store(payload.query, payload.namespace, query_embedding, response_data)
 
