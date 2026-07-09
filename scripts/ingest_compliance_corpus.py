@@ -22,6 +22,7 @@ FILES = [
 
 async def main():
     print(f"Ingesting compliance corpus → namespace='{NAMESPACE}'\n")
+    
     total_chunks = 0
 
     for filename, document_id in FILES:

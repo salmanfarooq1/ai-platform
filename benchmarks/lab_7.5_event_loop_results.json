@@ -1,0 +1,22 @@
+{
+  "lab": "7.5 \u2014 Cross-encoder event-loop impact",
+  "tick_interval_ms": 10.0,
+  "safe_threshold_ms": 20.0,
+  "results": [
+    {
+      "mode": "blocking",
+      "inference_ms": 379.48,
+      "heartbeat_ticks": 0,
+      "max_gap_ms": 0.0,
+      "mean_gap_ms": 0.0
+    },
+    {
+      "mode": "offloaded",
+      "inference_ms": 418.39,
+      "heartbeat_ticks": 40,
+      "max_gap_ms": 11.03,
+      "mean_gap_ms": 10.48
+    }
+  ],
+  "verdict": "\u2705 SAFE \u2014 flip rerank=True"
+}
