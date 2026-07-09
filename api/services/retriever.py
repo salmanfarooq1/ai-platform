@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from asyncpg import Pool
 import config
 import json
+from sentence_transformers import CrossEncoder
+from core.processing.cpu_offload import run_cpu_bound
 
 def _parse_metadata(raw):
     if isinstance(raw, str):
@@ -22,8 +24,9 @@ class RetrieverConfig:
     rrf_k: int = 60
     bm25_weight: float = 0.4
     vector_weight: float = 0.6
-    mode: str = "hybrid"  # "vector_only" | "bm25_only" | "hybrid"
-
+    mode: str = "hybrid"
+    rerank: bool = False          # turn reranking on/off
+    rerank_candidates: int = 20   # how many candidates to feed the reranker
 
 BM25_OR_THRESHOLD = 5  # queries with 5+ words switch AND -> OR
 
@@ -135,6 +138,29 @@ def rrf_merge(
 
     return merged
 
+_cross_encoder: CrossEncoder | None = None
+
+def get_cross_encoder() -> CrossEncoder:
+    global _cross_encoder
+    if _cross_encoder is None:
+        _cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+    return _cross_encoder
+
+
+def rerank(query: str, candidates: list[dict], top_k: int = 5) -> list[dict]:
+    if not candidates:
+        return []
+
+    model = get_cross_encoder()
+    pairs = [(query, c["content"]) for c in candidates]
+    scores = model.predict(pairs)
+
+    for c, score in zip(candidates, scores):
+        c["rerank_score"] = float(score)
+
+    ranked = sorted(candidates, key=lambda c: c["rerank_score"], reverse=True)
+    return ranked[:top_k]
+
 
 async def retrieve(
     pool: Pool,
@@ -147,20 +173,27 @@ async def retrieve(
         config = RetrieverConfig()
 
     if config.mode == "vector_only":
-        results = await retrieve_vector(pool, query_embedding, namespace, config.top_k)
-        return results[: config.top_k]
+        candidates = await retrieve_vector(pool, query_embedding, namespace, config.top_k)
 
-    if config.mode == "bm25_only":
-        results = await retrieve_bm25(pool, query, namespace, config.top_k)
-        return results[: config.top_k]
-    
+    elif config.mode == "bm25_only":
+        candidates = await retrieve_bm25(pool, query, namespace, config.top_k)
 
-    if config.mode == "hybrid":
-        over_fetch = config.top_k * 2
+    elif config.mode == "hybrid":
+        over_fetch = config.rerank_candidates if config.rerank else config.top_k * 2
         bm25_results, vector_results = await asyncio.gather(
             retrieve_bm25(pool, query, namespace, over_fetch),
             retrieve_vector(pool, query_embedding, namespace, over_fetch),
         )
-        return rrf_merge(bm25_results, vector_results, k=config.rrf_k, top_k=config.top_k)
+        candidates = rrf_merge(
+            bm25_results, vector_results,
+            k=config.rrf_k,
+            top_k=config.rerank_candidates if config.rerank else config.top_k,
+        )
 
-    raise ValueError(f"Unknown retrieval mode: {config.mode}")
+    else:
+        raise ValueError(f"Unknown retrieval mode: {config.mode}")
+
+    if config.rerank and len(candidates) > config.top_k:
+        candidates = await run_cpu_bound(rerank, query, candidates, config.top_k)
+
+    return candidates[:config.top_k]

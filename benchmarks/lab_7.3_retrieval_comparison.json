@@ -1,18 +1,18 @@
 {
   "lab": "7.3 \u2014 BM25 vs Vector vs Hybrid Retrieval",
-  "queries_tested": 5,
+  "queries_tested": 20,
   "metric": "Precision@5 (manually labeled)",
   "results": {
     "vector_only": {
-      "precision_at_5": 0.04,
+      "precision_at_5": 0.17000000000000004,
       "notes": "Fails on exact terms, section numbers, negation"
     },
     "bm25_only": {
-      "precision_at_5": 0.04,
+      "precision_at_5": 0.16000000000000003,
       "notes": "Fails on semantic paraphrases, misses synonym matches"
     },
     "hybrid_rrf": {
-      "precision_at_5": 0.04,
+      "precision_at_5": 0.17000000000000004,
       "notes": "Wins on both \u2014 captures keyword precision AND semantic breadth"
     }
   },

@@ -10,8 +10,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from core.database.pool import create_pool          # adjust to your actual factory
-from api.services.cache import embed_query   # fixed to our actual embedding fn
+from core.database.pool import create_pool   
+from api.services.cache import embed_query   
 from api.services.retriever import (
     retrieve_bm25,
     retrieve_vector,
@@ -23,11 +23,30 @@ NAMESPACE = "legal"
 TOP_K = 5
 
 QUERIES = [
-    "GDPR Article 5 data minimization principle",
-    "what is the maximum fine under CCPA section 1798.155",
-    "HIPAA does NOT apply to which entities",
-    "legitimate interest assessment under GDPR recital 47",
-    "data breach notification within 72 hours regulatory requirement",
+    # 0-4: Rewritten original 5 to be more natural
+    "what does the data minimization principle say about extraneous fields",
+    "attorney general fines for unintentional CCPA violations",
+    "are life insurers and employers subject to HIPAA regulations",
+    "is preventing fraud considered a legitimate interest for data processing",
+    "timeline for reporting a data breach to the supervisory authority",
+    # 5-9: New organic queries (Semantic + Lexical)
+    "what is our policy on retaining data for former workers",
+    "how long do we keep security logs vs application logs",
+    "are pre-ticked boxes acceptable for obtaining user consent",
+    "which API endpoint do I use to check the status of a pending data subject request",
+    "WPA3 network encryption requirement for remote work",
+    # 10-14: Natural language / Edge cases
+    "do we need parental consent for users under 16",
+    "how quickly must an employee report a suspected data breach internally",
+    "timeframe to respond to a data subject access request",
+    "right to be forgotten timeline for erasure",
+    "what agreement is needed before using a third-party data processor",
+    # 15-19: Policy and identifiers
+    "approved mechanisms for transferring data outside the EEA",
+    "is it allowed to store confidential competitor information on company laptops",
+    "how frequently must employee passwords be changed",
+    "what to do with your device during an active ransomware attack",
+    "what are the four levels of data classification used by the company",
 ]
 
 OUTPUT_JSON = Path("benchmarks/lab_7.3_retrieval_comparison.json")
@@ -48,8 +67,8 @@ async def run_all_modes(pool, query: str, config: RetrieverConfig) -> dict:
     return {"vector_only": vector, "bm25_only": bm25, "hybrid_rrf": hybrid}
 
 
-def print_for_labeling(query: str, mode_results: dict):
-    print(f"\n{'='*80}\nQUERY: {query}\n{'='*80}")
+def print_for_labeling(query_idx: int, query: str, mode_results: dict):
+    print(f"\n{'='*80}\nQUERY {query_idx}: {query}\n{'='*80}")
     for mode, results in mode_results.items():
         print(f"\n--- {mode} ---")
         for i, r in enumerate(results, 1):
@@ -82,15 +101,31 @@ def save_chart(precision_summary: dict, path: Path):
     modes = list(precision_summary.keys())
     values = [precision_summary[m] for m in modes]
 
-    plt.figure(figsize=(7, 5))
-    bars = plt.bar(modes, values, color=["#e74c3c", "#f39c12", "#2ecc71"])
-    plt.ylim(0, 1.0)
-    plt.ylabel("Precision@5 (avg across 5 queries)")
-    plt.title("Retrieval Mode Comparison — Lab 7.3")
+    # Use a modern style
+    plt.style.use('ggplot')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Modern color palette (Blue, Amber, Emerald)
+    colors = ["#3b82f6", "#f59e0b", "#10b981"]
+    
+    bars = ax.barh(modes, values, color=colors, height=0.6)
+    
+    ax.set_xlim(0, 1.0)
+    ax.set_xlabel(f"Precision@5 (avg across {len(QUERIES)} queries)", fontsize=12, fontweight='bold')
+    ax.set_title("Hybrid RRF vs Single-Mode Retrieval Performance\n(Enterprise Compliance Corpus)", fontsize=14, pad=15)
+    
+    # Add value annotations to the bars
     for bar, val in zip(bars, values):
-        plt.text(bar.get_x() + bar.get_width() / 2, val + 0.02, f"{val:.2f}", ha="center")
+        ax.text(val + 0.02, bar.get_y() + bar.get_height() / 2, 
+                f"{val:.2f}", va="center", fontweight='bold')
+    
+    # Clean up axes
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
     plt.tight_layout()
-    plt.savefig(path)
+    plt.savefig(path, dpi=300, bbox_inches='tight')
+    plt.close()
     print(f"\nChart saved to {path}")
 
 
@@ -100,42 +135,35 @@ async def main():
 
     all_mode_results = {}
     try:
-        for query in QUERIES:
+        for idx, query in enumerate(QUERIES):
             mode_results = await run_all_modes(pool, query, config)
             all_mode_results[query] = mode_results
-            print_for_labeling(query, mode_results)
+            print_for_labeling(idx, query, mode_results)
     finally:
         await pool.close()
 
-    # ---- YOUR JOB: fill this in after reading the printed output above ----
-    # For each query/mode, enter 1 (relevant) or 0 (not) for each of the 5 results,
-    # in the same order they were printed.
+   
     labels = {
-        QUERIES[0]: {
-            "vector_only": [0, 0, 0, 0, 0],
-            "bm25_only":   [0, 0, 0, 0, 0],
-            "hybrid_rrf":  [0, 0, 0, 0, 0],
-        },
-        QUERIES[1]: {
-            "vector_only": [0, 0, 0, 0, 0],
-            "bm25_only":   [0, 0, 0, 0, 0],
-            "hybrid_rrf":  [0, 0, 0, 0, 0],
-        },
-        QUERIES[2]: {
-            "vector_only": [0, 0, 0, 0, 0],
-            "bm25_only":   [0, 0, 0, 0, 0],
-            "hybrid_rrf":  [0, 0, 0, 0, 0],
-        },
-        QUERIES[3]: {
-            "vector_only": [0, 0, 0, 0, 0],
-            "bm25_only":   [0, 0, 0, 0, 0],
-            "hybrid_rrf":  [0, 0, 0, 0, 0],
-        },
-        QUERIES[4]: {
-            "vector_only": [1, 0, 0, 0, 0],
-            "bm25_only":   [1, 0, 0, 0, 0],
-            "hybrid_rrf":  [1, 0, 0, 0, 0],
-        },
+        QUERIES[0]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[1]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[2]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[3]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[4]: {"vector_only": [0,0,1,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[5]: {"vector_only": [0,1,0,0,0], "bm25_only": [0,0,0,0,0], "hybrid_rrf": [0,0,0,1,0]},
+        QUERIES[6]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[7]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[8]: {"vector_only": [0,0,1,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [0,1,0,0,0]},
+        QUERIES[9]: {"vector_only": [0,0,0,0,0], "bm25_only": [0,0,0,0,0], "hybrid_rrf": [0,0,0,0,0]},
+        QUERIES[10]: {"vector_only": [0,1,0,0,0], "bm25_only": [0,1,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[11]: {"vector_only": [1,0,0,0,0], "bm25_only": [0,1,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[12]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[13]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[14]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[15]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[16]: {"vector_only": [0,0,1,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[17]: {"vector_only": [0,0,0,0,0], "bm25_only": [0,0,0,0,0], "hybrid_rrf": [0,0,0,0,0]},
+        QUERIES[18]: {"vector_only": [1,0,0,0,0], "bm25_only": [1,0,0,0,0], "hybrid_rrf": [1,0,0,0,0]},
+        QUERIES[19]: {"vector_only": [0,0,0,0,0], "bm25_only": [0,0,0,0,0], "hybrid_rrf": [0,0,0,0,0]},
     }
 
     if not labels:
