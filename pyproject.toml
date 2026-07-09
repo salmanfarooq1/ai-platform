@@ -20,7 +20,8 @@ dependencies = [
     "python-multipart (>=0.0.32,<0.0.33)",
     "litellm (>=1.89.2,<2.0.0)",
     "redis[hiredis] (>=8.0.1,<9.0.0)",
-    "sentence-transformers (>=5.6.0,<6.0.0)"
+    "sentence-transformers (>=5.6.0,<6.0.0)",
+    "ragas (>=0.4.3,<0.5.0)",
 ]
 
 

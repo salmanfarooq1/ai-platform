@@ -1,0 +1,47 @@
+{
+  "lab": "7.5 \u2014 RAGAS-style Evaluation",
+  "implementation": "custom LLM-as-judge (litellm + embed_query)",
+  "ragas_library": false,
+  "ragas_note": "ragas 0.4.3 has fragmented API (old singletons vs new collections) that do not interoperate. Switched to equivalent custom implementation.",
+  "judge_llm": "groq/meta-llama/llama-4-scout-17b-16e-instruct",
+  "namespace": "default",
+  "top_k": 5,
+  "dataset_size": 10,
+  "corpus": "enterprise_compliance (GDPR/CCPA/HIPAA)",
+  "targets": {
+    "faithfulness": 0.85,
+    "context_recall": 0.8
+  },
+  "results": {
+    "vector_only": {
+      "faithfulness": 0.4,
+      "answer_relevancy": 0.721,
+      "context_precision": 0.0,
+      "context_recall": 0.0
+    },
+    "hybrid_rrf": {
+      "faithfulness": 0.1,
+      "answer_relevancy": 0.6761,
+      "context_precision": 0.0,
+      "context_recall": 0.0
+    },
+    "hybrid_rrf_reranked": {
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.8436,
+      "context_precision": 0.0,
+      "context_recall": 0.0
+    }
+  },
+  "questions": [
+    "What is the maximum fine under CCPA Section 1798.155 for intentional violations?",
+    "Under GDPR Article 5, what does the data minimization principle require?",
+    "Which entities are explicitly exempt from HIPAA regulations?",
+    "Within how many hours must a personal data breach be reported to the supervisory authority under GDPR?",
+    "What is the minimum retention period for employee personal data after termination of employment?",
+    "Are pre-ticked boxes a valid method of obtaining user consent under GDPR?",
+    "What agreement must be in place before engaging a third-party data processor?",
+    "What are the approved mechanisms for transferring personal data outside the European Economic Area?",
+    "How long may application logs containing personal data be retained?",
+    "What rights does a data subject have to access their personal data under GDPR?"
+  ]
+}
