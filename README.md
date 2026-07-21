@@ -74,6 +74,10 @@ core/
 | 4.1 | GIL limits CPU-bound threading | Threads ≈ Sequential, Processes ≈ 4x faster |
 | 4.2 | Serialization break-even point | Sequential wins <1MB, Processes win >10MB (2.44x at 10MB) |
 | 4.3 | Event loop responsiveness | Naive: 545ms avg delay → Hybrid: 2.58ms avg delay (2.53x pipeline speedup) |
+| 6.2 | Semantic vs string cache hit rate | 41% → 74% on 100-query test set |
+| 6.5 | End-to-end cost reduction via cache | ~60% cost reduction |
+| 7.3 | Vector vs BM25 vs Hybrid precision | 0.17 / 0.16 / 0.17 Precision@5 — corpus ceiling is 0.20 |
+| 7.5 | Reranker answer relevancy lift | +0.12 (0.7983 → 0.9167) with event loop max gap 11ms |
 
 ---
 
@@ -158,7 +162,62 @@ Forced the LLM into returning a strict `GeneratedAnswer` schema to eliminate reg
 ### Lab 5.4 — Math & Mislabeled Files
 Updated the vector search to use Cosine Distance (`<=>`) for accurate similarity scoring (`1.0 - distance`), and bulletproofed the chunker routing against mislabeled or unknown file extensions.
 
+---
+
+## Week 6: Caching & Cost Optimization
+
+### Lab 6.1 — Cache-Aside with Redis
+Built exact-match Redis caching: hash the query + namespace + top_k → check Redis first, only hit the DB and LLM on a miss. Cache hit returns in ~1ms vs ~800ms full pipeline.
+
+### Lab 6.2 — Semantic Caching
+Exact match only catches identical queries. Added a Redis HNSW vector index: embed the query, find the nearest cached query by cosine similarity, return the cached answer if similarity > 0.95. Hit rate went from 41% to 74% on the test set. The key insight: you need the embedding for vector search anyway, so the semantic cache check costs nothing extra.
+
+### Lab 6.3 — Model Routing by Query Complexity
+Not every query needs the most expensive model. A word count + keyword heuristic routes short factual queries to the cheap model and longer analytical queries to the full model. Measured cost per 100 mixed queries before and after.
+
+### Lab 6.4 & 6.5 — Integration & Benchmark
+Wired all three layers (exact cache → semantic cache → full pipeline) into the search route. Dual-layer cache reduces LLM calls by ~60% on a realistic query distribution. Benchmark committed to `benchmarks/lab_6.5_cache_benchmarks.json`.
+
+---
+
+## Week 7: Hybrid RAG & Evaluation
+
+### Lab 7.1 — Vector Search Failure Cases
+Documented 5 concrete failure modes of pure vector search on the legal compliance corpus. Article numbers drift (searching "Article 5" returns "Article 6" content). Rare identifiers like section numbers compress into generic topics. Negation is invisible to cosine similarity. These aren't theoretical — all five were reproduced with actual queries against the real database.
+
+### Lab 7.2 — FTS Index Migration
+Added a `tsvector` full-text search column to the documents table and a GIN index. Migrated the schema and verified BM25 scoring works via `ts_rank()`.
+
+### Lab 7.3 — Hybrid Retrieval (RRF)
+Built the hybrid retriever: run BM25 and vector search in parallel, merge by Reciprocal Rank Fusion (k=60). Neither retriever dominates — documents scoring well in either list get a boost. Also discovered the AND/OR threshold problem: PostgreSQL's `plainto_tsquery` uses AND by default, which returns empty results for long natural language queries. Fixed with `BM25_OR_THRESHOLD = 5` — queries under 5 words use AND (precision mode), 5+ words rewrite to OR (recall mode).
+
+Precision@5 results across 20 manually labeled queries (corpus ceiling is 0.20 = 1 relevant chunk per query in top 5):
+
+| Mode | Precision@5 | Notes |
+|---|---|---|
+| Vector only | 0.17 | Fails on exact terms, article numbers |
+| BM25 only | 0.16 | Fails on semantic paraphrases |
+| Hybrid RRF | 0.17 | Captures both — 85% hit rate at the ceiling |
+
+### Lab 7.5 — Cross-Encoder Reranking + Eval
+Added a two-stage pipeline: hybrid RRF produces up to 20 candidates, cross-encoder (`ms-marco-MiniLM-L-6-v2`) re-scores them by reading query+chunk together and picks the top 5. Answer relevancy went from 0.7983 to 0.9167 (+0.12).
+
+Before enabling this in the async API, ran an event-loop safety check (Lab C.5): confirmed that when reranking is offloaded via `run_cpu_bound()`, the event loop heartbeat max gap is 11ms — well under the 20ms safe threshold. `rerank=True` is now the production default.
+
+Evaluation was run with DeepEval using Gemini-2.5-pro as the judge:
+
+| Metric | Hybrid RRF | Hybrid + Reranked |
+|---|---|---|
+| Faithfulness | 0.9500 | 0.9667 |
+| Answer Relevancy | 0.7983 | **0.9167** |
+| Context Precision | 0.3917 | 0.3833 |
+| Context Recall | 0.4000 | 0.4000 |
+
+Context recall ceiling at 0.40 is a corpus gap, not a retriever bug — 6 of 10 eval questions ask for content not present in the ingested documents. Dataset expansion is the next step.
+
+---
+
 ## What's Next
 
-- **Week 6: Caching & Redis** — Implementing Cache-Aside and Semantic Caching to eliminate redundant LLM calls and reduce API spend.
-- Weeks 7–12: LangGraph agents, hybrid RAG retrieval, evals with RAGAS, production deployment.
+- **Week 8: Governance & Data Ops** — Namespace isolation, document lifecycle with SHA-256 hash-based staleness detection, audit log, rate limiting, token budgets, and Microsoft Fabric batch ingestion.
+- Weeks 9–12: Containerization, CI/CD, LangGraph agents, MCP server, feedback loop, GitHub webhook connector.

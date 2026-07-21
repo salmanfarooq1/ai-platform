@@ -42,3 +42,18 @@ In Postgres, `plainto_tsquery` separates all tokens with an `&` (AND). If a chun
 - **The Problem:** This behavior causes BM25 to return 0 results for long, natural language queries (e.g. 6+ words), because the probability of all words appearing in a single chunk is extremely low.
 - **The Tradeoff:** We could cast the query to text and blindly replace all `&` with `|` (OR) operators. This fixes recall for long queries, but completely sacrifices BM25's greatest strength: exact multi-term precision for short keyword queries (like "GDPR Article 5"). If we blindly used OR, "GDPR Article 5" would match any chunk that just mentions "GDPR", diluting the results.
 - **The Solution:** We implemented a `BM25_OR_THRESHOLD = 5`. For queries under 5 words (keyword lookups), we use the strict `AND` operator to preserve extreme precision. For natural language queries with 5 or more words, we dynamically fall back to the `OR` operator to ensure high recall without returning empty sets.
+
+## Lab 7.5: RAGAS to Custom LLM-as-judge to DeepEval
+
+- ragas library had a lot of dependencies on langchain, langchain-community, langchain-openai etc. which had conflicts with our existing packages like numpy version mismatch etc. so we deferred it and shifted to custom code to measure the metrics.
+- this approach worked but it was brittle, and less trust-worthy, and it had extra code complexity. so we shifted then towards DeepEval
+- DeepEval approach is working, it is actually using the built in Faithfulness, Relevancy, Precision and Recall funtions, but here we faced another long iterating sequence of `Rate Limit(429)` errors from Groq, first i thought the math could resolve this error, so we started waiting between requests, then we discovered that it is actually using async for four metrics of the same question, then, there arised another rate limiting issue, that our previous calls started exhausting the quota, so now, we have modified our code to capture actual returned headers from groq api and they show something like this
+
+```
+
+[judge] rate-limit state: {'retry-after': '1613', 'x-ratelimit-limit-requests': '1000', 'x-ratelimit-remaining-requests': '911', 'x-ratelimit-reset-requests': '2h8m9.599s', 
+'x-ratelimit-limit-tokens': '12000', 'x-ratelimit-remaining-tokens': '12000', 'x-ratelimit-reset-tokens': '1ms'}
+
+```
+
+this tells us we should wait for 1613 seconds roughly 20 minutes before sending next request. it seems to resolve the rate limiting issue. and since groq is the only better free option here, we currently go with this setup, optimized for preciseness over speed. 
