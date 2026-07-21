@@ -1,0 +1,23 @@
+{
+  "lab": "7.5 \u2014 RAG Evaluation",
+  "judge_llm": "gemini-2.5-pro",
+  "judge_provider": "gemini",
+  "namespace": "legal",
+  "top_k": 5,
+  "dataset_size": 10,
+  "corpus": "enterprise_compliance (GDPR/CCPA/HIPAA)",
+  "results": {
+    "hybrid_rrf": {
+      "faithfulness": 0.95,
+      "answer_relevancy": 0.7983,
+      "context_precision": 0.3917,
+      "context_recall": 0.4
+    },
+    "hybrid_rrf_reranked": {
+      "faithfulness": 0.9667,
+      "answer_relevancy": 0.9167,
+      "context_precision": 0.3833,
+      "context_recall": 0.4
+    }
+  }
+}

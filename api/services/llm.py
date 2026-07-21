@@ -49,7 +49,8 @@ async def generate_with_citations(
             )
         }],
         response_format=GeneratedAnswer, # The structured response object
-        max_tokens=1000
+        max_tokens=4000
+
     )
 
     # 3. Check if the model was cut off mid-answer by max_tokens.

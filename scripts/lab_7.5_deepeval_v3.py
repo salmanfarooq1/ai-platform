@@ -1,57 +1,30 @@
 """
-scripts/lab_7.5_ragas_eval.py
-================================
-RAG Evaluation using DeepEval.
+scripts/lab_7.5_deepeval_v3.py
+======================================
+Robust RAG Evaluation using DeepEval.
 
-WHY DEEPEVAL (not custom LLM-as-judge, not ragas)
----------------------------------------------------
-Custom LLM-as-judge: llama-4-scout on Groq returned literal '0.0' for context
-precision and recall regardless of content. It also involves more complexity than
-using a purpose built library.
-
-ragas 0.4.3: has two internal metric subsystems (old singleton + new collections)
-that do not interoperate. we faced 5 distinct API breakages over multiple sessions.
-
-DeepEval: it has already tested prompts designed to work on smaller models, clean
-GroqLLM adapter pattern, no dependency on LangChain/VertexAI/datasets like RAGAS.
-It gives same level of metrics, but with a more stable API and better documentation.
-
-FOUR METRICS
--------------
-  Faithfulness       — Every claim in the answer must be supported by contexts.
-                       Low = hallucination.
-  Answer Relevancy   — Embedding similarity between question and answer.
-                       Low = answer is off-topic.
-  Context Precision  — Are the retrieved chunks actually relevant to the question?
-                       Low = retriever returned noisy chunks.
-  Context Recall     — Does the retrieved context cover the ground truth answer?
-                       Low = the right chunk was never retrieved.
-
-ARCHITECTURE
--------------
-  Phase 1: Data Collection — retrieve + generate for 3 modes (async, fast).
-  Phase 2: Scoring — DeepEval evaluate() per test case (sync, rate-limited).
-
-RATE LIMITING
---------------
-  Groq free tier: 30 RPM. DeepEval's evaluate() fires metrics sequentially per
-  test case by default. We add an explicit asyncio.sleep between questions to
-  ensure we never burst above 24 RPM across all judge calls.
+Features:
+1. Support for Gemini API (Free or Paid Tier via Google AI Studio) for BOTH generation and evaluation.
+2. Multiple Providers: Configure "gemini", "groq", or "ollama" for Generation and Judging independently.
+3. Maximum Transparency: Prints exact reasoning, metric details, and scores to the console.
+4. State Checkpointing: Saves progress question-by-question so restarts resume where they left off.
 """
 
 import asyncio
 import json
 import sys
 import time
+import urllib.request
+import urllib.error
+
 from pathlib import Path
 
-# DeepEval uses asyncio internally, setting telemoetry opt out avoids event loop conflicts
+# DeepEval uses asyncio internally, setting telemetry opt out avoids event loop conflicts
 import os
 os.environ["DEEPEVAL_TELEMETRY_OPT_OUT"] = "YES"
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from groq import Groq
 from deepeval.models.base_model import DeepEvalBaseLLM
 from deepeval.metrics import (
     FaithfulnessMetric,
@@ -60,7 +33,6 @@ from deepeval.metrics import (
     ContextualRecallMetric,
 )
 from deepeval.test_case import LLMTestCase
-from deepeval import evaluate
 
 from core.database.pool import create_pool
 from api.services.cache import embed_query
@@ -69,11 +41,63 @@ from api.services.llm import generate_with_citations
 from config import LLM_CONFIG
 
 # ---------------------------------------------------------------------------
-# Configuration
+# Provider & Model Settings
 # ---------------------------------------------------------------------------
-NAMESPACE  = "default"
+# Choose providers: "gemini", "groq", or "ollama"
+GENERATION_PROVIDER = "gemini"  # Cloud Gemini (fast)
+JUDGE_PROVIDER      = "gemini"  # Cloud Gemini (fast)
+
+# Model Names
+GEMINI_GEN_MODEL  = "gemini/gemini-3.5-flash"  # Active stable Flash model for generation
+GEMINI_JUDGE_MODEL = "gemini-2.5-pro"          # Reasoning model for judging (avoids self-bias)
+
+
+
+GROQ_GEN_MODEL   = "groq/meta-llama/llama-4-scout-17b-16e-instruct"
+GROQ_JUDGE_MODEL  = "llama-3.3-70b-specdec"
+
+OLLAMA_GEN_MODEL  = "ollama/qwen2.5"
+OLLAMA_JUDGE_MODEL = "qwen2.5:latest"
+
+# ---------------------------------------------------------------------------
+# Resolve Configuration
+# ---------------------------------------------------------------------------
+NAMESPACE  = "legal"  # verified compliance corpus namespace
 TOP_K      = 5
-OUTPUT_PATH = Path("benchmarks/lab_7.5_ragas_baseline.json")
+OUTPUT_PATH = Path("benchmarks/lab_7.5_deepeval_baseline.json")
+PROGRESS_FILE = Path("benchmarks/.eval_progress.json")
+
+# Between-question pause to respect API rate limits (Gemini AI Studio Free is 15 RPM)
+INTER_QUESTION_SLEEP = 6.5  
+
+
+# Set up environment and variables based on providers
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
+if not GEMINI_KEY:
+    # Look in LLM_CONFIG or fallback env
+    GEMINI_KEY = LLM_CONFIG.get("gemini_key", "") or os.environ.get("GOOGLE_API_KEY", "")
+
+if GEMINI_KEY:
+    os.environ["GEMINI_API_KEY"] = GEMINI_KEY
+    os.environ["GOOGLE_API_KEY"] = GEMINI_KEY
+
+# Set generation model configuration
+if GENERATION_PROVIDER == "gemini":
+    LLM_CONFIG["model"] = GEMINI_GEN_MODEL
+elif GENERATION_PROVIDER == "groq":
+    LLM_CONFIG["model"] = GROQ_GEN_MODEL
+else:
+    LLM_CONFIG["model"] = OLLAMA_GEN_MODEL
+
+GEN_MODEL = LLM_CONFIG["model"]
+
+# Configure Judge LLM Name
+if JUDGE_PROVIDER == "gemini":
+    JUDGE_MODEL_NAME = GEMINI_JUDGE_MODEL
+elif JUDGE_PROVIDER == "groq":
+    JUDGE_MODEL_NAME = GROQ_JUDGE_MODEL
+else:
+    JUDGE_MODEL_NAME = OLLAMA_JUDGE_MODEL
 
 MODES = [
     RetrieverConfig(top_k=TOP_K, mode="hybrid",  rerank=False),
@@ -81,23 +105,8 @@ MODES = [
 ]
 MODE_NAMES = ["hybrid_rrf", "hybrid_rrf_reranked"]
 
-# Groq model for generation (same as production)
-GEN_MODEL = LLM_CONFIG["model"]  # groq/meta-llama/llama-4-scout-17b-16e-instruct
-
-# Judge model — separate from generation to avoid bias and rate limit contention.
-# llama-3.3-70b-versatile is DeepEval's recommended Groq judge (70B reasons well).
-# We strip the "groq/" prefix because the Groq SDK takes bare model names.
-JUDGE_MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"
-
-# Between-question pause to stay below Groq 30 RPM free tier
-# DeepEval fires 4 metric judge calls per test case.
-# 4 calls × 2.5s = 10s minimum per question → 6 questions/min → well under 30 RPM
-INTER_QUESTION_SLEEP = 4.0  # seconds
-
 # ---------------------------------------------------------------------------
 # EVAL DATASET
-# 10 compliance-domain questions with manually written ground truth answers.
-# Ground truth is set by human inspection, NOT auto-labelled from model output.
 # ---------------------------------------------------------------------------
 EVAL_QUESTIONS = [
     {
@@ -142,53 +151,114 @@ EVAL_QUESTIONS = [
     },
 ]
 
-
 # ---------------------------------------------------------------------------
-# DeepEval custom Groq LLM adapter
+# DeepEval custom Gemini LLM adapter
 # ---------------------------------------------------------------------------
-class GroqJudge(DeepEvalBaseLLM):
+class GeminiJudge(DeepEvalBaseLLM):
     """
-    Wraps the Groq SDK as a DeepEval judge.
-
-    Design decisions:
-    - Uses the synchronous Groq client because DeepEval calls generate()
-      synchronously inside its metric compute logic. Wrapping an async call
-      in a sync context from within an already-running event loop causes
-      "cannot run nested event loop" errors.
-    - a_generate() falls back to generate() (same pattern recommended by
-      DeepEval docs for non-async providers).
-    - temperature=0.0 for deterministic judgments.
-    - max_tokens=2048 — DeepEval's internal prompts return structured JSON
-      with reasoning chains; 16 tokens (our old limit) was truncating them.
+    Wraps the Gemini Developer API (Google AI Studio) as a DeepEval judge.
     """
-
     def __init__(self, model_name: str, api_key: str):
         self.model_name = model_name
-        self._client = Groq(api_key=api_key)
+        self.api_key = api_key
         super().__init__(model_name)
 
     def load_model(self):
         return self.model_name
 
     def generate(self, prompt: str, schema=None) -> str:
-        kwargs = {
-            "model": self.model_name,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.0,
-            "max_tokens": 2048,
+        # Standard REST endpoint for Google AI Studio
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
+        
+        contents = {
+            "contents": [{
+                "parts": [{"text": prompt}]
+            }],
+            "generationConfig": {
+                "temperature": 0.0,
+            }
         }
+        
         if schema is not None:
-            kwargs["response_format"] = {"type": "json_object"}
+            contents["generationConfig"]["responseMimeType"] = "application/json"
 
-        response = self._client.chat.completions.create(**kwargs)
-        return response.choices[0].message.content
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(contents).encode("utf-8"),
+            headers={"Content-Type": "application/json"}
+        )
+
+        for attempt in range(4):
+
+            try:
+                with urllib.request.urlopen(req) as response:
+                    res = json.loads(response.read().decode("utf-8"))
+                    text = res["candidates"][0]["content"]["parts"][0]["text"]
+                    return text
+            except urllib.error.HTTPError as e:
+                try:
+                    error_body = e.read().decode("utf-8")
+                except Exception:
+                    error_body = str(e)
+                
+                print(f"    [gemini-judge] API HTTP Error {e.code}: {error_body[:200]}...")
+                if e.code == 429 or "RESOURCE_EXHAUSTED" in error_body:
+                    wait = 45.0
+                    print(f"    [gemini-judge] Rate limit (429) hit — cooling down for {wait}s (attempt {attempt+1}/4)...")
+                else:
+                    wait = 15.0
+                time.sleep(wait)
+            except Exception as e:
+                wait = 15.0
+                print(f"    [gemini-judge] Unexpected error: {e} — retrying in {wait}s...")
+                time.sleep(wait)
+
+        return "{}" if schema is not None else ""
 
 
     async def a_generate(self, prompt: str, schema=None) -> str:
-        # DeepEval calls this from async contexts in some metric paths.
-        # We delegate to the sync generate() since Groq's async SDK is
-        # a different client class. This is safe — no event loop nesting
-        # because DeepEval uses asyncio.to_thread() internally.
+        return self.generate(prompt, schema)
+
+    def get_model_name(self) -> str:
+        return self.model_name
+
+# ---------------------------------------------------------------------------
+# DeepEval custom Ollama LLM adapter
+# ---------------------------------------------------------------------------
+class OllamaJudge(DeepEvalBaseLLM):
+    def __init__(self, model_name: str, base_url: str = "http://localhost:11434"):
+        self.model_name = model_name
+        self.base_url = base_url
+        super().__init__(model_name)
+
+    def load_model(self):
+        return self.model_name
+
+    def generate(self, prompt: str, schema=None) -> str:
+        url = f"{self.base_url}/api/chat"
+        payload = {
+            "model": self.model_name,
+            "messages": [{"role": "user", "content": prompt}],
+            "options": {"temperature": 0.0},
+            "stream": False
+        }
+        if schema is not None:
+            payload["format"] = "json"
+
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"}
+        )
+        try:
+            with urllib.request.urlopen(req) as response:
+                res = json.loads(response.read().decode("utf-8"))
+                return res["message"]["content"]
+        except Exception as e:
+            print(f"    [ollama-judge] error: {e}")
+            return "{}" if schema is not None else ""
+
+    async def a_generate(self, prompt: str, schema=None) -> str:
         return self.generate(prompt, schema)
 
     def get_model_name(self) -> str:
@@ -196,7 +266,7 @@ class GroqJudge(DeepEvalBaseLLM):
 
 
 # ---------------------------------------------------------------------------
-# Phase 1: Data collection — retrieve + generate for each mode
+# Phase 1: Data collection
 # ---------------------------------------------------------------------------
 async def collect_for_mode(pool, config: RetrieverConfig, mode_name: str) -> list[dict]:
     print(f"\n  [{mode_name}] Collecting {len(EVAL_QUESTIONS)} answers...")
@@ -216,7 +286,6 @@ async def collect_for_mode(pool, config: RetrieverConfig, mode_name: str) -> lis
         )
 
         if not chunks:
-            print(f"    Q{i+1}: WARNING — no chunks (namespace={NAMESPACE!r})")
             records.append({
                 "question": question,
                 "answer": "",
@@ -256,27 +325,33 @@ async def collect_for_mode(pool, config: RetrieverConfig, mode_name: str) -> lis
         })
         print(f"    Q{i+1}: ✓  chunks={len(contexts)}  answer={len(answer)}ch")
 
+        # Sleep slightly if calling a cloud API for generation to stay clean on limits
+        if GENERATION_PROVIDER == "gemini" and i < len(EVAL_QUESTIONS) - 1:
+            time.sleep(1.0)
+
     return records
 
 
 # ---------------------------------------------------------------------------
-# Phase 2: Score with DeepEval
+# Phase 2: Scoring (Progress Checkpointed + Transparency Logs)
 # ---------------------------------------------------------------------------
 def score_with_deepeval(
     records: list[dict],
     mode_name: str,
-    judge: GroqJudge,
-) -> dict:
+    judge: DeepEvalBaseLLM,
+) -> list[dict]:
     """
-    Convert collected records to DeepEval LLMTestCase objects and evaluate.
-
-    Each LLMTestCase maps to one (question, answer, contexts, ground_truth) row.
-    We evaluate question by question with a sleep between them to respect Groq
-    rate limits rather than firing all 10 × 4 = 40 judge calls concurrently.
+    Score RAG answers, resuming from progress file if possible, and printing full reasoning details.
     """
-    print(f"\n  [{mode_name}] Scoring {len(records)} responses via DeepEval...")
+    checkpoint = {}
+    if PROGRESS_FILE.exists():
+        try:
+            checkpoint = json.loads(PROGRESS_FILE.read_text())
+        except Exception:
+            pass
 
-    # Instantiate metrics once — reused across all test cases
+    print(f"\n  [{mode_name}] Scoring {len(records)} responses via {JUDGE_PROVIDER.upper()} judge...")
+
     metrics = [
         FaithfulnessMetric(     threshold=0.5, model=judge, include_reason=True),
         AnswerRelevancyMetric(  threshold=0.5, model=judge, include_reason=True),
@@ -294,50 +369,61 @@ def score_with_deepeval(
     all_scores = []
 
     for i, rec in enumerate(records):
+        checkpoint_key = f"{mode_name}_Q{i+1}"
+        
+        if checkpoint_key in checkpoint:
+            scores = checkpoint[checkpoint_key]
+            all_scores.append(scores)
+            continue
+
         if not rec["answer"] or not rec["contexts"]:
-            print(f"    Q{i+1}: skipped (no answer or no contexts)")
-            all_scores.append({k: 0.0 for k in metric_keys})
+            scores = {k: 0.0 for k in metric_keys}
+            all_scores.append(scores)
+            checkpoint[checkpoint_key] = scores
+            PROGRESS_FILE.write_text(json.dumps(checkpoint, indent=2))
             continue
 
         test_case = LLMTestCase(
             input=rec["question"],
             actual_output=rec["answer"],
-            expected_output=rec["ground_truth"],    # required for Recall & Precision
+            expected_output=rec["ground_truth"],
             retrieval_context=rec["contexts"],
         )
 
-        # Measure metrics directly (avoids evaluate API dependency / nested loop issues)
         try:
-            for m in metrics:
-                m.measure(test_case)
-
-
             scores = {}
+            reasons = {}
             for metric, key in zip(metrics, metric_keys):
+                metric.measure(test_case)
                 scores[key] = round(metric.score or 0.0, 4)
+                reasons[key] = metric.reason or "No reason provided."
 
-            print(
-                f"    Q{i+1}: "
-                f"faith={scores['faithfulness']:.2f}  "
-                f"relev={scores['answer_relevancy']:.2f}  "
-                f"prec={scores['context_precision']:.2f}  "
-                f"recall={scores['context_recall']:.2f}"
-            )
+            print(f"\n    --- Q{i+1} Detailed Metrics ---")
+            print(f"    Question : {rec['question']}")
+            print(f"    Answer   : {rec['answer'][:120]}...")
+            print(f"    * Faithfulness     : {scores['faithfulness']:.2f}")
+            print(f"      Reason           : {reasons['faithfulness']}")
+            print(f"    * Answer Relevancy : {scores['answer_relevancy']:.2f}")
+            print(f"      Reason           : {reasons['answer_relevancy']}")
+            print(f"    * Context Precision: {scores['context_precision']:.2f}")
+            print(f"      Reason           : {reasons['context_precision']}")
+            print(f"    * Context Recall   : {scores['context_recall']:.2f}")
+            print(f"      Reason           : {reasons['context_recall']}")
+            print("-" * 50)
+
             all_scores.append(scores)
+            checkpoint[checkpoint_key] = scores
+            PROGRESS_FILE.write_text(json.dumps(checkpoint, indent=2))
 
         except Exception as e:
-            print(f"    Q{i+1}: DeepEval error — {type(e).__name__}: {str(e)[:120]}")
+            print(f"    Q{i+1}: scoring failed: {type(e).__name__}: {str(e)[:120]}")
             all_scores.append({k: 0.0 for k in metric_keys})
 
-        # Rate limit guard: 4 judge calls per question, 2.5s minimum gap each
-        if i < len(records) - 1:
+        # Apply rate limiting gap if using a cloud API judge
+        if JUDGE_PROVIDER == "gemini" and i < len(records) - 1:
             time.sleep(INTER_QUESTION_SLEEP)
 
-    def mean(key):
-        vals = [s[key] for s in all_scores]
-        return round(sum(vals) / len(vals), 4) if vals else 0.0
-
-    return {k: mean(k) for k in metric_keys}
+    return all_scores
 
 
 # ---------------------------------------------------------------------------
@@ -348,20 +434,28 @@ async def main():
     print(f"Questions  : {len(EVAL_QUESTIONS)}")
     print(f"Namespace  : {NAMESPACE}")
     print(f"Modes      : {', '.join(MODE_NAMES)}")
-    print(f"Judge LLM  : {JUDGE_MODEL_NAME}")
+    print(f"Judge Provider: {JUDGE_PROVIDER.upper()} ({JUDGE_MODEL_NAME})")
+    print(f"Gen LLM    : {GEN_MODEL} ({GENERATION_PROVIDER.upper()})")
 
-    # Build the judge once — shared across all modes
-    groq_api_key = LLM_CONFIG.get("groq_key") or os.environ.get("GROQ_API_KEY", "")
-    if not groq_api_key:
+    if not GEMINI_KEY and (GENERATION_PROVIDER == "gemini" or JUDGE_PROVIDER == "gemini"):
         raise ValueError(
-            "GROQ_API_KEY not found. Set it in .env.local or as an env var."
+            "GEMINI_API_KEY not found in environment. Please add it to your environment or .env.local file."
         )
 
-    judge = GroqJudge(model_name=JUDGE_MODEL_NAME, api_key=groq_api_key)
+    # Build the configured Judge
+    if JUDGE_PROVIDER == "gemini":
+        judge = GeminiJudge(model_name=JUDGE_MODEL_NAME, api_key=GEMINI_KEY)
+    elif JUDGE_PROVIDER == "groq":
+        # Import groq judge dynamically via importlib to avoid import syntax errors on dot-named files
+        import importlib
+        module = importlib.import_module("scripts.lab_7.5_deepeval")
+        judge = module.GroqJudge(model_name=JUDGE_MODEL_NAME, api_key=LLM_CONFIG["groq_key"])
+    else:
+        judge = OllamaJudge(model_name=JUDGE_MODEL_NAME)
 
     pool = await create_pool()
     all_records: dict[str, list[dict]] = {}
-    all_results: dict[str, dict] = {}
+    all_results: dict[str, list[dict]] = {}
 
     try:
         print("\n" + "=" * 60)
@@ -373,10 +467,19 @@ async def main():
         await pool.close()
 
     print("\n" + "=" * 60)
-    print("PHASE 2: Scoring (DeepEval — 4 metrics)")
+    print("PHASE 2: Scoring (DeepEval)")
     print("=" * 60)
     for name in MODE_NAMES:
         all_results[name] = score_with_deepeval(all_records[name], name, judge)
+
+    # Calculate means
+    final_results = {}
+    for name in MODE_NAMES:
+        final_results[name] = {}
+        scores_list = all_results[name]
+        for key in ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]:
+            vals = [s[key] for s in scores_list]
+            final_results[name][key] = round(sum(vals) / len(vals), 4) if vals else 0.0
 
     # Summary table
     print("\n" + "=" * 68)
@@ -387,27 +490,28 @@ async def main():
     for metric in ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]:
         row = f"{metric:<22}"
         for name in MODE_NAMES:
-            val = all_results.get(name, {}).get(metric, "N/A")
+            val = final_results.get(name, {}).get(metric, "N/A")
             row += f"  {str(val):>14}"
         print(row)
 
-    print(f"\n  Target faithfulness   : >= 0.85")
-    print(f"  Target context_recall : >= 0.80")
+    # Delete progress cache upon fully successful run
+    if PROGRESS_FILE.exists():
+        try:
+            PROGRESS_FILE.unlink()
+        except Exception:
+            pass
 
     # Save benchmark
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     output = {
         "lab":            "7.5 — RAG Evaluation",
-        "framework":      "deepeval",
-        "version":        "4.0.8",
         "judge_llm":      JUDGE_MODEL_NAME,
+        "judge_provider": JUDGE_PROVIDER,
         "namespace":      NAMESPACE,
         "top_k":          TOP_K,
         "dataset_size":   len(EVAL_QUESTIONS),
         "corpus":         "enterprise_compliance (GDPR/CCPA/HIPAA)",
-        "targets":        {"faithfulness": 0.85, "context_recall": 0.80},
-        "results":        all_results,
-        "questions":      [q["question"] for q in EVAL_QUESTIONS],
+        "results":        final_results,
     }
     OUTPUT_PATH.write_text(json.dumps(output, indent=2))
     print(f"\n  Saved → {OUTPUT_PATH}")

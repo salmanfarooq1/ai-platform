@@ -141,6 +141,19 @@ def rrf_merge(
 _cross_encoder: CrossEncoder | None = None
 
 def get_cross_encoder() -> CrossEncoder:
+    """
+    Module-level singleton — loads the model once per process.
+
+    ProcessPoolExecutor reuses worker processes across calls (it does NOT
+    spawn a new process per task). So this model loads exactly once per
+    worker on the first rerank() call into that worker, then stays in RAM
+    for all subsequent calls to the same worker. With max_workers=1 (the
+    default in run_cpu_bound), it loads exactly once for the lifetime of
+    the pool.
+
+    Consequence: the ~380ms cold-load cost (confirmed in lab C.5) is paid
+    once at startup, not on every request.
+    """
     global _cross_encoder
     if _cross_encoder is None:
         _cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")

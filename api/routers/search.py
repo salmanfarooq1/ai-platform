@@ -87,8 +87,21 @@ async def search(
             "document_id": c["document_id"],
             "source_filename": c.get("source_filename") or "unknown",
             "text": c["content"],
-            # rrf_score is present for hybrid; fall back to vector_score or bm25_score
-            "score": c.get("rrf_score") or c.get("vector_score") or c.get("bm25_score") or 0.0,
+            # Use explicit key-existence checks, NOT Python `or`.
+            # `or` treats 0.0 as falsy and would fall through to the next score
+            # even when 0.0 is a legitimate value. rrf_score is always a small
+            # positive float (1/(k+rank)), so it can never be zero in practice,
+            # but this pattern is correct for any future score field.
+            # NOTE: rerank_score is intentionally excluded here. It is a raw
+            # cross-encoder logit (unbounded, not in [0,1]) — not comparable
+            # to vector_score or rrf_score. Displaying it as a confidence
+            # percentage would be misleading. Reranking only changes ordering.
+            "score": (
+                c["rrf_score"]    if "rrf_score"    in c else
+                c["vector_score"] if "vector_score" in c else
+                c["bm25_score"]   if "bm25_score"   in c else
+                0.0
+            ),
         }
         for c in raw_chunks
     ]

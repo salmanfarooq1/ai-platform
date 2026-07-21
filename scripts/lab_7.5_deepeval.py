@@ -1,20 +1,19 @@
 """
 scripts/lab_7.5_ragas_eval.py
 ================================
-RAG Evaluation using DeepEval.
+Lab C.6 — RAG Evaluation using DeepEval.
 
 WHY DEEPEVAL (not custom LLM-as-judge, not ragas)
 ---------------------------------------------------
 Custom LLM-as-judge: llama-4-scout on Groq returned literal '0.0' for context
-precision and recall regardless of content. It also involves more complexity than
-using a purpose built library.
+precision and recall regardless of content. it also involves more complexity than using a purpose built library.
 
 ragas 0.4.3: has two internal metric subsystems (old singleton + new collections)
 that do not interoperate. we faced 5 distinct API breakages over multiple sessions.
 
 DeepEval: it has already tested prompts designed to work on smaller models, clean
-GroqLLM adapter pattern, no dependency on LangChain/VertexAI/datasets like RAGAS.
-It gives same level of metrics, but with a more stable API and better documentation.
+GroqLLM adapter pattern, no dependency on LangChain/VertexAI/datasets.
+Same 4 metrics, same semantic meaning, reliable output.
 
 FOUR METRICS
 -------------
@@ -45,7 +44,7 @@ import sys
 import time
 from pathlib import Path
 
-# DeepEval uses asyncio internally, setting telemoetry opt out avoids event loop conflicts
+# DeepEval uses asyncio internally, setting telemetry opt out avoids event loop conflicts
 import os
 os.environ["DEEPEVAL_TELEMETRY_OPT_OUT"] = "YES"
 
@@ -71,7 +70,8 @@ from config import LLM_CONFIG
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-NAMESPACE  = "default"
+NAMESPACE  = "legal"
+
 TOP_K      = 5
 OUTPUT_PATH = Path("benchmarks/lab_7.5_ragas_baseline.json")
 
@@ -84,10 +84,11 @@ MODE_NAMES = ["hybrid_rrf", "hybrid_rrf_reranked"]
 # Groq model for generation (same as production)
 GEN_MODEL = LLM_CONFIG["model"]  # groq/meta-llama/llama-4-scout-17b-16e-instruct
 
-# Judge model — separate from generation to avoid bias and rate limit contention.
-# llama-3.3-70b-versatile is DeepEval's recommended Groq judge (70B reasons well).
+# Judge model is separate from generation to avoid bias and rate limit contention.
+# llama-3.3-70b-versatile is DeepEval's recommended Groq judge, 70B reasons well.
 # We strip the "groq/" prefix because the Groq SDK takes bare model names.
-JUDGE_MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"
+JUDGE_MODEL_NAME = "openai/gpt-oss-120b"
+
 
 # Between-question pause to stay below Groq 30 RPM free tier
 # DeepEval fires 4 metric judge calls per test case.
@@ -155,8 +156,8 @@ class GroqJudge(DeepEvalBaseLLM):
       synchronously inside its metric compute logic. Wrapping an async call
       in a sync context from within an already-running event loop causes
       "cannot run nested event loop" errors.
-    - a_generate() falls back to generate() (same pattern recommended by
-      DeepEval docs for non-async providers).
+    - a_generate() falls back to generate() which is the same pattern recommended by
+      DeepEval docs for non-async providers.
     - temperature=0.0 for deterministic judgments.
     - max_tokens=2048 — DeepEval's internal prompts return structured JSON
       with reasoning chains; 16 tokens (our old limit) was truncating them.
@@ -171,6 +172,9 @@ class GroqJudge(DeepEvalBaseLLM):
         return self.model_name
 
     def generate(self, prompt: str, schema=None) -> str:
+        import groq
+        import time
+
         kwargs = {
             "model": self.model_name,
             "messages": [{"role": "user", "content": prompt}],
@@ -180,14 +184,29 @@ class GroqJudge(DeepEvalBaseLLM):
         if schema is not None:
             kwargs["response_format"] = {"type": "json_object"}
 
-        response = self._client.chat.completions.create(**kwargs)
-        return response.choices[0].message.content
+        for attempt in range(5):
+            try:
+                response = self._client.chat.completions.create(**kwargs)
+                return response.choices[0].message.content
+            except groq.RateLimitError as e:
+                # Groq 120B model has a tight RPM/TPM limit on free tier.
+                # Wait 35s on 429 to let the rate limit window reset.
+                wait_time = 35.0
+                print(f"    [judge] Rate Limit (429) - waiting {wait_time}s (attempt {attempt+1}/5)...")
+                time.sleep(wait_time)
+            except Exception as e:
+                print(f"    [judge] Unexpected error: {type(e).__name__}: {str(e)[:120]}")
+                return "{}" if schema is not None else ""
+
+        print("    [judge] All rate limit retries exhausted - returning empty response")
+        return "{}" if schema is not None else ""
+
 
 
     async def a_generate(self, prompt: str, schema=None) -> str:
         # DeepEval calls this from async contexts in some metric paths.
         # We delegate to the sync generate() since Groq's async SDK is
-        # a different client class. This is safe — no event loop nesting
+        # a different client class. This is safe, having no event loop nesting
         # because DeepEval uses asyncio.to_thread() internally.
         return self.generate(prompt, schema)
 
