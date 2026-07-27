@@ -40,7 +40,7 @@ import json
 import sys
 
 # Ensure project root is on the path when run directly
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from api.services.retriever import rerank, get_cross_encoder
 from core.processing.cpu_offload import run_cpu_bound
