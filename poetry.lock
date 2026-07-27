@@ -333,6 +333,29 @@ files = [
 ]
 
 [[package]]
+name = "beautifulsoup4"
+version = "4.15.0"
+description = "Screen-scraping library"
+optional = false
+python-versions = ">=3.7.0"
+groups = ["main"]
+files = [
+    {file = "beautifulsoup4-4.15.0-py3-none-any.whl", hash = "sha256:d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9"},
+    {file = "beautifulsoup4-4.15.0.tar.gz", hash = "sha256:288e3ca7d54b06f2ac191970bc275c1939cb46d450b255bf6718b04aa37ab4f7"},
+]
+
+[package.dependencies]
+soupsieve = ">=1.6.1"
+typing-extensions = ">=4.0.0"
+
+[package.extras]
+cchardet = ["cchardet"]
+chardet = ["chardet"]
+charset-normalizer = ["charset-normalizer"]
+html5lib = ["html5lib"]
+lxml = ["lxml"]
+
+[[package]]
 name = "certifi"
 version = "2026.6.17"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -5352,6 +5375,18 @@ files = [
 ]
 
 [[package]]
+name = "soupsieve"
+version = "2.9"
+description = "A modern CSS selector implementation for Beautiful Soup."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "soupsieve-2.9-py3-none-any.whl", hash = "sha256:a2b2c76d67df2382d245409fd71e321a571717e58463efa32ace87dcadac2c12"},
+    {file = "soupsieve-2.9.tar.gz", hash = "sha256:acee8417325c5653e1377dc31eccad59eb82cbc65942afe6174c53b3aaad63fc"},
+]
+
+[[package]]
 name = "sqlalchemy"
 version = "2.0.51"
 description = "Database Abstraction Library"
@@ -6583,4 +6618,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "6d0d4aa7b1be9b85390e0115c2ceddc1de76ddad10ecd262bb19f4faaaae3b6d"
+content-hash = "8778c3d52b77237fc0b8cf0a37b5f573ce7a30981b13062d29cfa0d5b89ecbad"
