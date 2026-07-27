@@ -1,0 +1,56 @@
+{
+  "hybrid_rrf": {
+    "in_domain": {
+      "FaithfulnessMetric": 1.0,
+      "AnswerRelevancyMetric": 0.7545454545454545,
+      "ContextualPrecisionMetric": 0.45041666666666663,
+      "ContextualRecallMetric": 0.8
+    },
+    "ood": {
+      "pass_rate": 1.0,
+      "passed": 3,
+      "total": 3,
+      "detail": [
+        {
+          "question": "What is the capital of France?",
+          "passed": true
+        },
+        {
+          "question": "How many calories are in an apple?",
+          "passed": true
+        },
+        {
+          "question": "What are the rules for adopting a pet in California?",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "hybrid_rrf_reranked": {
+    "in_domain": {
+      "FaithfulnessMetric": 0.6857142857142857,
+      "AnswerRelevancyMetric": 0.7,
+      "ContextualPrecisionMetric": 0.61,
+      "ContextualRecallMetric": 0.8
+    },
+    "ood": {
+      "pass_rate": 1.0,
+      "passed": 3,
+      "total": 3,
+      "detail": [
+        {
+          "question": "What is the capital of France?",
+          "passed": true
+        },
+        {
+          "question": "How many calories are in an apple?",
+          "passed": true
+        },
+        {
+          "question": "What are the rules for adopting a pet in California?",
+          "passed": true
+        }
+      ]
+    }
+  }
+}
