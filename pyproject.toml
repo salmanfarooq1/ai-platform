@@ -21,8 +21,6 @@ dependencies = [
     "litellm (>=1.89.2,<2.0.0)",
     "redis[hiredis] (>=8.0.1,<9.0.0)",
     "sentence-transformers (>=5.6.0,<6.0.0)",
-    "ragas (>=0.4.3,<0.5.0)",
-    "langchain-community (>=0.4.2,<0.5.0)",
     "deepeval (>=4.0.8,<5.0.0)",
     "groq (>=1.5.0,<2.0.0)",
     "requests (>=2.34.2,<3.0.0)",
@@ -33,3 +31,25 @@ dependencies = [
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-asyncio (>=1.4.0,<2.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)"
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "unit: fast, isolated tests with no external dependencies",
+    "integration: tests against a real test database/Redis instance",
+    "e2e: full-stack tests that exercise the API end-to-end",
+]
+
+[tool.coverage.run]
+source = ["api", "core"]
+omit = ["*/tests/*"]
