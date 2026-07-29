@@ -53,7 +53,7 @@ async def redis_health() -> str:
 
 # --- Cache key ---
 
-def cache_key(query: str, namespace: str, top_k: int) -> str:
+def cache_key(query: str, namespace: str, top_k: int, retrieval_mode: str = "hybrid", rerank: bool = True) -> str:
     """
     Deterministic cache key from query parameters.
 
@@ -69,14 +69,14 @@ def cache_key(query: str, namespace: str, top_k: int) -> str:
     - Old entries expire naturally via TTL (1 hour). Zero-downtime schema migration.
     """
     normalized = query.lower().strip()
-    raw = f"{normalized}:{namespace}:{top_k}"
+    raw = f"{normalized}:{namespace}:{top_k}:{retrieval_mode}:{rerank}"
     hash_hex = hashlib.sha256(raw.encode()).hexdigest()
     return f"cache:v{CACHE_SCHEMA_VERSION}:{hash_hex[:16]}"
 
 
 # --- Cache-aside operations ---
 
-async def get_cached_response(query: str, namespace: str, top_k: int) -> dict | None:
+async def get_cached_response(query: str, namespace: str, top_k: int, retrieval_mode: str = "hybrid", rerank: bool = True) -> dict | None:
     """
     Cache-aside read.
 
@@ -85,7 +85,7 @@ async def get_cached_response(query: str, namespace: str, top_k: int) -> dict | 
     """
     try:
         r = await get_redis()
-        key = cache_key(query, namespace, top_k)
+        key = cache_key(query, namespace, top_k, retrieval_mode, rerank)
         value = await r.get(key)
 
         if value is None:
@@ -103,6 +103,8 @@ async def set_cached_response(
     namespace: str,
     top_k: int,
     response: dict,
+    retrieval_mode: str = "hybrid",
+    rerank: bool = True,
 ) -> None:
     """
     Cache-aside write. Fire-and-forget.
@@ -114,7 +116,7 @@ async def set_cached_response(
     """
     try:
         r = await get_redis()
-        key = cache_key(query, namespace, top_k)
+        key = cache_key(query, namespace, top_k, retrieval_mode, rerank)
         await r.set(key, json.dumps(response), ex=CACHE_TTL_SECONDS)
 
     except redis.RedisError as e:

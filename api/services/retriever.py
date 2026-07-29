@@ -91,6 +91,7 @@ async def retrieve_vector(
                    1.0 - (embedding <=> $1::vector) AS vector_score
             FROM documents
             WHERE namespace = $2
+              AND 1.0 - (embedding <=> $1::vector) > 0.0
             ORDER BY vector_score DESC
             LIMIT $3
             """,
@@ -180,33 +181,33 @@ async def retrieve(
     query: str,
     query_embedding: list[float],
     namespace: str,
-    config: RetrieverConfig | None = None,
+    cfg: RetrieverConfig | None = None,
 ) -> list[dict]:
-    if config is None:
-        config = RetrieverConfig()
+    if cfg is None:
+        cfg = RetrieverConfig()
 
-    if config.mode == "vector_only":
-        candidates = await retrieve_vector(pool, query_embedding, namespace, config.top_k)
+    if cfg.mode == "vector_only":
+        candidates = await retrieve_vector(pool, query_embedding, namespace, cfg.top_k)
 
-    elif config.mode == "bm25_only":
-        candidates = await retrieve_bm25(pool, query, namespace, config.top_k)
+    elif cfg.mode == "bm25_only":
+        candidates = await retrieve_bm25(pool, query, namespace, cfg.top_k)
 
-    elif config.mode == "hybrid":
-        over_fetch = config.rerank_candidates if config.rerank else config.top_k * 2
+    elif cfg.mode == "hybrid":
+        over_fetch = cfg.rerank_candidates if cfg.rerank else cfg.top_k * 2
         bm25_results, vector_results = await asyncio.gather(
             retrieve_bm25(pool, query, namespace, over_fetch),
             retrieve_vector(pool, query_embedding, namespace, over_fetch),
         )
         candidates = rrf_merge(
             bm25_results, vector_results,
-            k=config.rrf_k,
-            top_k=config.rerank_candidates if config.rerank else config.top_k,
+            k=cfg.rrf_k,
+            top_k=cfg.rerank_candidates if cfg.rerank else cfg.top_k,
         )
 
     else:
-        raise ValueError(f"Unknown retrieval mode: {config.mode}")
+        raise ValueError(f"Unknown retrieval mode: {cfg.mode}")
 
-    if config.rerank and len(candidates) > config.top_k:
-        candidates = await run_cpu_bound(rerank, query, candidates, config.top_k)
+    if cfg.rerank and len(candidates) > cfg.top_k:
+        candidates = await run_cpu_bound(rerank, query, candidates, cfg.top_k)
 
-    return candidates[:config.top_k]
+    return candidates[:cfg.top_k]

@@ -74,3 +74,11 @@ FEATURES = {
     "otel_enabled": True,
     "azure_monitor": MODE == "prod",
 }
+
+# Input / Output Guardrails configuration
+GUARDRAIL_CONFIG = {
+    # Maximum query character length (Default: 1000 characters)
+    "max_query_length": int(os.getenv("MAX_QUERY_LENGTH", 1000)),
+    # Self-reported LLM confidence floor for flagging (Default: 0.45)
+    "confidence_floor": float(os.getenv("CONFIDENCE_FLOOR", 0.45)),
+}

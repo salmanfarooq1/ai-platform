@@ -12,6 +12,7 @@ from api.services.cache import (
     embed_query,
 )
 from api.services.retriever import retrieve, RetrieverConfig
+from api.services.guardrails import check_input, check_output
 from config import LLM_CONFIG
 
 router = APIRouter()
@@ -27,10 +28,21 @@ async def search(
     payload: SearchRequest,
     pool: Pool = Depends(get_db_pool),
 ):
+    # Step 0: Input guardrail check (before any cache lookup, DB, or LLM I/O)
+    guard = check_input(payload.query)
+    if guard.blocked:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "query_blocked", "reason": guard.blocked_reason},
+        )
+
     # Step 1: Exact cache check 
     # Cheapest possible check with pure Redis GET, no embedding, no DB, no LLM.
     # If this hits, we're done in ~1ms.
-    exact_hit = await get_cached_response(payload.query, payload.namespace, payload.top_k)
+    exact_hit = await get_cached_response(
+        payload.query, payload.namespace, payload.top_k,
+        payload.retrieval_mode, payload.rerank,
+    )
     if exact_hit:
         request.state.usage = {"cache": "exact_hit", "total_cost": 0.0}
         response = JSONResponse(content=exact_hit)
@@ -62,8 +74,8 @@ async def search(
     # Step 4: Full pipeline on cache MISS — hybrid retrieval + LLM generation
     retriever_config = RetrieverConfig(
         top_k=payload.top_k,
-        mode="hybrid",
-        rerank=True,  # C.5: confirmed safe via lab_7.5_rerank_event_loop.py
+        mode=payload.retrieval_mode,
+        rerank=payload.rerank,
     )
 
     raw_chunks = await retrieve(
@@ -71,7 +83,7 @@ async def search(
         query=payload.query,
         query_embedding=query_embedding,
         namespace=payload.namespace,
-        config=retriever_config,
+        cfg=retriever_config,
     )
 
     if not raw_chunks:
@@ -127,6 +139,9 @@ async def search(
         for c in answer_obj.citations
     ]
 
+    # Step 4.5: Output guardrail check — evaluate LLM confidence floor
+    output_guard = check_output(answer_obj.answer, answer_obj.confidence)
+
     response_data = SearchResponse(
         query=payload.query,
         answer=answer_obj.answer,
@@ -134,11 +149,16 @@ async def search(
         needs_clarification=answer_obj.needs_clarification,
         results=results,
         total_results=len(results),
+        flagged=output_guard.flagged,
+        flag_reason=output_guard.flag_reason,
     ).model_dump()
 
     # Step 5: Store in both caches 
     # Fire-and-forget pattern here so that cache writes never block the response
-    await set_cached_response(payload.query, payload.namespace, payload.top_k, response_data)
+    await set_cached_response(
+        payload.query, payload.namespace, payload.top_k, response_data,
+        payload.retrieval_mode, payload.rerank,
+    )
     await semantic_cache_store(payload.query, payload.namespace, query_embedding, response_data)
 
     response = JSONResponse(content=response_data)
