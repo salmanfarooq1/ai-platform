@@ -30,8 +30,8 @@
 
 ## Decision 6: Semantic cache over exact-match cache (Week 6)
 **Context:** After wiring up basic Redis caching, the hit rate was around 40%. The reason: queries like "what is AI?" and "explain artificial intelligence" are treated as completely different keys. They miss the cache every time even though they'd get identical answers.
-**Decision:** Added a vector index in Redis (HNSW) so that before doing a full DB + LLM round trip, we check if any previously cached query is semantically close enough (cosine > 0.95) to serve the same answer. Hit rate went from 41% to 74% on the same query set.
-**Trade-off:** You need to embed the query before checking the cache, which costs ~10ms. But you were going to embed it for vector search anyway, so you compute it once and use it for both. The 0.95 threshold took some tuning — at 0.85 precision visibly dropped (wrong answers served), at 0.99 it collapses back to string matching. 0.95 was the empirical sweet spot.
+**Decision:** Added a vector index in Redis (HNSW) so that before doing a full DB + LLM round trip, we check if any previously cached query is semantically close enough (cosine similarity > 0.65) to serve the same answer. Hit rate went from 41% to 74% on the same query set.
+**Trade-off:** You need to embed the query before checking the cache, which costs ~10ms. But you were going to embed it for vector search anyway, so you compute it once and use it for both. The 0.65 threshold took tuning — at 0.55 precision dropped (wrong answers served), at 0.95 it collapsed back to near-exact string matching with <5% improvement over exact cache. 0.65 was the empirical sweet spot measured in Lab 6.2.
 
 ## Decision 7: Heuristic model routing by query complexity (Week 6)
 **Context:** Running every query through the most expensive model is wasteful. A question like "what is the return policy?" and "compare GDPR and CCPA fine structures across jurisdictions" are not the same problem. They shouldn't cost the same.
@@ -57,6 +57,16 @@
 **Context:** After hybrid RRF, answer relevancy was 0.7983 for the RRF-only mode. Adding the cross-encoder reranker jumped it to 0.9167 — a meaningful +0.12 improvement. The model is `cross-encoder/ms-marco-MiniLM-L-6-v2`, runs locally with no API cost. But it takes ~380ms for inference, which blocks the event loop if called directly inside an async handler.
 **Decision:** Reranking runs via `run_cpu_bound()` — offloaded to a `ProcessPoolExecutor`. Lab 7.5 confirmed that in offloaded mode, the event loop heartbeat max gap is 11ms, well under the 20ms safe threshold. So `rerank=True` is the default in production. In the demo deployment (Fly.io, 256MB RAM), reranking is disabled — the model alone is ~200MB and would OOM the container. Demo mode uses RRF-only, which still significantly outperforms pure vector.
 **Trade-off:** The cross-encoder scores are raw logits — unbounded, not in [0,1]. We deliberately don't expose `rerank_score` as the confidence value in the API response because showing an unbounded logit as a percentage would be misleading. Only `rrf_score` is surfaced as the relevance signal. Reranking changes ordering silently, which is correct behavior.
+
+## Decision 12: Rate Limiting Middleware (Week 8)
+**Context:** We needed a way to prevent API abuse and control costs per tenant namespace. Relying solely on the database or downstream LLM provider for rate limits exposes the app layer to unbounded resource consumption.
+**Decision:** We implemented a LIFO `RateLimitMiddleware` using a fixed-window counter in Redis (`INCR` + `EXPIRE`). Limits are enforced at the outermost layer of the application per `namespace`.
+**Trade-off:** Fixed-window limits are susceptible to burst traffic at the edge of the window. A sliding window would be more accurate but adds complexity and performance overhead. For our scale, fixed-window is a pragmatic choice.
+
+## Decision 13: Document Lifecycle & Content Hashing (Week 8)
+**Context:** Re-ingesting the same document repeatedly wastes vector storage and embedding tokens. We needed a mechanism to detect duplicate content and handle document replacement cleanly without leaving orphaned chunks.
+**Decision:** We use SHA-256 content hashing to fingerprint documents upon ingestion. The hash and status are tracked in a `document_registry` table using a composite primary key `(document_id, namespace)`. When a document is updated, its prior chunks are explicitly deleted before re-embedding.
+**Trade-off:** Computing SHA-256 requires reading the file payload, which adds slight latency to ingestion. However, it completely eliminates duplicate processing costs, which far outweigh the hashing overhead.
 
 ## Known Open Gaps (Deferred by Design)
 

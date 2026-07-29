@@ -145,7 +145,7 @@ MODEL_PRICING = {
     "gemini-2.5-pro": {"input": 1.25, "output": 10.00},   # <=200K context tier
 }
 
-DRY_RUN = False  # flip to False only after reading the (re-run, fixed) dry-run projection
+DRY_RUN = True  # flip to False only after reading the dry-run projection
 
 MODES = [
     RetrieverConfig(top_k=TOP_K, mode="hybrid", rerank=False),
@@ -464,7 +464,7 @@ async def collect_for_mode(pool, config: RetrieverConfig, mode_name: str,
             query=question,
             query_embedding=embedding,
             namespace=namespace,
-            config=config,
+            cfg=config,
         )
 
         if not chunks:

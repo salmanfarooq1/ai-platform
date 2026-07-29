@@ -221,7 +221,23 @@ Evaluation was executed using `scripts/lab_7.5_deep_eval_v5.py` with `gemini-3.5
 
 ---
 
+## Week 8: Governance, Data Ops, and Testing Foundations
+
+### Lab 8.1 — Document Lifecycle & Hashing
+Built a document registry using a composite primary key `(document_id, namespace)`. Implemented SHA-256 payload hashing to prevent duplicate embedding costs and cleanly handle document updates by deleting old chunks before re-ingestion.
+
+### Lab 8.2 — API Rate Limiting
+Implemented an LIFO `RateLimitMiddleware` using Redis fixed-window counters (`INCR` + `EXPIRE`). Protected the application layer from unbounded costs and abuse per namespace.
+
+### Lab 8.3 — Input & Output Guardrails
+Wired up regex-based input validation to block prompt injection (e.g., "ignore instructions") and applied strict query length boundaries. Added an output guardrail based on retrieval `rrf_score` to flag out-of-domain answers below the `CONFIDENCE_FLOOR`.
+
+### Lab 8.4 — Pytest 3-Tier Architecture
+Established a production-grade testing foundation. Configured `pytest-asyncio` and `pytest-cov`, and used `pytest_collection_modifyitems` to dynamically auto-tag tests as `unit`, `integration`, or `e2e` based on their directory structure. All 39 unit tests pass with >90% coverage on core services.
+
+---
+
 ## What's Next
 
-- **Week 8: Governance & Data Ops** — Namespace isolation, document lifecycle with SHA-256 hash-based staleness detection, audit log, rate limiting, token budgets, and Microsoft Fabric batch ingestion.
-- Weeks 9–12: Containerization, CI/CD, LangGraph agents, MCP server, feedback loop, GitHub webhook connector.
+- **Week 9: Agentic Workflows** — LangGraph integration, tool calling, query rewriting, and LLM-based routing.
+- Weeks 10–12: Containerization, CI/CD, MCP server, feedback loop, GitHub webhook connector.
