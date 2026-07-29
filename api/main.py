@@ -9,6 +9,7 @@ from api.routers.ingest import router as ingest_router
 from api.routers.search import router as search_router
 from api.middleware.logging import RequestIDMiddleware, LatencyMiddleware, LoggingMiddleware
 from api.middleware.finops import FinOpsMiddleware
+from api.middleware.rate_limit import RateLimitMiddleware
 from api.services.cache import get_redis, close_redis, create_semantic_cache_index
 
 # --- Lifespan ---
@@ -51,6 +52,7 @@ app.add_middleware(LoggingMiddleware)
 app.add_middleware(LatencyMiddleware)
 app.add_middleware(FinOpsMiddleware)
 app.add_middleware(RequestIDMiddleware)
+app.add_middleware(RateLimitMiddleware)
 
 # --- Root route ---
 # check that the server is reachable 
