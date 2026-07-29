@@ -1,9 +1,16 @@
 import tempfile
 import os
+import time
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Request
 from asyncpg import Pool
 from api.models.schemas import IngestRequest, IngestResponse
 from core.pipeline.db_ingest import ingestion_pipeline
+from core.ingestion.lifecycle import (
+    compute_content_hash,
+    check_document_status,
+    delete_document_chunks,
+    register_document,
+)
 
 router = APIRouter()
 
@@ -15,46 +22,78 @@ router = APIRouter()
 async def get_db_pool(request: Request) -> Pool:
     return request.app.state.db_pool
 
+
 @router.post("/ingest", response_model=IngestResponse)
 async def ingest(
     request: Request,
     file: UploadFile = File(...),
     namespace: str = "default",
     document_id: str = None,
-    pool: Pool = Depends(get_db_pool),   # injected automatically
+    pool: Pool = Depends(get_db_pool),
 ):
-    # Default document_id to filename if not provided
     doc_id = document_id or file.filename
+    content = await file.read()
+    content_hash = compute_content_hash(content)
 
-    # Pipeline expects a file path, not bytes.
-    # Write upload to a temp file, run pipeline, clean up.
-    # NamedTemporaryFile with delete=False so we control deletion timing.
+    # Check document lifecycle status
+    status = await check_document_status(pool, doc_id, namespace, content_hash)
+
+    # Case 1: Unchanged file — short-circuit and skip processing
+    if status == "unchanged":
+        return IngestResponse(
+            document_id=doc_id,
+            namespace=namespace,
+            total_chunks=0,
+            total_time_seconds=0.0,
+            throughput_chunks_per_second=0.0,
+            status="unchanged",
+            content_hash=content_hash,
+            chunks_deleted=0,
+        )
+
+    # Case 2: Updated file — delete old chunks before re-ingesting
+    chunks_deleted = 0
+    if status == "updated":
+        chunks_deleted = await delete_document_chunks(pool, doc_id, namespace)
+
+    # Case 3 & 2 (New or Updated): Run chunking & embedding pipeline
+    tmp_path = None
     try:
         suffix = "." + file.filename.rsplit(".", 1)[-1] if "." in file.filename else ".txt"
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-            content = await file.read()
             tmp.write(content)
             tmp_path = tmp.name
 
-        
         metrics = await ingestion_pipeline(
             input_file_path=tmp_path,
             document_id=doc_id,
             namespace=namespace,
-            pool = pool
+            pool=pool,
         )
+
+        # Register document in document_registry
+        await register_document(
+            pool=pool,
+            document_id=doc_id,
+            namespace=namespace,
+            content_hash=content_hash,
+            chunk_count=metrics.get("total_chunks", 0),
+            source_filename=file.filename,
+        )
+
     except ValueError as e:
-        # get_chunker raises ValueError for unsupported file types
         raise HTTPException(status_code=415, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        # Always clean up temp file — even if pipeline raised
-        if os.path.exists(tmp_path):
+        if tmp_path and os.path.exists(tmp_path):
             os.remove(tmp_path)
 
     return IngestResponse(
         document_id=doc_id,
         namespace=namespace,
-        **metrics
+        status=status,
+        content_hash=content_hash,
+        chunks_deleted=chunks_deleted,
+        **metrics,
     )

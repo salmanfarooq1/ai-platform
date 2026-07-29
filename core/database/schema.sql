@@ -41,3 +41,16 @@ DROP TRIGGER IF EXISTS trig_update_fts ON documents;
 CREATE TRIGGER trig_update_fts
     BEFORE INSERT OR UPDATE ON documents
     FOR EACH ROW EXECUTE FUNCTION update_fts_vector();
+
+-- Document lifecycle tracking 
+-- Records the content hash of each ingested document so we can detect
+-- re-ingestion of unchanged files (skip) and updated files (delete + re-ingest).
+CREATE TABLE IF NOT EXISTS document_registry (
+    document_id     VARCHAR(255) NOT NULL,
+    namespace       VARCHAR(255) NOT NULL DEFAULT 'default',
+    content_hash    VARCHAR(64)  NOT NULL,
+    source_filename VARCHAR(500),
+    chunk_count     INTEGER      NOT NULL DEFAULT 0,
+    last_ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (document_id, namespace)
+);

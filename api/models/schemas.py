@@ -13,6 +13,9 @@ class IngestResponse(BaseModel):
     total_chunks: int
     total_time_seconds: float
     throughput_chunks_per_second: float
+    status: str = "new"  # "new" | "unchanged" | "updated"
+    content_hash: str | None = None
+    chunks_deleted: int = 0
 
 # --- Search ---
 
@@ -20,6 +23,15 @@ class SearchRequest(BaseModel):
     query: str = Field(description="Natural language query to search against stored chunks")
     namespace: str = Field(default="default", description="Scope to search within")
     top_k: int = Field(default=5, ge=1, le=50, description="Number of chunks to retrieve")
+    retrieval_mode: str = Field(
+        default="hybrid",
+        pattern="^(vector_only|bm25_only|hybrid)$",
+        description="Retrieval strategy: vector_only, bm25_only, or hybrid (default)"
+    )
+    rerank: bool = Field(
+        default=True,
+        description="Whether to apply cross-encoder reranking after retrieval"
+    )
 
 class SearchResult(BaseModel):
     document_id: str
@@ -35,6 +47,8 @@ class SearchResponse(BaseModel):
     needs_clarification: bool    # LLM flagged the question as ambiguous
     results: list[SearchResult]  # The supporting chunk citations
     total_results: int
+    flagged: bool = False
+    flag_reason: str | None = None
 
 # --- Health ---
 
