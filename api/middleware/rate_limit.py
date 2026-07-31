@@ -19,12 +19,14 @@ in main.py must be:
 Remember: FastAPI applies middleware in LIFO order.
 The last one added is the first one executed on an incoming request.
 """
-import time
 import json
 import logging
-from starlette.middleware.base import BaseHTTPMiddleware
+import time
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from api.services.cache import get_redis
 
 logger = logging.getLogger("api.rate_limit")
@@ -42,24 +44,26 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if request.url.path not in ("/search", "/ingest"):
             return await call_next(request)
 
-        # Extract namespace from the request body. For POST /search and /ingest,
-        # the namespace is in the JSON body. We need to read the body without
-        # consuming it (the route handler needs it too).
-        #
-        # Starlette's BaseHTTPMiddleware buffers the body automatically, so
-        # reading it here does NOT prevent the route from reading it again.
+        # Extract namespace for per-tenant rate limiting.
+        # Two code paths depending on content type:
+        #   1. JSON body (POST /search): parse namespace from the JSON payload
+        #   2. Multipart form (POST /ingest): read namespace from URL query params
+        #      because parsing multipart in middleware consumes the body stream
         namespace = "global"
-        try:
-            body = await request.body()
-            if body:
-                data = json.loads(body)
-                namespace = data.get("namespace", "global")
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            pass  # non-JSON body (e.g., multipart file upload for /ingest)
+        content_type = request.headers.get("content-type", "")
 
-        # For multipart /ingest requests, namespace comes as a form field,
-        # not JSON. In that case, fall back to "global" — fine for now.
-        # A future improvement could parse multipart here.
+        if "multipart/form-data" in content_type:
+            # /ingest: namespace comes as a query parameter (?namespace=legal)
+            namespace = request.query_params.get("namespace", "global")
+        else:
+            # /search: namespace is in the JSON body
+            try:
+                body = await request.body()
+                if body:
+                    data = json.loads(body)
+                    namespace = data.get("namespace", "global")
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                pass
 
         # Build the window key. Integer division groups all requests within
         # the same 60-second window under the same key.

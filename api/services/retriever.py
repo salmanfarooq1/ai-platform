@@ -5,12 +5,14 @@ Production-ready hybrid retriever service.
 Called by the /search route and by LangGraph agents.
 """
 import asyncio
-from dataclasses import dataclass
-from asyncpg import Pool
-import config
 import json
+from dataclasses import dataclass
+
+from asyncpg import Pool
 from sentence_transformers import CrossEncoder
+
 from core.processing.cpu_offload import run_cpu_bound
+
 
 def _parse_metadata(raw):
     if isinstance(raw, str):
@@ -207,7 +209,10 @@ async def retrieve(
     else:
         raise ValueError(f"Unknown retrieval mode: {cfg.mode}")
 
-    if cfg.rerank and len(candidates) > cfg.top_k:
+    # Rerank if enabled and there is more than one candidate to reorder.
+    # Previous condition (len > top_k) skipped reranking when few candidates
+    # existed. The cross-encoder should run whenever there is a choice to make.
+    if cfg.rerank and len(candidates) > 1:
         candidates = await run_cpu_bound(rerank, query, candidates, cfg.top_k)
 
     return candidates[:cfg.top_k]

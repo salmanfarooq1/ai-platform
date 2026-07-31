@@ -1,12 +1,14 @@
 import hashlib
 import json
 import logging
+import time
+from uuid import uuid4
+
+import litellm
+import numpy as np
 import redis.asyncio as redis
 from redis.exceptions import ResponseError
-import numpy as np
-from uuid import uuid4
-import time
-import litellm
+
 from config import CACHE_CONFIG, LLM_CONFIG
 
 logger = logging.getLogger("api.cache")
@@ -81,7 +83,6 @@ async def get_cached_response(query: str, namespace: str, top_k: int, retrieval_
     Cache-aside read.
 
     Returns parsed dict on HIT, None on MISS or any Redis failure.
-    
     """
     try:
         r = await get_redis()
@@ -111,7 +112,7 @@ async def set_cached_response(
 
     SET with ex= is one atomic operation.
 
-    setting and expiring the key in different commands is not atomic and it can cause a redis 
+    setting and expiring the key in different commands is not atomic and it can cause a redis
     memory leak if the process crashes between the two calls.
     """
     try:
@@ -148,6 +149,9 @@ async def create_semantic_cache_index() -> None:
             "response", "TEXT",
             "query", "TEXT",
             "namespace", "TAG",
+            "retrieval_mode", "TAG",
+            "rerank", "TAG",
+            "top_k", "NUMERIC",
             "created_at", "NUMERIC",
         )
         logger.info("[cache] Semantic cache index created")
@@ -178,15 +182,29 @@ async def semantic_cache_lookup(
     query: str,
     namespace: str,
     query_embedding: list[float],
+    retrieval_mode: str = "hybrid",
+    rerank: bool = True,
+    top_k: int = 5,
 ) -> dict | None:
     """KNN search in Redis vector index for semantically similar cached response."""
     try:
         r = await get_redis()
         vec_bytes = _to_bytes(query_embedding)
 
+        # Build the filter: namespace AND retrieval_mode AND rerank AND top_k
+        # This prevents cross-contamination between different retrieval configs.
+        rerank_str = str(int(rerank))
+        filter_query = (
+            f"(@namespace:{{{namespace}}})"
+            f" (@retrieval_mode:{{{retrieval_mode}}})"
+            f" (@rerank:{{{rerank_str}}})"
+            f" (@top_k:[{top_k} {top_k}])"
+            f"=>[KNN 1 @embedding $vec AS score]"
+        )
+
         results = await r.execute_command(
             "FT.SEARCH", "idx:semantic_cache",
-            f"(@namespace:{{{namespace}}})=>[KNN 1 @embedding $vec AS score]",
+            filter_query,
             "PARAMS", "2", "vec", vec_bytes,
             "RETURN", "3", "response", "score", "query",
             "SORTBY", "score",
@@ -222,6 +240,9 @@ async def semantic_cache_store(
     namespace: str,
     query_embedding: list[float],
     response: dict,
+    retrieval_mode: str = "hybrid",
+    rerank: bool = True,
+    top_k: int = 5,
 ) -> None:
     """
     Store query embedding + response in Redis HASH for semantic indexing.
@@ -240,6 +261,9 @@ async def semantic_cache_store(
                 "response": json.dumps(response),
                 "query": query,
                 "namespace": namespace,
+                "retrieval_mode": retrieval_mode,
+                "rerank": str(int(rerank)),    # Redis TAG fields must be strings
+                "top_k": str(top_k),           # Redis NUMERIC as string
                 "created_at": int(time.time()),
             })
             await pipe.expire(key, SEMANTIC_CACHE_TTL)

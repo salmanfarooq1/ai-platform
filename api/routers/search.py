@@ -1,19 +1,21 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
-from fastapi.responses import JSONResponse
+import asyncio
+
 from asyncpg import Pool
-import litellm
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
+
 from api.models.schemas import SearchRequest, SearchResponse, SearchResult
-from api.services.llm import generate_with_routing
 from api.services.cache import (
+    embed_query,
     get_cached_response,
-    set_cached_response,
     semantic_cache_lookup,
     semantic_cache_store,
-    embed_query,
+    set_cached_response,
 )
-from api.services.retriever import retrieve, RetrieverConfig
 from api.services.guardrails import check_input, check_output
-from config import LLM_CONFIG
+from api.services.llm import generate_with_routing
+from api.services.retriever import RetrieverConfig, retrieve
+from config import FEATURES
 
 router = APIRouter()
 
@@ -36,12 +38,18 @@ async def search(
             detail={"error": "query_blocked", "reason": guard.blocked_reason},
         )
 
-    # Step 1: Exact cache check 
+    # Step 0.5: Compute effective rerank flag
+    # If the environment disables reranking (e.g., Koyeb 512MB RAM), force it to False.
+    # We must compute this BEFORE cache lookups so we don't cache non-reranked results
+    # under a rerank=True key.
+    effective_rerank = payload.rerank and FEATURES["reranker_enabled"]
+
+    # Step 1: Exact cache check
     # Cheapest possible check with pure Redis GET, no embedding, no DB, no LLM.
     # If this hits, we're done in ~1ms.
     exact_hit = await get_cached_response(
         payload.query, payload.namespace, payload.top_k,
-        payload.retrieval_mode, payload.rerank,
+        payload.retrieval_mode, effective_rerank,
     )
     if exact_hit:
         request.state.usage = {"cache": "exact_hit", "total_cost": 0.0}
@@ -51,7 +59,7 @@ async def search(
         response.headers["X-Cost-USD"] = "0.000000"
         return response
 
-    # Step 2: Embed query 
+    # Step 2: Embed query
     # Embedding is needed for both semantic cache lookup AND vector search.
     # Compute once, use twice but don't embed twice.
     try:
@@ -59,10 +67,13 @@ async def search(
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Embedding provider failed: {str(e)}")
 
-    # Step 3: Semantic cache check 
+    # Step 3: Semantic cache check
     # Slightly more expensive than exact (vector search in Redis) but still
     # orders of magnitude cheaper than a DB + LLM round trip.
-    semantic_hit = await semantic_cache_lookup(payload.query, payload.namespace, query_embedding)
+    semantic_hit = await semantic_cache_lookup(
+        payload.query, payload.namespace, query_embedding,
+        payload.retrieval_mode, effective_rerank, payload.top_k,
+    )
     if semantic_hit:
         request.state.usage = {"cache": "semantic_hit", "total_cost": 0.0}
         response = JSONResponse(content=semantic_hit)
@@ -75,7 +86,7 @@ async def search(
     retriever_config = RetrieverConfig(
         top_k=payload.top_k,
         mode=payload.retrieval_mode,
-        rerank=payload.rerank,
+        rerank=effective_rerank,
     )
 
     raw_chunks = await retrieve(
@@ -153,13 +164,18 @@ async def search(
         flag_reason=output_guard.flag_reason,
     ).model_dump()
 
-    # Step 5: Store in both caches 
-    # Fire-and-forget pattern here so that cache writes never block the response
-    await set_cached_response(
+    # Step 5: Store in both caches
+    # Fire-and-forget: create_task schedules the writes on the event loop
+    # without blocking the response. If Redis is down, the functions log
+    # a warning internally and swallow the error.
+    asyncio.create_task(set_cached_response(
         payload.query, payload.namespace, payload.top_k, response_data,
-        payload.retrieval_mode, payload.rerank,
-    )
-    await semantic_cache_store(payload.query, payload.namespace, query_embedding, response_data)
+        payload.retrieval_mode, effective_rerank,
+    ))
+    asyncio.create_task(semantic_cache_store(
+        payload.query, payload.namespace, query_embedding, response_data,
+        payload.retrieval_mode, effective_rerank, payload.top_k,
+    ))
 
     response = JSONResponse(content=response_data)
     response.headers["X-Cache"] = "MISS"
