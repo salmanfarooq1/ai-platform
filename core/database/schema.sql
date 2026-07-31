@@ -16,6 +16,12 @@ CREATE INDEX IF NOT EXISTS idx_documents_namespace
 CREATE INDEX IF NOT EXISTS idx_documents_document_id 
     ON documents(document_id);
 
+-- Composite index for document lifecycle operations (delete + registry lookup).
+-- Namespace-leading order so that retrieval queries filtering by namespace alone
+-- can also benefit from this index (prefix match).
+CREATE INDEX IF NOT EXISTS idx_documents_ns_docid
+    ON documents(namespace, document_id);
+
 CREATE INDEX IF NOT EXISTS idx_documents_embedding_hnsw
     ON documents
     USING hnsw (embedding vector_cosine_ops)
