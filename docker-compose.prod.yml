@@ -1,0 +1,64 @@
+# Production compose file. Builds the API from the local Dockerfile
+# and wires it to Postgres + Redis via an internal Docker network.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up --build
+#
+# Environment variables (set in .env.prod or pass via -e):
+#   MODE=demo (or prod)
+#   DATABASE_URL=postgresql://...
+#   REDIS_URL=redis://...
+#   GROQ_API_KEY=gsk_...
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-api
+    ports:
+      - "8000:8000"
+    environment:
+      - MODE=${MODE:-demo}
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rag_platform
+      - REDIS_URL=redis://redis:6379
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - WEB_CONCURRENCY=2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "rag_platform"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./core/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    # No ports exposed — API connects via Docker network hostname "postgres"
+
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: redis
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    # No ports exposed — API connects via Docker network hostname "redis"
+
+volumes:
+  pgdata:
+  redis_data:

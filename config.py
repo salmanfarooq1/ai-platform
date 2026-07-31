@@ -70,7 +70,7 @@ CACHE_CONFIG = {
 }
 
 FEATURES = {
-    "reranker_enabled": MODE == "prod",
+    "reranker_enabled": MODE != "demo",  # disabled on Koyeb free tier (512MB RAM OOM guard)
     "otel_enabled": True,
     "azure_monitor": MODE == "prod",
 }
