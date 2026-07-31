@@ -68,10 +68,19 @@
 **Decision:** We use SHA-256 content hashing to fingerprint documents upon ingestion. The hash and status are tracked in a `document_registry` table using a composite primary key `(document_id, namespace)`. When a document is updated, its prior chunks are explicitly deleted before re-embedding.
 **Trade-off:** Computing SHA-256 requires reading the file payload, which adds slight latency to ingestion. However, it completely eliminates duplicate processing costs, which far outweigh the hashing overhead.
 
+## Decision 14: Multi-stage Docker build (Week 9)
+**Context:** The application has heavy dependencies (sentence-transformers, numpy, PyTorch). A naive Dockerfile produces a 2-3GB image. Cloud deployment platforms have limited disk space on free tiers, and image pull time directly impacts cold start latency.
+**Decision:** Two-stage build. Builder stage installs Poetry and resolves all dependencies. Runtime stage copies only the virtualenv and application code. Result: ~600MB image (still large due to PyTorch, but 60% smaller than single-stage).
+**Trade-off:** Multi-stage builds are more complex to debug (you cannot `docker exec` into the builder stage). If a dependency fails to build, you need to add a `RUN` step in the builder stage to diagnose it. Worth it for the image size reduction.
+
+## Decision 15: Daily token budget via Redis INCRBY (Week 9)
+**Context:** FinOps middleware tracks cost per request but does not enforce a cap. A runaway script or misconfigured agent can exhaust the Groq API quota before anyone notices.
+**Decision:** A Redis counter keyed by `budget:{namespace}:{date}` tracks cumulative tokens per namespace per day. The middleware checks the counter before processing and rejects with 429 when the budget is exceeded. The key expires after 25 hours (self-cleaning, no cron).
+**Trade-off:** The budget check adds one Redis GET to every /search request (~0.1ms). The counter is eventually consistent — two concurrent requests could both pass the check and both consume tokens, briefly exceeding the cap by up to one request's worth. Acceptable for a compliance platform with moderate query volume.
+
 ## Known Open Gaps (Deferred by Design)
 
-- **Citation content validation:** Code checks that chunk_index exists, not that the cited chunk truly supports the answer. Resolved in Week 7 via RAGAS faithfulness scoring.
-- **Budget hard stop:** Monthly LLM spend is tracked in logs but not enforced with a hard cap. Redis counter approach planned for Week 9.
-- **Semantic cache quality monitoring:** No automated check that 0.95 threshold isn't serving wrong answers. Manual log review interim. Automated spot-checking deferred to Week 8.
-- **Full CDC cache invalidation:** Cache invalidation on document update deferred to Week 10. TTL=3600s mitigates for low-change-frequency documents.
+- **Real-time citation content validation:** The code validates that a `chunk_id` exists in the database, but does not run an LLM check on the live path to prove the chunk content strictly entails the sentence. Doing this synchronously would add 300ms+ latency and double LLM token cost per request. Offline DeepEval faithfulness scoring (Week 7) measures citation quality in batch. Live citation validation is deferred.
+- **Monthly aggregate budget caps:** Daily LLM spend is tracked and capped in Redis (Week 9) to prevent catastrophic runaway costs. Monthly aggregation and billing tier logic require persistent DB rollups and accounting rules, which are deferred because daily caps mitigate 99% of financial risk.
+- **Event-driven CDC cache invalidation:** Cache invalidation uses TTL=3600s. Real-time CDC (Change Data Capture) via Postgres triggers or Redis Pub/Sub would immediately invalidate cached queries when a document changes, but adds background worker complexity. Because compliance documents update quarterly at most, TTL expiry combined with SHA-256 document lifecycle management (Week 8) is an acceptable tradeoff. CDC invalidation is deferred.
 

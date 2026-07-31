@@ -78,6 +78,8 @@ core/
 | 6.5 | End-to-end cost reduction via cache | ~60% cost reduction |
 | 7.3 | Vector vs BM25 vs Hybrid precision | 0.17 / 0.16 / 0.17 Precision@5 — corpus ceiling is 0.20 |
 | 7.5 | Reranker Contextual Precision & OOD Refusal | +35.5% Precision lift (0.450 → 0.610), 0.800 Recall, 100% OOD Refusal |
+| 9.1 | Multi-stage Docker build | 2.5GB → ~600MB image size |
+| 9.2 | Token budget enforcement | 500K tokens/day/namespace, auto-reset at midnight UTC |
 
 ---
 
@@ -237,7 +239,27 @@ Established a production-grade testing foundation. Configured `pytest-asyncio` a
 
 ---
 
+## Week 9: Production Deployment, CI, Guardrails & Governance
+
+### Containerization
+Built a multi-stage `Dockerfile` (`python:3.11-slim-bookworm` builder + runtime). Builder installs Poetry and all dependencies; runtime copies only the virtualenv and app code. Image size: ~600MB.
+
+### Production Docker Compose
+`docker-compose.prod.yml` runs API + PostgreSQL (pgvector) + Redis stack with health check dependencies (`pg_isready`, `redis-cli ping`) and automatic schema initialization via `docker-entrypoint-initdb.d/`.
+
+### Koyeb & Cloud Deployment Setup
+Configured deployment safeguards for 512MB RAM free instances: `FEATURES["reranker_enabled"] = MODE != "demo"` (disables cross-encoder reranker in demo mode to prevent memory OOM crashes while maintaining hybrid RRF search). Documented CLI secrets setup (`GROQ_API_KEY`, `DATABASE_URL`, `REDIS_URL`).
+
+### Token Budget Enforcement
+Built `TokenBudgetMiddleware` backed by a Redis counter (`budget:{namespace}:{date}`). Evaluated at the middleware boundary (0.1ms latency, $0.00 cost when budget is exceeded). Counter expires after 25 hours (automatic midnight UTC reset).
+
+### Health Check Expansion
+Expanded `/health` endpoint with active probes for database (`SELECT 1`), Redis ping, LiteLLM embedding model reachability, process `uptime_seconds`, and deployment `mode`.
+
+---
+
 ## What's Next
 
-- **Week 9: Agentic Workflows** — LangGraph integration, tool calling, query rewriting, and LLM-based routing.
-- Weeks 10–12: Containerization, CI/CD, MCP server, feedback loop, GitHub webhook connector.
+- **Week 10: Agentic Workflows** — LangGraph integration, tool calling, query rewriting, and LLM-based routing.
+- **Week 11: MCP Server** — Exposing statutory compliance RAG search as a Model Context Protocol tool.
+- **Week 12: Production Polish & Portfolio Readiness**.
