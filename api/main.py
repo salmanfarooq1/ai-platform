@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from api.agent.graph import build_agent_graph
+from api.agent.router import router as agent_router
 from api.middleware.finops import FinOpsMiddleware
 from api.middleware.logging import LatencyMiddleware, LoggingMiddleware, RequestIDMiddleware
 from api.middleware.rate_limit import RateLimitMiddleware
@@ -24,9 +26,10 @@ async def lifespan(app: FastAPI):
     # Pool is created ONCE here, not per request.
     # app.state is FastAPI's built-in dict for storing app-level shared state.
     app.state.db_pool = await create_pool()
+    app.state.agent_graph = build_agent_graph(app.state.db_pool)
     app.state.redis = await get_redis()
     await create_semantic_cache_index()  # idempotent, safe on every restart
-    print("[startup] DB pool, Redis, semantic cache index ready") # replaced with logging in prod
+    print("[startup] DB pool, agent graph, Redis, semantic cache index ready") # replaced with logging in prod
 
     yield  # server is running, handling requests
 
@@ -65,3 +68,4 @@ async def root():
 app.include_router(health_router)
 app.include_router(ingest_router)
 app.include_router(search_router)
+app.include_router(agent_router, prefix="/agent", tags=["agent"])
