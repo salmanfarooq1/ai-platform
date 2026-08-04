@@ -258,8 +258,28 @@ Expanded `/health` endpoint with active probes for database (`SELECT 1`), Redis 
 
 ---
 
+## Week 10: LangGraph Agent
+
+### Agent Architecture
+A compliance research agent using LangGraph: one reasoning/retrieval role with two tools:
+* `retrieve_chunks`: the existing hybrid retriever, `mode` as a parameter rather than a tool per strategy
+* `list_namespaces`: lets the agent discover available document scopes instead of relying on a hardcoded list
+
+Plus a deterministic synthesis step and an optional verifier role that checks the drafted answer against retrieved chunks, toggleable per request and via a deployment-wide flag.
+
+Every agent answer includes citations, a confidence score, the model used, verification status, and full query cost (every reasoning and verification turn, not just the last step).
+
+### Key Results
+| Metric | Value |
+|---|---|
+| Single-step queries | 1 retrieval + synthesis, ~3-4s |
+| Multi-step queries | 2-4 retrievals + synthesis, ~8-12s |
+| With verifier enabled | +1 LLM call minimum; +1 full retrieval round if a retry is triggered |
+| Agent endpoint | `POST /agent/query` |
+
+---
+
 ## What's Next
 
-- **Week 10: Agentic Workflows** — LangGraph integration, tool calling, query rewriting, and LLM-based routing.
 - **Week 11: MCP Server** — Exposing statutory compliance RAG search as a Model Context Protocol tool.
 - **Week 12: Production Polish & Portfolio Readiness**.
