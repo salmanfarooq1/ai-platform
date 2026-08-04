@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
 from typing import Any
+
+from pydantic import BaseModel, Field
 
 # --- Ingest ---
 
@@ -42,8 +43,8 @@ class SearchResult(BaseModel):
 
 class SearchResponse(BaseModel):
     query: str
-    answer: str                  # The LLM-generated answer text
-    confidence: float            # LLM self-reported confidence (0.0–1.0)
+    answer: str                  # The LLM generated answer text
+    confidence: float            # LLM self reported confidence (0.0 to 1.0)
     needs_clarification: bool    # LLM flagged the question as ambiguous
     results: list[SearchResult]  # The supporting chunk citations
     total_results: int
@@ -57,6 +58,8 @@ class HealthResponse(BaseModel):
     db: str                      # "ok" or "error: <reason>"
     redis: str                   # "ok" or "error: <reason>"
     version: str
+    mode: str = ""               # "local", "demo", or "prod"
+    uptime_seconds: int = 0
 
 class Citation(BaseModel):
     """A reference to the specific chunk from the DB that supported the answer."""

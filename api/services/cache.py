@@ -9,7 +9,7 @@ import numpy as np
 import redis.asyncio as redis
 from redis.exceptions import ResponseError
 
-from config import CACHE_CONFIG, LLM_CONFIG
+from config import CACHE_CONFIG, EMBEDDING_DIM, LLM_CONFIG
 
 logger = logging.getLogger("api.cache")
 
@@ -144,7 +144,7 @@ async def create_semantic_cache_index() -> None:
             "SCHEMA",
             "embedding", "VECTOR", "HNSW", "6",
                 "TYPE", "FLOAT32",
-                "DIM", "768",
+                "DIM", str(EMBEDDING_DIM),
                 "DISTANCE_METRIC", "COSINE",
             "response", "TEXT",
             "query", "TEXT",
