@@ -1,8 +1,9 @@
-import litellm
-import json
-from api.models.schemas import GeneratedAnswer, Citation
-from config import LLM_CONFIG
 import logging
+
+import litellm
+
+from api.models.schemas import Citation, GeneratedAnswer
+from config import LLM_CONFIG
 
 logger = logging.getLogger("api.llm")
 
@@ -22,7 +23,7 @@ Question: {question}
 """
 
 async def generate_with_citations(
-    query: str, 
+    query: str,
     chunks: list[dict],
     model: str | None = None,
 ) -> tuple[GeneratedAnswer, dict]:
@@ -64,8 +65,8 @@ async def generate_with_citations(
             f"model={model_to_use} query='{query[:60]}'"
         )
         raise ValueError(
-            f"LLM response was truncated (finish_reason=length). "
-            f"Query may require a longer answer. Consider increasing max_tokens or reducing top_k."
+            "LLM response was truncated (finish_reason=length). "
+            "Query may require a longer answer. Consider increasing max_tokens or reducing top_k."
         )
 
     # 4. LiteLLM returns a string containing the JSON. We parse it back into our Pydantic model.
@@ -94,13 +95,13 @@ async def generate_with_citations(
                 f"query='{query[:60]}'"
             )
             continue
-            
+
     answer_obj.citations = hydrated_citations
 
     # 5. Extract the tokens so our FinOps middleware can charge for it!
     usage_dict = dict(response.usage) if response.usage else {}
     usage_dict["model"] = response.model
-    
+
     return answer_obj, usage_dict
 
 # --- Model Routing ---

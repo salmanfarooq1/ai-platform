@@ -68,4 +68,4 @@ async def root():
 app.include_router(health_router)
 app.include_router(ingest_router)
 app.include_router(search_router)
-app.include_router(agent_router, prefix="/agent", tags=["agent"])
+app.include_router(agent_router)

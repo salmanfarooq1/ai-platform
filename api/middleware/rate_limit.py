@@ -41,7 +41,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Only rate-limit the expensive endpoints. Health checks and root
         # should never be rate-limited — monitoring systems hit them constantly.
-        if request.url.path not in ("/search", "/ingest"):
+        if request.url.path not in ("/search", "/ingest", "/agent/query"):
             return await call_next(request)
 
         # Extract namespace for per-tenant rate limiting.

@@ -4,6 +4,7 @@ tests/unit/test_llm.py
 Tests for the query complexity classifier (pure function, no LLM call needed).
 """
 import pytest
+
 from api.services.llm import classify_query_complexity
 
 

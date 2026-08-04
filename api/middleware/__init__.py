@@ -1,4 +1,4 @@
-from .logging import RequestIDMiddleware, LatencyMiddleware, LoggingMiddleware
+from .logging import LatencyMiddleware, LoggingMiddleware, RequestIDMiddleware
 
 __all__ = [
     "RequestIDMiddleware",

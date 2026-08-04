@@ -12,8 +12,9 @@ Provides three operations:
 These are called by the /ingest route handler before and after the chunking pipeline.
 """
 import hashlib
-from asyncpg import Pool
 import logging
+
+from asyncpg import Pool
 
 logger = logging.getLogger("core.lifecycle")
 

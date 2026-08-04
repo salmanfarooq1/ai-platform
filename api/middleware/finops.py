@@ -1,6 +1,7 @@
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import Request
 import logging
+
+from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger("api.finops")
 
@@ -18,18 +19,18 @@ class FinOpsMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # 1. run the route, and wait for response by LLM.
         response = await call_next(request)
-        
+
         # 2. Check if the route attached any token usage data to the request state.
         usage = getattr(request.state, "usage", None)
-        
+
         cost_usd = 0.0
-        
+
         if usage:
             # 1. Extract tokens and model, safely defaulting to 0 or "unknown"
             prompt_tokens = usage.get("prompt_tokens", 0)
             completion_tokens = usage.get("completion_tokens", 0)
             model = usage.get("model", "unknown")
-            
+
             # 2. Look up the pricing rates.
             if model.startswith("ollama/"):
                 # Local Ollama inference is always free — expected zero, not a gap.
@@ -44,22 +45,22 @@ class FinOpsMiddleware(BaseHTTPMiddleware):
                 rates = {"input": 0.0, "output": 0.0}
             else:
                 rates = PRICING[model]
-            
+
             # 3. Calculate the dollar cost
             input_cost = (prompt_tokens / 1_000_000) * rates["input"]
             output_cost = (completion_tokens / 1_000_000) * rates["output"]
-            
+
             cost_usd = input_cost + output_cost
-            
+
         # 3. Stamp the headers
         response.headers["X-Cost-USD"] = f"{cost_usd:.6f}"
-        
+
         if usage:
             response.headers["X-Tokens-In"] = str(usage.get("prompt_tokens", 0))
             response.headers["X-Tokens-Out"] = str(usage.get("completion_tokens", 0))
             response.headers["X-Query-ID"] = str(getattr(request.state, 'request_id', 'unknown'))
-            
+
             # Log the cost so we have a permanent record!
             logger.info(f"Query ID {getattr(request.state, 'request_id', 'unknown')} cost ${cost_usd:.6f}")
-            
+
         return response

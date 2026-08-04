@@ -1,6 +1,8 @@
 import litellm
-from core.ingestion.chunkers import ChunkRecord
+
 from config import LLM_CONFIG
+from core.ingestion.chunkers import ChunkRecord
+
 
 async def embed_chunks(chunks: list[ChunkRecord]) -> list[ChunkRecord]:
     '''

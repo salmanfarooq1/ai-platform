@@ -6,6 +6,8 @@ from langchain_core.messages import HumanMessage, ToolMessage
 from langgraph.errors import GraphRecursionError
 from pydantic import BaseModel, Field
 
+from api.services.guardrails import check_input
+
 logger = logging.getLogger("api.agent")
 router = APIRouter(prefix="/agent", tags=["agent"])
 
@@ -45,24 +47,32 @@ def _combine_usage(result: dict) -> dict:
     """Sum every reasoning role and verifier role LLM call usage with
     synthesize_node own cost, so FinOps sees an agent query full cost,
     not just its final step."""
-    all_calls = result.get("reasoning_usage", []) + result.get("verifier_usage", [])
+    all_calls = (
+        result.get("reasoning_usage", [])
+        + result.get("verifier_usage", [])
+        + result.get("synthesis_usage", [])
+    )
+
     prompt_tokens = sum(u.get("prompt_tokens", 0) for u in all_calls)
     completion_tokens = sum(u.get("completion_tokens", 0) for u in all_calls)
     llm_cost = sum(u.get("cost", 0.0) for u in all_calls)
-    synthesis_cost = result.get("synthesis_cost", 0.0)
 
     return {
         "prompt_tokens": prompt_tokens,
         "completion_tokens": completion_tokens,
-        "total_cost": llm_cost + synthesis_cost,
+        "total_cost": llm_cost,
         "routing_decision": "agent",
         "routed_model": result.get("model_used", ""),
+        "model": result.get("model_used", ""),
     }
 
 
 @router.post("/query", response_model=AgentResponse)
 async def agent_query(request: Request, response: Response, payload: AgentRequest) -> AgentResponse:
     start = time.perf_counter()
+    
+    check_input(payload.question)
+
     graph = request.app.state.agent_graph  # compiled once at startup (see main.py)
 
     # Generous upper bound, not a tight derivation.
@@ -78,6 +88,7 @@ async def agent_query(request: Request, response: Response, payload: AgentReques
                 # agent_node tries to append.
                 "reasoning_usage": [],
                 "verifier_usage": [],
+                "synthesis_usage": [],
                 "enable_verifier": payload.enable_verifier,
                 "verify_retries_left": payload.max_verify_retries,
             },

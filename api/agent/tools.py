@@ -13,7 +13,7 @@ logger = logging.getLogger("api.agent.tools")
 
 
 @tool
-def list_namespaces() -> str:
+async def list_namespaces() -> str:
     """
     List the document namespaces available to search, with a short
     description of what each one contains.
@@ -86,11 +86,13 @@ def make_retrieve_tool(pool: Pool):
 
             results = []
             for i, c in enumerate(chunks):
-                score = (
-                    c.get("rrf_score") or
-                    c.get("vector_score") or
-                    c.get("bm25_score") or 0.0
-                )
+                if "rrf_score" in c and c["rrf_score"] is not None:
+                    score = c["rrf_score"]
+                elif "vector_score" in c and c["vector_score"] is not None:
+                    score = c["vector_score"]
+                else:
+                    score = c.get("bm25_score", 0.0)
+
                 content = c["content"]
                 results.append({
                     "chunk_index": i,

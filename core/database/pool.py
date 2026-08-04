@@ -1,9 +1,12 @@
-import asyncpg
 import logging
 import os
+
+import asyncpg
 from asyncpg import Pool
 from pgvector.asyncpg import register_vector
+
 from config import DATABASE_CONFIG
+
 
 async def init_connection(conn):
     await register_vector(conn)

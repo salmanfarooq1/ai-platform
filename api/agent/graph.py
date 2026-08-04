@@ -45,8 +45,7 @@ class AgentState(TypedDict):
     confidence: float
     citations: list[dict]
     model_used: str
-    tokens_used: int
-    synthesis_cost: float
+    synthesis_usage: Annotated[list[dict], add]
     enable_verifier: bool
     verify_retries_left: int
     verified: bool
@@ -143,8 +142,7 @@ async def synthesize_node(state: AgentState) -> dict:
             "confidence": 0.0,
             "citations": [],
             "model_used": "",
-            "tokens_used": 0,
-            "synthesis_cost": 0.0,
+            "synthesis_usage": [{"prompt_tokens": 0, "completion_tokens": 0, "cost": 0.0}],
         }
 
     db_chunks = [
@@ -173,55 +171,11 @@ async def synthesize_node(state: AgentState) -> dict:
             for c in answer_obj.citations
         ],
         "model_used": answer_obj.model_used,
-        "tokens_used": usage_dict.get("prompt_tokens", 0) + usage_dict.get("completion_tokens", 0),
-        "synthesis_cost": usage_dict.get("total_cost", 0.0),
+        "synthesis_usage": [usage_dict],
     }
 
 
-async def verify_node(state: AgentState) -> dict:
-    """
-    Runs only when should_verify routes here. Checks the synthesized
-    answer against the retrieved chunks; if something looks unsupported
-    and retries remain, sends the graph back to agent_node with feedback.
-    """
-    chunks = _extract_chunks(state["messages"])
-    excerpts = "\n\n".join(
-        f"[{c.get('document_id')}] {c.get('content', '')[:500]}" for c in chunks
-    )
 
-    model = ChatLiteLLM(
-        model=LLM_CONFIG["model"],
-        temperature=0,
-        max_tokens=500,
-    )
-    response = await model.ainvoke([
-        SystemMessage(content=VERIFIER_SYSTEM_PROMPT),
-        HumanMessage(content=f"Draft answer:\n{state['final_answer']}\n\nSource chunks:\n{excerpts}"),
-    ])
-
-    try:
-        parsed = json.loads(response.content)
-        supported = bool(parsed.get("supported", True))
-        notes = parsed.get("notes", "")
-    except (json.JSONDecodeError, TypeError):
-        # Default to accepting the draft rather than looping on a parse failure.
-        supported = True
-        notes = "Verifier response was not valid JSON; treated as supported."
-
-    update = {
-        "verified": supported,
-        "verification_notes": notes,
-        "verifier_usage": [_extract_llm_usage(response)],
-    }
-
-    retries_left = state.get("verify_retries_left", 0)
-    if not supported and retries_left > 0:
-        update["verify_retries_left"] = retries_left - 1
-        update["messages"] = [HumanMessage(
-            content=f"[Verifier feedback] {notes} Please retrieve additional context to address this."
-        )]
-
-    return update
 
 
 def should_continue(state: AgentState) -> str:
@@ -244,8 +198,10 @@ def should_verify(state: AgentState) -> str:
 def verify_router(state: AgentState) -> str:
     """After verification: retry (back through agent_node) if something was
     flagged as unsupported and retries remain; otherwise end."""
-    if not state.get("verified", True) and state.get("verify_retries_left", 0) > 0:
-        return "retry"
+    if not state.get("verified", True):
+        last_msg = state["messages"][-1]
+        if isinstance(last_msg, HumanMessage) and str(last_msg.content).startswith("[Verifier feedback]"):
+            return "retry"
     return "end"
 
 
@@ -265,6 +221,12 @@ def build_agent_graph(pool: Pool):
         max_tokens=4000,
     ).bind_tools(tools)
 
+    verifier_model = ChatLiteLLM(
+        model=LLM_CONFIG["model"],
+        temperature=0,
+        max_tokens=500,
+    )
+
     async def agent_node(state: AgentState) -> dict:
         messages = [SystemMessage(content=AGENT_SYSTEM_PROMPT), *state["messages"]]
         response = await model.ainvoke(messages)
@@ -272,6 +234,46 @@ def build_agent_graph(pool: Pool):
             "messages": [response],
             "reasoning_usage": [_extract_llm_usage(response)],
         }
+
+    async def verify_node(state: AgentState) -> dict:
+        """
+        Runs only when should_verify routes here. Checks the synthesized
+        answer against the retrieved chunks; if something looks unsupported
+        and retries remain, sends the graph back to agent_node with feedback.
+        """
+        chunks = _extract_chunks(state["messages"])
+        excerpts = "\n\n".join(
+            f"[{c.get('document_id')}] {c.get('content', '')[:500]}" for c in chunks
+        )
+
+        response = await verifier_model.ainvoke([
+            SystemMessage(content=VERIFIER_SYSTEM_PROMPT),
+            HumanMessage(content=f"Draft answer:\n{state['final_answer']}\n\nSource chunks:\n{excerpts}"),
+        ])
+
+        try:
+            parsed = json.loads(response.content)
+            supported = bool(parsed.get("supported", True))
+            notes = parsed.get("notes", "")
+        except (json.JSONDecodeError, TypeError):
+            # Default to accepting the draft rather than looping on a parse failure.
+            supported = True
+            notes = "Verifier response was not valid JSON; treated as supported."
+
+        update = {
+            "verified": supported,
+            "verification_notes": notes,
+            "verifier_usage": [_extract_llm_usage(response)],
+        }
+
+        retries_left = state.get("verify_retries_left", 0)
+        if not supported and retries_left > 0:
+            update["verify_retries_left"] = retries_left - 1
+            update["messages"] = [HumanMessage(
+                content=f"[Verifier feedback] {notes} Please retrieve additional context to address this."
+            )]
+
+        return update
 
     graph = StateGraph(AgentState)
     graph.add_node("agent", agent_node)

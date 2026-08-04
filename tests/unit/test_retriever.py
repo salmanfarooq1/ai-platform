@@ -4,6 +4,7 @@ tests/unit/test_retriever.py
 Tests for the retriever's pure functions (no database needed).
 """
 import pytest
+
 from api.services.retriever import rrf_merge
 
 

@@ -1,10 +1,11 @@
 import asyncio
-import time
 import json
+import time
 from itertools import islice
+
 from core.clients.async_http_client import AsyncHttpClient
-from core.ingestion.readers import read_chunks
 from core.ingestion.processors import clean_chunks
+from core.ingestion.readers import read_chunks
 
 # define the main pipeline in async
 
@@ -14,9 +15,9 @@ async def ingestion_pipeline(api_url : str, input_file_path : str, batch_size : 
 
     chunks = read_chunks(input_file_path, chunk_size = 1024) # read chunks using read_chunks from readers.py
     cleaned_chunks = clean_chunks(chunks) # clean chunks using clean_chunks from processors.py
-    
+
     # initialize variables to keep track of total chunks and successful chunks
-    total_chunks = 0 
+    total_chunks = 0
     successful_chunks = 0
 
     # prepare headers for the API request, authorization is optional because it is mock for now, if we use real API key, then we will set the auth as well
@@ -30,12 +31,12 @@ async def ingestion_pipeline(api_url : str, input_file_path : str, batch_size : 
         for batch in batch_generator(cleaned_chunks, batch_size): # batch here is the actual list of chunks
             tasks = [client.post(api_url, data = {"inputs" : chunk}, headers = headers) for chunk in batch] # create tasks list for complete batch ( creates coroutines, for batch size of 50, a list of 50 coroutines)
             embeddings = await asyncio.gather(*tasks, return_exceptions=True) # wait for all tasks to complete, return_exceptions=True will return the exception if any and prevent crash
-            
+
             total_chunks+= len(batch) # update with the length of batch
             successful_chunks += sum(1 for e in embeddings if isinstance(e, dict) and 'error' not in e) # update with the number of successful chunks, logic is that we check if it is a dictionary ( this ignores any exception objects), and then we also check if 'error' is there in the dict, so errors will also be ignored, rest are successful
 
             # here is one imp catch: with open is sync, but since writing is fast here, it is not a bottleneck
-            with open(output_file_path, 'a') as f: # open the output file in append mode, does not load the whole file into memory, so it is memory efficient, 
+            with open(output_file_path, 'a') as f: # open the output file in append mode, does not load the whole file into memory, so it is memory efficient,
                 for embedding in embeddings:
                     if isinstance(embedding, dict):
                         f.write(json.dumps(embedding) + '\n')

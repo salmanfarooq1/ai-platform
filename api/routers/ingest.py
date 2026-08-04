@@ -1,16 +1,17 @@
-import tempfile
 import os
-import time
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Request
+import tempfile
+
 from asyncpg import Pool
-from api.models.schemas import IngestRequest, IngestResponse
-from core.pipeline.db_ingest import ingestion_pipeline
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+
+from api.models.schemas import IngestResponse
 from core.ingestion.lifecycle import (
-    compute_content_hash,
     check_document_status,
+    compute_content_hash,
     delete_document_chunks,
     register_document,
 )
+from core.pipeline.db_ingest import ingestion_pipeline
 
 router = APIRouter()
 

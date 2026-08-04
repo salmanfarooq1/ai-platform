@@ -46,7 +46,7 @@ DEFAULT_DAILY_TOKEN_BUDGET = 500_000
 class TokenBudgetMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Only enforce on expensive endpoints
-        if request.url.path not in ("/search",):
+        if request.url.path not in ("/search", "/agent/query"):
             return await call_next(request)
 
         # Extract namespace (same pattern as rate limiter)

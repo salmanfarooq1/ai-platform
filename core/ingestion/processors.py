@@ -14,6 +14,7 @@ Do NOT use in production pipelines — use chunkers.py instead.
 
 import warnings
 
+
 def clean_chunks(chunk_stream):
     """DEPRECATED: Use core.ingestion.chunkers instead. Strips all non-alphanumeric chars."""
     warnings.warn(

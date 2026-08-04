@@ -20,12 +20,11 @@ NOTE on chunk_size units:
   TODO: replace with tiktoken when tokenizer is wired into the pipeline.
 """
 
+import json as _json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable as _Callable
-import json as _json
-import re
-
 
 # ---------------------------------------------------------------------------
 # ChunkRecord — maps directly to the documents table schema
@@ -262,7 +261,7 @@ def header_aware_split(
         for deeper in list(current_headers.keys()):
             if deeper > level:
                 del current_headers[deeper]
-        path_parts = [current_headers[l] for l in sorted(current_headers)]
+        path_parts = [current_headers[lvl] for lvl in sorted(current_headers)]
         return " > ".join(path_parts)
 
     # --- Build chunks ---
@@ -580,7 +579,7 @@ def get_chunker(extension: str, text: str = "") -> _ChunkerFn:
     Raises NotImplementedError for known-but-unbuilt types (e.g. pdf).
     """
     ext = extension.lower().lstrip(".")
-    
+
     # 1. Content Sniffing Fallback: Is this actually a JSON file masquerading as a .txt?
     if text:
         text_stripped = text.strip()
@@ -601,7 +600,7 @@ def get_chunker(extension: str, text: str = "") -> _ChunkerFn:
                 f"See Week 13 (Docling multimodal ingestion)."
             )
         return chunker
-        
+
     # 3. Default fallback — if we have no idea what this is, assume it's plain text.
     # We no longer crash the pipeline on `.log` or extensionless files.
     return CHUNKER_REGISTRY["txt"]

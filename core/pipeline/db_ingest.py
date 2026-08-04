@@ -1,11 +1,13 @@
 import time
 from itertools import islice
+from pathlib import Path
 from typing import Generator, Iterator
+
 from asyncpg import Pool
+
+from core.database import bulk_insert, create_pool
 from core.ingestion.chunkers import ChunkRecord, get_chunker
 from core.ingestion.embedders import embed_chunks
-from core.database import create_pool, bulk_insert
-from pathlib import Path
 
 
 def batch_generator(iterable: Iterator, batch_size: int = 50) -> Generator[list, None, None]:
