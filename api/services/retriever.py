@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from asyncpg import Pool
 from sentence_transformers import CrossEncoder
 
+import config
 from core.processing.cpu_offload import run_cpu_bound
 
 
@@ -30,7 +31,7 @@ class RetrieverConfig:
     rerank: bool = False          # turn reranking on/off
     rerank_candidates: int = 20   # how many candidates to feed the reranker
 
-BM25_OR_THRESHOLD = 5  # queries with 5+ words switch AND -> OR
+BM25_OR_THRESHOLD = 5  # queries with 5 or more words switch AND to OR
 
 async def retrieve_bm25(
     pool: Pool,
@@ -85,19 +86,36 @@ async def retrieve_vector(
     query_embedding: list[float],
     namespace: str,
     limit: int,
+    min_score: float = config.MIN_VECTOR_SCORE,
 ) -> list[dict]:
+    """
+    Vector similarity search with a score floor.
+
+    Why the nested SQL query (SELECT * FROM (SELECT ...))?
+    Postgres processes the WHERE clause before it processes the SELECT clause.
+    If we calculate the vector_score inside the SELECT, Postgres doesn't know what 
+    "vector_score" is when it hits the WHERE clause, unless we type the whole math formula again!
+    
+    To avoid making the database do the math twice, we use a subquery:
+    1. The inner query does the math once and labels it 'vector_score'.
+    2. The outer query can now safely filter using WHERE vector_score > min_score.
+    
+    min_score defaults to config.MIN_VECTOR_SCORE (0.0) so we don't break existing code.
+    """
     async with pool.acquire() as conn:
         rows = await conn.fetch(
             """
-            SELECT id, document_id, content, metadata,
-                   1.0 - (embedding <=> $1::vector) AS vector_score
-            FROM documents
-            WHERE namespace = $2
-              AND 1.0 - (embedding <=> $1::vector) > 0.0
+            SELECT * FROM (
+                SELECT id, document_id, content, metadata,
+                       1.0 - (embedding <=> $1::vector) AS vector_score
+                FROM documents
+                WHERE namespace = $2
+            ) scored
+            WHERE vector_score > $4
             ORDER BY vector_score DESC
             LIMIT $3
             """,
-            query_embedding, namespace, limit,
+            query_embedding, namespace, limit, min_score,
         )
 
     results = []
@@ -121,12 +139,12 @@ def rrf_merge(
     top_k: int = 5,
 ) -> list[dict]:
     scores: dict[str, float] = {}
-    docs: dict[str, dict] = {}  # document_id -> best available fields
+    docs: dict[str, dict] = {}  # document_id mapped to best available fields
 
     for rank, doc in enumerate(bm25_results, start=1):
         chunk_id = doc["id"]
         scores[chunk_id] = scores.get(chunk_id, 0.0) + 1.0 / (k + rank)
-        docs.setdefault(chunk_id, doc)  # keep first-seen (bm25) unless overwritten below
+        docs.setdefault(chunk_id, doc)  # keep first seen (bm25) unless overwritten below
 
     for rank, doc in enumerate(vector_results, start=1):
         chunk_id = doc["id"]
@@ -211,7 +229,7 @@ async def retrieve(
 
     # Rerank if enabled and there is more than one candidate to reorder.
     # Previous condition (len > top_k) skipped reranking when few candidates
-    # existed. The cross-encoder should run whenever there is a choice to make.
+    # existed. The cross encoder should run whenever there is a choice to make.
     if cfg.rerank and len(candidates) > 1:
         candidates = await run_cpu_bound(rerank, query, candidates, cfg.top_k)
 
