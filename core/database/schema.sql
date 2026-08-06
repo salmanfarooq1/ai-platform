@@ -81,4 +81,4 @@ CREATE INDEX IF NOT EXISTS idx_usage_log_created
     ON usage_log(created_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_usage_log_endpoint_date
-    ON usage_log(endpoint, DATE(created_at));
+    ON usage_log(endpoint, created_at);
