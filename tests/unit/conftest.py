@@ -22,3 +22,31 @@ def make_doc():
             score_field: score,
         }
     return _make
+
+
+class AsyncContextManager:
+    """Reusable async context manager mock for DB connections."""
+    def __init__(self, obj):
+        self._obj = obj
+
+    async def __aenter__(self):
+        return self._obj
+
+    async def __aexit__(self, *args):
+        pass
+
+
+@pytest.fixture
+def mock_db_pool():
+    """Create a mock asyncpg Pool with a working acquire() context manager.
+
+    Usage:
+        def test_something(mock_db_pool):
+            pool, conn = mock_db_pool
+            conn.fetch.return_value = [...]
+    """
+    from unittest.mock import AsyncMock, MagicMock
+    pool = MagicMock()
+    conn = AsyncMock()
+    pool.acquire = MagicMock(return_value=AsyncContextManager(conn))
+    return pool, conn
