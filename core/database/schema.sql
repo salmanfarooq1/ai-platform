@@ -60,3 +60,25 @@ CREATE TABLE IF NOT EXISTS document_registry (
     last_ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (document_id, namespace)
 );
+
+-- Per-request LLM usage log for cost tracking and monthly aggregation.
+-- One row per API request that consumed LLM tokens.
+-- FinOps middleware writes here after every /search and /agent/query response.
+CREATE TABLE IF NOT EXISTS usage_log (
+    id                BIGSERIAL PRIMARY KEY,
+    request_id        VARCHAR(64)   NOT NULL,
+    endpoint          VARCHAR(100)  NOT NULL,
+    namespace         VARCHAR(255)  NOT NULL DEFAULT 'global',
+    model             VARCHAR(200)  NOT NULL,
+    prompt_tokens     INTEGER       NOT NULL DEFAULT 0,
+    completion_tokens INTEGER       NOT NULL DEFAULT 0,
+    cost_usd          NUMERIC(12,8) NOT NULL DEFAULT 0.0,
+    routing_decision  VARCHAR(50),
+    created_at        TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_usage_log_created
+    ON usage_log(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_usage_log_endpoint_date
+    ON usage_log(endpoint, DATE(created_at));
