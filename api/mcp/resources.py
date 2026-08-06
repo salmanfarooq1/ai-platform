@@ -37,19 +37,24 @@ async def resource_document(namespace: str, document_id: str) -> str:
     if pool is None:
         return json.dumps({"error": "Database pool not available"})
 
-    async with pool.acquire() as conn:
-        rows = await conn.fetch(
-            """
-            SELECT id, content, metadata
-            FROM documents
-            WHERE namespace = $1 AND document_id = $2
-            ORDER BY id
-            """,
-            namespace, document_id,
-        )
+    try:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT id, content, metadata
+                FROM documents
+                WHERE namespace = $1 AND document_id = $2
+                ORDER BY id
+                """,
+                namespace, document_id,
+            )
 
-    chunks = [
-        {"chunk_id": r["id"], "content": r["content"], "metadata": dict(r["metadata"] or {})}
-        for r in rows
-    ]
-    return json.dumps({"document_id": document_id, "namespace": namespace, "chunks": chunks}, indent=2)
+        chunks = [
+            {"chunk_id": r["id"], "content": r["content"], "metadata": dict(r["metadata"] or {})}
+            for r in rows
+        ]
+        return json.dumps({"document_id": document_id, "namespace": namespace, "chunks": chunks}, indent=2)
+
+    except Exception as e:
+        logger.error("[mcp/resource_document] %s", e)
+        return json.dumps({"error": str(e)})
