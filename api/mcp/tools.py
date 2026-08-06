@@ -21,6 +21,8 @@ from config import FEATURES, NAMESPACE_REGISTRY
 
 logger = logging.getLogger("api.mcp.tools")
 
+MAX_CHUNK_PREVIEW_LENGTH = 800
+
 
 @mcp.tool()
 async def list_namespaces() -> str:
@@ -81,7 +83,9 @@ async def search_documents(
 
         results = []
         for i, c in enumerate(chunks):
-            if "rrf_score" in c and c["rrf_score"] is not None:
+            if "rerank_score" in c and c["rerank_score"] is not None:
+                score = c["rerank_score"]
+            elif "rrf_score" in c and c["rrf_score"] is not None:
                 score = c["rrf_score"]
             elif "vector_score" in c and c["vector_score"] is not None:
                 score = c["vector_score"]
@@ -93,7 +97,7 @@ async def search_documents(
                 "document_id": c["document_id"],
                 "source_filename": c.get("source_filename", "unknown"),
                 "score": round(float(score), 4),
-                "content": c["content"][:800],
+                "content": c["content"][:MAX_CHUNK_PREVIEW_LENGTH],
             })
 
         return json.dumps({"count": len(results), "chunks": results}, indent=2)
@@ -120,6 +124,7 @@ async def multi_namespace_search(
         namespaces: List of namespaces to search. Defaults to all known.
         top_k: Results per namespace (1-10).
     """
+    top_k = max(1, min(top_k, 10))
     targets = namespaces or list(NAMESPACE_REGISTRY.keys())
     all_results = []
 
