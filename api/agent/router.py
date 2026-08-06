@@ -7,6 +7,7 @@ from langgraph.errors import GraphRecursionError
 from pydantic import BaseModel, Field
 
 from api.services.guardrails import check_input
+from config import MODEL_PRICING
 
 logger = logging.getLogger("api.agent")
 router = APIRouter(prefix="/agent", tags=["agent"])
@@ -55,7 +56,12 @@ def _combine_usage(result: dict) -> dict:
 
     prompt_tokens = sum(u.get("prompt_tokens", 0) for u in all_calls)
     completion_tokens = sum(u.get("completion_tokens", 0) for u in all_calls)
-    llm_cost = sum(u.get("cost", 0.0) for u in all_calls)
+    
+    model = result.get("model_used", "")
+    llm_cost = 0.0
+    if model and not model.startswith("ollama/"):
+        rates = MODEL_PRICING.get(model, {"input": 0.0, "output": 0.0})
+        llm_cost = (prompt_tokens / 1_000_000) * rates["input"] + (completion_tokens / 1_000_000) * rates["output"]
 
     return {
         "prompt_tokens": prompt_tokens,
@@ -71,7 +77,12 @@ def _combine_usage(result: dict) -> dict:
 async def agent_query(request: Request, response: Response, payload: AgentRequest) -> AgentResponse:
     start = time.perf_counter()
     
-    check_input(payload.question)
+    guard = check_input(payload.question)
+    if guard.blocked:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "query_blocked", "reason": guard.blocked_reason},
+        )
 
     graph = request.app.state.agent_graph  # compiled once at startup (see main.py)
 
@@ -127,6 +138,7 @@ async def agent_query(request: Request, response: Response, payload: AgentReques
             reasoning_steps.append(f"Tool result: {content[:200]}{suffix}")
 
     usage_dict = _combine_usage(result)
+    usage_dict["namespace"] = payload.namespace
     request.state.usage = usage_dict
     response.headers["X-Cost-USD"] = f"{usage_dict['total_cost']:.6f}"
 
