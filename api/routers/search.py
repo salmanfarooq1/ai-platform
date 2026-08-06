@@ -137,6 +137,7 @@ async def search(
 
     # Attach usage to request state — FinOps middleware reads this
     request.state.usage = usage_dict
+    request.state.usage["namespace"] = payload.namespace
 
     # Build response dict — stored in both caches
     results = [
