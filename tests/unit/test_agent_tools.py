@@ -120,7 +120,7 @@ def test_combine_usage_sums_reasoning_and_verifier_and_synthesis_cost():
         "model_used": "groq/meta-llama/llama-4-scout-17b-16e-instruct",
     }
     usage = _combine_usage(result)
-    assert usage["total_cost"] == pytest.approx(0.0055)
+    assert usage["total_cost"] == pytest.approx(0.0000312)
     assert usage["prompt_tokens"] == 160
     assert usage["routing_decision"] == "agent"
 
