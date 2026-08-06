@@ -279,7 +279,44 @@ Every agent answer includes citations, a confidence score, the model used, verif
 
 ---
 
-## What's Next
+## Week 11: MCP Server & Cost Tracking
 
-- **Week 11: MCP Server** — Exposing statutory compliance RAG search as a Model Context Protocol tool.
-- **Week 12: Production Polish & Portfolio Readiness**.
+### MCP Integration
+The platform now speaks the Model Context Protocol (MCP), allowing external AI clients (Claude Desktop, Cursor, VS Code) to discover and invoke our RAG tools programmatically over SSE transport.
+
+| Component | Count | Details |
+|---|---|---|
+| Tools | 5 | `list_namespaces`, `search_documents`, `multi_namespace_search`, `get_ingestion_status`, `get_cost_summary` |
+| Resources | 3 | Namespace registry, feature flags, document chunks |
+| Prompts | 2 | Compliance research workflow, cost audit workflow |
+
+### Persistent Cost Tracking
+A `usage_log` table in Postgres stores one row per LLM-consuming request. The FinOps middleware writes via `asyncio.create_task` (fire-and-forget). Monthly cost reports are a simple `GROUP BY` query.
+
+### Gap Fixes
+- Input guardrail added to `/agent/query`
+- `list_namespaces` made async for event loop safety
+- Verifier model built once as closure in graph constructor
+
+---
+
+## Week 12: Production Hardening
+
+### What Changed
+- Fixed invalid Postgres expression index on `usage_log`
+- Added `rerank_score` to scoring waterfall for score-order consistency
+- Injected namespace into `/search` usage tracking
+- Hardened MCP resource error handling
+- Added rate limiting for `/mcp/sse` endpoint
+- Extracted magic numbers into named constants
+- Expanded test suite with FinOps, search schema, and shared fixtures
+
+### Final Architecture
+| Layer | Components |
+|---|---|
+| Transport | FastAPI + SSE (MCP) |
+| Middleware | Rate limit → Request ID → Token budget → FinOps → Latency → Logging |
+| Routes | `/search`, `/ingest`, `/health`, `/agent/query`, `/mcp/sse` |
+| Services | Hybrid retriever, semantic cache, guardrails, usage writer |
+| Agent | LangGraph (reasoning → tools → synthesis → verification) |
+| Storage | Postgres (pgvector) + Redis |

@@ -104,4 +104,9 @@
 **Why fire-and-forget, not synchronous INSERT:** A synchronous write would add latency to every response and, worse, would crash the response if Postgres is temporarily unreachable. Cost tracking is important but not as important as serving the response.
 **Trade-off:** If the app crashes between creating the task and executing the INSERT, that one row is lost. At the scale this platform operates, a missed row is negligible for monthly reports.
 
+## Decision 19: Production hardening and final quality pass (Week 12)
+**Context:** After 11 weeks of feature development, the codebase had accumulated several minor inconsistencies: a missing namespace in usage tracking, an invalid Postgres expression index, unguarded resource endpoints, and gaps in test coverage. None of these were blockers individually, but collectively they represented technical debt that would compound over time.
+**Decision:** Dedicate an entire sprint to zero-feature hardening. Every known issue from code reviews, observation logs, and codebase audits was systematically resolved. Test coverage was expanded. Documentation was finalized. The goal was not to add capabilities, but to ensure every existing capability was production-grade.
+**Trade-off:** No new features were shipped this week. The platform's capability set is frozen at the Week 11 feature level. This was deliberate — shipping quality over quantity.
+
 
