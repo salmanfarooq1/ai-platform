@@ -1,66 +1,86 @@
+"""
+FinOps middleware — cost calculation and persistent usage logging.
+
+Runs after the route handler returns. Reads request.state.usage
+(set by /search and /agent/query routes), calculates dollar cost
+from MODEL_PRICING in config.py, stamps response headers, and persists
+the record to Postgres via the usage writer service.
+
+The DB write is fire-and-forget: if Postgres is temporarily unreachable,
+the header is still stamped and the request still succeeds.
+"""
+import asyncio
 import logging
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from api.services.usage import record_usage
+from config import MODEL_PRICING
+
 logger = logging.getLogger("api.finops")
 
-# Prices are per 1,000,000 tokens
-# IMPORTANT: Add new models here as they are onboarded.
-# An unknown model silently reports $0.00 — always verify after adding a new model.
-PRICING = {
-    "azure/gpt-4o":                                        {"input": 2.50,  "output": 10.00},
-    "groq/llama-3.1-70b-versatile":                        {"input": 0.59,  "output": 0.79},
-    "groq/meta-llama/llama-4-scout-17b-16e-instruct":      {"input": 0.11,  "output": 0.34},
-    "groq/meta-llama/llama-4-maverick-17b-128e-instruct":  {"input": 0.20,  "output": 0.60},
-}
 
 class FinOpsMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # 1. run the route, and wait for response by LLM.
         response = await call_next(request)
 
-        # 2. Check if the route attached any token usage data to the request state.
         usage = getattr(request.state, "usage", None)
-
         cost_usd = 0.0
 
         if usage:
-            # 1. Extract tokens and model, safely defaulting to 0 or "unknown"
             prompt_tokens = usage.get("prompt_tokens", 0)
             completion_tokens = usage.get("completion_tokens", 0)
             model = usage.get("model", "unknown")
 
-            # 2. Look up the pricing rates.
             if model.startswith("ollama/"):
-                # Local Ollama inference is always free — expected zero, not a gap.
                 rates = {"input": 0.0, "output": 0.0}
-            elif model not in PRICING:
-                # Unknown cloud model — cost is genuinely unknown, not free.
-                # Log a warning so the PRICING dict gets updated.
+            elif model not in MODEL_PRICING:
                 logger.warning(
-                    f"[finops] Unknown model '{model}' not in PRICING dict. "
-                    f"Cost reported as $0.00. Add pricing entry to finops.py."
+                    "[finops] Unknown model '%s' not in MODEL_PRICING. "
+                    "Cost reported as $0.00. Add an entry to config.py.",
+                    model,
                 )
                 rates = {"input": 0.0, "output": 0.0}
             else:
-                rates = PRICING[model]
+                rates = MODEL_PRICING[model]
 
-            # 3. Calculate the dollar cost
             input_cost = (prompt_tokens / 1_000_000) * rates["input"]
             output_cost = (completion_tokens / 1_000_000) * rates["output"]
-
             cost_usd = input_cost + output_cost
 
-        # 3. Stamp the headers
         response.headers["X-Cost-USD"] = f"{cost_usd:.6f}"
 
         if usage:
             response.headers["X-Tokens-In"] = str(usage.get("prompt_tokens", 0))
             response.headers["X-Tokens-Out"] = str(usage.get("completion_tokens", 0))
-            response.headers["X-Query-ID"] = str(getattr(request.state, 'request_id', 'unknown'))
 
-            # Log the cost so we have a permanent record!
-            logger.info(f"Query ID {getattr(request.state, 'request_id', 'unknown')} cost ${cost_usd:.6f}")
+            request_id = str(getattr(request.state, "request_id", "unknown"))
+            response.headers["X-Query-ID"] = request_id
+
+            logger.info(
+                "[finops] %s cost=$%.6f model=%s tokens=%d+%d",
+                request_id,
+                cost_usd,
+                usage.get("model", "unknown"),
+                usage.get("prompt_tokens", 0),
+                usage.get("completion_tokens", 0),
+            )
+
+            pool = getattr(request.app.state, "db_pool", None)
+            if pool:
+                asyncio.create_task(
+                    record_usage(
+                        pool=pool,
+                        request_id=request_id,
+                        endpoint=request.url.path,
+                        namespace=usage.get("namespace", "global"),
+                        model=usage.get("model", "unknown"),
+                        prompt_tokens=usage.get("prompt_tokens", 0),
+                        completion_tokens=usage.get("completion_tokens", 0),
+                        cost_usd=cost_usd,
+                        routing_decision=usage.get("routing_decision", ""),
+                    )
+                )
 
         return response
