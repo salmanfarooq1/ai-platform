@@ -206,16 +206,8 @@ def verify_router(state: AgentState) -> str:
 
 
 def build_agent_graph(pool: Pool):
-    """
-    Construct and compile the agent graph, bound to a DB pool.
-
-    Called ONCE at app startup (not per request). A compiled graph is
-    meant to be invoked repeatedly and concurrently; rebuilding it on
-    every request would recompile the whole thing and re instantiate the
-    ChatLiteLLM clients for no benefit.
-    """
     tools = [make_retrieve_tool(pool), list_namespaces]
-    model = ChatLiteLLM(
+    reasoning_model = ChatLiteLLM(
         model=LLM_CONFIG["model"],
         temperature=0,
         max_tokens=4000,
@@ -229,26 +221,22 @@ def build_agent_graph(pool: Pool):
 
     async def agent_node(state: AgentState) -> dict:
         messages = [SystemMessage(content=AGENT_SYSTEM_PROMPT), *state["messages"]]
-        response = await model.ainvoke(messages)
+        response = await reasoning_model.ainvoke(messages)
         return {
             "messages": [response],
             "reasoning_usage": [_extract_llm_usage(response)],
         }
 
-    async def verify_node(state: AgentState) -> dict:
-        """
-        Runs only when should_verify routes here. Checks the synthesized
-        answer against the retrieved chunks; if something looks unsupported
-        and retries remain, sends the graph back to agent_node with feedback.
-        """
+    async def verify_node_inner(state: AgentState) -> dict:
         chunks = _extract_chunks(state["messages"])
         excerpts = "\n\n".join(
             f"[{c.get('document_id')}] {c.get('content', '')[:500]}" for c in chunks
         )
-
         response = await verifier_model.ainvoke([
             SystemMessage(content=VERIFIER_SYSTEM_PROMPT),
-            HumanMessage(content=f"Draft answer:\n{state['final_answer']}\n\nSource chunks:\n{excerpts}"),
+            HumanMessage(
+                content=f"Draft answer:\n{state['final_answer']}\n\nSource chunks:\n{excerpts}"
+            ),
         ])
 
         try:
@@ -256,7 +244,6 @@ def build_agent_graph(pool: Pool):
             supported = bool(parsed.get("supported", True))
             notes = parsed.get("notes", "")
         except (json.JSONDecodeError, TypeError):
-            # Default to accepting the draft rather than looping on a parse failure.
             supported = True
             notes = "Verifier response was not valid JSON; treated as supported."
 
@@ -279,7 +266,7 @@ def build_agent_graph(pool: Pool):
     graph.add_node("agent", agent_node)
     graph.add_node("tools", ToolNode(tools))
     graph.add_node("synthesize", synthesize_node)
-    graph.add_node("verify", verify_node)
+    graph.add_node("verify", verify_node_inner)
 
     graph.set_entry_point("agent")
     graph.add_conditional_edges("agent", should_continue, {"tools": "tools", "synthesize": "synthesize"})
