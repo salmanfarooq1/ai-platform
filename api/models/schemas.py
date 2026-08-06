@@ -76,3 +76,17 @@ class GeneratedAnswer(BaseModel):
     confidence: float       # e.g., 0.95
     model_used: str
     needs_clarification: bool
+
+
+class LatestDocumentInfo(BaseModel):
+    document_id: str
+    source_filename: str
+    ingested_at: str
+
+
+class IngestionStatusResponse(BaseModel):
+    namespace: str
+    document_count: int
+    chunk_count: int
+    latest_document: LatestDocumentInfo | None = None
+
