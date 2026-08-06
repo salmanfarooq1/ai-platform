@@ -120,3 +120,14 @@ GUARDRAIL_CONFIG = {
     # Self reported LLM confidence floor for flagging (Default: 0.45)
     "confidence_floor": float(os.getenv("CONFIDENCE_FLOOR", 0.45)),
 }
+
+# LLM token pricing in USD per million tokens.
+# Update this dict when providers change rates, or replace with
+# a dynamic fetch script (see OBS-06 in notes_and_obs.md).
+MODEL_PRICING: dict[str, dict[str, float]] = {
+    "azure/gpt-4o":                                        {"input": 2.50,  "output": 10.00},
+    "groq/llama-3.1-70b-versatile":                        {"input": 0.59,  "output": 0.79},
+    "groq/meta-llama/llama-4-scout-17b-16e-instruct":      {"input": 0.11,  "output": 0.34},
+    "groq/meta-llama/llama-4-maverick-17b-128e-instruct":  {"input": 0.20,  "output": 0.60},
+}
+
