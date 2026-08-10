@@ -28,13 +28,9 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from api.services.cache import get_redis
+from config import RATE_LIMIT_REQUESTS, RATE_LIMIT_WINDOW_SECONDS
 
 logger = logging.getLogger("api.rate_limit")
-
-# Configurable limits. In production these would come from config.py
-# or from a per-namespace config table in the database.
-RATE_LIMIT_REQUESTS = 60       # max requests per window
-RATE_LIMIT_WINDOW_SECONDS = 60 # window size in seconds
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):

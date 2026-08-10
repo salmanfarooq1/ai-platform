@@ -131,3 +131,16 @@ MODEL_PRICING: dict[str, dict[str, float]] = {
     "groq/meta-llama/llama-4-maverick-17b-128e-instruct":  {"input": 0.20,  "output": 0.60},
 }
 
+# ==========================================
+# RATE LIMITING AND BUDGET CONSTANTS
+# ==========================================
+
+# Fixed-window rate limiting — requests per window.
+RATE_LIMIT_REQUESTS = 60
+RATE_LIMIT_WINDOW_SECONDS = 60
+
+# Daily token budget per namespace.
+# At Groq's llama-4-scout pricing ($0.11/M input + $0.34/M output),
+# 500K tokens costs roughly $0.11. Generous for development, tight enough
+# to catch runaway loops.
+DEFAULT_DAILY_TOKEN_BUDGET = 500_000

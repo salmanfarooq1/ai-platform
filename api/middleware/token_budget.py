@@ -33,14 +33,10 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from api.services.cache import get_redis
+from config import DEFAULT_DAILY_TOKEN_BUDGET
 
 logger = logging.getLogger("api.budget")
 
-# Default daily budget: 500,000 tokens per namespace.
-# At Groq's llama-4-scout pricing ($0.11/M input + $0.34/M output),
-# 500K tokens costs roughly $0.11. Generous for development, tight enough
-# to catch runaway loops.
-DEFAULT_DAILY_TOKEN_BUDGET = 500_000
 
 
 class TokenBudgetMiddleware(BaseHTTPMiddleware):
