@@ -33,6 +33,10 @@ async def ingest(
     pool: Pool = Depends(get_db_pool),
 ):
     doc_id = document_id or file.filename
+    # Set minimal usage so FinOpsMiddleware stamps X-Query-ID on the response.
+    # Ingest has no LLM cost, but X-Query-ID lets the frontend tie each ingest
+    # result to a specific server-side request for debugging and MetaBar display.
+    request.state.usage = {"namespace": namespace}
     content = await file.read()
     content_hash = compute_content_hash(content)
 

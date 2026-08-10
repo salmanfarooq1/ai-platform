@@ -52,7 +52,7 @@ async def search(
         payload.retrieval_mode, effective_rerank,
     )
     if exact_hit:
-        request.state.usage = {"cache": "exact_hit", "total_cost": 0.0}
+        request.state.usage = {"cache": "exact_hit", "total_cost": 0.0, "namespace": payload.namespace}
         response = JSONResponse(content=exact_hit)
         response.headers["X-Cache"] = "HIT"
         response.headers["X-Cache-Type"] = "exact"
@@ -75,7 +75,7 @@ async def search(
         payload.retrieval_mode, effective_rerank, payload.top_k,
     )
     if semantic_hit:
-        request.state.usage = {"cache": "semantic_hit", "total_cost": 0.0}
+        request.state.usage = {"cache": "semantic_hit", "total_cost": 0.0, "namespace": payload.namespace}
         response = JSONResponse(content=semantic_hit)
         response.headers["X-Cache"] = "HIT"
         response.headers["X-Cache-Type"] = "semantic"
@@ -159,6 +159,7 @@ async def search(
         answer=answer_obj.answer,
         confidence=answer_obj.confidence,
         needs_clarification=answer_obj.needs_clarification,
+        rerank_applied=effective_rerank,
         results=results,
         total_results=len(results),
         flagged=output_guard.flagged,

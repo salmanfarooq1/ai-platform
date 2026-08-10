@@ -80,7 +80,7 @@ async def health_check(request: Request) -> HealthResponse:
         status="ok" if all_ok else "degraded",
         db=db_status,
         redis=redis_status,
-        version="0.3.0",
+        version=request.app.version,
         mode=MODE,
         uptime_seconds=int(time.time() - _start_time),
     )
