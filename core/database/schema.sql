@@ -82,3 +82,21 @@ CREATE INDEX IF NOT EXISTS idx_usage_log_created
 
 CREATE INDEX IF NOT EXISTS idx_usage_log_endpoint_date
     ON usage_log(endpoint, created_at);
+
+-- Per-answer user feedback (thumbs up / down) for quality reporting.
+-- request_id ties each feedback row back to a specific usage_log entry
+-- and to the X-Query-ID header surfaced in the API response.
+CREATE TABLE IF NOT EXISTS feedback (
+    id          BIGSERIAL PRIMARY KEY,
+    request_id  TEXT          NOT NULL,
+    endpoint    TEXT          NOT NULL,
+    rating      TEXT          NOT NULL CHECK (rating IN ('up', 'down')),
+    comment     TEXT,
+    created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_request_id
+    ON feedback(request_id);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_created
+    ON feedback(created_at DESC);

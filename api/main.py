@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.agent.graph import build_agent_graph
 from api.agent.router import router as agent_router
@@ -9,6 +10,10 @@ from api.middleware.finops import FinOpsMiddleware
 from api.middleware.logging import LatencyMiddleware, LoggingMiddleware, RequestIDMiddleware
 from api.middleware.rate_limit import RateLimitMiddleware
 from api.middleware.token_budget import TokenBudgetMiddleware
+from api.routers.analytics import router as analytics_router
+from api.routers.config import router as config_router
+from api.routers.docs import router as docs_router
+from api.routers.feedback import router as feedback_router
 from api.routers.health import router as health_router
 from api.routers.ingest import router as ingest_router
 from api.routers.search import router as search_router
@@ -40,13 +45,33 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# MIDDLEWARE — LIFO order: last added = first executed
+# MIDDLEWARE — LIFO order: last added = first executed on incoming request.
+# CORSMiddleware is last here so it is outermost — it runs before everything
+# else, including RateLimitMiddleware. This ensures preflight (OPTIONS)
+# requests get proper CORS headers even when the request would be rate-limited.
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(LatencyMiddleware)
 app.add_middleware(FinOpsMiddleware)
 app.add_middleware(TokenBudgetMiddleware)
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(RateLimitMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",  # Vite dev server
+        "http://localhost:4173",  # Vite preview
+        "http://localhost:3000",  # alternative dev port
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=[
+        "X-Cost-USD", "X-Tokens-In", "X-Tokens-Out", "X-Query-ID",
+        "X-Request-ID", "X-Process-Time", "X-Cache", "X-Cache-Type",
+        "X-Budget-Remaining", "X-Budget-Limit",
+        "X-RateLimit-Limit", "X-RateLimit-Remaining",
+    ],
+)
 
 
 @app.get("/")
@@ -59,6 +84,10 @@ app.include_router(ingest_router)
 app.include_router(search_router)
 app.include_router(agent_router)
 app.include_router(mcp_router)
+app.include_router(config_router)
+app.include_router(analytics_router)
+app.include_router(docs_router)
+app.include_router(feedback_router)
 
 # SseServerTransport.handle_post_message is a raw ASGI app, not a FastAPI
 # endpoint function. It must be mounted directly, not registered as an
