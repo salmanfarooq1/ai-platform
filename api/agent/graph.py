@@ -148,7 +148,7 @@ async def synthesize_node(state: AgentState) -> dict:
     db_chunks = [
         {
             "document_id": c["document_id"],
-            "source_filename": c.get("source_filename", "unknown"),
+            "source_filename": c.get("source_filename") or "unknown",
             "text": c["content"],
             "score": c.get("score", 0.0),
         }
@@ -170,7 +170,7 @@ async def synthesize_node(state: AgentState) -> dict:
             }
             for c in answer_obj.citations
         ],
-        "model_used": answer_obj.model_used,
+        "model_used": usage_dict.get("routed_model", ""),
         "synthesis_usage": [usage_dict],
     }
 
@@ -221,7 +221,18 @@ def build_agent_graph(pool: Pool):
 
     async def agent_node(state: AgentState) -> dict:
         messages = [SystemMessage(content=AGENT_SYSTEM_PROMPT), *state["messages"]]
-        response = await reasoning_model.ainvoke(messages)
+        response = None
+        for attempt in range(3):
+            try:
+                response = await reasoning_model.ainvoke(messages)
+                break
+            except Exception as e:
+                if "rate_limit" in str(e).lower() and attempt < 2:
+                    import asyncio
+                    logger.warning("[agent] reasoning_model rate limited, waiting 35s (attempt %d)...", attempt + 1)
+                    await asyncio.sleep(35)
+                else:
+                    raise
         return {
             "messages": [response],
             "reasoning_usage": [_extract_llm_usage(response)],

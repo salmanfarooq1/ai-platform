@@ -158,7 +158,7 @@ async def search(
         query=payload.query,
         answer=answer_obj.answer,
         confidence=answer_obj.confidence,
-        needs_clarification=answer_obj.needs_clarification,
+        needs_clarification=getattr(answer_obj, "needs_clarification", False),
         rerank_applied=effective_rerank,
         results=results,
         total_results=len(results),

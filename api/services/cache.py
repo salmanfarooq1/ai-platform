@@ -191,14 +191,33 @@ async def semantic_cache_lookup(
         r = await get_redis()
         vec_bytes = _to_bytes(query_embedding)
 
-        # Build the filter: namespace AND retrieval_mode AND rerank AND top_k
-        # This prevents cross-contamination between different retrieval configs.
+        # Build the KNN pre-filter covering all retrieval config dimensions.
+        # This prevents cross-contamination between different retrieval configs
+        # (e.g. hybrid vs bm25, rerank=True vs False).
+        #
+        # Tag fields (namespace, retrieval_mode, rerank): escape chars that
+        # RediSearch tag syntax treats as delimiters — comma, dot, colon, etc.
+        # The safe chars for a tag value are [a-zA-Z0-9_-].
+        # Numeric range for top_k: @top_k:[n n] selects the exact value.
+        #
+        # All pre-filters are inside ONE paren group so RediSearch parses them
+        # as AND-ed conditions before the =>[KNN ...] combinator.
+        # (Separate groups like (...) (...) are implicit OR in Dialect 2.)
+        # Characters that RediSearch tag syntax treats as delimiters;
+        # escape each with a backslash so tag filter values are literal.
+        _TAG_SPECIAL = (',', '.', '<', '>', '{', '}', '[', ']', '(', ')',
+                        '|', '!', '@', '#', '$', '%', '^', '&', '*', '-',
+                        '+', '=', ' ', '/', ':', ';')
+        _TAG_ESCAPE = str.maketrans({c: '\\' + c for c in _TAG_SPECIAL})
+        ns_tag = namespace.translate(_TAG_ESCAPE)
+        mode_tag = retrieval_mode.translate(_TAG_ESCAPE)
         rerank_str = str(int(rerank))
+
         filter_query = (
-            f"(@namespace:{{{namespace}}})"
-            f" (@retrieval_mode:{{{retrieval_mode}}})"
-            f" (@rerank:{{{rerank_str}}})"
-            f" (@top_k:[{top_k} {top_k}])"
+            f"(@namespace:{{{ns_tag}}}"
+            f" @retrieval_mode:{{{mode_tag}}}"
+            f" @rerank:{{{rerank_str}}}"
+            f" @top_k:[{top_k} {top_k}])"
             f"=>[KNN 1 @embedding $vec AS score]"
         )
 
