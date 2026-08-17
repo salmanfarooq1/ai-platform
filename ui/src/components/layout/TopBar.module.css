@@ -1,0 +1,41 @@
+/* TopBar.module.css */
+
+/* ── Glass material (Apple §12) ── */
+/* Solid fallback for browsers without backdrop-filter */
+.topBar {
+  /* z-index keeps the glass surface painted above scrolling content in .main */
+  z-index: 40;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-5);
+  /* Solid fallback — matches opaque bg-surface exactly */
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  gap: var(--space-4);
+}
+
+/* Progressive enhancement: translucent glass when supported */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .topBar {
+    background: var(--surface-glass);
+    -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+    backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+    /* Bright top-edge line — light catching the material (Apple §12) */
+    border-bottom: 1px solid var(--surface-glass-border);
+    /* Scroll-edge fade: only appear when content is beneath */
+    box-shadow: 0 1px 0 var(--border-subtle);
+  }
+}
+
+.themeSep { width:1px; height:18px; background:var(--border-subtle); flex-shrink:0; margin:0 var(--space-1); }
+.left,.right { display:flex; align-items:center; gap:var(--space-3); }
+.platformName { font-size:var(--text-body); font-weight:600; line-height:var(--leading-body); color:var(--text-primary); }
+.modeBadge { font-size:var(--text-micro); line-height:var(--leading-micro); font-weight:700; letter-spacing:var(--tracking-micro); text-transform:uppercase; padding:3px 8px; border-radius:var(--radius-full); }
+.mode_local  { background:var(--data-subtle);    color:var(--data); }
+.mode_demo   { background:var(--accent-subtle);   color:var(--accent); }
+.mode_prod   { background:var(--success-subtle);  color:var(--success); }
+.uptime  { font-size:var(--text-sm); line-height:var(--leading-sm); font-family:var(--font-mono); color:var(--text-muted); }
+.version { font-size:var(--text-xs); line-height:var(--leading-xs); font-family:var(--font-mono); color:var(--text-disabled); }

@@ -23,3 +23,6 @@ learning_docs/
 .coverage
 scratch/
 *.code-workspace
+node_modules/
+ui/node_modules/
+ui/dist/

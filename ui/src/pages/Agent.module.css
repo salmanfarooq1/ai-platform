@@ -1,0 +1,17 @@
+/* Agent.module.css */
+.page { display:flex; flex-direction:column; gap:var(--space-6); animation:fadeIn 200ms ease; }
+.header { display:flex; flex-direction:column; gap:var(--space-1); }
+.loading { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--space-4); padding:var(--space-12) 0; color:var(--text-muted); font-size:var(--text-body); line-height:var(--leading-body); text-align:center; }
+.loadingBar { position:relative; width:200px; height:4px; background:var(--bg-sunken); border-radius:var(--radius-full); overflow:hidden; }
+.loadingBar::after { content:''; position:absolute; top:0; left:-150%; width:100%; height:100%; background:var(--accent); border-radius:var(--radius-full); animation:loadSlide 1.5s infinite linear; }
+.errorBanner { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-4); background:var(--danger-subtle); border:1px solid var(--danger-border); border-radius:var(--radius-md); color:var(--red-400); font-size:var(--text-ui); line-height:var(--leading-ui); font-weight:500; }
+.results { display:flex; flex-direction:column; gap:var(--space-6); }
+.metricsRow { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:var(--space-4); }
+.agentStats { display:flex; flex-direction:column; gap:var(--space-2); margin-top:var(--space-3); font-size:var(--text-sm); line-height:var(--leading-sm); }
+.agentStats div { display:flex; justify-content:space-between; border-bottom:1px solid var(--border-subtle); padding-bottom:4px; }
+.agentStats dt { color:var(--text-muted); }
+.agentStats dd { font-weight:600; color:var(--text-primary); font-family:var(--font-mono); }
+.model { color:var(--data) !important; font-size:var(--text-xs) !important; }
+.citTitle { font-size:var(--text-h3); font-weight:600; line-height:var(--leading-h3); letter-spacing:var(--tracking-h3); color:var(--text-primary); display:flex; align-items:center; gap:var(--space-2); margin-bottom:var(--space-4); }
+.citCount { font-size:var(--text-sm); font-family:var(--font-mono); background:var(--bg-elevated); color:var(--text-secondary); padding:2px 8px; border-radius:var(--radius-full); border:1px solid var(--border-default); }
+.citList { display:flex; flex-direction:column; gap:var(--space-3); }

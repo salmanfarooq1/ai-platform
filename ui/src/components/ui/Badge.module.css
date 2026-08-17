@@ -1,0 +1,40 @@
+/* Badge.module.css */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  border: 1px solid transparent;
+  /* Transition covers background, color, and transform */
+  transition:
+    background    var(--transition-fast),
+    color         var(--transition-fast),
+    transform     var(--press-duration) var(--press-easing);
+}
+
+/* ── Sizes ── */
+.sm { font-size:var(--text-micro); line-height:var(--leading-micro); padding:2px 7px; }
+.md { font-size:var(--text-xs);    line-height:var(--leading-xs);    padding:3px 10px; }
+
+/* ── Variants ── */
+.success { background:var(--badge-hit-bg);  color:var(--badge-hit-text); }
+.danger  { background:var(--danger-subtle); color:var(--red-400); }
+.warning { background:var(--warning-subtle);color:var(--yellow-400); }
+.info    { background:var(--data-subtle);   color:var(--data); }
+.accent  { background:var(--accent-subtle); color:var(--accent); }
+.neutral { background:var(--badge-miss-bg); color:var(--badge-miss-text); }
+
+/* ── Press feedback (Apple §1) ── */
+/* Option A: explicit .interactive modifier prop — Badge authors opt-in */
+.badge.interactive {
+  cursor: pointer;
+  will-change: transform;
+}
+.badge.interactive:active { transform: scale(0.94); }
+
+/* Option B: automatic — badge inside a button or anchor inherits press context */
+a:active .badge,
+button:active .badge { transform: scale(0.96); }

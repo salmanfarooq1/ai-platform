@@ -1,0 +1,63 @@
+/* Sidebar.module.css */
+
+/* ── Glass material (Apple §12) ── */
+/* Solid fallback */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) 0;
+  overflow-y: auto;
+  /* Sidebar is already pinned by the flex layout — no sticky needed */
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .sidebar {
+    background: var(--surface-glass);
+    -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+    backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+    /* Right edge: light catching the glass (Apple §12 — "bright top edge") */
+    border-right: 1px solid var(--surface-glass-border);
+    box-shadow: 1px 0 0 var(--border-subtle);
+  }
+}
+
+.logo { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-3) var(--space-5); margin-bottom:var(--space-4); border-bottom:1px solid var(--border-subtle); }
+.logoMark { font-size:var(--text-ui); font-weight:800; color:var(--accent); background:var(--accent-subtle); border:1px solid var(--border-accent); padding:4px 8px; border-radius:var(--radius-sm); letter-spacing:var(--tracking-micro); }
+.logoText { font-size:var(--text-body); font-weight:600; line-height:var(--leading-body); color:var(--text-primary); }
+.navList { list-style:none; flex:1; padding:0 var(--space-3); display:flex; flex-direction:column; gap:var(--space-1); }
+
+/* ── Nav item: hover + press feedback (Apple §1 — respond on pointer-down) ── */
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  letter-spacing: var(--tracking-ui);
+  font-weight: 500;
+  border: 1px solid transparent;
+  /* Transition covers color, background, border, and transform for press */
+  transition:
+    color       var(--transition-fast),
+    background  var(--transition-fast),
+    border-color var(--transition-fast),
+    transform   var(--press-duration) var(--press-easing);
+  /* Hint will-change to compositor for transform-only paint */
+  will-change: transform;
+}
+.navItem:hover { color:var(--text-primary); background:var(--bg-elevated); }
+/* Pointer-down press: critically damped scale, no overshoot (Apple §4) */
+.navItem:active { transform:scale(var(--press-scale)); }
+.navItem.active { color:var(--accent); background:var(--accent-subtle); border-color:var(--border-accent); }
+
+.icon { font-size:1rem; width:20px; text-align:center; flex-shrink:0; }
+.footer { padding:var(--space-4) var(--space-5); border-top:1px solid var(--border-subtle); margin-top:auto; }
+.version { font-size:var(--text-xs); line-height:var(--leading-xs); color:var(--text-disabled); font-family:var(--font-mono); }

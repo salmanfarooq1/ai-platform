@@ -1,0 +1,10 @@
+/* IngestResult.module.css */
+.statusRow { display:flex; align-items:center; gap:var(--space-3); margin-bottom:var(--space-5); }
+.desc { font-size:0.875rem; color:var(--text-secondary); }
+.metrics { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:var(--space-4); }
+.metric { display:flex; flex-direction:column; gap:4px; padding:var(--space-3); background:var(--bg-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); }
+.metric dt { font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); }
+.metric dd { font-size:0.9375rem; font-weight:600; color:var(--text-primary); font-family:var(--font-mono); word-break:break-all; }
+.highlight { color:var(--accent) !important; font-size:1.1rem !important; }
+.hashRow { grid-column:1 / -1; }
+.hash { font-size:0.8125rem !important; color:var(--data) !important; }
