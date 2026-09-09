@@ -30,7 +30,16 @@ async def create_pool() -> Pool:
         dsn = DATABASE_CONFIG["url"],
         min_size = max(1, pool_size // 4),   # keep 25% of max alive when idle
         max_size = pool_size,                # ceiling on simultaneous connections
-        init = init_connection               # called on every new connection the pool creates
+        init = init_connection,              # called on every new connection the pool creates
+        # Neon's demo-mode DATABASE_URL points at its PgBouncer pooler
+        # (transaction mode). Under transaction pooling, asyncpg's server-side
+        # prepared statements can get bound on one physical connection and then
+        # reused against a different one on the next query, raising
+        # "prepared statement ... does not exist". Disabling the statement
+        # cache makes every query a fresh simple/extended-protocol round trip
+        # instead, which is safe under pooling. Harmless against a
+        # non-pooled Postgres too (local/prod), just a small perf cost.
+        statement_cache_size = 0,
     )
 
     # Log total connection budget so multi-worker deployments are visible.
