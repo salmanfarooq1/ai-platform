@@ -4,7 +4,7 @@ Production grade AI backend platform built around memory-efficient ingestion, as
 
 Core idea: most AI pipelines fail at scale not because of the model, but because of poor infrastructure - loading files eagerly into memory, firing unbounded concurrent requests, or writing everything to disk at once. This project builds the infrastructure layer that handles all of that correctly.
 
-This is a 12-week structured learning project. Each lab isolates one concept, breaks it, measures it, fixes it, then integrates it into the platform. Code in `core/` is production-ready - scripts in `scripts/` show how it was built and tested.
+Built incrementally over 12 phases, roughly one per week. Each lab isolates one concept, breaks it, measures it, fixes it, then integrates it into the platform. Code in `core/` is production-ready - scripts in `scripts/` show how it was built and tested.
 
 ---
 
@@ -54,8 +54,8 @@ core/
 │   ├── processors.py          # text cleaning generator
 │   └── embedders.py           # embedding generator (768-dim)
 └── pipeline/
-    ├── async_ingest.py        # HTTP-based async ingestion (Week 2)
-    └── db_ingest.py           # database-backed ingestion (Week 3)
+    ├── async_ingest.py        # HTTP-based async ingestion
+    └── db_ingest.py           # database-backed ingestion
 ```
 
 ---
@@ -76,122 +76,122 @@ core/
 | 4.3 | Event loop responsiveness | Naive: 545ms avg delay → Hybrid: 2.58ms avg delay (2.53x pipeline speedup) |
 | 6.2 | Semantic vs string cache hit rate | 41% → 74% on 100-query test set |
 | 6.5 | End-to-end cost reduction via cache | ~60% cost reduction |
-| 7.3 | Vector vs BM25 vs Hybrid precision | 0.17 / 0.16 / 0.17 Precision@5 — corpus ceiling is 0.20 |
+| 7.3 | Vector vs BM25 vs Hybrid precision | 0.17 / 0.16 / 0.17 Precision@5 (corpus ceiling is 0.20) |
 | 7.5 | Reranker Contextual Precision & OOD Refusal | +35.5% Precision lift (0.450 → 0.610), 0.800 Recall, 100% OOD Refusal |
-| 9.1 | Multi-stage Docker build | 2.5GB → ~600MB image size |
+| 9.1 | Multi-stage Docker build | 2.5GB → 600MB (with reranker) / 119MB (demo, no torch) |
 | 9.2 | Token budget enforcement | 500K tokens/day/namespace, auto-reset at midnight UTC |
 
 ---
 
-## Week 1: Memory-Efficient Ingestion
+## 1. Memory-Efficient Ingestion
 
-### Lab 1.1 — Memory Experiments
+### Lab 1.1: Memory Experiments
 Proved lazy evaluation (`range`) saves massive memory vs eager loading (`list`). This prevents OOM errors in pipelines.
 
-### Lab 1.2 — Memory Leaks
+### Lab 1.2: Memory Leaks
 Learned how circular references bypass Python's reference counting and how garbage collection fixes leaks.
 
-### Lab 1.3 — File Chunk Iterator
+### Lab 1.3: File Chunk Iterator
 Built production iterator/context manager to process huge files with O(1) memory usage.
 
-### Lab 1.4 — Generator Pipeline
+### Lab 1.4: Generator Pipeline
 Built generator pipeline for massive datasets with constant memory usage.
 
-### Lab 1.5 — Integration Test
-Integrated all Week 1 modules and tested end-to-end.
+### Lab 1.5: Integration Test
+Integrated all ingestion modules above and tested end-to-end.
 
 ---
 
-## Week 2: Async HTTP & Concurrency
+## 2. Async HTTP & Concurrency
 
-### Lab 2.1 — Event Loop Deep Dive
+### Lab 2.1: Event Loop Deep Dive
 Explored asyncio event loop, proved it's single-threaded, understood how it handles concurrency without threads.
 
-### Lab 2.2 — Concurrency Trap
+### Lab 2.2: Concurrency Trap
 Found what happens when you fire too many concurrent requests. Key finding: over-concurrency kills performance.
 
-### Lab 2.3 — Controlled Concurrency
+### Lab 2.3: Controlled Concurrency
 In Lab 2.2, 1000 unbounded requests = 57% success rate. With `Semaphore(500)` = 100% success at same throughput (95 req/s vs 90 req/s). Controlled concurrency wins.
 
-### Lab 2.4 — Production HTTP Client
+### Lab 2.4: Production HTTP Client
 Built `AsyncHttpClient` - handles thousands of API calls with automatic retries, semaphore rate limiting, and error handling.
 
-### Lab 2.5 — Integration Pipeline
-Combined Week 1 + Week 2 into full async pipeline: read → clean → batch → embed → store. Generator chain keeps memory constant regardless of file size. Concurrency drives throughput, memory scales with concurrency not file size.
+### Lab 2.5: Integration Pipeline
+Combined ingestion and HTTP layers into a full async pipeline: read → clean → batch → embed → store. Generator chain keeps memory constant regardless of file size. Concurrency drives throughput, memory scales with concurrency not file size.
 
 ---
 
-## Week 3: PostgreSQL + pgvector
+## 3. PostgreSQL + pgvector
 
-### Lab 3.1 — Database Setup
+### Lab 3.1: Database Setup
 Set up PostgreSQL + pgvector via Docker. Connected with psycopg2 (sync) first, then asyncpg (async). Registered pgvector extension and created vector(768) schema.
 
-### Lab 3.2 — Row-by-Row vs Bulk Insert
+### Lab 3.2: Row-by-Row vs Bulk Insert
 Benchmarked three psycopg2 approaches. `executemany` is a lie (1.03x). `execute_batch` gives 2.27x. Both still too slow for production.
 
-### Lab 3.3 — asyncpg COPY
-asyncpg's `copy_records_to_table()` hit 102,106 rows/s — a 226x speedup over row-by-row. COPY bypasses SQL parsing entirely.
+### Lab 3.3: asyncpg COPY
+asyncpg's `copy_records_to_table()` hit 102,106 rows/s, a 226x speedup over row-by-row. COPY bypasses SQL parsing entirely.
 
-### Lab 3.4 — Connection Pooling + Integration
+### Lab 3.4: Connection Pooling + Integration
 Built `asyncpg.create_pool()` with `init=register_vector`. Pool concurrent (0.63s) beats fresh-connect-per-batch (0.99s). Integrated everything into `db_ingest.py`: read → clean → embed → COPY to postgres. 1,297 chunks/sec, all rows verified in DB.
 
 ---
-## Week 4: GIL, Multiprocessing & Hybrid Concurrency
+## 4. GIL, Multiprocessing & Hybrid Concurrency
 
-### Lab 4.1 — GIL Proof
+### Lab 4.1: GIL Proof
 
 Proved the GIL prevents parallel execution for CPU-bound threads. Four threads running sum(i*i for i in range(5M)) takes the same time as sequential. Four processes take ~4x less. The fix for CPU-bound work is ProcessPoolExecutor, not ThreadPoolExecutor.
 
-### Lab 4.2 — Serialization Overhead
+### Lab 4.2: Serialization Overhead
 
-Every process boundary has a pickle cost. Found the break-even: sequential wins below ~1MB-10MB of data per task, processes win above ~10MB. Small tasks (DB writes, tiny cleanups) should never use multiprocessing — the overhead dominates. Large tasks (embedding batches, chunking large docs) benefit from it.
+Every process boundary has a pickle cost. Found the break-even: sequential wins below ~1MB-10MB of data per task, processes win above ~10MB. Small tasks (DB writes, tiny cleanups) should never use multiprocessing, the overhead dominates. Large tasks (embedding batches, chunking large docs) benefit from it.
 
-### Lab 4.3 — Hybrid Async + Multiprocessing
+### Lab 4.3: Hybrid Async + Multiprocessing
 
-Proved that CPU work called directly inside an async coroutine blocks the entire event loop — average 545ms delay, nothing else can run. run_in_executor() offloads CPU work to a process pool while immediately returning control to the event loop. Result: 2.58ms average delay, 2.53x pipeline speedup. This is the production pattern for core/pipeline/.
+Proved that CPU work called directly inside an async coroutine blocks the entire event loop: average 545ms delay, nothing else can run. run_in_executor() offloads CPU work to a process pool while immediately returning control to the event loop. Result: 2.58ms average delay, 2.53x pipeline speedup. This is the production pattern for core/pipeline/.
 
-## Week 5: RAG API & Structured Outputs
+## 5. RAG API & Structured Outputs
 
-### Lab 5.1 — The FastAPI LIFO Onion
+### Lab 5.1: The FastAPI LIFO Onion
 Built the API layer with robust middlewares. Proved that FastAPI mounts middleware in Last-In-First-Out (LIFO) order, and fixed our `FinOpsMiddleware` by strictly ordering it after the Request ID generation.
 
-### Lab 5.2 — LiteLLM Abstraction
+### Lab 5.2: LiteLLM Abstraction
 Replaced raw provider SDKs with LiteLLM. Moving between local Ollama and production GPT-4o is now a single config change without rewriting the core `acompletion` logic.
 
-### Lab 5.3 — Structured Pydantic Outputs
+### Lab 5.3: Structured Pydantic Outputs
 Forced the LLM into returning a strict `GeneratedAnswer` schema to eliminate regex parsing. Eradicated silent database corruption by catching hallucinations loudly at the Pydantic validation boundary.
 
-### Lab 5.4 — Math & Mislabeled Files
+### Lab 5.4: Math & Mislabeled Files
 Updated the vector search to use Cosine Distance (`<=>`) for accurate similarity scoring (`1.0 - distance`), and bulletproofed the chunker routing against mislabeled or unknown file extensions.
 
 ---
 
-## Week 6: Caching & Cost Optimization
+## 6. Caching & Cost Optimization
 
-### Lab 6.1 — Cache-Aside with Redis
+### Lab 6.1: Cache-Aside with Redis
 Built exact-match Redis caching: hash the query + namespace + top_k → check Redis first, only hit the DB and LLM on a miss. Cache hit returns in ~1ms vs ~800ms full pipeline.
 
-### Lab 6.2 — Semantic Caching
+### Lab 6.2: Semantic Caching
 Exact match only catches identical queries. Added a Redis HNSW vector index: embed the query, find the nearest cached query by cosine similarity, return the cached answer if similarity > 0.95. Hit rate went from 41% to 74% on the test set. The key insight: you need the embedding for vector search anyway, so the semantic cache check costs nothing extra.
 
-### Lab 6.3 — Model Routing by Query Complexity
+### Lab 6.3: Model Routing by Query Complexity
 Not every query needs the most expensive model. A word count + keyword heuristic routes short factual queries to the cheap model and longer analytical queries to the full model. Measured cost per 100 mixed queries before and after.
 
-### Lab 6.4 & 6.5 — Integration & Benchmark
+### Lab 6.4 & 6.5: Integration & Benchmark
 Wired all three layers (exact cache → semantic cache → full pipeline) into the search route. Dual-layer cache reduces LLM calls by ~60% on a realistic query distribution. Benchmark committed to `benchmarks/lab_6.5_cache_benchmarks.json`.
 
 ---
 
-## Week 7: Hybrid RAG & Evaluation
+## 7. Hybrid RAG & Evaluation
 
-### Lab 7.1 — Vector Search Failure Cases
-Documented 5 concrete failure modes of pure vector search on the legal compliance corpus. Article numbers drift (searching "Article 5" returns "Article 6" content). Rare identifiers like section numbers compress into generic topics. Negation is invisible to cosine similarity. These aren't theoretical — all five were reproduced with actual queries against the real database.
+### Lab 7.1: Vector Search Failure Cases
+Documented 5 concrete failure modes of pure vector search on the legal compliance corpus. Article numbers drift (searching "Article 5" returns "Article 6" content). Rare identifiers like section numbers compress into generic topics. Negation is invisible to cosine similarity. These aren't theoretical: all five were reproduced with actual queries against the real database.
 
-### Lab 7.2 — FTS Index Migration
+### Lab 7.2: FTS Index Migration
 Added a `tsvector` full-text search column to the documents table and a GIN index. Migrated the schema and verified BM25 scoring works via `ts_rank()`.
 
-### Lab 7.3 — Hybrid Retrieval (RRF)
-Built the hybrid retriever: run BM25 and vector search in parallel, merge by Reciprocal Rank Fusion (k=60). Neither retriever dominates — documents scoring well in either list get a boost. Also discovered the AND/OR threshold problem: PostgreSQL's `plainto_tsquery` uses AND by default, which returns empty results for long natural language queries. Fixed with `BM25_OR_THRESHOLD = 5` — queries under 5 words use AND (precision mode), 5+ words rewrite to OR (recall mode).
+### Lab 7.3: Hybrid Retrieval (RRF)
+Built the hybrid retriever: run BM25 and vector search in parallel, merge by Reciprocal Rank Fusion (k=60). Neither retriever dominates, documents scoring well in either list get a boost. Also discovered the AND/OR threshold problem: PostgreSQL's `plainto_tsquery` uses AND by default, which returns empty results for long natural language queries. Fixed with `BM25_OR_THRESHOLD = 5`: queries under 5 words use AND (precision mode), 5+ words rewrite to OR (recall mode).
 
 Precision@5 results across 20 manually labeled queries (corpus ceiling is 0.20 = 1 relevant chunk per query in top 5):
 
@@ -199,12 +199,12 @@ Precision@5 results across 20 manually labeled queries (corpus ceiling is 0.20 =
 |---|---|---|
 | Vector only | 0.17 | Fails on exact terms, article numbers |
 | BM25 only | 0.16 | Fails on semantic paraphrases |
-| Hybrid RRF | 0.17 | Captures both — 85% hit rate at the ceiling |
+| Hybrid RRF | 0.17 | Captures both, 85% hit rate at the ceiling |
 
-### Lab 7.5 — Cross-Encoder Reranking + Robust DeepEval v5 Benchmark
+### Lab 7.5: Cross-Encoder Reranking + Robust DeepEval v5 Benchmark
 Added a two-stage pipeline: hybrid RRF produces up to 20 candidates, cross-encoder (`ms-marco-MiniLM-L-6-v2`) re-scores them by reading query+chunk together and picks top 5.
 
-Before enabling this in the async API, ran an event-loop safety check (Lab C.5): confirmed that when reranking is offloaded via `run_cpu_bound()`, the event loop heartbeat max gap is 11ms — well under the 20ms safe threshold. `rerank=True` is now the production default.
+Before enabling this in the async API, ran an event-loop safety check (Lab C.5): confirmed that when reranking is offloaded via `run_cpu_bound()`, the event loop heartbeat max gap is 11ms, well under the 20ms safe threshold. `rerank=True` is now the production default.
 
 Evaluation was executed using `scripts/lab_7.5_deep_eval_v5.py` with `gemini-3.5-flash` for generation and `gemini-2.5-pro` for judging across dual-namespaces (`legal` GDPR/CCPA + `kyc_aml` 31 CFR 1010) and isolated OOD guardrail triplets:
 
@@ -223,32 +223,32 @@ Evaluation was executed using `scripts/lab_7.5_deep_eval_v5.py` with `gemini-3.5
 
 ---
 
-## Week 8: Governance, Data Ops, and Testing Foundations
+## 8. Governance, Data Ops, and Testing Foundations
 
-### Lab 8.1 — Document Lifecycle & Hashing
+### Lab 8.1: Document Lifecycle & Hashing
 Built a document registry using a composite primary key `(document_id, namespace)`. Implemented SHA-256 payload hashing to prevent duplicate embedding costs and cleanly handle document updates by deleting old chunks before re-ingestion.
 
-### Lab 8.2 — API Rate Limiting
+### Lab 8.2: API Rate Limiting
 Implemented an LIFO `RateLimitMiddleware` using Redis fixed-window counters (`INCR` + `EXPIRE`). Protected the application layer from unbounded costs and abuse per namespace.
 
-### Lab 8.3 — Input & Output Guardrails
+### Lab 8.3: Input & Output Guardrails
 Wired up regex-based input validation to block prompt injection (e.g., "ignore instructions") and applied strict query length boundaries. Added an output guardrail based on retrieval `rrf_score` to flag out-of-domain answers below the `CONFIDENCE_FLOOR`.
 
-### Lab 8.4 — Pytest 3-Tier Architecture
+### Lab 8.4: Pytest 3-Tier Architecture
 Established a production-grade testing foundation. Configured `pytest-asyncio` and `pytest-cov`, and used `pytest_collection_modifyitems` to dynamically auto-tag tests as `unit`, `integration`, or `e2e` based on their directory structure. All 39 unit tests pass with >90% coverage on core services.
 
 ---
 
-## Week 9: Production Deployment, CI, Guardrails & Governance
+## 9. Production Deployment, CI, Guardrails & Governance
 
 ### Containerization
-Built a multi-stage `Dockerfile` (`python:3.11-slim-bookworm` builder + runtime). Builder installs Poetry and all dependencies; runtime copies only the virtualenv and app code. Image size: ~600MB.
+Multi-stage `Dockerfile` (`python:3.11-slim-bookworm` builder + runtime). Builder installs Poetry and all dependencies; runtime copies only the virtualenv and app code. An `INCLUDE_RERANK` build arg controls whether `sentence-transformers`/torch ship in the image: false for the 512MB demo tier (119MB image, 240MB steady-state RSS), true for a prod build with reranking enabled. See Decision 20 in `ARCHITECTURE.md`.
 
 ### Production Docker Compose
 `docker-compose.prod.yml` runs API + PostgreSQL (pgvector) + Redis stack with health check dependencies (`pg_isready`, `redis-cli ping`) and automatic schema initialization via `docker-entrypoint-initdb.d/`.
 
-### Koyeb & Cloud Deployment Setup
-Configured deployment safeguards for 512MB RAM free instances: `FEATURES["reranker_enabled"] = MODE != "demo"` (disables cross-encoder reranker in demo mode to prevent memory OOM crashes while maintaining hybrid RRF search). Documented CLI secrets setup (`GROQ_API_KEY`, `DATABASE_URL`, `REDIS_URL`).
+### Free-Tier Cloud Deployment
+`FEATURES["reranker_enabled"] = MODE != "demo"` disables the cross-encoder in demo mode to stay inside 512MB RAM while keeping hybrid RRF search. Demo mode's embedding model is `gemini/gemini-embedding-001` (truncated to 768 dims), not the local `nomic-embed-text` default, since no cloud free tier runs an Ollama sidecar. Deployed via a Render Blueprint (`render.yaml`); see `docs/render-deployment.md` for the full runbook and Decisions 21-23 in `ARCHITECTURE.md` for why.
 
 ### Token Budget Enforcement
 Built `TokenBudgetMiddleware` backed by a Redis counter (`budget:{namespace}:{date}`). Evaluated at the middleware boundary (0.1ms latency, $0.00 cost when budget is exceeded). Counter expires after 25 hours (automatic midnight UTC reset).
@@ -258,7 +258,7 @@ Expanded `/health` endpoint with active probes for database (`SELECT 1`), Redis 
 
 ---
 
-## Week 10: LangGraph Agent
+## 10. LangGraph Agent
 
 ### Agent Architecture
 A compliance research agent using LangGraph: one reasoning/retrieval role with two tools:
@@ -279,7 +279,7 @@ Every agent answer includes citations, a confidence score, the model used, verif
 
 ---
 
-## Week 11: MCP Server & Cost Tracking
+## 11. MCP Server & Cost Tracking
 
 ### MCP Integration
 The platform now speaks the Model Context Protocol (MCP), allowing external AI clients (Claude Desktop, Cursor, VS Code) to discover and invoke our RAG tools programmatically over SSE transport.
@@ -300,7 +300,7 @@ A `usage_log` table in Postgres stores one row per LLM-consuming request. The Fi
 
 ---
 
-## Week 12: Production Hardening
+## 12. Production Hardening
 
 ### What Changed
 - Fixed invalid Postgres expression index on `usage_log`
