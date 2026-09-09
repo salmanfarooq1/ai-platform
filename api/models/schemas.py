@@ -58,6 +58,7 @@ class HealthResponse(BaseModel):
     status: str                  # "ok" or "degraded"
     db: str                      # "ok" or "error: <reason>"
     redis: str                   # "ok" or "error: <reason>"
+    embedding: str = "unknown"   # "ok" or "error: <reason>"
     version: str
     mode: str = ""               # "local", "demo", or "prod"
     uptime_seconds: int = 0

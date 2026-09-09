@@ -5,7 +5,7 @@ from fastapi import APIRouter, Request
 
 from api.models.schemas import HealthResponse
 from api.services.cache import redis_health
-from config import LLM_CONFIG, MODE
+from config import MODE
 
 router = APIRouter()
 _start_time = time.time()
@@ -26,12 +26,12 @@ _EMBED_COLD_START_RETRY_DELAY = 1.0
 
 
 async def _probe_once() -> str:
-    import litellm
-    resp = await asyncio.wait_for(
-        litellm.aembedding(model=LLM_CONFIG["embedding_model"], input=["health check"]),
+    from core.clients.embeddings import aembed_texts
+    vectors = await asyncio.wait_for(
+        aembed_texts(["health check"]),
         timeout=_EMBED_PROBE_TIMEOUT,
     )
-    return "ok" if resp.data else "error: empty response"
+    return "ok" if vectors else "error: empty response"
 
 
 async def _check_embedding() -> str:
@@ -80,6 +80,7 @@ async def health_check(request: Request) -> HealthResponse:
         status="ok" if all_ok else "degraded",
         db=db_status,
         redis=redis_status,
+        embedding=embed_status,
         version=request.app.version,
         mode=MODE,
         uptime_seconds=int(time.time() - _start_time),
