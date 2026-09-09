@@ -7,9 +7,9 @@ Called by the /search route and by LangGraph agents.
 import asyncio
 import json
 from dataclasses import dataclass
+from typing import Any
 
 from asyncpg import Pool
-from sentence_transformers import CrossEncoder
 
 import config
 from core.processing.cpu_offload import run_cpu_bound
@@ -159,9 +159,13 @@ def rrf_merge(
 
     return merged
 
-_cross_encoder: CrossEncoder | None = None
+# Typed as Any rather than CrossEncoder: sentence-transformers pulls in torch
+# (~2GB installed, ~300MB resident just to import), which does not fit the
+# 512MB demo-tier memory budget. It is not installed in the production image
+# and is imported lazily below, so it must not be referenced at module scope.
+_cross_encoder: Any = None
 
-def get_cross_encoder() -> CrossEncoder:
+def get_cross_encoder() -> Any:
     """
     Module-level singleton — loads the model once per process.
 
@@ -177,6 +181,11 @@ def get_cross_encoder() -> CrossEncoder:
     """
     global _cross_encoder
     if _cross_encoder is None:
+        # Imported here, not at module scope, so that deployments with
+        # FEATURES["reranker_enabled"] = False never pay the torch import cost
+        # and can ship an image without sentence-transformers installed.
+        from sentence_transformers import CrossEncoder
+
         _cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
     return _cross_encoder
 

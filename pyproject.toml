@@ -9,7 +9,6 @@ readme = "README.md"
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "aiohttp (>=3.13.3,<4.0.0)",
-    "matplotlib (>=3.10.8,<4.0.0)",
     "numpy (>=2.4.2,<3.0.0)",
     "psycopg2-binary (>=2.9.11,<3.0.0)",
     "asyncpg (>=0.31.0,<0.32.0)",
@@ -20,8 +19,6 @@ dependencies = [
     "python-multipart (>=0.0.32,<0.0.33)",
     "litellm (>=1.89.2,<2.0.0)",
     "redis[hiredis] (>=8.0.1,<9.0.0)",
-    "sentence-transformers (>=5.6.0,<6.0.0)",
-    "deepeval (>=4.0.8,<5.0.0)",
     "groq (>=1.5.0,<2.0.0)",
     "requests (>=2.34.2,<3.0.0)",
     "beautifulsoup4 (>=4.15.0,<5.0.0)",
@@ -37,6 +34,21 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
+# Kept out of [project.dependencies] so that `poetry install --only main` - what
+# the Dockerfile runs - produces an image without torch. sentence-transformers
+# is only reached through the cross-encoder reranker, which FEATURES
+# ["reranker_enabled"] disables in demo mode to stay inside 512MB of RAM.
+rerank = [
+    "sentence-transformers (>=5.6.0,<6.0.0)",
+]
+
+# Only imported by scripts/ (labs, corpus building, eval plots), which the
+# production image does not copy.
+labs = [
+    "matplotlib (>=3.10.8,<4.0.0)",
+    "deepeval (>=4.0.8,<5.0.0)",
+]
+
 dev = [
     "pytest (>=9.1.1,<10.0.0)",
     "pytest-asyncio (>=1.4.0,<2.0.0)",

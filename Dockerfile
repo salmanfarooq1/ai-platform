@@ -28,7 +28,15 @@ COPY pyproject.toml poetry.lock ./
 
 # Install runtime dependencies only (no dev/test deps in production image).
 # --no-root: don't install the project itself yet (we haven't copied the code).
-RUN poetry install --only main --no-root
+# INCLUDE_RERANK=true pulls in sentence-transformers/torch for the cross-encoder
+# reranker (needed when MODE=prod). Leave it false for demo/free-tier builds,
+# where FEATURES["reranker_enabled"] is off anyway and the extra ~3GB is dead weight.
+ARG INCLUDE_RERANK=false
+RUN if [ "$INCLUDE_RERANK" = "true" ]; then \
+        poetry install --only main,rerank --no-root; \
+    else \
+        poetry install --only main --no-root; \
+    fi
 
 # Now copy the application code. This layer changes on every code change,
 # but the dependency layer above is cached.
@@ -45,7 +53,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Copy the virtualenv from the builder stage.
-# This contains all installed packages (fastapi, litellm, sentence-transformers, etc.)
+# This contains all installed packages (fastapi, litellm, and sentence-transformers
+# if INCLUDE_RERANK=true was set on the builder stage above).
 COPY --from=builder /app/.venv .venv
 
 # Copy application code
