@@ -1,0 +1,33 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Deploys api/main.py (via Dockerfile) as a free-tier web service.
+# Free instances are 512MB RAM / 0.1 CPU and spin down after 15 min idle,
+# cold-starting on the next request — expected on this plan, not a bug.
+#
+# Usage: Render dashboard -> New -> Blueprint -> connect this repo. Render
+# reads this file, creates the service, and prompts for every envVar marked
+# `sync: false` (masked input, stored as a Render secret, never committed).
+services:
+  - type: web
+    name: ai-platform
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: MODE
+        value: demo
+      # Single worker: FEATURES["reranker_enabled"] is already off in demo
+      # mode, but the DB pool itself is sized (config.py DATABASE_CONFIG
+      # pool_size=5) assuming one worker process on a 512MB instance.
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
