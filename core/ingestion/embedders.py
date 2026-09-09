@@ -1,6 +1,4 @@
-import litellm
-
-from config import LLM_CONFIG
+from core.clients.embeddings import aembed_texts
 from core.ingestion.chunkers import ChunkRecord
 
 
@@ -14,16 +12,11 @@ async def embed_chunks(chunks: list[ChunkRecord]) -> list[ChunkRecord]:
 
     texts = [chunk.content for chunk in chunks]
 
-    # Dynamically grab the model (e.g., ollama/nomic-embed-text or azure/...)
-    target_model = LLM_CONFIG["embedding_model"]
+    # Single async batch request. The model and any provider-specific width
+    # handling live in core.clients.embeddings.
+    embeddings = await aembed_texts(texts)
 
-    # Make a single async batch request
-    response = await litellm.aembedding(
-        model=target_model,
-        input=texts
-    )
-
-    for i, data in enumerate(response.data):
-        chunks[i].embedding = data["embedding"]
+    for chunk, embedding in zip(chunks, embeddings):
+        chunk.embedding = embedding
 
     return chunks

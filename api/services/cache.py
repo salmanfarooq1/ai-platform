@@ -4,12 +4,12 @@ import logging
 import time
 from uuid import uuid4
 
-import litellm
 import numpy as np
 import redis.asyncio as redis
 from redis.exceptions import ResponseError
 
-from config import CACHE_CONFIG, EMBEDDING_DIM, LLM_CONFIG
+from config import CACHE_CONFIG, EMBEDDING_DIM
+from core.clients.embeddings import aembed_texts
 
 logger = logging.getLogger("api.cache")
 
@@ -167,12 +167,9 @@ async def create_semantic_cache_index() -> None:
         raise
 
 async def embed_query(query: str) -> list[float]:
-    """Embed a single query string using LiteLLM."""
-    response = await litellm.aembedding(
-        model=LLM_CONFIG["embedding_model"],
-        input=[query]
-    )
-    return response.data[0]["embedding"]
+    """Embed a single query string."""
+    vectors = await aembed_texts([query])
+    return vectors[0]
 
 def _to_bytes(embedding: list[float]) -> bytes:
     """Convert list[float] to FLOAT32 bytes for Redis vector storage."""

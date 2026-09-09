@@ -68,12 +68,24 @@ LLM_CONFIG = {
         "prod":  "azure/gpt-4o",
     }.get(MODE, "groq/llama-3.3-70b-versatile")),
 
-    # Note: Groq has no embedding API (Ollama serves embeddings for both local and demo).
-    # CAVEAT: In demo mode, if Ollama goes down, there is no embedding fallback.
-    # The fallbacks list below only covers LLM completion, not embeddings.
+    # Note: Groq has no embedding API, so embeddings come from a separate provider.
+    # local -> Ollama on the host (nomic-embed-text, 768 native).
+    # demo  -> Gemini gemini-embedding-001 (3072 native, truncated to 768).
+    #          Demo runs on a 512MB Koyeb instance with no Ollama sidecar to
+    #          talk to, so the embedding provider has to be a hosted API.
+    #          Requires GEMINI_API_KEY. Note that text-embedding-004 is retired
+    #          and 404s on current keys.
+    # CAVEAT: there is no embedding fallback in any mode. The fallbacks list
+    # below only covers LLM completion, not embeddings.
+    #
+    # Every mode ends up at EMBEDDING_DIM (768) to match the VECTOR(768) column
+    # in core/database/schema.sql. Where the provider is wider than that,
+    # core/clients/embeddings.py requests the narrower width and renormalizes.
+    # Switching to a provider that cannot emit 768 means a schema change and a
+    # full re-ingest.
     "embedding_model": os.getenv("EMBED_MODEL", {
         "local": "ollama/nomic-embed-text",
-        "demo":  "ollama/nomic-embed-text",
+        "demo":  "gemini/gemini-embedding-001",
         "prod":  "azure/text-embedding-3-small",
     }.get(MODE, "ollama/nomic-embed-text")),
 
