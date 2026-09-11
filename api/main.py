@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -61,6 +62,7 @@ app.add_middleware(
         "http://localhost:5173",  # Vite dev server
         "http://localhost:4173",  # Vite preview
         "http://localhost:3000",  # alternative dev port
+        *([os.environ["FRONTEND_URL"]] if os.environ.get("FRONTEND_URL") else []),
     ],
     allow_credentials=True,
     allow_methods=["*"],
