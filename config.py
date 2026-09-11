@@ -63,10 +63,10 @@ MODE = os.getenv("MODE", "local")
 
 LLM_CONFIG = {
     "model": os.getenv("LLM_MODEL", {
-        "local": "gemini/gemini-2.5-flash-lite",
-        "demo":  "gemini/gemini-2.5-flash-lite",
+        "local": "gemini/gemini-3.5-flash-lite",
+        "demo":  "gemini/gemini-3.5-flash-lite",
         "prod":  "azure/gpt-4o",
-    }.get(MODE, "gemini/gemini-2.5-flash-lite")),
+    }.get(MODE, "gemini/gemini-3.5-flash-lite")),
 
     # Note: Groq has no embedding API, so embeddings come from a separate provider.
     # local -> Ollama on the host (nomic-embed-text, 768 native).
