@@ -31,3 +31,13 @@ services:
         sync: false
       - key: REDIS_URL
         sync: false
+
+  - type: web
+    name: ai-platform-ui
+    runtime: docker
+    dockerfilePath: ./ui/Dockerfile.ui
+    dockerContext: ./ui
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        value: https://ai-platform-6udm.onrender.com
