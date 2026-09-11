@@ -8,6 +8,15 @@ Built incrementally over 12 phases, roughly one per week. Each lab isolates one 
 
 ---
 
+## Live Demo
+
+- Frontend: https://ai-platform-ui-o2eo.onrender.com
+- API: https://ai-platform-6udm.onrender.com
+
+Runs `MODE=demo` on Render's free tier: reranker disabled (hybrid RRF search only, no cross-encoder stage), completion runs on `gemini/gemini-3.5-flash-lite` rather than Groq, and only the `kyc_aml` namespace is ingested. Free-tier instances spin down after 15 minutes idle, the first request after that can take 30-50s to cold-start.
+
+---
+
 ## Prerequisites
 
 - Python 3.11+
