@@ -39,5 +39,8 @@ services:
     dockerContext: ./ui
     plan: free
     envVars:
+      # Relative, not the backend's absolute URL: nginx.conf proxies /api/*
+      # to the backend server-side, so the browser only ever talks to this
+      # one origin. Keeps this a single public URL instead of two.
       - key: VITE_API_URL
-        value: https://ai-platform-6udm.onrender.com
+        value: /api
