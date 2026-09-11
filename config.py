@@ -63,10 +63,10 @@ MODE = os.getenv("MODE", "local")
 
 LLM_CONFIG = {
     "model": os.getenv("LLM_MODEL", {
-        "local": "groq/llama-3.3-70b-versatile", # For complex reasoning
-        "demo":  "groq/llama-3.3-70b-versatile",
+        "local": "groq/openai/gpt-oss-120b", # For complex reasoning
+        "demo":  "groq/openai/gpt-oss-120b",
         "prod":  "azure/gpt-4o",
-    }.get(MODE, "groq/llama-3.3-70b-versatile")),
+    }.get(MODE, "groq/openai/gpt-oss-120b")),
 
     # Note: Groq has no embedding API, so embeddings come from a separate provider.
     # local -> Ollama on the host (nomic-embed-text, 768 native).
@@ -139,7 +139,6 @@ GUARDRAIL_CONFIG = {
 MODEL_PRICING: dict[str, dict[str, float]] = {
     "azure/gpt-4o":                                        {"input": 2.50,  "output": 10.00},
     "groq/llama-3.1-70b-versatile":                        {"input": 0.59,  "output": 0.79},
-    "groq/llama-3.3-70b-versatile":                            {"input": 0.11,  "output": 0.34},
     # LiteLLM strips the provider prefix (groq/) from model names in usage
     # data, so finops receives "openai/gpt-oss-120b". Alias maps to same rate.
     "openai/gpt-oss-120b":                                 {"input": 0.11,  "output": 0.34},
