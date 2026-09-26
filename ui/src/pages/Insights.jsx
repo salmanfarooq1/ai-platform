@@ -1,30 +1,41 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { getAnalyticsSummary } from '../api/analytics'
 import Card from '../components/ui/Card'
-import styles from './Analytics.module.css'
+import { usePageTitle } from '../hooks/usePageTitle'
+import styles from './Insights.module.css'
 
 const DAYS = [7, 14, 30, 90]
 
-export default function Analytics() {
-  const [days, setDays]         = useState(7)
-  const [summary, setSummary]   = useState(null)
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState(null)
+// Insights: cost, usage, latency and quality over time (BRANDING.md §6, §8).
+export default function Insights() {
+  usePageTitle('Insights')
+  const [days, setDays]       = useState(7)
+  const [summary, setSummary] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState(null)
 
   useEffect(() => {
     let gone = false
     setLoading(true); setError(null)
     getAnalyticsSummary(days)
-      .then(d  => { if (!gone) setSummary(d) })
+      .then(d => { if (!gone) setSummary(d) })
       .catch(e => { if (!gone) setError(e) })
       .finally(() => { if (!gone) setLoading(false) })
     return () => { gone = true }
   }, [days])
 
+  const maxDayCost = useMemo(
+    () => Math.max(1e-9, ...(summary?.by_day ?? []).map(r => r.cost_usd)),
+    [summary]
+  )
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1>Analytics</h1>
+        <div>
+          <h1>Insights</h1>
+          <p>Cost, usage and latency over time.</p>
+        </div>
         <div className={styles.dayPicker} role="group" aria-label="Time window">
           {DAYS.map(d => (
             <button key={d} className={`${styles.dayBtn} ${d === days ? styles.active : ''}`}
@@ -33,20 +44,36 @@ export default function Analytics() {
         </div>
       </header>
 
-      {loading && <p className={styles.info}>Loading analytics…</p>}
+      {loading && <p className={styles.info}>Loading insights…</p>}
       {error && <p className={styles.err} role="alert">{error.message}</p>}
 
       {summary && (
         <>
           <div className={styles.summaryRow}>
-            <Card><dt className={styles.dt}>Total cost</dt><dd className={styles.dd}>${summary.total_cost_usd.toFixed(4)}</dd></Card>
-            <Card><dt className={styles.dt}>Total requests</dt><dd className={styles.dd}>{summary.total_requests.toLocaleString()}</dd></Card>
-            <Card><dt className={styles.dt}>Avg cost / request</dt><dd className={styles.dd}>${summary.avg_cost_per_request.toFixed(6)}</dd></Card>
-            <Card><dt className={styles.dt}>Total tokens</dt><dd className={styles.dd}>{summary.total_tokens.toLocaleString()}</dd></Card>
+            <Card><div className={styles.dt}>Total cost</div><div className={styles.dd}>${summary.total_cost_usd.toFixed(4)}</div></Card>
+            <Card><div className={styles.dt}>Total requests</div><div className={styles.dd}>{summary.total_requests.toLocaleString()}</div></Card>
+            <Card><div className={styles.dt}>Avg cost / request</div><div className={styles.dd}>${summary.avg_cost_per_request.toFixed(6)}</div></Card>
+            <Card><div className={styles.dt}>Total tokens</div><div className={styles.dd}>{summary.total_tokens.toLocaleString()}</div></Card>
           </div>
 
+          {summary.by_day.length > 0 && (
+            <Card title="Cost by day">
+              <div className={styles.chart}>
+                {summary.by_day.map(r => (
+                  <div key={r.date} className={styles.barRow}>
+                    <span className={styles.barLabel}>{r.date}</span>
+                    <div className={styles.barTrack}>
+                      <div className={styles.barFill} style={{ width: `${Math.max(2, (r.cost_usd / maxDayCost) * 100)}%` }} />
+                    </div>
+                    <span className={styles.barVal}>${r.cost_usd.toFixed(4)}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
           <div className={styles.breakdownGrid}>
-            <Card title="By namespace">
+            <Card title="By collection">
               <ul className={styles.list}>
                 {summary.by_namespace.map(r => (
                   <li key={r.namespace} className={styles.row}>

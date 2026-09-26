@@ -1,394 +1,207 @@
 /* src/styles/tokens.css
-   ─────────────────────────────────────────────────────────────────────────────
-   Two-mode design token system.
-   • :root sets the dark-mode palette (default — matches existing appearance).
-   • [data-theme="light"] and @media(prefers-color-scheme:light) set the light
-     palette. Values are authored separately, not simply inverted.
-   • [data-theme="dark"] re-asserts the dark palette so an explicit override
-     always wins over the media query.
-   ─────────────────────────────────────────────────────────────────────────────
+   Verity design tokens — BRANDING.md §4, §5, §8, §10.
+   :root holds light-mode values (the default). Dark values are layered on
+   via @media(prefers-color-scheme:dark) and re-asserted by [data-theme="dark"]
+   so an explicit choice from useTheme always wins over the OS setting.
+   [data-theme="light"] re-asserts light so it wins over a dark OS setting.
 */
 
-/* ── Tier 0: Raw primitives (shared across both modes) ────────────────────── */
 :root {
-  /* ── Font stacks ── */
-  /* Inter first (loaded via Google Fonts), then the system-ui stack the skill
-     recommends as the platform default. -apple-system targets SF Pro on Apple
-     devices. ui-sans-serif is the CSS4 generic for the system UI font. */
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'Fira Code', monospace;
+  /* ── Fonts (§5) ── */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-  /* ── Type scale ── (Apple §15: size-specific tracking + leading)
-     Naming convention:
-       --text-{step}       → font-size
-       --leading-{step}    → line-height   (tight at large, loose at small)
-       --tracking-{step}   → letter-spacing (negative at large, near-0 at small/body,
-                                              slightly positive at micro/label sizes)
-     Steps: display > title > h1 > h2 > h3 > body > ui > sm > xs
-  ── */
+  /* ── Type scale (§5) — tracking/leading are size-specific, never fixed ── */
+  --text-display:      clamp(2.25rem, 4vw, 3.25rem);
+  --leading-display:   1.05;
+  --tracking-display:  -0.025em;
 
-  /* Display — hero / page-level numbers */
-  --text-display:    clamp(2rem, 4vw + 0.5rem, 3.5rem); /* ~32px → 56px */
-  --leading-display: 1.05;
-  --tracking-display: -0.03em;
+  --text-title-1:      1.75rem;
+  --leading-title-1:   1.15;
+  --tracking-title-1:  -0.02em;
 
-  /* Title — large section headings */
-  --text-title:    clamp(1.5rem, 2vw + 0.5rem, 2rem);   /* ~24px → 32px */
-  --leading-title: 1.15;
-  --tracking-title: -0.025em;
+  --text-title-2:      1.25rem;
+  --leading-title-2:   1.25;
+  --tracking-title-2:  -0.012em;
 
-  /* H1 — page headings (used in every page's <h1>) */
-  --text-h1:    clamp(1.375rem, 1.5vw + 0.5rem, 1.75rem); /* ~22px → 28px */
-  --leading-h1: 1.2;
-  --tracking-h1: -0.022em;
+  --text-headline:     1rem;
+  --leading-headline:  1.35;
+  --tracking-headline: -0.006em;
 
-  /* H2 — section headings */
-  --text-h2:    1.25rem;   /* 20px — fixed; content-level, not display */
-  --leading-h2: 1.3;
-  --tracking-h2: -0.018em;
+  --text-body:         0.9375rem;
+  --leading-body:      1.55;
+  --tracking-body:     0em;
 
-  /* H3 — card/sub-section titles */
-  --text-h3:    1.0625rem; /* 17px */
-  --leading-h3: 1.4;
-  --tracking-h3: -0.01em;
+  --text-callout:      0.875rem;
+  --leading-callout:   1.45;
+  --tracking-callout:  0em;
 
-  /* Body — primary prose */
-  --text-body:    0.9375rem; /* 15px */
-  --leading-body: 1.65;
-  --tracking-body: 0em;      /* at body size, tracking is neutral */
+  --text-footnote:     0.8125rem;
+  --leading-footnote:  1.4;
+  --tracking-footnote: 0.005em;
 
-  /* UI — interactive labels, nav items, button text, form labels */
-  --text-ui:    0.875rem;  /* 14px */
-  --leading-ui: 1.5;
-  --tracking-ui: 0em;
+  --text-caption:      0.6875rem;
+  --leading-caption:   1.3;
+  --tracking-caption:  0.06em;
 
-  /* Small — helper text, secondary labels, timestamps */
-  --text-sm:    0.8125rem; /* 13px */
-  --leading-sm: 1.55;
-  --tracking-sm: 0.005em; /* slight positive at smaller sizes for legibility */
+  /* ── Spacing / radius (§8) ── */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --space-12: 48px;
 
-  /* Extra-small / Micro — badge labels, ALL-CAPS metadata, version strings */
-  --text-xs:    0.75rem;   /* 12px */
-  --leading-xs: 1.5;
-  --tracking-xs: 0.01em;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-full: 9999px;
 
-  /* Micro — very small labels (0.7rem used by .modeBadge in TopBar) */
-  --text-micro: 0.6875rem; /* 11px */
-  --leading-micro: 1.4;
-  --tracking-micro: 0.04em; /* intentionally wide for ALL-CAPS readability */
+  /* ── Layout ── */
+  --sidebar-width: 248px;
+  --topbar-height: 56px;
+  --content-max: 1080px;
 
-  /* ── Spacing, radius, transitions ── */
-  --space-1:4px; --space-2:8px;  --space-3:12px; --space-4:16px;
-  --space-5:20px;--space-6:24px; --space-8:32px; --space-10:40px;
-  --space-12:48px; --space-16:64px;
+  /* ── Materials (§10, §12) ── */
+  --material-blur: 24px;
+  --material-saturate: 180%;
 
-  --radius-sm:6px;  --radius-md:10px; --radius-lg:14px;
-  --radius-xl:20px; --radius-full:9999px;
-
-  --transition-fast:150ms ease; --transition-normal:200ms ease; --transition-slow:300ms ease;
-
-  /* ── Material tokens (Apple §12 — translucent surfaces) ── */
-  /* Blur radius: bigger surface = stronger blur for separation from content behind */
-  --material-blur:       20px;
-  --material-saturate:   180%;
-  /* Press / interaction feedback spring parameters */
-  --press-duration:      120ms;  /* faster than transition-fast — responds on pointer-down */
-  --press-scale:         0.97;   /* critically damped, no overshoot */
-  --press-easing:        cubic-bezier(0.25, 0.46, 0.45, 0.94); /* ease-out feel */
-  --hover-lift-duration: 160ms;
+  /* ── Motion (§12) — springs, not durations. See MotionConfig usage in JS. ── */
+  --press-scale: 0.97;
+  --press-duration: 100ms;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   DARK MODE — default palette (also asserted by [data-theme="dark"])
-   ══════════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════ LIGHT MODE (default) ══════════════════════ */
 :root,
-[data-theme="dark"] {
-  /* Gray scale */
-  --gray-1000: #080a10;  --gray-950: #0c0e16;   --gray-900: #151821;
-  --gray-850:  #1a1e2c;  --gray-800: #1d2130;   --gray-750: #242840;
-  --gray-700:  #2d3250;  --gray-600: #3d4466;   --gray-500: #5a6280;
-  --gray-400:  #8892a4;  --gray-300: #b0bac8;   --gray-200: #d4dae6;
+[data-theme="light"] {
+  --brand:        #2F5BEA;
+  --brand-pressed:#2449C4;
+  --brand-tint:   rgba(47, 91, 234, 0.10);
+  --ink:          #0B0D12;
 
-  /* Amber */
-  --amber-700: #b45309;  --amber-600: #d97706;  --amber-500: #e8a020;
-  --amber-400: #fbbf24;  --amber-300: #fcd34d;  --amber-200: #fde68a;
+  --bg-canvas:    #F6F6F4;
+  --bg-surface:   #FFFFFF;
+  --bg-muted:     #F0F0EE;
+  --material-thin:rgba(255, 255, 255, 0.62);
+  --hairline:     rgba(0, 0, 0, 0.07);
 
-  /* Cyan */
-  --cyan-600:  #0891b2;  --cyan-500:  #06b6d4;  --cyan-400: #22d3ee;
-  --cyan-300:  #67e8f9;
+  --text-primary:   #0B0D12;
+  --text-secondary: #565B66;
+  --text-tertiary:  #8B909B;
+  --text-on-brand:  #FFFFFF;
 
-  /* Status primitives */
-  --emerald-600: #059669; --emerald-500: #10b981; --emerald-400: #34d399;
-  --red-600:   #dc2626;  --red-500:   #ef4444;  --red-400:   #f87171;
-  --yellow-500: #eab308; --yellow-400: #facc15;
+  --success: #1F9D55;
+  --warning: #C27C0E;
+  --danger:  #D6362F;
+  --info:    var(--brand);
 
-  /* Backgrounds */
-  --bg-base:        #0c0e16;
-  --bg-surface:     #151821;
-  --bg-elevated:    #1d2130;
-  --bg-sunken:      #080a10;
-  --bg-overlay:     rgba(8, 10, 16, 0.70);
+  --success-tint: rgba(31, 157, 85, 0.10);
+  --warning-tint: rgba(194, 124, 14, 0.10);
+  --danger-tint:  rgba(214, 54, 47, 0.10);
+  --info-tint:    var(--brand-tint);
 
-  /* Borders */
-  --border-subtle:  #1a1e2c;
-  --border-default: #242840;
-  --border-strong:  #2d3250;
-  --border-accent:  rgba(232, 160, 32, 0.35);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.03);
+  --shadow-md: 0 8px 24px -8px rgba(0,0,0,0.10);
+  --shadow-lg: 0 24px 48px -12px rgba(0,0,0,0.18);
 
-  /* Text */
-  --text-primary:   #f0f2f8;
-  --text-secondary: #b0bac8;
-  --text-muted:     #8892a4;
-  --text-disabled:  #3d4466;
-  --text-inverse:   #0c0e16;
+  --ambient-wash: linear-gradient(to bottom, rgba(47,91,234,0.06), transparent);
+  --scrim: rgba(0, 0, 0, 0.35);
 
-  /* Accent (amber) */
-  --accent:         #e8a020;
-  --accent-dim:     #d97706;
-  --accent-subtle:  rgba(232, 160, 32, 0.10);
-  --accent-glow:    rgba(232, 160, 32, 0.20);
-
-  /* Data (cyan) */
-  --data:           #22d3ee;
-  --data-dim:       #06b6d4;
-  --data-subtle:    rgba(34, 211, 238, 0.08);
-
-  /* Status semantic */
-  --success:        #10b981;
-  --success-subtle: rgba(16, 185, 129, 0.10);
-  --success-glow:   rgba(16, 185, 129, 0.40);
-  --success-border: rgba(16, 185, 129, 0.25);
-
-  --warning:        #facc15;
-  --warning-subtle: rgba(234, 179, 8, 0.10);
-  --warning-border: rgba(234, 179, 8, 0.25);
-
-  --danger:         #ef4444;
-  --danger-subtle:  rgba(239, 68, 68, 0.10);
-  --danger-border:  rgba(239, 68, 68, 0.25);
-
-  --info-border:    rgba(34, 211, 238, 0.20);
-
-  /* Shadows */
-  --shadow-sm:     0 1px 3px rgba(8,10,16,0.40);
-  --shadow-md:     0 4px 12px rgba(8,10,16,0.50);
-  --shadow-lg:     0 8px 24px rgba(8,10,16,0.60);
-  --shadow-accent: 0 0 20px rgba(232,160,32,0.15);
-
-  /* Component tokens */
-  --btn-primary-bg:    #e8a020;
-  --btn-primary-text:  #0c0e16;
-  --btn-primary-hover: #d97706;
-  --btn-ghost-hover:   #1d2130;
-  --input-bg:          #080a10;
-  --input-border:      #242840;
-  --input-border-focus:#e8a020;
-  --input-text:        #f0f2f8;
-  --input-placeholder: #8892a4;
-  --card-bg:           #151821;
-  --card-border:       #242840;
-  --card-hover-border: #2d3250;
-  --badge-hit-bg:      rgba(16, 185, 129, 0.12);
-  --badge-hit-text:    #34d399;
-  --badge-miss-bg:     rgba(90, 98, 128, 0.20);
-  --badge-miss-text:   #b0bac8;
-
-  /* UI micro-element tokens */
-  --spinner-track:  rgba(255, 255, 255, 0.30);
-  --toggle-thumb:   #ffffff;
-  --toggle-shadow:  rgba(0, 0, 0, 0.30);
-
-  /* Glass surface background (used with backdrop-filter) */
-  --surface-glass:  rgba(21, 24, 33, 0.72);   /* dark: ~72% opacity of --bg-surface */
-  --surface-glass-border: rgba(255, 255, 255, 0.06); /* subtle top-edge highlight */
+  color-scheme: light;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   LIGHT MODE — separate, non-inverted warm palette
-   Applied by media query (auto) OR explicit data-theme="light"
-   ══════════════════════════════════════════════════════════════════════════════ */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --gray-1000: #f5f4f2;  --gray-950: #edecea;   --gray-900: #e4e3e0;
-    --gray-850:  #d6d3cf;  --gray-800: #ccc9c6;   --gray-750: #bfbbb6;
-    --gray-700:  #b0ada9;  --gray-600: #7a7775;   --gray-500: #4a4845;
-    --gray-400:  #3a3835;  --gray-300: #2a2826;   --gray-200: #1a1918;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand:        #6E8BFF;
+    --brand-pressed:#5A77EE;
+    --brand-tint:   rgba(110, 139, 255, 0.16);
+    --ink:          #F3F4F6;
 
-    --amber-700: #92400e;  --amber-600: #b45309;  --amber-500: #c2700a;
-    --amber-400: #d97706;  --amber-300: #e8a020;
+    --bg-canvas:    #0E0F12;
+    --bg-surface:   #16181D;
+    --bg-muted:     #1C1F25;
+    --material-thin:rgba(22, 24, 29, 0.62);
+    --hairline:     rgba(255, 255, 255, 0.08);
 
-    --cyan-600:  #0884a8;  --cyan-500:  #0891b2;  --cyan-400: #0e9ec4;
-    --cyan-300:  #06b6d4;
+    --text-primary:   #F3F4F6;
+    --text-secondary: #A3A8B3;
+    --text-tertiary:  #6F7480;
+    --text-on-brand:  #0B0D12;
 
-    --emerald-600: #065f46; --emerald-500: #0a7a59; --emerald-400: #0d9068;
-    --red-600:   #991b1b;  --red-500:   #c0392b;  --red-400:   #dc2626;
-    --yellow-500: #7a6200; --yellow-400: #9a7c00;
+    --success: #34C77B;
+    --warning: #F0A93B;
+    --danger:  #FF6961;
+    --info:    var(--brand);
 
-    --bg-base:        #fafaf9;
-    --bg-surface:     #f5f4f2;
-    --bg-elevated:    #edecea;
-    --bg-sunken:      #ffffff;
-    --bg-overlay:     rgba(250, 250, 249, 0.80);
+    --success-tint: rgba(52, 199, 123, 0.14);
+    --warning-tint: rgba(240, 169, 59, 0.14);
+    --danger-tint:  rgba(255, 105, 97, 0.14);
+    --info-tint:    var(--brand-tint);
 
-    --border-subtle:  #e8e6e3;
-    --border-default: #d6d3cf;
-    --border-strong:  #bfbbb6;
-    --border-accent:  rgba(180, 83, 9, 0.30);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.28), 0 1px 1px rgba(0,0,0,0.20);
+    --shadow-md: 0 8px 24px -8px rgba(0,0,0,0.45);
+    --shadow-lg: 0 24px 48px -12px rgba(0,0,0,0.60);
 
-    --text-primary:   #1a1918;
-    --text-secondary: #4a4845;
-    --text-muted:     #7a7775;
-    --text-disabled:  #b0ada9;
-    --text-inverse:   #fafaf9;
+    --ambient-wash: linear-gradient(to bottom, rgba(110,139,255,0.10), transparent);
+    --scrim: rgba(0, 0, 0, 0.55);
 
-    --accent:         #c2700a;
-    --accent-dim:     #9c5a08;
-    --accent-subtle:  rgba(194, 112, 10, 0.08);
-    --accent-glow:    rgba(194, 112, 10, 0.16);
-
-    --data:           #0884a8;
-    --data-dim:       #066b8a;
-    --data-subtle:    rgba(8, 132, 168, 0.08);
-
-    --success:        #0a7a59;
-    --success-subtle: rgba(10, 122, 89, 0.08);
-    --success-glow:   rgba(10, 122, 89, 0.25);
-    --success-border: rgba(10, 122, 89, 0.20);
-
-    --warning:        #9a7c00;
-    --warning-subtle: rgba(154, 124, 0, 0.08);
-    --warning-border: rgba(154, 124, 0, 0.22);
-
-    --danger:         #c0392b;
-    --danger-subtle:  rgba(192, 57, 43, 0.08);
-    --danger-border:  rgba(192, 57, 43, 0.22);
-
-    --info-border:    rgba(8, 132, 168, 0.20);
-
-    --shadow-sm:     0 1px 3px rgba(26,25,24,0.08);
-    --shadow-md:     0 4px 12px rgba(26,25,24,0.10);
-    --shadow-lg:     0 8px 24px rgba(26,25,24,0.12);
-    --shadow-accent: 0 0 20px rgba(194,112,10,0.12);
-
-    --btn-primary-bg:    #c2700a;
-    --btn-primary-text:  #fafaf9;
-    --btn-primary-hover: #9c5a08;
-    --btn-ghost-hover:   #edecea;
-    --input-bg:          #ffffff;
-    --input-border:      #d6d3cf;
-    --input-border-focus:#c2700a;
-    --input-text:        #1a1918;
-    --input-placeholder: #7a7775;
-    --card-bg:           #f5f4f2;
-    --card-border:       #d6d3cf;
-    --card-hover-border: #bfbbb6;
-    --badge-hit-bg:      rgba(10, 122, 89, 0.10);
-    --badge-hit-text:    #0a7a59;
-    --badge-miss-bg:     rgba(122, 119, 117, 0.12);
-    --badge-miss-text:   #4a4845;
-
-    --spinner-track:  rgba(0, 0, 0, 0.15);
-    --toggle-thumb:   #ffffff;
-    --toggle-shadow:  rgba(0, 0, 0, 0.20);
-
-    /* Glass surface background */
-    --surface-glass:  rgba(245, 244, 242, 0.82);  /* light: ~82% opacity of --bg-surface */
-    --surface-glass-border: rgba(0, 0, 0, 0.06);  /* subtle bottom-edge shadow line */
+    color-scheme: dark;
   }
 }
 
-/* Explicit [data-theme="light"] always wins */
-[data-theme="light"] {
-  --gray-1000: #f5f4f2;  --gray-950: #edecea;   --gray-900: #e4e3e0;
-  --gray-850:  #d6d3cf;  --gray-800: #ccc9c6;   --gray-750: #bfbbb6;
-  --gray-700:  #b0ada9;  --gray-600: #7a7775;   --gray-500: #4a4845;
-  --gray-400:  #3a3835;  --gray-300: #2a2826;   --gray-200: #1a1918;
+[data-theme="dark"] {
+  --brand:        #6E8BFF;
+  --brand-pressed:#5A77EE;
+  --brand-tint:   rgba(110, 139, 255, 0.16);
+  --ink:          #F3F4F6;
 
-  --amber-700: #92400e;  --amber-600: #b45309;  --amber-500: #c2700a;
-  --amber-400: #d97706;  --amber-300: #e8a020;
+  --bg-canvas:    #0E0F12;
+  --bg-surface:   #16181D;
+  --bg-muted:     #1C1F25;
+  --material-thin:rgba(22, 24, 29, 0.62);
+  --hairline:     rgba(255, 255, 255, 0.08);
 
-  --cyan-600:  #0884a8;  --cyan-500:  #0891b2;  --cyan-400: #0e9ec4;
-  --cyan-300:  #06b6d4;
+  --text-primary:   #F3F4F6;
+  --text-secondary: #A3A8B3;
+  --text-tertiary:  #6F7480;
+  --text-on-brand:  #0B0D12;
 
-  --emerald-600: #065f46; --emerald-500: #0a7a59; --emerald-400: #0d9068;
-  --red-600:   #991b1b;  --red-500:   #c0392b;  --red-400:   #dc2626;
-  --yellow-500: #7a6200; --yellow-400: #9a7c00;
+  --success: #34C77B;
+  --warning: #F0A93B;
+  --danger:  #FF6961;
+  --info:    var(--brand);
 
-  --bg-base:        #fafaf9;
-  --bg-surface:     #f5f4f2;
-  --bg-elevated:    #edecea;
-  --bg-sunken:      #ffffff;
-  --bg-overlay:     rgba(250, 250, 249, 0.80);
+  --success-tint: rgba(52, 199, 123, 0.14);
+  --warning-tint: rgba(240, 169, 59, 0.14);
+  --danger-tint:  rgba(255, 105, 97, 0.14);
+  --info-tint:    var(--brand-tint);
 
-  --border-subtle:  #e8e6e3;
-  --border-default: #d6d3cf;
-  --border-strong:  #bfbbb6;
-  --border-accent:  rgba(180, 83, 9, 0.30);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.28), 0 1px 1px rgba(0,0,0,0.20);
+  --shadow-md: 0 8px 24px -8px rgba(0,0,0,0.45);
+  --shadow-lg: 0 24px 48px -12px rgba(0,0,0,0.60);
 
-  --text-primary:   #1a1918;
-  --text-secondary: #4a4845;
-  --text-muted:     #7a7775;
-  --text-disabled:  #b0ada9;
-  --text-inverse:   #fafaf9;
+  --ambient-wash: linear-gradient(to bottom, rgba(110,139,255,0.10), transparent);
+  --scrim: rgba(0, 0, 0, 0.55);
 
-  --accent:         #c2700a;
-  --accent-dim:     #9c5a08;
-  --accent-subtle:  rgba(194, 112, 10, 0.08);
-  --accent-glow:    rgba(194, 112, 10, 0.16);
-
-  --data:           #0884a8;
-  --data-dim:       #066b8a;
-  --data-subtle:    rgba(8, 132, 168, 0.08);
-
-  --success:        #0a7a59;
-  --success-subtle: rgba(10, 122, 89, 0.08);
-  --success-glow:   rgba(10, 122, 89, 0.25);
-  --success-border: rgba(10, 122, 89, 0.20);
-
-  --warning:        #9a7c00;
-  --warning-subtle: rgba(154, 124, 0, 0.08);
-  --warning-border: rgba(154, 124, 0, 0.22);
-
-  --danger:         #c0392b;
-  --danger-subtle:  rgba(192, 57, 43, 0.08);
-  --danger-border:  rgba(192, 57, 43, 0.22);
-
-  --info-border:    rgba(8, 132, 168, 0.20);
-
-  --shadow-sm:     0 1px 3px rgba(26,25,24,0.08);
-  --shadow-md:     0 4px 12px rgba(26,25,24,0.10);
-  --shadow-lg:     0 8px 24px rgba(26,25,24,0.12);
-  --shadow-accent: 0 0 20px rgba(194,112,10,0.12);
-
-  --btn-primary-bg:    #c2700a;
-  --btn-primary-text:  #fafaf9;
-  --btn-primary-hover: #9c5a08;
-  --btn-ghost-hover:   #edecea;
-  --input-bg:          #ffffff;
-  --input-border:      #d6d3cf;
-  --input-border-focus:#c2700a;
-  --input-text:        #1a1918;
-  --input-placeholder: #7a7775;
-  --card-bg:           #f5f4f2;
-  --card-border:       #d6d3cf;
-  --card-hover-border: #bfbbb6;
-  --badge-hit-bg:      rgba(10, 122, 89, 0.10);
-  --badge-hit-text:    #0a7a59;
-  --badge-miss-bg:     rgba(122, 119, 117, 0.12);
-  --badge-miss-text:   #4a4845;
-
-  --spinner-track:  rgba(0, 0, 0, 0.15);
-  --toggle-thumb:   #ffffff;
-  --toggle-shadow:  rgba(0, 0, 0, 0.20);
-
-  /* Glass surface background */
-  --surface-glass:  rgba(245, 244, 242, 0.82);
-  --surface-glass-border: rgba(0, 0, 0, 0.06);
+  color-scheme: dark;
 }
 
-/* ── Smooth theme transition (Apple §14 — ease dark↔light changes) ────────── */
+/* Theme changes ease, never jump (§4, §14) */
 html {
-  transition:
-    background-color 220ms ease,
-    color 220ms ease;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* prefers-reduced-transparency: materials become solid (§10, §14) */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --material-thin: var(--bg-surface);
+    --material-blur: 0px;
+  }
+}
+
+/* prefers-contrast: hairlines strengthen, materials solid (§10, §14) */
+@media (prefers-contrast: more) {
+  :root {
+    --hairline: var(--text-tertiary);
+    --material-thin: var(--bg-surface);
+    --material-blur: 0px;
+  }
 }

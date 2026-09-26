@@ -1,0 +1,39 @@
+/* Ask mode switch — the selected pill slides between segments (BRANDING.md §8) */
+.track {
+  position: relative;
+  display: inline-flex;
+  background: var(--bg-muted);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  gap: 2px;
+}
+
+.pill {
+  position: absolute;
+  top: 2px; bottom: 2px;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  z-index: 0;
+}
+
+.segment {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-callout);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: calc(var(--radius-md) - 2px);
+  white-space: nowrap;
+}
+.segment.active { color: var(--brand); }
+.segment:active { transform: scale(0.98); }
+
+.segmentContent { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; }

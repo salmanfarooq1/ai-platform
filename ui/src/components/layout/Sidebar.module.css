@@ -1,63 +1,79 @@
-/* Sidebar.module.css */
-
-/* ── Glass material (Apple §12) ── */
-/* Solid fallback */
+/* Desktop sidebar — translucent material, right hairline (BRANDING.md §7) */
 .sidebar {
-  width: 220px;
+  width: var(--sidebar-width);
   flex-shrink: 0;
-  background: var(--bg-surface);
-  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  padding: var(--space-4) 0;
-  overflow-y: auto;
-  /* Sidebar is already pinned by the flex layout — no sticky needed */
+  background: var(--material-thin);
+  backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+  -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+  border-right: 1px solid var(--hairline);
+  padding: var(--space-5) var(--space-4);
+  gap: var(--space-5);
 }
 
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  .sidebar {
-    background: var(--surface-glass);
-    -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
-    backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
-    /* Right edge: light catching the glass (Apple §12 — "bright top edge") */
-    border-right: 1px solid var(--surface-glass-border);
-    box-shadow: 1px 0 0 var(--border-subtle);
-  }
-}
+.logoRow { padding: 0 var(--space-1); }
 
-.logo { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-3) var(--space-5); margin-bottom:var(--space-4); border-bottom:1px solid var(--border-subtle); }
-.logoMark { font-size:var(--text-ui); font-weight:800; color:var(--accent); background:var(--accent-subtle); border:1px solid var(--border-accent); padding:4px 8px; border-radius:var(--radius-sm); letter-spacing:var(--tracking-micro); }
-.logoText { font-size:var(--text-body); font-weight:600; line-height:var(--leading-body); color:var(--text-primary); }
-.navList { list-style:none; flex:1; padding:0 var(--space-3); display:flex; flex-direction:column; gap:var(--space-1); }
+.badgeRow { padding: 0 var(--space-1); }
 
-/* ── Nav item: hover + press feedback (Apple §1 — respond on pointer-down) ── */
+.navList { display: flex; flex-direction: column; gap: 2px; flex: 1; list-style: none; }
+
 .navItem {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  height: 40px;
+  padding: 0 var(--space-3);
   border-radius: var(--radius-md);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-decoration: none;
-  font-size: var(--text-ui);
-  line-height: var(--leading-ui);
-  letter-spacing: var(--tracking-ui);
+  font-size: var(--text-callout);
   font-weight: 500;
-  border: 1px solid transparent;
-  /* Transition covers color, background, border, and transform for press */
-  transition:
-    color       var(--transition-fast),
-    background  var(--transition-fast),
-    border-color var(--transition-fast),
-    transform   var(--press-duration) var(--press-easing);
-  /* Hint will-change to compositor for transform-only paint */
-  will-change: transform;
+  position: relative;
 }
-.navItem:hover { color:var(--text-primary); background:var(--bg-elevated); }
-/* Pointer-down press: critically damped scale, no overshoot (Apple §4) */
-.navItem:active { transform:scale(var(--press-scale)); }
-.navItem.active { color:var(--accent); background:var(--accent-subtle); border-color:var(--border-accent); }
+.navItem:hover { background: var(--bg-muted); color: var(--text-primary); }
+.navItem:active { transform: scale(var(--press-scale)); }
+.navItem.active { background: var(--brand-tint); color: var(--brand); font-weight: 600; }
 
-.icon { font-size:1rem; width:20px; text-align:center; flex-shrink:0; }
-.footer { padding:var(--space-4) var(--space-5); border-top:1px solid var(--border-subtle); margin-top:auto; }
-.version { font-size:var(--text-xs); line-height:var(--leading-xs); color:var(--text-disabled); font-family:var(--font-mono); }
+.navIcon { flex-shrink: 0; display: grid; place-items: center; }
+
+.healthDot {
+  margin-left: auto;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--danger);
+  flex-shrink: 0;
+}
+
+.footer { padding: 0 var(--space-1); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--tracking-caption); color: var(--text-tertiary); }
+
+/* Bottom tab bar below 900px (BRANDING.md §7) */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 64px;
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0;
+    gap: 0;
+    border-right: none;
+    border-top: 1px solid var(--hairline);
+    z-index: 50;
+  }
+  .logoRow, .badgeRow, .footer { display: none; }
+  .navList { flex-direction: row; flex: 1; }
+  .navList li { flex: 1; }
+  .navItem {
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    gap: 2px;
+    font-size: var(--text-caption);
+    border-radius: 0;
+  }
+  .healthDot { position: absolute; top: 8px; right: calc(50% - 18px); margin-left: 0; }
+}

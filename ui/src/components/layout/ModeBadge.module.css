@@ -1,0 +1,17 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--hairline);
+  background: var(--material-thin);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.dot { width: 6px; height: 6px; border-radius: var(--radius-full); flex-shrink: 0; }

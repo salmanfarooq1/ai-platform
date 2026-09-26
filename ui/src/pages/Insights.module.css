@@ -1,0 +1,31 @@
+.page { display: flex; flex-direction: column; gap: var(--space-6); }
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.header p { margin-top: 4px; }
+
+.dayPicker { display: flex; background: var(--bg-muted); border-radius: var(--radius-md); padding: 2px; gap: 2px; }
+.dayBtn { background: none; border: none; padding: var(--space-1) var(--space-3); border-radius: calc(var(--radius-md) - 2px); font-size: var(--text-footnote); font-weight: 600; color: var(--text-tertiary); cursor: pointer; }
+.dayBtn.active { background: var(--bg-surface); color: var(--brand); box-shadow: var(--shadow-sm); }
+
+.info, .err { font-size: var(--text-callout); color: var(--text-secondary); }
+.err { color: var(--danger); }
+
+.summaryRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-4); }
+.dt { font-size: var(--text-caption); font-weight: 600; text-transform: uppercase; letter-spacing: var(--tracking-caption); color: var(--text-tertiary); }
+.dd { font-size: var(--text-title-1); font-weight: 700; font-variant-numeric: tabular-nums; margin-top: var(--space-2); }
+
+.breakdownGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4); }
+.list { display: flex; flex-direction: column; gap: var(--space-2); list-style: none; }
+.row { display: flex; justify-content: space-between; align-items: center; font-size: var(--text-footnote); }
+.key { color: var(--text-primary); font-weight: 500; }
+.val { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+.chart { display: flex; flex-direction: column; gap: var(--space-2); }
+.barRow { display: grid; grid-template-columns: 90px 1fr auto; align-items: center; gap: var(--space-3); font-size: var(--text-footnote); }
+.barLabel { color: var(--text-tertiary); }
+.barTrack { height: 10px; background: var(--bg-muted); border-radius: var(--radius-full); overflow: hidden; }
+.barFill { height: 100%; background: var(--brand); border-radius: var(--radius-full); }
+.barVal { color: var(--text-secondary); font-variant-numeric: tabular-nums; text-align: right; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--tracking-caption); color: var(--text-tertiary); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--hairline); }
+.table td { padding: var(--space-2) var(--space-3); font-size: var(--text-footnote); border-bottom: 1px solid var(--hairline); font-variant-numeric: tabular-nums; }

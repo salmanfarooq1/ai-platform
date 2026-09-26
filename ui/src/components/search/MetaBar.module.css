@@ -1,6 +1,5 @@
-/* MetaBar.module.css */
-.metaBar { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2); padding:var(--space-3) 0; border-top:1px solid var(--border-subtle); margin-top:var(--space-4); }
-.chip { display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; padding:3px 9px; background:var(--bg-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-full); }
-.label { color:var(--text-disabled); font-weight:500; }
-.value { color:var(--text-secondary); font-weight:600; }
-.mono { font-family:var(--font-mono); }
+.metaBar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.chip { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-caption); padding: 3px 9px; background: var(--bg-muted); border-radius: var(--radius-full); }
+.label { color: var(--text-tertiary); font-weight: 600; text-transform: uppercase; letter-spacing: var(--tracking-caption); }
+.value { color: var(--text-secondary); font-weight: 600; font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }

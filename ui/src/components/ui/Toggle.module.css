@@ -1,9 +1,6 @@
-/* Toggle.module.css */
+.wrapper { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.label { font-size: var(--text-callout); color: var(--text-secondary); font-weight: 500; }
 
-.wrapper { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); }
-.label { font-size:var(--text-ui); line-height:var(--leading-ui); color:var(--text-secondary); font-weight:500; }
-
-/* ── Track ── */
 .track {
   position: relative;
   width: 40px;
@@ -12,41 +9,25 @@
   border: none;
   cursor: pointer;
   flex-shrink: 0;
-  /* Background transition: color switch on toggle */
-  transition:
-    background  var(--transition-fast),
-    transform   var(--press-duration) var(--press-easing);
-  will-change: transform;
+  transition: background 150ms ease;
 }
+.track:active:not(:disabled) { transform: scale(0.92); transition: transform var(--press-duration) ease-out; }
+.track:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* Pointer-down press: scale the whole track (Apple §1 — instant, on touch-down) */
-.track:active:not(:disabled) { transform: scale(0.92); }
-.track:disabled { opacity:0.35; cursor:not-allowed; }
+.on  { background: var(--brand); }
+.off { background: var(--bg-muted); border: 1px solid var(--hairline); }
 
-.on  { background: var(--accent); }
-.off { background: var(--gray-700); }
-
-/* Hover — subtle background lift to hint interactivity */
-.on:hover:not(:disabled)  { filter: brightness(1.08); }
-.off:hover:not(:disabled) { filter: brightness(1.12); }
-
-/* ── Thumb ── */
 .thumb {
   position: absolute;
-  top: 3px;
-  left: 3px;
+  top: 2px;
+  left: 2px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--toggle-thumb);
-  /* Thumb translate uses press-easing for a physical slide feel.
-     This is not momentum — it's state-change — so no bounce (Apple §4: bounce
-     only when a gesture carried momentum). Critically damped curve here. */
-  transition: transform var(--press-duration) var(--press-easing);
-  box-shadow: 0 1px 3px var(--toggle-shadow);
-  /* Pointer-events:none so the parent :active fires, not the thumb */
+  background: #fff;
+  transition: transform 150ms ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   pointer-events: none;
 }
-
-.on  .thumb { transform: translateX(18px); }
-.off .thumb { transform: translateX(0); }
+.on .thumb  { transform: translateX(18px); }
+.off .thumb { transform: translateX(0); background: var(--text-tertiary); }

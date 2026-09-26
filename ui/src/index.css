@@ -3,12 +3,8 @@
 @import './styles/tokens.css';
 
 /* ── Reset ── */
-*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Base document ──
-   font-optical-sizing:auto lets the browser (and Inter's variable axis) apply
-   per-size optical adjustments automatically — Apple's "Dynamic Type" equivalent
-   on the web (skill §15). font-size:100% respects the user's browser setting. */
 html {
   font-size: 100%;
   font-optical-sizing: auto;
@@ -18,108 +14,102 @@ html {
   text-size-adjust: 100%;
 }
 
+/* Canvas + ambient wash (§11) — quiet atmosphere, never a flat page. Sits
+   behind all content, never moves, never intercepts pointer events. */
 body {
   font-family: var(--font-sans);
   font-size: var(--text-body);
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
-  background: var(--bg-base);
+  background: var(--bg-canvas);
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
 }
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 480px;
+  background: var(--ambient-wash);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root { position: relative; z-index: 1; }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-track { background:var(--bg-base); }
-::-webkit-scrollbar-thumb { background:var(--gray-700); border-radius:var(--radius-full); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: var(--radius-full); }
 
-/* ── Focus ── */
-:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:var(--radius-sm); }
-a,button,input,select,textarea { transition:var(--transition-normal); }
+/* ── Focus ring (§14) — visible, brand-colored, offset, never a layout shift ── */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
 
-/* ── Heading scale ── (Apple §15: size-specific tracking + leading)
-   Each heading level receives its own font-size, line-height, and
-   letter-spacing. Tracking tightens as size grows. */
+/* ── Type scale (§5) ── */
 h1 {
-  font-size: var(--text-h1);
-  font-weight: 700;
-  line-height: var(--leading-h1);
-  letter-spacing: var(--tracking-h1);
+  font-size: var(--text-title-1); font-weight: 700;
+  line-height: var(--leading-title-1); letter-spacing: var(--tracking-title-1);
   color: var(--text-primary);
 }
-
 h2 {
-  font-size: var(--text-h2);
-  font-weight: 600;
-  line-height: var(--leading-h2);
-  letter-spacing: var(--tracking-h2);
+  font-size: var(--text-title-2); font-weight: 600;
+  line-height: var(--leading-title-2); letter-spacing: var(--tracking-title-2);
   color: var(--text-primary);
 }
-
 h3 {
-  font-size: var(--text-h3);
-  font-weight: 600;
-  line-height: var(--leading-h3);
-  letter-spacing: var(--tracking-h3);
+  font-size: var(--text-headline); font-weight: 600;
+  line-height: var(--leading-headline); letter-spacing: var(--tracking-headline);
   color: var(--text-primary);
 }
-
-/* Body / prose */
 p {
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  letter-spacing: var(--tracking-body);
-  color: var(--text-secondary);
+  font-size: var(--text-body); line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body); color: var(--text-secondary);
 }
+em { color: var(--brand); font-style: italic; }
 
-/* Mono blocks — inherit the scale step of their container */
 code, pre { font-family: var(--font-mono); font-size: 0.875em; }
 
-/* ── Type-scale utility classes ──
-   Module CSS files can reference these instead of repeating raw values.
-   Usage:  className={styles.myThing + ' ' + 'text-sm'}  (or via @composes) */
-.text-display { font-size:var(--text-display); line-height:var(--leading-display); letter-spacing:var(--tracking-display); }
-.text-title   { font-size:var(--text-title);   line-height:var(--leading-title);   letter-spacing:var(--tracking-title);   }
-.text-h1      { font-size:var(--text-h1);      line-height:var(--leading-h1);      letter-spacing:var(--tracking-h1);      }
-.text-h2      { font-size:var(--text-h2);      line-height:var(--leading-h2);      letter-spacing:var(--tracking-h2);      }
-.text-h3      { font-size:var(--text-h3);      line-height:var(--leading-h3);      letter-spacing:var(--tracking-h3);      }
-.text-body    { font-size:var(--text-body);    line-height:var(--leading-body);    letter-spacing:var(--tracking-body);    }
-.text-ui      { font-size:var(--text-ui);      line-height:var(--leading-ui);      letter-spacing:var(--tracking-ui);      }
-.text-sm      { font-size:var(--text-sm);      line-height:var(--leading-sm);      letter-spacing:var(--tracking-sm);      }
-.text-xs      { font-size:var(--text-xs);      line-height:var(--leading-xs);      letter-spacing:var(--tracking-xs);      }
-.text-micro   { font-size:var(--text-micro);   line-height:var(--leading-micro);   letter-spacing:var(--tracking-micro);   }
+button, input, select, textarea { font-family: inherit; color: inherit; }
 
-/* ── Accessibility ── */
-.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+/* Numbers in stats/tables (§5) */
+.tabular-nums { font-variant-numeric: tabular-nums; }
 
-/* ── Reduced motion (Apple §14) ──
-   Covers:
-   - All keyframe animations (shimmer, fadeIn, pulse-dot, blink, spin, loadSlide)
-   - Button / Toggle / NavItem press-scale transforms (--press-duration)
-   - Hover lift box-shadows
-   - Backdrop-filter blur transition (the glass surfaces)
-   - TopBar sticky scroll fade
-   Cross-fade opacity changes are kept — they aid comprehension without
-   vestibular risk (Apple §14 guidance). */
+/* ── Type-scale utility classes ── */
+.text-display  { font-size: var(--text-display);  line-height: var(--leading-display);  letter-spacing: var(--tracking-display); }
+.text-title-1  { font-size: var(--text-title-1);  line-height: var(--leading-title-1);  letter-spacing: var(--tracking-title-1); }
+.text-title-2  { font-size: var(--text-title-2);  line-height: var(--leading-title-2);  letter-spacing: var(--tracking-title-2); }
+.text-headline { font-size: var(--text-headline); line-height: var(--leading-headline); letter-spacing: var(--tracking-headline); }
+.text-body     { font-size: var(--text-body);     line-height: var(--leading-body);     letter-spacing: var(--tracking-body); }
+.text-callout  { font-size: var(--text-callout);  line-height: var(--leading-callout);  letter-spacing: var(--tracking-callout); }
+.text-footnote { font-size: var(--text-footnote); line-height: var(--leading-footnote); letter-spacing: var(--tracking-footnote); }
+.text-caption  { font-size: var(--text-caption);  line-height: var(--leading-caption);  letter-spacing: var(--tracking-caption); text-transform: uppercase; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ── Reduced motion (§14) — replace slides/springs with short cross-fades ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    /* Remove compositor hints that are meaningless without motion */
-    will-change: auto !important;
+    scroll-behavior: auto !important;
   }
 }
 
-/* ── Animations ── */
-@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-.skeleton { background:linear-gradient(90deg,var(--bg-surface) 25%,var(--bg-elevated) 50%,var(--bg-surface) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:var(--radius-sm); }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-muted) 25%, var(--bg-surface) 50%, var(--bg-muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
 
-@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
-@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-.fade-in { animation:fadeIn 200ms ease forwards; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-.cursor::after { content:'▋'; display:inline-block; color:var(--accent); animation:blink 1s step-end infinite; margin-left:1px; }
-@keyframes spin { to{transform:rotate(360deg)} }
-@keyframes loadSlide { to{left:150%} }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.cursor::after { content: '▋'; display: inline-block; color: var(--brand); animation: blink 1s step-end infinite; margin-left: 1px; }

@@ -1,8 +1,11 @@
-/* GuardrailBanner.module.css */
-.banner { display:flex; align-items:flex-start; gap:var(--space-3); padding:var(--space-4); border-radius:var(--radius-md); border:1px solid; animation:fadeIn 200ms ease; }
-.banner strong { display:block; font-size:0.875rem; margin-bottom:var(--space-1); }
-.banner p { font-size:0.8125rem; margin:0; opacity:0.85; }
-.icon { font-size:1.1rem; flex-shrink:0; margin-top:1px; }
-.error   { background:var(--danger-subtle);  border-color:var(--danger-border);  color:var(--red-400); }
-.warning { background:var(--warning-subtle); border-color:var(--warning-border); color:var(--yellow-400); }
-.info    { background:var(--data-subtle);    border-color:var(--info-border);    color:var(--data); }
+/* Guardrail banner — inline in the answer area, 3px left bar (BRANDING.md §8) */
+.banner { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-md); background: var(--bg-muted); border-left: 3px solid; }
+.banner strong { display: block; font-size: var(--text-callout); margin-bottom: 2px; color: var(--text-primary); }
+.banner p { font-size: var(--text-footnote); margin: 0; color: var(--text-secondary); }
+.icon { flex-shrink: 0; margin-top: 1px; }
+.error   { border-color: var(--danger); }
+.error .icon   { color: var(--danger); }
+.warning { border-color: var(--warning); }
+.warning .icon { color: var(--warning); }
+.info    { border-color: var(--info); }
+.info .icon    { color: var(--info); }

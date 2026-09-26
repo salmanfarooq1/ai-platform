@@ -1,6 +1,3 @@
-/* Button.module.css */
-
-/* ── Base ── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -12,42 +9,36 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   white-space: nowrap;
-  /* Explicit property list: transform uses press-duration (fast, pointer-down),
-     everything else uses transition-fast (slightly slower, looks intentional) */
-  transition:
-    background     var(--transition-fast),
-    color          var(--transition-fast),
-    border-color   var(--transition-fast),
-    box-shadow     var(--transition-fast),
-    transform      var(--press-duration) var(--press-easing);
-  will-change: transform;
+  height: 40px;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
-.btn:disabled { opacity:0.4; cursor:not-allowed; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ── Press feedback (Apple §1: respond on pointer-down, §4: critically damped) ── */
-/* Scale fires on :active which maps to pointer-down in CSS — instant response */
-.btn:active:not(:disabled) { transform: scale(var(--press-scale)); }
+/* Press feedback on pointer-down (apple-design §1) */
+.btn:active:not(:disabled) { transform: scale(var(--press-scale)); transition: transform var(--press-duration) ease-out; }
 
-/* ── Sizes ── */
-.sm { font-size:var(--text-sm);  padding:var(--space-1) var(--space-3); }
-.md { font-size:var(--text-ui);  padding:var(--space-2) var(--space-5); }
-.lg { font-size:var(--text-body); padding:var(--space-3) var(--space-6); }
+.sm { font-size: var(--text-footnote); height: 32px; padding: 0 var(--space-3); }
+.md { font-size: var(--text-callout); padding: 0 var(--space-5); }
+.lg { font-size: var(--text-body); height: 44px; padding: 0 var(--space-6); }
 
-/* ── Variants ── */
-.primary { background:var(--btn-primary-bg); color:var(--btn-primary-text); }
-.primary:hover:not(:disabled) {
-  background: var(--btn-primary-hover);
-  box-shadow: 0 2px 8px var(--accent-glow);
+.primary { background: var(--brand); color: var(--text-on-brand); }
+.primary:hover:not(:disabled) { background: var(--brand-pressed); }
+.primary:active:not(:disabled) { background: var(--brand-pressed); }
+
+.secondary { background: var(--bg-muted); color: var(--text-primary); }
+.secondary:hover:not(:disabled) { filter: brightness(0.97); }
+
+.ghost { background: transparent; color: var(--text-secondary); }
+.ghost:hover:not(:disabled) { background: var(--bg-muted); color: var(--text-primary); }
+
+.danger { background: transparent; color: var(--danger); }
+.danger:hover:not(:disabled) { background: var(--danger-tint); }
+
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
-
-.secondary { background:var(--bg-elevated); color:var(--text-primary); border-color:var(--border-default); }
-.secondary:hover:not(:disabled) { border-color:var(--border-strong); background:var(--bg-elevated); }
-
-.ghost { background:transparent; color:var(--text-secondary); }
-.ghost:hover:not(:disabled) { background:var(--btn-ghost-hover); color:var(--text-primary); }
-
-.danger { background:var(--danger-subtle); color:var(--red-400); border-color:var(--danger-border); }
-.danger:hover:not(:disabled) { background:var(--danger-subtle); border-color:var(--danger); }
-
-/* ── Loading spinner ── */
-.spinner { width:14px; height:14px; border:2px solid var(--spinner-track); border-top-color:currentColor; border-radius:50%; animation:spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

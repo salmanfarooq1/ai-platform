@@ -1,41 +1,42 @@
-/* TopBar.module.css */
-
-/* ── Glass material (Apple §12) ── */
-/* Solid fallback for browsers without backdrop-filter */
+/* Sticky, translucent top bar. No hard divider — a scroll-edge fade appears
+   only once content has scrolled under it (BRANDING.md §7, §15). */
 .topBar {
-  /* z-index keeps the glass surface painted above scrolling content in .main */
+  position: sticky;
+  top: 0;
   z-index: 40;
-  height: 52px;
+  height: var(--topbar-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-5);
-  /* Solid fallback — matches opaque bg-surface exactly */
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border-subtle);
-  flex-shrink: 0;
   gap: var(--space-4);
+  padding: 0 var(--space-6);
+  background: var(--material-thin);
+  backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+  -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+  box-shadow: none;
+  transition: box-shadow 200ms ease;
 }
 
-/* Progressive enhancement: translucent glass when supported */
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  .topBar {
-    background: var(--surface-glass);
-    -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
-    backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
-    /* Bright top-edge line — light catching the material (Apple §12) */
-    border-bottom: 1px solid var(--surface-glass-border);
-    /* Scroll-edge fade: only appear when content is beneath */
-    box-shadow: 0 1px 0 var(--border-subtle);
-  }
+.topBar.scrolled {
+  box-shadow: 0 1px 0 var(--hairline), 0 8px 16px -12px rgba(0, 0, 0, 0.18);
 }
 
-.themeSep { width:1px; height:18px; background:var(--border-subtle); flex-shrink:0; margin:0 var(--space-1); }
-.left,.right { display:flex; align-items:center; gap:var(--space-3); }
-.platformName { font-size:var(--text-body); font-weight:600; line-height:var(--leading-body); color:var(--text-primary); }
-.modeBadge { font-size:var(--text-micro); line-height:var(--leading-micro); font-weight:700; letter-spacing:var(--tracking-micro); text-transform:uppercase; padding:3px 8px; border-radius:var(--radius-full); }
-.mode_local  { background:var(--data-subtle);    color:var(--data); }
-.mode_demo   { background:var(--accent-subtle);   color:var(--accent); }
-.mode_prod   { background:var(--success-subtle);  color:var(--success); }
-.uptime  { font-size:var(--text-sm); line-height:var(--leading-sm); font-family:var(--font-mono); color:var(--text-muted); }
-.version { font-size:var(--text-xs); line-height:var(--leading-xs); font-family:var(--font-mono); color:var(--text-disabled); }
+.left, .right { display: flex; align-items: center; gap: var(--space-3); }
+
+.themeBtn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.themeBtn:hover { background: var(--bg-muted); color: var(--text-primary); }
+.themeBtn:active { transform: scale(var(--press-scale)); }
+
+@media (max-width: 900px) {
+  .topBar { padding: 0 var(--space-4); }
+}

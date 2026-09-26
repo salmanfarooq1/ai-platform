@@ -1,4 +1,17 @@
-/* Card.module.css */
-.card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-lg); padding:var(--space-5); transition:border-color var(--transition-fast); }
-.card.accent { border-color:var(--border-accent); box-shadow:var(--shadow-accent); }
-.title { font-size:0.8125rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:var(--space-4); }
+/* Cards: solid surface, hairline border, shadow-sm (BRANDING.md §8, §10) */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.card.accent { border-color: var(--brand-tint); }
+.title {
+  font-size: var(--text-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caption);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-4);
+}

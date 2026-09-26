@@ -1,5 +1,29 @@
-/* Layout.module.css */
-.shell { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
-.body  { display:flex; flex:1; overflow:hidden; }
-.main  { flex:1; overflow-y:auto; padding:var(--space-8); contain:layout style; }
-@media (max-width:768px) { .main { padding:var(--space-4); } }
+.shell { display: flex; height: 100vh; overflow: hidden; background: var(--bg-canvas); }
+
+.contentArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) 40px 48px;
+}
+
+@media (max-width: 1024px) {
+  .container { padding: var(--space-5) 24px 48px; }
+}
+
+@media (max-width: 900px) {
+  .container { padding: var(--space-4) 16px 88px; } /* room for bottom tab bar */
+}

@@ -1,0 +1,19 @@
+.page { display: flex; flex-direction: column; gap: var(--space-6); }
+.header p { margin-top: 4px; }
+
+.section { display: flex; flex-direction: column; gap: var(--space-3); }
+.sTitle { font-size: var(--text-title-2); font-weight: 600; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-4); }
+
+.tile { display: flex; flex-direction: column; gap: var(--space-2); }
+.tileLabel { font-size: var(--text-caption); font-weight: 600; text-transform: uppercase; letter-spacing: var(--tracking-caption); color: var(--text-tertiary); }
+.tileValue { font-size: var(--text-title-1); font-weight: 700; font-variant-numeric: tabular-nums; }
+.tileSub { font-size: var(--text-footnote); color: var(--text-secondary); }
+
+.svcHeader { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
+.svcName { font-size: var(--text-headline); font-weight: 600; }
+.svcStatus { font-size: var(--text-footnote); font-weight: 600; }
+.svcStatus.ok      { color: var(--success); }
+.svcStatus.error   { color: var(--danger); }
+.svcStatus.unknown { color: var(--text-tertiary); }

@@ -1,45 +1,25 @@
-import StatusDot from '../ui/StatusDot'
-import Toggle from '../ui/Toggle'
+import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '../../hooks/useTheme'
+import CollectionPicker from './CollectionPicker'
 import styles from './TopBar.module.css'
 
-export default function TopBar({ health }) {
-  const isHealthy = health?.status === 'ok'
-  const mode = health?.mode ?? '—'
+export default function TopBar({ scrolled }) {
   const { isDark, toggleDark } = useTheme()
 
-  function formatUptime(s) {
-    if (!s) return '—'
-    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60)
-    return h > 0 ? `${h}h ${m}m` : `${m}m`
-  }
-
   return (
-    <header className={styles.topBar} role="banner">
+    <header className={[styles.topBar, scrolled ? styles.scrolled : ''].join(' ')} role="banner">
       <div className={styles.left}>
-        <StatusDot
-          status={health === null ? 'unknown' : isHealthy ? 'ok' : 'error'}
-          aria-label={`System: ${health === null ? 'checking' : isHealthy ? 'healthy' : 'degraded'}`}
-        />
-        <span className={styles.platformName}>AI Platform</span>
+        <CollectionPicker />
       </div>
       <div className={styles.right}>
-        {health && (
-          <>
-            <span className={`${styles.modeBadge} ${styles[`mode_${mode}`]}`}>
-              {mode.toUpperCase()}
-            </span>
-            <span className={styles.uptime} title="Uptime">↑ {formatUptime(health.uptime_seconds)}</span>
-          </>
-        )}
-        <span className={styles.version}>{health?.version ?? ''}</span>
-        <div className={styles.themeSep} aria-hidden="true" />
-        <Toggle
-          id="theme-toggle"
-          label={isDark ? '🌙' : '☀️'}
-          checked={isDark}
-          onChange={toggleDark}
-        />
+        <button
+          type="button"
+          className={styles.themeBtn}
+          onClick={toggleDark}
+          aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+        >
+          {isDark ? <Moon size={18} strokeWidth={1.75} /> : <Sun size={18} strokeWidth={1.75} />}
+        </button>
       </div>
     </header>
   )

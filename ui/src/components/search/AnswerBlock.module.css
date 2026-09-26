@@ -1,15 +1,18 @@
-/* AnswerBlock.module.css */
-.wrapper { padding:var(--space-5); background:var(--bg-elevated); border-radius:var(--radius-lg); border:1px solid var(--border-default); border-left:3px solid var(--accent); }
-.answer { font-size:0.9375rem; line-height:1.7; color:var(--text-primary); }
-.answer :global(p) { margin-bottom:var(--space-3); color:var(--text-primary); }
-.answer :global(p:last-child) { margin-bottom:0; }
-.answer :global(strong) { font-weight:700; }
-.answer :global(code) { font-family:var(--font-mono); font-size:0.85em; background:var(--bg-sunken); padding:2px 6px; border-radius:var(--radius-sm); color:var(--accent); }
-.answer :global(pre) { background:var(--bg-sunken); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:var(--space-4); overflow-x:auto; margin:var(--space-4) 0; }
-.answer :global(pre code) { background:none; padding:0; color:var(--text-primary); }
-.answer :global(ul),.answer :global(ol) { padding-left:var(--space-6); margin-bottom:var(--space-3); }
-.answer :global(li) { margin-bottom:var(--space-1); color:var(--text-primary); }
-.answer :global(table) { width:100%; border-collapse:collapse; font-size:0.875rem; margin:var(--space-4) 0; }
-.answer :global(th),.answer :global(td) { padding:var(--space-2) var(--space-3); border:1px solid var(--border-subtle); }
-.answer :global(th) { background:var(--bg-sunken); font-weight:600; color:var(--text-secondary); }
-.answer :global(blockquote) { border-left:3px solid var(--border-strong); padding-left:var(--space-4); color:var(--text-muted); margin:var(--space-4) 0; }
+/* Answer panel body — solid surface, max 68ch prose (BRANDING.md §8) */
+.wrapper { max-width: 68ch; }
+.answer { font-size: var(--text-body); line-height: var(--leading-body); color: var(--text-primary); }
+.answer :global(p) { margin-bottom: var(--space-3); color: var(--text-primary); }
+.answer :global(p:last-child) { margin-bottom: 0; }
+.answer :global(strong) { font-weight: 700; }
+.answer :global(code) { font-family: var(--font-mono); font-size: 0.85em; background: var(--bg-muted); padding: 2px 6px; border-radius: var(--radius-sm); color: var(--brand); }
+.answer :global(pre) { background: var(--bg-muted); border: 1px solid var(--hairline); border-radius: var(--radius-md); padding: var(--space-4); overflow-x: auto; margin: var(--space-4) 0; }
+.answer :global(pre code) { background: none; padding: 0; color: var(--text-primary); }
+.answer :global(ul), .answer :global(ol) { padding-left: var(--space-6); margin-bottom: var(--space-3); }
+.answer :global(li) { margin-bottom: var(--space-1); color: var(--text-primary); }
+.answer :global(table) { width: 100%; border-collapse: collapse; font-size: var(--text-footnote); margin: var(--space-4) 0; }
+.answer :global(th), .answer :global(td) { padding: var(--space-2) var(--space-3); border: 1px solid var(--hairline); }
+.answer :global(th) { background: var(--bg-muted); font-weight: 600; color: var(--text-secondary); }
+.answer :global(blockquote) { border-left: 3px solid var(--hairline); padding-left: var(--space-4); color: var(--text-tertiary); margin: var(--space-4) 0; }
+
+/* Inline citation markers [1] render as small brand-tint pills (§8) */
+.answer :global(.cite-marker) { display: inline-flex; background: var(--brand-tint); color: var(--brand); border-radius: var(--radius-sm); padding: 0 5px; font-size: 0.8em; font-weight: 600; }

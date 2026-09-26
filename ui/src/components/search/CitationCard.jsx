@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import Badge from '../ui/Badge'
 import styles from './CitationCard.module.css'
 
-export default function CitationCard({ result, index }) {
+export default function CitationCard({ result, index, selected = false }) {
   const [expanded, setExpanded] = useState(false)
   const { document_id, namespace, content, score, metadata } = result
   const chunkIndex = metadata?.chunk_index
@@ -15,15 +16,15 @@ export default function CitationCard({ result, index }) {
   }
   // RRF scores are <0.1; vector scores are 0.1-1.0
   function formatScore(s) {
-    return s < 0.1 ? s.toFixed(4) : `${Math.round(s*100)}%`
+    return s < 0.1 ? s.toFixed(4) : `${Math.round(s * 100)}%`
   }
   const preview = content.slice(0, 180)
 
   return (
-    <div className={styles.card}>
+    <div id={`citation-${index}`} className={[styles.card, selected ? styles.selected : ''].join(' ')}>
       <div className={styles.header}>
         <div className={styles.source}>
-          <span className={styles.index} aria-label={`Citation ${index+1}`}>[{index+1}]</span>
+          <span className={styles.index} aria-label={`Citation ${index + 1}`}>[{index + 1}]</span>
           <span className={styles.docId} title={document_id}>{document_id}</span>
           {chunkIndex != null && <span className={styles.chunk}>chunk #{chunkIndex}</span>}
         </div>
@@ -36,6 +37,7 @@ export default function CitationCard({ result, index }) {
         <p className={styles.text}>{expanded ? content : preview}{!expanded && content.length > 180 && '…'}</p>
         {content.length > 180 && (
           <button className={styles.expandBtn} onClick={() => setExpanded(e => !e)} aria-expanded={expanded}>
+            {expanded ? <ChevronUp size={14} strokeWidth={1.75} /> : <ChevronDown size={14} strokeWidth={1.75} />}
             {expanded ? 'Show less' : 'Show full excerpt'}
           </button>
         )}

@@ -1,3 +1,4 @@
+import { Zap, RotateCcw } from 'lucide-react'
 import Badge from '../ui/Badge'
 import styles from './MetaBar.module.css'
 
@@ -19,19 +20,20 @@ export default function MetaBar({ headers }) {
     <div className={styles.metaBar} role="status" aria-label="Query metadata">
       {cache && (
         <Badge variant={isHit ? 'success' : 'neutral'} title={isHit ? 'Cache hit — no LLM call' : 'Cache miss — full RAG pipeline'}>
-          {isHit ? `⚡ ${cacheType === 'semantic' ? 'Semantic' : 'Exact'} Hit` : '↻ Cache Miss'}
+          {isHit ? <Zap size={12} strokeWidth={1.75} /> : <RotateCcw size={12} strokeWidth={1.75} />}
+          {isHit ? `${cacheType === 'semantic' ? 'Semantic' : 'Exact'} hit` : 'Cache miss'}
         </Badge>
       )}
       {costUsd && parseFloat(costUsd) >= 0 && (
         <span className={styles.chip} title="LLM cost">
           <span className={styles.label}>Cost</span>
-          <span className={styles.value} style={{color:'var(--accent)'}}>{formatCost(costUsd) ?? '$0.000000'}</span>
+          <span className={styles.value} style={{color:'var(--brand)'}}>{formatCost(costUsd) ?? '$0.000000'}</span>
         </span>
       )}
       {tokensIn && tokensOut && (
         <span className={styles.chip} title="Token usage">
           <span className={styles.label}>Tokens</span>
-          <span className={styles.value} style={{color:'var(--data)'}}>{tokensIn} in / {tokensOut} out</span>
+          <span className={styles.value} style={{color:'var(--info)'}}>{tokensIn} in / {tokensOut} out</span>
         </span>
       )}
       {processTime && (
