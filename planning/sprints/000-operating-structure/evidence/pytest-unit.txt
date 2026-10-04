@@ -1,0 +1,65 @@
+Running teardown with pytest sessionfinish...
+
+==================================== ERRORS ====================================
+___________________ ERROR collecting tests/unit/test_llm.py ____________________
+ImportError while importing test module '/home/user/ai-platform/tests/unit/test_llm.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_llm.py:8: in <module>
+    from api.services.llm import classify_query_complexity
+E   ImportError: cannot import name 'classify_query_complexity' from 'api.services.llm' (/home/user/ai-platform/api/services/llm.py)
+=========================== short test summary info ============================
+ERROR tests/unit/test_llm.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+2 deselected, 1 error in 7.27s
+............F......F.F...............................................    [100%]Running teardown with pytest sessionfinish...
+
+=================================== FAILURES ===================================
+______ test_combine_usage_sums_reasoning_and_verifier_and_synthesis_cost _______
+
+    def test_combine_usage_sums_reasoning_and_verifier_and_synthesis_cost():
+        result = {
+            "reasoning_usage": [{"prompt_tokens": 100, "completion_tokens": 20, "cost": 0.001}],
+            "verifier_usage": [{"prompt_tokens": 50, "completion_tokens": 10, "cost": 0.0005}],
+            "synthesis_usage": [{"prompt_tokens": 10, "completion_tokens": 10, "cost": 0.004}],
+            "model_used": "groq/meta-llama/llama-4-scout-17b-16e-instruct",
+        }
+        usage = _combine_usage(result)
+>       assert usage["total_cost"] == pytest.approx(0.0000312)
+E       assert 0.0 == 3.12e-05 ± 3.1e-11
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 3.12e-05 ± 3.1e-11
+
+tests/unit/test_agent_tools.py:123: AssertionError
+____________________ test_model_pricing_has_required_models ____________________
+
+    def test_model_pricing_has_required_models():
+        """All models used in LLM_CONFIG must have pricing entries."""
+        required = [
+            "groq/meta-llama/llama-4-scout-17b-16e-instruct",
+        ]
+        for model in required:
+>           assert model in MODEL_PRICING, f"Missing pricing for {model}"
+E           AssertionError: Missing pricing for groq/meta-llama/llama-4-scout-17b-16e-instruct
+E           assert 'groq/meta-llama/llama-4-scout-17b-16e-instruct' in {'azure/gpt-4o': {'input': 2.5, 'output': 10.0}, 'groq/llama-3.1-70b-versatile': {'input': 0.59, 'output': 0.79}, 'openai/gpt-oss-120b': {'input': 0.11, 'output': 0.34}}
+
+tests/unit/test_finops.py:13: AssertionError
+________________________ test_cost_calculation_formula _________________________
+
+    def test_cost_calculation_formula():
+        """Verify the cost formula matches what finops.py uses."""
+>       rates = MODEL_PRICING["groq/meta-llama/llama-4-scout-17b-16e-instruct"]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'groq/meta-llama/llama-4-scout-17b-16e-instruct'
+
+tests/unit/test_finops.py:27: KeyError
+=========================== short test summary info ============================
+FAILED tests/unit/test_agent_tools.py::test_combine_usage_sums_reasoning_and_verifier_and_synthesis_cost
+FAILED tests/unit/test_finops.py::test_model_pricing_has_required_models - As...
+FAILED tests/unit/test_finops.py::test_cost_calculation_formula - KeyError: '...
+3 failed, 66 passed, 2 deselected in 7.30s

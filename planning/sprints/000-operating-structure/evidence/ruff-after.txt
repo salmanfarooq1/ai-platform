@@ -1,0 +1,609 @@
+W291 Trailing whitespace
+  --> api/agent/graph.py:32:79
+   |
+30 |     concatenation (add) (one entry per LLM call in that role). Both MUST
+31 |     be initialized as empty lists wherever ainvoke() is first called
+32 |     (Task 7). Without that initialization, LangGraph raises InvalidUpdateError 
+   |                                                                               ^
+33 |     the first time agent_node tries to append to a key that was never in state.
+   |
+help: Remove trailing whitespace
+
+W293 [*] Blank line contains whitespace
+  --> api/agent/router.py:59:1
+   |
+57 |     prompt_tokens = sum(u.get("prompt_tokens", 0) for u in all_calls)
+58 |     completion_tokens = sum(u.get("completion_tokens", 0) for u in all_calls)
+59 |     
+   | ^^^^
+60 |     model = result.get("model_used", "")
+61 |     llm_cost = 0.0
+   |
+help: Remove whitespace from blank line
+   |
+58 |     completion_tokens = sum(u.get("completion_tokens", 0) for u in all_calls)
+   -     
+59 +
+60 |     model = result.get("model_used", "")
+   |
+
+W293 [*] Blank line contains whitespace
+  --> api/agent/router.py:79:1
+   |
+77 | async def agent_query(request: Request, response: Response, payload: AgentRequest) -> AgentResponse:
+78 |     start = time.perf_counter()
+79 |     
+   | ^^^^
+80 |     guard = check_input(payload.question)
+81 |     if guard.blocked:
+   |
+help: Remove whitespace from blank line
+   |
+78 |     start = time.perf_counter()
+   -     
+79 +
+80 |     guard = check_input(payload.question)
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> api/main.py:1:1
+   |
+ 1 | / import os
+ 2 | | from contextlib import asynccontextmanager
+ 3 | |
+ 4 | | from fastapi import FastAPI
+ 5 | | from fastapi.middleware.cors import CORSMiddleware
+ 6 | |
+ 7 | | from api.agent.graph import build_agent_graph
+ 8 | | from api.agent.router import router as agent_router
+ 9 | | from api.mcp.transport import init_mcp_context, router as mcp_router, sse_transport
+10 | | from api.middleware.finops import FinOpsMiddleware
+11 | | from api.middleware.logging import LatencyMiddleware, LoggingMiddleware, RequestIDMiddleware
+12 | | from api.middleware.rate_limit import RateLimitMiddleware
+13 | | from api.middleware.token_budget import TokenBudgetMiddleware
+14 | | from api.routers.analytics import router as analytics_router
+15 | | from api.routers.config import router as config_router
+16 | | from api.routers.docs import router as docs_router
+17 | | from api.routers.feedback import router as feedback_router
+18 | | from api.routers.health import router as health_router
+19 | | from api.routers.ingest import router as ingest_router
+20 | | from api.routers.search import router as search_router
+21 | | from api.services.cache import close_redis, create_semantic_cache_index, get_redis
+22 | | from core.database.pool import create_pool
+   | |__________________________________________^
+   |
+help: Organize imports
+   |
+8  | from api.agent.router import router as agent_router
+   - from api.mcp.transport import init_mcp_context, router as mcp_router, sse_transport
+9  + from api.mcp.transport import init_mcp_context, sse_transport
+10 + from api.mcp.transport import router as mcp_router
+11 | from api.middleware.finops import FinOpsMiddleware
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> api/mcp/transport.py:16:1
+   |
+14 |   can access shared resources without global mutable state.
+15 |   """
+16 | / import logging
+17 | |
+18 | | from asyncpg import Pool
+19 | | from fastapi import APIRouter, Request
+20 | |
+21 | | from api.mcp.server import mcp
+22 | |
+23 | | # Import modules so their decorators register on the mcp instance above.
+24 | | import api.mcp.tools      # noqa: F401
+25 | | import api.mcp.resources  # noqa: F401
+26 | | import api.mcp.prompts    # noqa: F401
+27 | |
+28 | | from mcp.server.sse import SseServerTransport
+   | |_____________________________________________^
+29 |
+30 |   logger = logging.getLogger("api.mcp.transport")
+   |
+help: Organize imports
+   |
+19 | from fastapi import APIRouter, Request
+20 + from mcp.server.sse import SseServerTransport
+21 |
+   - from api.mcp.server import mcp
+   -
+   - # Import modules so their decorators register on the mcp instance above.
+   - import api.mcp.tools      # noqa: F401
+22 + import api.mcp.prompts  # noqa: F401
+23 | import api.mcp.resources  # noqa: F401
+   - import api.mcp.prompts    # noqa: F401
+24 |
+   - from mcp.server.sse import SseServerTransport
+25 + # Import modules so their decorators register on the mcp instance above.
+26 + import api.mcp.tools  # noqa: F401
+27 + from api.mcp.server import mcp
+28 |
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> api/services/llm.py:1:1
+  |
+1 | / import json
+2 | | import logging
+3 | | from typing import Any
+4 | | import litellm
+5 | | from pydantic import BaseModel, Field
+6 | | from api.models.schemas import SearchResult
+7 | | from config import LLM_CONFIG, MODEL_PRICING
+  | |____________________________________________^
+8 |
+9 |   logger = logging.getLogger("api.services.llm")
+  |
+help: Organize imports
+  |
+3 | from typing import Any
+4 +
+5 | import litellm
+6 | from pydantic import BaseModel, Field
+7 +
+8 | from api.models.schemas import SearchResult
+  |
+
+F401 [*] `json` imported but unused
+ --> api/services/llm.py:1:8
+  |
+1 | import json
+  |        ^^^^
+2 | import logging
+3 | from typing import Any
+  |
+help: Remove unused import: `json`
+  |
+  - import json
+1 | import logging
+  |
+
+F401 [*] `typing.Any` imported but unused
+ --> api/services/llm.py:3:20
+  |
+1 | import json
+2 | import logging
+3 | from typing import Any
+  |                    ^^^
+4 | import litellm
+5 | from pydantic import BaseModel, Field
+  |
+help: Remove unused import: `typing.Any`
+  |
+2 | import logging
+  - from typing import Any
+3 | import litellm
+  |
+
+F401 [*] `api.models.schemas.SearchResult` imported but unused
+ --> api/services/llm.py:6:32
+  |
+4 | import litellm
+5 | from pydantic import BaseModel, Field
+6 | from api.models.schemas import SearchResult
+  |                                ^^^^^^^^^^^^
+7 | from config import LLM_CONFIG, MODEL_PRICING
+  |
+help: Remove unused import: `api.models.schemas.SearchResult`
+  |
+5 | from pydantic import BaseModel, Field
+  - from api.models.schemas import SearchResult
+6 | from config import LLM_CONFIG, MODEL_PRICING
+  |
+
+W291 Trailing whitespace
+  --> api/services/retriever.py:96:83
+   |
+94 |     Why the nested SQL query (SELECT * FROM (SELECT ...))?
+95 |     Postgres processes the WHERE clause before it processes the SELECT clause.
+96 |     If we calculate the vector_score inside the SELECT, Postgres doesn't know what 
+   |                                                                                   ^
+97 |     "vector_score" is when it hits the WHERE clause, unless we type the whole math formula again!
+   |
+help: Remove trailing whitespace
+
+W293 Blank line contains whitespace
+   --> api/services/retriever.py:98:1
+    |
+ 96 |     If we calculate the vector_score inside the SELECT, Postgres doesn't know what 
+ 97 |     "vector_score" is when it hits the WHERE clause, unless we type the whole math formula again!
+ 98 |     
+    | ^^^^
+ 99 |     To avoid making the database do the math twice, we use a subquery:
+100 |     1. The inner query does the math once and labels it 'vector_score'.
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> api/services/retriever.py:102:1
+    |
+100 |     1. The inner query does the math once and labels it 'vector_score'.
+101 |     2. The outer query can now safely filter using WHERE vector_score > min_score.
+102 |     
+    | ^^^^
+103 |     min_score defaults to config.MIN_VECTOR_SCORE (0.0) so we don't break existing code.
+104 |     """
+    |
+help: Remove whitespace from blank line
+
+W291 [*] Trailing whitespace
+  --> tests/unit/test_agent_tools.py:72:27
+   |
+70 | def test_verify_router_retries_when_unsupported_and_retries_remain():
+71 |     state = {
+72 |         "verified": False, 
+   |                           ^
+73 |         "verify_retries_left": 1,
+74 |         "messages": [HumanMessage(content="[Verifier feedback] needs info")]
+   |
+help: Remove trailing whitespace
+   |
+71 |     state = {
+   -         "verified": False, 
+72 +         "verified": False,
+73 |         "verify_retries_left": 1,
+   |
+
+W291 [*] Trailing whitespace
+  --> tests/unit/test_agent_tools.py:81:27
+   |
+79 | def test_verify_router_ends_when_retries_exhausted():
+80 |     state = {
+81 |         "verified": False, 
+   |                           ^
+82 |         "verify_retries_left": 0,
+83 |         "messages": [HumanMessage(content="Draft answer")]
+   |
+help: Remove trailing whitespace
+   |
+80 |     state = {
+   -         "verified": False, 
+81 +         "verified": False,
+82 |         "verify_retries_left": 0,
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+   --> tests/unit/test_agent_tools.py:153:5
+    |
+151 |       """Integration test for the router to verify it properly initializes
+152 |       reducer lists and passes them to the graph."""
+153 | /     from fastapi.testclient import TestClient
+154 | |     from fastapi import FastAPI
+155 | |     from api.agent.router import router as agent_router
+    | |_______________________________________________________^
+156 |
+157 |       app = FastAPI()
+    |
+help: Organize imports
+    |
+152 |     reducer lists and passes them to the graph."""
+153 +     from fastapi import FastAPI
+154 |     from fastapi.testclient import TestClient
+    -     from fastapi import FastAPI
+155 +
+156 |     from api.agent.router import router as agent_router
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:189:1
+    |
+187 |     """Integration test covering TG-1 (end to end) and TG-2 (verify-retry loop)."""
+188 |     import api.agent.graph as graph_module
+189 |     
+    | ^^^^
+190 |     call_count = {"agent": 0, "verifier": 0}
+    |
+help: Remove whitespace from blank line
+    |
+188 |     import api.agent.graph as graph_module
+    -     
+189 +
+190 |     call_count = {"agent": 0, "verifier": 0}
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:191:1
+    |
+190 |     call_count = {"agent": 0, "verifier": 0}
+191 |     
+    | ^^^^
+192 |     class FakeAgentModel:
+193 |         def bind_tools(self, tools):
+    |
+help: Remove whitespace from blank line
+    |
+190 |     call_count = {"agent": 0, "verifier": 0}
+    -     
+191 +
+192 |     class FakeAgentModel:
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:195:1
+    |
+193 |         def bind_tools(self, tools):
+194 |             return self
+195 |             
+    | ^^^^^^^^^^^^
+196 |         async def ainvoke(self, messages):
+197 |             call_count["agent"] += 1
+    |
+help: Remove whitespace from blank line
+    |
+194 |             return self
+    -             
+195 +
+196 |         async def ainvoke(self, messages):
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:217:1
+    |
+216 |     monkeypatch.setattr(graph_module, "ChatLiteLLM", fake_chat_lite_llm)
+217 |     
+    | ^^^^
+218 |     async def fake_generate(question, db_chunks):
+219 |         from api.models.schemas import GeneratedAnswer
+    |
+help: Remove whitespace from blank line
+    |
+216 |     monkeypatch.setattr(graph_module, "ChatLiteLLM", fake_chat_lite_llm)
+    -     
+217 +
+218 |     async def fake_generate(question, db_chunks):
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:228:1
+    |
+226 |         )
+227 |         return ans, {"total_cost": 0.01, "prompt_tokens": 10, "completion_tokens": 10}
+228 |         
+    | ^^^^^^^^
+229 |     monkeypatch.setattr("api.services.llm.generate_with_routing", fake_generate)
+    |
+help: Remove whitespace from blank line
+    |
+227 |         return ans, {"total_cost": 0.01, "prompt_tokens": 10, "completion_tokens": 10}
+    -         
+228 +
+229 |     monkeypatch.setattr("api.services.llm.generate_with_routing", fake_generate)
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:230:1
+    |
+229 |     monkeypatch.setattr("api.services.llm.generate_with_routing", fake_generate)
+230 |     
+    | ^^^^
+231 |     class FakePool:
+232 |         pass
+    |
+help: Remove whitespace from blank line
+    |
+229 |     monkeypatch.setattr("api.services.llm.generate_with_routing", fake_generate)
+    -     
+230 +
+231 |     class FakePool:
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:233:1
+    |
+231 |     class FakePool:
+232 |         pass
+233 |         
+    | ^^^^^^^^
+234 |     from langchain_core.tools import tool
+235 |     @tool
+    |
+help: Remove whitespace from blank line
+    |
+232 |         pass
+    -         
+233 +
+234 |     from langchain_core.tools import tool
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:239:1
+    |
+237 |         """Fake retrieve tool."""
+238 |         return json.dumps({"chunks": [{"document_id": "doc1", "chunk_index": 0, "content": "fake content"}]})
+239 |         
+    | ^^^^^^^^
+240 |     monkeypatch.setattr(graph_module, "make_retrieve_tool", lambda pool: fake_retrieve)
+    |
+help: Remove whitespace from blank line
+    |
+238 |         return json.dumps({"chunks": [{"document_id": "doc1", "chunk_index": 0, "content": "fake content"}]})
+    -         
+239 +
+240 |     monkeypatch.setattr(graph_module, "make_retrieve_tool", lambda pool: fake_retrieve)
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:241:1
+    |
+240 |     monkeypatch.setattr(graph_module, "make_retrieve_tool", lambda pool: fake_retrieve)
+241 |     
+    | ^^^^
+242 |     graph = graph_module.build_agent_graph(FakePool())
+    |
+help: Remove whitespace from blank line
+    |
+240 |     monkeypatch.setattr(graph_module, "make_retrieve_tool", lambda pool: fake_retrieve)
+    -     
+241 +
+242 |     graph = graph_module.build_agent_graph(FakePool())
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:243:1
+    |
+242 |     graph = graph_module.build_agent_graph(FakePool())
+243 |     
+    | ^^^^
+244 |     result = await graph.ainvoke({
+245 |         "messages": [HumanMessage(content="Hello")],
+    |
+help: Remove whitespace from blank line
+    |
+242 |     graph = graph_module.build_agent_graph(FakePool())
+    -     
+243 +
+244 |     result = await graph.ainvoke({
+    |
+
+W293 [*] Blank line contains whitespace
+   --> tests/unit/test_agent_tools.py:252:1
+    |
+250 |         "verify_retries_left": 1
+251 |     }, config={"recursion_limit": 10})
+252 |     
+    | ^^^^
+253 |     assert call_count["agent"] == 3
+254 |     assert call_count["verifier"] == 2
+    |
+help: Remove whitespace from blank line
+    |
+251 |     }, config={"recursion_limit": 10})
+    -     
+252 +
+253 |     assert call_count["agent"] == 3
+    |
+
+F401 [*] `pytest` imported but unused
+ --> tests/unit/test_finops.py:2:8
+  |
+1 | """Tests for FinOps middleware pricing logic."""
+2 | import pytest
+  |        ^^^^^^
+3 |
+4 | from config import MODEL_PRICING
+  |
+help: Remove unused import: `pytest`
+  |
+1 | """Tests for FinOps middleware pricing logic."""
+  - import pytest
+2 |
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests/unit/test_mcp_tools.py:72:5
+   |
+70 |   async def test_multi_namespace_defaults_to_all():
+71 |       """multi_namespace_search with no explicit list should use all known namespaces."""
+72 | /     from unittest.mock import patch, AsyncMock
+73 | |     from config import NAMESPACE_REGISTRY
+74 | |     import json
+   | |_______________^
+75 |       
+76 |       with patch("api.mcp.tools.search_documents", new_callable=AsyncMock) as mock_search:
+   |
+help: Organize imports
+   |
+71 |     """multi_namespace_search with no explicit list should use all known namespaces."""
+   -     from unittest.mock import patch, AsyncMock
+   -     from config import NAMESPACE_REGISTRY
+72 |     import json
+73 +     from unittest.mock import AsyncMock, patch
+74 +
+75 +     from config import NAMESPACE_REGISTRY
+76 |     
+   |
+
+W293 [*] Blank line contains whitespace
+  --> tests/unit/test_mcp_tools.py:75:1
+   |
+73 |     from config import NAMESPACE_REGISTRY
+74 |     import json
+75 |     
+   | ^^^^
+76 |     with patch("api.mcp.tools.search_documents", new_callable=AsyncMock) as mock_search:
+77 |         mock_search.return_value = json.dumps({"count": 0, "chunks": []})
+   |
+help: Remove whitespace from blank line
+   |
+74 |     import json
+   -     
+75 +
+76 |     with patch("api.mcp.tools.search_documents", new_callable=AsyncMock) as mock_search:
+   |
+
+W293 [*] Blank line contains whitespace
+  --> tests/unit/test_mcp_tools.py:78:1
+   |
+76 |     with patch("api.mcp.tools.search_documents", new_callable=AsyncMock) as mock_search:
+77 |         mock_search.return_value = json.dumps({"count": 0, "chunks": []})
+78 |         
+   | ^^^^^^^^
+79 |         from api.mcp.tools import multi_namespace_search
+80 |         await multi_namespace_search(query="test")
+   |
+help: Remove whitespace from blank line
+   |
+77 |         mock_search.return_value = json.dumps({"count": 0, "chunks": []})
+   -         
+78 +
+79 |         from api.mcp.tools import multi_namespace_search
+   |
+
+W293 [*] Blank line contains whitespace
+  --> tests/unit/test_mcp_tools.py:81:1
+   |
+79 |         from api.mcp.tools import multi_namespace_search
+80 |         await multi_namespace_search(query="test")
+81 |         
+   | ^^^^^^^^
+82 |         assert mock_search.call_count == len(NAMESPACE_REGISTRY)
+   |
+help: Remove whitespace from blank line
+   |
+80 |         await multi_namespace_search(query="test")
+   -         
+81 +
+82 |         assert mock_search.call_count == len(NAMESPACE_REGISTRY)
+   |
+
+W293 [*] Blank line contains whitespace
+  --> tests/unit/test_mcp_tools.py:83:1
+   |
+82 |         assert mock_search.call_count == len(NAMESPACE_REGISTRY)
+83 |         
+   | ^^^^^^^^
+84 |         # Verify it passed each namespace exactly once
+85 |         called_namespaces = [call.kwargs.get("namespace") for call in mock_search.mock_calls]
+   |
+help: Remove whitespace from blank line
+   |
+82 |         assert mock_search.call_count == len(NAMESPACE_REGISTRY)
+   -         
+83 +
+84 |         # Verify it passed each namespace exactly once
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> tests/unit/test_usage.py:2:1
+  |
+1 |   """Tests for usage persistence service."""
+2 | / import pytest
+3 | | from unittest.mock import AsyncMock, MagicMock
+  | |______________________________________________^
+  |
+help: Organize imports
+  |
+1 | """Tests for usage persistence service."""
+  - import pytest
+2 | from unittest.mock import AsyncMock, MagicMock
+3 |
+4 + import pytest
+5 +
+6 |
+  |
+
+Found 33 errors.
+[*] 29 fixable with the `--fix` option (4 hidden fixes can be enabled with the `--unsafe-fixes` option).

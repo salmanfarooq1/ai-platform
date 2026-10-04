@@ -1,0 +1,4 @@
+.gitignore:2:.env.*	.env.demo
+.gitignore:2:.env.*	.env.public-preview
+.gitignore:2:.env.*	.env.local
+.env.example ignored? exit=1 (1 = not ignored)

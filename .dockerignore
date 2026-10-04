@@ -3,12 +3,11 @@
 __pycache__
 *.pyc
 .venv
-.env
-.env.local
-.env.demo
-.env.prod
 benchmarks/
 scripts/
 tests/
 docs/
 w8_plan.md
+.env
+.env.*
+!.env.example

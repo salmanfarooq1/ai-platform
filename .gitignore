@@ -1,7 +1,6 @@
 .env
-.env.local
-.env.demo
-.env.prod
+.env.*
+!.env.example
 __pycache__
 .venv/
 scripts/test_data/
@@ -26,3 +25,6 @@ scratch/
 node_modules/
 ui/node_modules/
 ui/dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

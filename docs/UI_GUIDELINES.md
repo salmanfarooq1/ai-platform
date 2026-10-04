@@ -1,4 +1,4 @@
-# Verity — Product Branding Guidelines
+# UI guidelines
 
 > Version 1.0.0 · September 2026
 > Authoritative reference for the ai-platform web UI (`ui/`).
@@ -8,9 +8,9 @@
 
 ## Overview
 
-Verity is a retrieval and reasoning workspace. People ask questions about their documents. Verity answers with citations, a confidence level, and a record of how it got there.
+The platform is a retrieval and reasoning workspace. People ask questions about their documents. It answers with citations, a confidence level, and a record of how it got there.
 
-The whole brand serves one feeling: **calm confidence**. Every answer should look traceable, not magical.
+The whole UI serves one feeling: **calm confidence**. Every answer should look traceable, not magical.
 
 **Three non-negotiable rules:**
 
@@ -20,23 +20,7 @@ The whole brand serves one feeling: **calm confidence**. Every answer should loo
 
 ---
 
-## 1. Name & Tagline
-
-| Property | Value |
-|---|---|
-| **Product name** | Verity |
-| **Tagline** | Answers you can trace. |
-| **Capitalisation** | Title case name. Sentence case tagline. |
-| **Page `<title>`** | `Verity — <Page name>` (e.g. `Verity — Ask`) |
-| **Hero headline** | `Answers you can <em>trace</em>.` |
-
-The accent word in a hero headline is always the **verb that proves trust**: *trace*, *verify*, *cite*. It is set in italic and in Brand Ink Blue.
-
-The name and tagline live in one config object (`ui/src/brand.js`). Never hardcode them in components.
-
----
-
-## 2. Logo
+## 1. Logo
 
 ### Logo mark
 
@@ -61,27 +45,25 @@ A **rounded square with three stacked lines**, where the last line is shorter an
 ### Lockup
 
 ```
-[mark]  Verity
-        ANSWERS YOU CAN TRACE
+[mark]  Governed Agent Platform
 ```
 
 | Element | Style |
 |---|---|
 | Name | 15px, weight 700, tracking `-0.01em` |
-| Tagline | 10px, weight 600, uppercase, tracking `0.06em`, `--text-tertiary` |
 | Gap | 10px |
 
 Collapsed sidebar or mobile top bar: mark only.
 
 ---
 
-## 3. Mode Badge
+## 2. Mode Badge
 
-The platform runs in modes (`demo`, `local`, `prod`) from `/config`. A small pill in the sidebar and on the Overview page shows the mode, so people know what they are talking to.
+The platform runs in modes (`public-preview`, `local`, `prod`) from `/config`. A small pill in the sidebar and on the Overview page shows the mode, so people know what they are talking to.
 
 | Mode | Dot color | Meaning |
 |---|---|---|
-| Demo | Amber `--warning` | Free tier, reduced pipeline (no reranker) |
+| Public preview | Amber `--warning` | Free tier, reduced pipeline (no reranker) |
 | Local | Blue `--brand` | Developer machine |
 | Production | Green `--success` | Full pipeline |
 
@@ -89,7 +71,7 @@ Pill: radius full, 1px `--hairline` border, translucent `--material-thin` fill, 
 
 ---
 
-## 4. Color
+## 3. Color
 
 Apple-style color: neutral, adaptive to light and dark, with one quiet brand color. Color carries **meaning**, not decoration.
 
@@ -122,7 +104,7 @@ Apple's four feedback kinds [§16]: status, completion, warning, error. Each has
 | Token | Light | Dark | Used for |
 |---|---|---|---|
 | `--success` | `#1F9D55` | `#34C77B` | Verified answers, ingest complete, healthy service |
-| `--warning` | `#C27C0E` | `#F0A93B` | Low confidence, partial verification, demo mode |
+| `--warning` | `#C27C0E` | `#F0A93B` | Low confidence, partial verification, public-preview mode |
 | `--danger` | `#D6362F` | `#FF6961` | Errors, guardrail blocks, failed ingest |
 | `--info` | `--brand` | `--brand` | In-progress status, neutral notices |
 
@@ -146,7 +128,7 @@ Gauges and progress bars always use the scale color on a `--bg-muted` track. Nev
 
 ---
 
-## 5. Typography
+## 4. Typography
 
 **One family: Inter** (variable, with optical sizing). Mono: **JetBrains Mono** for IDs, chunk text and code. No display serif. Apple defaults to the system face; Inter is the closest cross-platform match, and falls back to `system-ui` [§15].
 
@@ -173,14 +155,14 @@ Tracking and leading change with size [§15]. Large text is tight. Small text is
 ### Casing rules
 
 - **Sentence case** for buttons, nav items, titles and body. This is the Apple convention: calm, readable.
-- **UPPERCASE only for `caption`**: micro-labels, badges, table headers, the tagline.
+- **UPPERCASE only for `caption`**: micro-labels, badges, table headers.
 - Never uppercase user content, answers or document text.
 - Emphasis uses **weight**, not size or color [§15].
 - Numbers in stats and tables use `font-variant-numeric: tabular-nums`.
 
 ---
 
-## 6. Information Architecture
+## 5. Information Architecture
 
 The old UI had six flat tabs (Dashboard, Search, Agent, Ingest, Analytics, Documents). Two pairs were the same job split in two. Nav labels should name their contents, not vague umbrellas [§16 Wayfinding].
 
@@ -207,7 +189,7 @@ The old UI had six flat tabs (Dashboard, Search, Agent, Ingest, Analytics, Docum
 
 ---
 
-## 7. Layout
+## 6. Layout
 
 ### App shell
 
@@ -215,7 +197,7 @@ The old UI had six flat tabs (Dashboard, Search, Agent, Ingest, Analytics, Docum
 ┌───────────────┬──────────────────────────────────────────────┐
 │ [Logo lockup] │  Top bar (translucent): Collection ▾   Theme │
 │               ├──────────────────────────────────────────────┤
-│ ● DEMO        │                                              │
+│ ● PUBLIC PREVIEW        │                                              │
 │               │   Page title                                 │
 │ Ask           │   Supporting line                            │
 │ Library       │                                              │
@@ -232,15 +214,15 @@ The old UI had six flat tabs (Dashboard, Search, Agent, Ingest, Analytics, Docum
 | Top bar | 56px, sticky, same translucent material. No hard bottom border: use a soft scroll-edge fade that appears only once content scrolls under it [§12] |
 | Content column | `max-width: 1080px`, centered, gutters 40px desktop / 24px tablet / 16px mobile |
 | Vertical rhythm | 24px between major blocks, 48px bottom padding |
-| Canvas | `--bg-canvas` with the ambient wash (Section 11) |
+| Canvas | `--bg-canvas` with the ambient wash (Section 10) |
 
 Below 900px the sidebar becomes a bottom tab bar with the four destinations (icon + label). No horizontal page scroll at any width.
 
 ### Ask page layout
 
 ```
-          ● DEMO · kyc_aml
-     Answers you can *trace*.
+          ● PUBLIC PREVIEW · kyc_aml
+     Ask your documents.
   Ask anything about your documents.
 
 ┌──────────────────────────────────────────┐
@@ -269,7 +251,7 @@ Below 900px the sidebar becomes a bottom tab bar with the four destinations (ico
 
 ---
 
-## 8. Components
+## 7. Components
 
 All values below are CSS tokens in `ui/src/styles/tokens.css`. Components use CSS modules.
 
@@ -382,7 +364,7 @@ Nested corners are concentric: inner radius = outer radius − padding.
 
 ---
 
-## 9. Iconography
+## 8. Iconography
 
 - **Lucide React only** (`lucide-react`). No emoji or Unicode glyphs in UI chrome.
 - Stroke width 1.75. Icons inherit text color.
@@ -391,7 +373,7 @@ Nested corners are concentric: inner radius = outer radius − padding.
 
 ---
 
-## 10. Depth & Materials
+## 9. Depth & Materials
 
 Apple uses translucent layers to show hierarchy [§12].
 
@@ -414,7 +396,7 @@ Rules:
 
 ---
 
-## 11. Ambient Background
+## 10. Ambient Background
 
 A quiet atmosphere, never a flat page, and never loud.
 
@@ -424,7 +406,7 @@ A quiet atmosphere, never a flat page, and never loud.
 
 ---
 
-## 12. Motion
+## 11. Motion
 
 Springs, not durations. Critically damped by default [§4].
 
@@ -447,7 +429,7 @@ Rules:
 
 ---
 
-## 13. Voice & Copy
+## 12. Voice & Copy
 
 - Plain, short sentences. No jargon on the surface; technical detail (RRF, rerank, top-k) lives inside Options and tooltips.
 - Labels name the thing: "Add documents", not "Submit". "Ask", not "Run query".
@@ -458,7 +440,7 @@ Rules:
 
 ---
 
-## 14. Accessibility
+## 13. Accessibility
 
 - Contrast: body text at least 4.5:1, large text 3:1, in both themes.
 - Every interactive element is reachable by keyboard with a visible focus ring (`--brand`, 2px, offset 2px).
@@ -469,7 +451,7 @@ Rules:
 
 ---
 
-## 15. What's Off-Brand
+## 14. What's Off-Brand
 
 | ❌ Never | ✅ Instead |
 |---|---|
