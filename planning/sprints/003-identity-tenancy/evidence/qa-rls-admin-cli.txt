@@ -1,0 +1,98 @@
+$ owner: seed a second tenant + principal + key via admin CLI
+tenant acme created: id=4d905244-2778-496f-b808-2351f175cef5
+key created: prefix=vsnr5y6v scopes=kb:read,query
+KEY (shown once, store it now): gap_vsnr5y6v_<redacted>
+$ gap_app, no app.tenant_id
+ current_user | rolsuper | rolbypassrls 
+--------------+----------+--------------
+ gap_app      | f        | f
+(1 row)
+
+ tenant_setting 
+----------------
+ 
+(1 row)
+
+         t         | count 
+-------------------+-------
+ tenants           |     0
+ principals        |     0
+ api_keys          |     0
+ knowledge_bases   |     0
+ documents         |     0
+ document_registry |     0
+ usage_log         |     0
+ feedback          |     0
+(8 rows)
+
+$ owner
+         t         | count 
+-------------------+-------
+ tenants           |     2
+ principals        |     1
+ api_keys          |     1
+ knowledge_bases   |     4
+ documents         |     6
+ document_registry |     3
+ usage_log         |     3
+ feedback          |     1
+(8 rows)
+
+$ force RLS flags and policies
+      relname      | relrowsecurity | relforcerowsecurity 
+-------------------+----------------+---------------------
+ api_keys          | t              | f
+ document_registry | t              | t
+ documents         | t              | t
+ feedback          | t              | t
+ knowledge_bases   | t              | t
+ principals        | t              | f
+ tenants           | t              | f
+ usage_log         | t              | t
+(8 rows)
+
+     tablename     |    policyname    |  cmd   |                                         qual                                         
+-------------------+------------------+--------+--------------------------------------------------------------------------------------
+ api_keys          | tenant_isolation | ALL    | (tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)
+ document_registry | tenant_isolation | ALL    | (tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)
+ documents         | tenant_isolation | ALL    | (tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)
+ feedback          | tenant_isolation | ALL    | (tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)
+ knowledge_bases   | tenant_isolation | ALL    | (tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)
+ principals        | tenant_isolation | ALL    | (tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)
+ tenants           | tenant_isolation | SELECT | (id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)
+ usage_log         | tenant_isolation | ALL    | (tenant_id = (NULLIF(current_setting('app.tenant_id'::text, true), ''::text))::uuid)
+(8 rows)
+
+$ api_keys row as owner (hash stored, not secret)
+  prefix  |          h          | len |     scopes      | revoked_at 
+----------+---------------------+-----+-----------------+------------
+ vsnr5y6v | b51fa4f795139895... |  64 | {kb:read,query} | 
+(1 row)
+
+ sha256_ok 
+-----------
+ f
+(1 row)
+
+secret occurrences in full dump: 0
+$ list-keys / revoke / revoke again
+vsnr5y6v  acme/bot (service)  scopes=kb:read,query  active  last_used=None
+key vsnr5y6v revoked
+no active key with prefix vsnr5y6v
+exit=0
+  prefix  | revoked 
+----------+---------
+ vsnr5y6v | t
+(1 row)
+
+
+$ redo of the hash check (first run split the secret wrongly on "_": urlsafe secrets can contain it; harness error, not a product bug)
+key created: prefix=8bybu5kn scopes=kb:read,query
+KEY (shown once, store it now): gap_8bybu5kn_<redacted>
+  prefix  | hash_matches | secret_in_row | token_in_row 
+----------+--------------+---------------+--------------
+ 8bybu5kn | t            | f             | f
+(1 row)
+
+secret occurrences in full pg_dump: 0
+secret occurrences in CLI list-keys: 0

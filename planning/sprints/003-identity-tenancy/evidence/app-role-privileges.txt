@@ -1,0 +1,45 @@
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+$ gap_app, inside its own tenant, tries the live finding: grant itself admin and un-revoke
+BEGIN
+ERROR:  permission denied for table api_keys
+ROLLBACK
+$ gap_app: INSERT INTO knowledge_bases (tenant_id, slug) VALUES ('2f42dc14-0b2c-4f61-8281-05cabd4b2861','x')
+ERROR:  permission denied for table knowledge_bases
+$ gap_app: UPDATE principals SET kind='user'
+ERROR:  permission denied for table principals
+$ gap_app: DELETE FROM tenants
+ERROR:  permission denied for table tenants
+$ gap_app: UPDATE knowledge_bases SET description='x'
+ERROR:  permission denied for table knowledge_bases
+
+$ gap_app still reads them, and writes data tables
+BEGIN
+ keys | kbs | principals 
+------+-----+------------
+    1 |   1 |          1
+(1 row)
+
+INSERT 0 1
+ROLLBACK
+
+$ default privileges for gap_app in schema public (expect none)
+0
+$ table privileges of gap_app
+    table_name     |            privs            
+-------------------+-----------------------------
+ api_keys          | SELECT
+ document_registry | DELETE,INSERT,SELECT,UPDATE
+ documents         | DELETE,INSERT,SELECT,UPDATE
+ feedback          | DELETE,INSERT,SELECT,UPDATE
+ knowledge_bases   | SELECT
+ principals        | SELECT
+ tenants           | SELECT
+ usage_log         | DELETE,INSERT,SELECT,UPDATE
+(8 rows)
+
+$ admin CLI (owner role) still works
+knowledge base legal created for tenant acme
+ohdm2osm  acme/bot (service)  scopes=query  active  last_used=None

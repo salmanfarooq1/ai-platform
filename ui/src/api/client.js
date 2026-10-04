@@ -1,9 +1,13 @@
 const BASE = import.meta.env.VITE_API_URL ?? '/api'
 
+// Every product route lives under /v1. Only / and /health are unversioned.
+export const API_PREFIX = '/v1'
+
 // NOTE: BASE is NOT exported. Modules that can't use this wrapper
-// (e.g., ingest.js which uses multipart) use import.meta.env directly.
+// (e.g., ingest.js which uses multipart) use import.meta.env directly
+// and import API_PREFIX for the version prefix.
 export async function apiFetch(path, options = {}) {
-  const response = await fetch(`${BASE}${path}`, {
+  const response = await fetch(`${BASE}${API_PREFIX}${path}`, {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   })
@@ -11,10 +15,11 @@ export async function apiFetch(path, options = {}) {
   if (!response.ok) {
     let errorBody
     try { errorBody = await response.json() }
-    catch { errorBody = { detail: `HTTP ${response.status}` } }
-    const error = new Error(
-      errorBody.detail?.reason || errorBody.detail || errorBody.error || 'Request failed'
-    )
+    catch { errorBody = { error: { code: 'http_error', message: `HTTP ${response.status}` } } }
+    // Every API error has the shape { error: { code, message, request_id } }.
+    const error = new Error(errorBody.error?.message || 'Request failed')
+    error.code = errorBody.error?.code
+    error.requestId = errorBody.error?.request_id
     error.status = response.status
     error.body = errorBody
     error.headers = headers
@@ -30,6 +35,7 @@ function extractHeaders(h) {
     tokensOut:       h.get('X-Tokens-Out'),
     queryId:         h.get('X-Query-ID'),
     requestId:       h.get('X-Request-ID'),
+    traceId:         h.get('X-Trace-ID'),
     processTime:     h.get('X-Process-Time'),
     cache:           h.get('X-Cache'),
     cacheType:       h.get('X-Cache-Type'),

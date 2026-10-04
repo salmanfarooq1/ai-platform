@@ -8,10 +8,12 @@ import asyncio
 import json
 from dataclasses import dataclass
 from typing import Any
+from uuid import UUID
 
 from asyncpg import Pool
 
 import config
+from core.database.tenant import tenant_connection
 from core.processing.cpu_offload import run_cpu_bound
 
 
@@ -38,11 +40,13 @@ async def retrieve_bm25(
     query: str,
     namespace: str,
     limit: int,
+    *,
+    tenant_id: UUID,
 ) -> list[dict]:
     word_count = len(query.split())
     use_or_mode = word_count >= BM25_OR_THRESHOLD
 
-    async with pool.acquire() as conn:
+    async with tenant_connection(pool, tenant_id) as conn:
         if use_or_mode:
             tsq = await conn.fetchval(
                 "SELECT replace(plainto_tsquery('english', $1)::text, '&', '|')::tsquery", query
@@ -60,11 +64,11 @@ async def retrieve_bm25(
             SELECT id, document_id, content, metadata,
                    ts_rank(fts_vector, $1) AS bm25_score
             FROM documents
-            WHERE namespace = $2 AND fts_vector @@ $1
+            WHERE tenant_id = $4 AND namespace = $2 AND fts_vector @@ $1
             ORDER BY bm25_score DESC
             LIMIT $3
             """,
-            tsq, namespace, limit,
+            tsq, namespace, limit, tenant_id,
         )
 
     results = []
@@ -87,35 +91,37 @@ async def retrieve_vector(
     namespace: str,
     limit: int,
     min_score: float = config.MIN_VECTOR_SCORE,
+    *,
+    tenant_id: UUID,
 ) -> list[dict]:
     """
     Vector similarity search with a score floor.
 
     Why the nested SQL query (SELECT * FROM (SELECT ...))?
     Postgres processes the WHERE clause before it processes the SELECT clause.
-    If we calculate the vector_score inside the SELECT, Postgres doesn't know what 
+    If we calculate the vector_score inside the SELECT, Postgres doesn't know what
     "vector_score" is when it hits the WHERE clause, unless we type the whole math formula again!
-    
+
     To avoid making the database do the math twice, we use a subquery:
     1. The inner query does the math once and labels it 'vector_score'.
     2. The outer query can now safely filter using WHERE vector_score > min_score.
-    
+
     min_score defaults to config.MIN_VECTOR_SCORE (0.0) so we don't break existing code.
     """
-    async with pool.acquire() as conn:
+    async with tenant_connection(pool, tenant_id) as conn:
         rows = await conn.fetch(
             """
             SELECT * FROM (
                 SELECT id, document_id, content, metadata,
                        1.0 - (embedding <=> $1::vector) AS vector_score
                 FROM documents
-                WHERE namespace = $2
+                WHERE tenant_id = $5 AND namespace = $2
             ) scored
             WHERE vector_score > $4
             ORDER BY vector_score DESC
             LIMIT $3
             """,
-            query_embedding, namespace, limit, min_score,
+            query_embedding, namespace, limit, min_score, tenant_id,
         )
 
     results = []
@@ -161,7 +167,7 @@ def rrf_merge(
 
 # Typed as Any rather than CrossEncoder: sentence-transformers pulls in torch
 # (~2GB installed, ~300MB resident just to import), which does not fit the
-# 512MB demo-tier memory budget. It is not installed in the production image
+# 512MB free-tier memory budget. It is not installed in the production image
 # and is imported lazily below, so it must not be referenced at module scope.
 _cross_encoder: Any = None
 
@@ -211,21 +217,23 @@ async def retrieve(
     query_embedding: list[float],
     namespace: str,
     cfg: RetrieverConfig | None = None,
+    *,
+    tenant_id: UUID,
 ) -> list[dict]:
     if cfg is None:
         cfg = RetrieverConfig()
 
     if cfg.mode == "vector_only":
-        candidates = await retrieve_vector(pool, query_embedding, namespace, cfg.top_k)
+        candidates = await retrieve_vector(pool, query_embedding, namespace, cfg.top_k, tenant_id=tenant_id)
 
     elif cfg.mode == "bm25_only":
-        candidates = await retrieve_bm25(pool, query, namespace, cfg.top_k)
+        candidates = await retrieve_bm25(pool, query, namespace, cfg.top_k, tenant_id=tenant_id)
 
     elif cfg.mode == "hybrid":
         over_fetch = cfg.rerank_candidates if cfg.rerank else cfg.top_k * 2
         bm25_results, vector_results = await asyncio.gather(
-            retrieve_bm25(pool, query, namespace, over_fetch),
-            retrieve_vector(pool, query_embedding, namespace, over_fetch),
+            retrieve_bm25(pool, query, namespace, over_fetch, tenant_id=tenant_id),
+            retrieve_vector(pool, query_embedding, namespace, over_fetch, tenant_id=tenant_id),
         )
         candidates = rrf_merge(
             bm25_results, vector_results,

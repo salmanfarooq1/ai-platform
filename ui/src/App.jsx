@@ -11,7 +11,7 @@ import { CollectionProvider } from './context/CollectionContext'
 import { getHealth } from './api/health'
 import { getConfig } from './api/config'
 
-// Four destinations (BRANDING.md §6). Old routes redirect so bookmarks and
+// Four destinations (docs/UI_GUIDELINES.md §5). Old routes redirect so bookmarks and
 // links into the previous six-tab UI still land somewhere sensible.
 export default function App() {
   const [health, setHealth] = useState(null)
@@ -33,7 +33,7 @@ export default function App() {
   }, [])
 
   return (
-    // Respect prefers-reduced-motion everywhere motion is used (BRANDING.md §12, §14)
+    // Respect prefers-reduced-motion everywhere motion is used (docs/UI_GUIDELINES.md §11, §13)
     <MotionConfig reducedMotion="user">
       <ToastProvider>
         <CollectionProvider config={config}>

@@ -3,7 +3,7 @@ import { ChevronDown, Library } from 'lucide-react'
 import { useCollection } from '../../context/CollectionContext'
 import styles from './CollectionPicker.module.css'
 
-// The one Collection (namespace) picker, in the top bar (BRANDING.md §6, §7).
+// The one Collection (namespace) picker, in the top bar (docs/UI_GUIDELINES.md §5, §6).
 export default function CollectionPicker() {
   const { namespace, setNamespace, namespaces, descriptions } = useCollection()
   const [open, setOpen] = useState(false)

@@ -1,4 +1,4 @@
-/* Desktop sidebar — translucent material, right hairline (BRANDING.md §7) */
+/* Desktop sidebar — translucent material, right hairline (docs/UI_GUIDELINES.md §6) */
 .sidebar {
   width: var(--sidebar-width);
   flex-shrink: 0;
@@ -48,7 +48,7 @@
 
 .footer { padding: 0 var(--space-1); font-size: var(--text-caption); text-transform: uppercase; letter-spacing: var(--tracking-caption); color: var(--text-tertiary); }
 
-/* Bottom tab bar below 900px (BRANDING.md §7) */
+/* Bottom tab bar below 900px (docs/UI_GUIDELINES.md §6) */
 @media (max-width: 900px) {
   .sidebar {
     position: fixed;

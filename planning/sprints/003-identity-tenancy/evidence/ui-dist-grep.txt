@@ -1,0 +1,30 @@
+$ grep -rIn -e "gap_[a-z0-9]\{8\}_" -e EVIDENCEKEY -e PREVIEW_API_KEY -e "Bearer gap" ui/dist
+exit status: 1 (1 = no match)
+
+$ ls -R ui/dist
+ui/dist:
+assets
+index.html
+
+ui/dist/assets:
+index-DYkABWcn.css
+index-ia2E24hW.js
+
+$ grep -n "Authorization\|PREVIEW_API_KEY" ui/nginx.conf
+2:# replacing the PREVIEW_API_KEY placeholder (and nothing else). Only variables that exist in the
+13:    # secret on this service (PREVIEW_API_KEY), scoped to the preview tenant. Any Authorization header the
+20:        proxy_set_header Authorization "Bearer ${PREVIEW_API_KEY}";
+
+$ grep -n "templates\|PREVIEW" ui/Dockerfile.ui
+12:# nginx.conf is a template: the image renders /etc/nginx/templates/*.template with envsubst at start,
+13:# so PREVIEW_API_KEY comes from the runtime environment and is never baked into the image or the bundle.
+14:COPY nginx.conf /etc/nginx/templates/default.conf.template
+
+$ pytest tests/unit/test_ui_proxy_config.py -v
+tests/unit/test_ui_proxy_config.py::test_template_sets_the_authorization_header_from_the_environment_on_api_calls_only PASSED [ 16%]
+tests/unit/test_ui_proxy_config.py::test_rendered_config_carries_the_value_and_leaves_nginx_variables_alone PASSED [ 33%]
+tests/unit/test_ui_proxy_config.py::test_no_real_key_is_committed_in_the_template_or_the_dockerfile PASSED [ 50%]
+tests/unit/test_ui_proxy_config.py::test_dockerfile_renders_the_template_at_runtime_not_build_time PASSED [ 66%]
+tests/unit/test_ui_proxy_config.py::test_container_refuses_to_start_without_the_key_and_never_prints_it PASSED [ 83%]
+tests/unit/test_ui_proxy_config.py::test_render_blueprint_declares_the_secrets_as_unsynced PASSED [100%]
+============================== 6 passed in 0.03s ===============================

@@ -14,7 +14,7 @@ function fileSize(b) {
   return b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`
 }
 
-// "Add documents" modal — three numbered steps (BRANDING.md §8).
+// "Add documents" modal — three numbered steps (docs/UI_GUIDELINES.md §7).
 export default function UploadModal({ open, onClose, triggerRef, config, onIngested }) {
   const { namespace: activeNamespace, namespaces } = useCollection()
   const toast = useToast()

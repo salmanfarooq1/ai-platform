@@ -1,0 +1,154 @@
+tenant A id=293ebfd2-6f2f-4725-a115-4255443c3803   tenant B id=2fcc4a50-a52b-41b4-ae18-ada420834760   (keys redacted below)
+
+$ curl -si localhost:8000/health   # public
+HTTP/1.1 200 OK
+content-type: application/json
+x-request-id: 6948754d003a4d9382cfe38fc09c12ad
+
+{"status":"ok","db":"ok","redis":"ok","embedding":"ok","version":"0.4.0","mode":"local","uptime_seconds":0}
+
+$ curl -si -X POST localhost:8000/v1/search -d '{...}'   # no token
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+content-type: application/json
+x-request-id: 0f31353b20504fefa5cfe010f8269f96
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"0f31353b20504fefa5cfe010f8269f96"}}
+
+$ curl -si localhost:8000/v1/documents -H 'Authorization: Bearer gap_aaaaaaaa_wrong'   # bad key
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+content-type: application/json
+x-request-id: 181fb7ea70d7455da38cc2ae4d0b0690
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"181fb7ea70d7455da38cc2ae4d0b0690"}}
+
+$ curl -si localhost:8000/v1/mcp/sse   # MCP, no token
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+content-type: application/json
+x-request-id: 1ee3c7dc06964113a1e08ed6f5c3d3ee
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"1ee3c7dc06964113a1e08ed6f5c3d3ee"}}
+
+$ curl -si -X POST localhost:8000/v1/ingest?namespace=legal -F file=@gdpr.md -H 'Authorization: Bearer <tenant A key>'   # A ingests
+HTTP/1.1 200 OK
+content-type: application/json
+x-tokens-in: 0
+x-tokens-out: 0
+x-query-id: e739195f02e64c7db8f57c968aa8ec6c
+x-request-id: e739195f02e64c7db8f57c968aa8ec6c
+
+{"document_id":"gdpr.md","namespace":"legal","total_chunks":1,"total_time_seconds":0.007,"throughput_chunks_per_second":142.86,"status":"new","content_hash":"30c286dfe4b094ae39b3e44d12369f1cfab789c920946ec2e46af5b6bbfb4e97","chunks_deleted":0}
+
+$ curl -si -X POST localhost:8000/v1/search ... -H 'Authorization: Bearer <tenant A key>'   # A searches
+HTTP/1.1 200 OK
+content-type: application/json
+x-cache: MISS
+x-cache-type: none
+x-tokens-in: 48
+x-tokens-out: 7
+x-query-id: d2eafbe1f9e54a17901fb1f4fbc57184
+x-budget-remaining: 499945
+x-budget-limit: 500000
+x-request-id: d2eafbe1f9e54a17901fb1f4fbc57184
+
+{"query":"breach notification supervisory authority 72 hours","answer":"According to gdpr.md: GDPR breach notification\n\nA personal data breach must be notified to the supervisory authority within 72 hours.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"gdpr.md","namespace":"legal","content":"GDPR breach notification\n\nA personal data breach must be notified to the supervisory authority withi","score":0.03278688524590164,"metadata":{"chunk_index":0}}],"total_results":1,"flagged":false,"flag_reason":null}
+
+$ same search with tenant B key   # B gets no A data
+HTTP/1.1 404 Not Found
+content-type: application/json
+x-request-id: 1e817dd3755249ebb5338c1b2850a077
+
+{"error":{"code":"not_found","message":"No documents found in namespace 'legal'. Ingest documents first.","request_id":"1e817dd3755249ebb5338c1b2850a077"}}
+
+$ B lists documents
+HTTP/1.1 200 OK
+content-type: application/json
+x-request-id: 4c08541a3a554289b88835510b6db0cc
+
+{"documents":[],"count":0}
+
+$ A lists documents
+HTTP/1.1 200 OK
+content-type: application/json
+x-request-id: 12605f1391954b01936ca33e5f159d8c
+
+{"documents":[{"document_id":"gdpr.md","namespace":"legal","source_filename":"gdpr.md","content_hash":"30c286dfe4b094ae39b3e44d12369f1cfab789c920946ec2e46af5b6bbfb4e97","chunk_count":1,"last_ingested_at":"2026-10-03T14:35:37.981074+00:00"}],"count":1}
+
+$ B spoofs: header X-Tenant-ID=<A> and ?tenant_id=<A>
+HTTP/1.1 200 OK
+content-type: application/json
+x-request-id: 55322b38f93a4595813893bfa9e39da3
+
+{"documents":[],"count":0}
+
+$ B spoofs in the search body: {"tenant_id": "<A>"}
+HTTP/1.1 404 Not Found
+content-type: application/json
+x-request-id: 433380145e5b4c5f9345241d476f2ef6
+
+{"error":{"code":"not_found","message":"No documents found in namespace 'legal'. Ingest documents first.","request_id":"433380145e5b4c5f9345241d476f2ef6"}}
+
+$ A (second search, same query)   # exact cache HIT for A
+HTTP/1.1 200 OK
+content-type: application/json
+x-cache: HIT
+x-cache-type: exact
+x-tokens-in: 0
+x-tokens-out: 0
+x-query-id: 59f1d588cf7549458182409586a14d26
+x-request-id: 59f1d588cf7549458182409586a14d26
+
+{"query":"breach notification supervisory authority 72 hours","answer":"According to gdpr.md: GDPR breach notification\n\nA personal data breach must be notified to the supervisory authority within 72 hours.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"gdpr.md","namespace":"legal","content":"GDPR breach notification\n\nA personal data breach must be notified to the supervisory authority withi","score":0.03278688524590164,"metadata":{"chunk_index":0}}],"total_results":1,"flagged":false,"flag_reason":null}
+
+$ B same query again   # still no A cache hit
+HTTP/1.1 404 Not Found
+content-type: application/json
+x-request-id: fdb2f746b1fb41e79006ff8e1afc70e6
+
+{"error":{"code":"not_found","message":"No documents found in namespace 'legal'. Ingest documents first.","request_id":"fdb2f746b1fb41e79006ff8e1afc70e6"}}
+
+$ query-only key tries to ingest   # 403
+HTTP/1.1 403 Forbidden
+content-type: application/json
+x-request-id: 45279ac2d2b445c48bf2aa0543e766ee
+
+{"error":{"code":"forbidden","message":"Missing required scope: kb:write","request_id":"45279ac2d2b445c48bf2aa0543e766ee"}}
+
+$ A asks for B's knowledge base (exists, but is B's)
+HTTP/1.1 404 Not Found
+content-type: application/json
+x-request-id: 4823107abca9494c9dac7d8e21f67f4c
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"4823107abca9494c9dac7d8e21f67f4c"}}
+
+$ A asks for a knowledge base that does not exist   # identical body apart from request_id
+HTTP/1.1 404 Not Found
+content-type: application/json
+x-request-id: 463031c52f3d4647956fbd53436da9ed
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"463031c52f3d4647956fbd53436da9ed"}}
+(DB) revoke tenant A's key, then use it
+key bza8p8pp revoked
+
+$ A's revoked key   # 401 immediately
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+content-type: application/json
+x-request-id: 29da40dd7add49abae226c4be8df0b59
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"29da40dd7add49abae226c4be8df0b59"}}
+
+--- rows as the owner sees them (tenant ownership of what the live run wrote) ---
+   slug   | chunks 
+----------+--------
+ tenant-a |      1
+(1 row)
+
+   slug   |  endpoint  | count 
+----------+------------+-------
+ tenant-a | /v1/ingest |     1
+ tenant-a | /v1/search |     2
+(2 rows)
+

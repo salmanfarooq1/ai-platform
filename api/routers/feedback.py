@@ -17,6 +17,12 @@ from asyncpg import Pool
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 
+from api.auth import require_scope
+from api.gateway_deps import entry_action, gateway_context
+from core.database.tenant import tenant_connection
+from core.identity.models import Principal, Scope
+from gateway import ActionKind, EnforcementContext, require
+
 router = APIRouter(tags=["feedback"])
 
 
@@ -34,7 +40,10 @@ class FeedbackRequest(BaseModel):
 @router.post("/feedback", status_code=201)
 async def submit_feedback(
     payload: FeedbackRequest,
+    request: Request,
     pool: Pool = Depends(get_db_pool),
+    principal: Principal = Depends(require_scope(Scope.QUERY)),
+    ctx: EnforcementContext = Depends(gateway_context),
 ):
     """Record a thumbs up or down rating for a specific response.
 
@@ -42,17 +51,19 @@ async def submit_feedback(
     /search or /agent/query response. This ties the feedback row back
     to the exact request in usage_log.
     """
+    await require(ctx, entry_action(request.url.path, ActionKind.FEEDBACK_WRITE))
     try:
-        async with pool.acquire() as conn:
+        async with tenant_connection(pool, principal.tenant_id) as conn:
             await conn.execute(
                 """
-                INSERT INTO feedback (request_id, endpoint, rating, comment)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO feedback (tenant_id, request_id, endpoint, rating, comment)
+                VALUES ($5, $1, $2, $3, $4)
                 """,
                 payload.request_id,
                 payload.endpoint,
                 payload.rating,
                 payload.comment,
+                principal.tenant_id,
             )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to record feedback: {str(e)}")
@@ -62,17 +73,21 @@ async def submit_feedback(
 
 @router.get("/quality-report")
 async def quality_report(
+    request: Request,
     days: int = Query(default=30, ge=1, le=365, description="Number of days to look back"),
     pool: Pool = Depends(get_db_pool),
+    principal: Principal = Depends(require_scope(Scope.KB_READ)),
+    ctx: EnforcementContext = Depends(gateway_context),
 ):
     """Return thumbs up/down counts aggregated by endpoint.
 
     Use this to track answer quality trends over time. A rising
     thumbs-down rate indicates a retrieval or generation regression.
     """
+    await require(ctx, entry_action(request.url.path, ActionKind.ANALYTICS_READ))
     since = datetime.now(timezone.utc) - timedelta(days=days)
 
-    async with pool.acquire() as conn:
+    async with tenant_connection(pool, principal.tenant_id) as conn:
         rows = await conn.fetch(
             """
             SELECT
@@ -81,11 +96,11 @@ async def quality_report(
                 COUNT(*) FILTER (WHERE rating = 'down') AS thumbs_down,
                 COUNT(*) AS total
             FROM feedback
-            WHERE created_at >= $1
+            WHERE tenant_id = $2 AND created_at >= $1
             GROUP BY endpoint
             ORDER BY total DESC
             """,
-            since,
+            since, principal.tenant_id,
         )
 
     return {

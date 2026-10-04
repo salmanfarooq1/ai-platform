@@ -11,7 +11,7 @@ import styles from './Library.module.css'
 const PAGE_SIZES = [10, 25, 50]
 
 // Library merges Documents + Ingest: a searchable, paginated table, and an
-// "Add documents" modal (BRANDING.md §6, §8).
+// "Add documents" modal (docs/UI_GUIDELINES.md §5, §7).
 export default function Library({ config }) {
   usePageTitle('Library')
   const { namespace } = useCollection()

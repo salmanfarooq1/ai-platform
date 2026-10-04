@@ -13,7 +13,7 @@ const MODES = [
 ]
 
 // Quick answer form. Namespace comes from the top-bar Collection picker
-// (BRANDING.md §6) — this form no longer has its own namespace input.
+// (docs/UI_GUIDELINES.md §5) — this form no longer has its own namespace input.
 export default function SearchForm({ onSubmit, loading, config, query, setQuery }) {
   const { namespace } = useCollection()
   const reduce = useReducedMotion()

@@ -1,0 +1,12 @@
+$ fresh Postgres container with docker/postgres-init mounted (what compose does on an empty volume)
+ rolname | rolsuper | rolbypassrls | rolcanlogin 
+---------+----------+--------------+-------------
+ gap_app | f        | f            | t
+(1 row)
+
+$ log of the init step
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/01-app-role.sh
+CREATE ROLE
+$ connect as gap_app with the password from APP_DB_PASSWORD
+gap_app
+(a wrong-password check is not meaningful inside the container: the official image trusts loopback connections)

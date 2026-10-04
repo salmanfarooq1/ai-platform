@@ -46,7 +46,7 @@ class SearchResponse(BaseModel):
     answer: str                  # The LLM generated answer text
     confidence: float            # LLM self reported confidence (0.0 to 1.0)
     needs_clarification: bool    # LLM flagged the question as ambiguous
-    rerank_applied: bool = False # Whether cross-encoder reranking actually ran (False in demo mode even if requested)
+    rerank_applied: bool = False # Whether cross-encoder reranking actually ran (False in public-preview mode even if requested)
     results: list[SearchResult]  # The supporting chunk citations
     total_results: int
     flagged: bool = False
@@ -60,7 +60,7 @@ class HealthResponse(BaseModel):
     redis: str                   # "ok" or "error: <reason>"
     embedding: str = "unknown"   # "ok" or "error: <reason>"
     version: str
-    mode: str = ""               # "local", "demo", or "prod"
+    mode: str = ""               # "local", "public-preview", or "prod"
     uptime_seconds: int = 0
 
 class Citation(BaseModel):

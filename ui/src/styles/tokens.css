@@ -1,5 +1,5 @@
 /* src/styles/tokens.css
-   Verity design tokens — BRANDING.md §4, §5, §8, §10.
+   Design tokens — docs/UI_GUIDELINES.md §3, §4, §7, §9.
    :root holds light-mode values (the default). Dark values are layered on
    via @media(prefers-color-scheme:dark) and re-asserted by [data-theme="dark"]
    so an explicit choice from useTheme always wins over the OS setting.

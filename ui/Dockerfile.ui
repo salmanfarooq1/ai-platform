@@ -9,5 +9,9 @@ RUN npm run build
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# nginx.conf is a template: the image renders /etc/nginx/templates/*.template with envsubst at start,
+# so PREVIEW_API_KEY comes from the runtime environment and is never baked into the image or the bundle.
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+COPY docker-require-preview-key.sh /docker-entrypoint.d/05-require-preview-key.sh
+RUN chmod +x /docker-entrypoint.d/05-require-preview-key.sh
 EXPOSE 80

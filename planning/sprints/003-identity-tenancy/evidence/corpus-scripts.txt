@@ -1,0 +1,40 @@
+$ CORPUS_TENANT_ID=<default tenant> python scripts/corpus/audit_db.py   (as gap_app via tenant_connection)
+=== Namespaces in DB ===
+  kyc_aml: 1 chunks
+  legal: 1 chunks
+
+=== fts_vector column exists: True ===
+GIN index idx_documents_fts: EXISTS
+Vector (HNSW) index: EXISTS → idx_documents_embedding_hnsw
+
+=== legal namespace: fts_vector NULLs = 0 (should be 0) ===
+
+=== Sample metadata from DB ===
+  pg_typeof: jsonb
+  Python type: str
+  First 100 chars: {"source_filename": "smoke.md"}
+
+$ audit_db.py with a tenant that has no data (a random UUID): sees nothing
+=== Namespaces in DB ===
+
+=== fts_vector column exists: True ===
+GIN index idx_documents_fts: EXISTS
+
+$ audit_db.py without CORPUS_TENANT_ID
+Set CORPUS_TENANT_ID to the tenant's UUID (see scripts/admin/identity.py create-tenant).
+
+$ apply_hnsw_index.py   (owner role from MIGRATION_DATABASE_URL / local default)
+Applying HNSW index on documents.embedding ...
+Done. Verifying ...
+Index confirmed: idx_documents_embedding_hnsw
+Definition: CREATE INDEX idx_documents_embedding_hnsw ON public.documents USING hnsw (embedding vector_cosine_ops) WITH (m='16', ef_construction='64')
+
+$ clear_legal.py for a tenant with no legal data: nothing removed, other tenant untouched
+Clearing 'legal' namespace for tenant 11111111-1111-1111-1111-111111111111...
+Namespace cleared (DELETE 0, DELETE 0).
+rows before clear: documents=2 registry=1
+
+$ clear_legal.py for the default tenant
+Clearing 'legal' namespace for tenant 00000000-0000-0000-0000-000000000001...
+Namespace cleared (DELETE 1, DELETE 1).
+rows after clear: documents=1 (kyc_aml kept: 1) registry=0

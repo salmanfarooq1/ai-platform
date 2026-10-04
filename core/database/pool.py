@@ -1,15 +1,17 @@
 import logging
-import os
 
 import asyncpg
-from asyncpg import Pool
+from asyncpg import Connection, Pool
 from pgvector.asyncpg import register_vector
 
 from config import DATABASE_CONFIG
+from core.database.guard import assert_rls_applies
+from core.settings import get_settings
 
 
-async def init_connection(conn):
+async def init_connection(conn: Connection) -> None:
     await register_vector(conn)
+
 
 logger = logging.getLogger("api.db")
 
@@ -18,7 +20,7 @@ async def create_pool() -> Pool:
     Create and return an asyncpg connection pool with pgvector registered on every connection.
 
     Uses DATABASE_CONFIG["url"] (DSN string) so the pool connects to the correct
-    database for the active MODE (local/demo/prod). Switching MODE changes the
+    database for the active MODE (local/public-preview/prod). Switching MODE changes the
     target database without touching this code.
 
     init=register_vector ensures every connection the pool creates understands
@@ -31,7 +33,7 @@ async def create_pool() -> Pool:
         min_size = max(1, pool_size // 4),   # keep 25% of max alive when idle
         max_size = pool_size,                # ceiling on simultaneous connections
         init = init_connection,              # called on every new connection the pool creates
-        # Neon's demo-mode DATABASE_URL points at its PgBouncer pooler
+        # Neon's public-preview DATABASE_URL points at its PgBouncer pooler
         # (transaction mode). Under transaction pooling, asyncpg's server-side
         # prepared statements can get bound on one physical connection and then
         # reused against a different one on the next query, raising
@@ -42,10 +44,17 @@ async def create_pool() -> Pool:
         statement_cache_size = 0,
     )
 
+    # Refuse to run as a role that bypasses row-level security. Applies in every mode.
+    try:
+        await assert_rls_applies(pool)
+    except Exception:
+        await pool.close()
+        raise
+
     # Log total connection budget so multi-worker deployments are visible.
     # Formula: total_db_connections = pool_size_per_worker × worker_count
     # Set WEB_CONCURRENCY env var to match your actual Uvicorn --workers value.
-    workers = int(os.getenv("WEB_CONCURRENCY", 1))
+    workers = get_settings().web_concurrency
     logger.info(
         f"[db] Pool ready: {pool_size} connections/worker × {workers} worker(s) "
         f"= {pool_size * workers} total DB connections"

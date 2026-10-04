@@ -1,0 +1,18 @@
+# JWT live attempts (server started with JWT_SECRET/ISSUER/AUDIENCE; secret not printed)
+valid JWT (sub=B principal, tenant=B, scope query kb:read)         HTTP/1.1 200 OK  {"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c686
+wrong tenant claim (sub=B principal, tenant=A)                     HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"05e2f0466a8e4b489ea9e
+A principal with B tenant claim                                    HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"89a2d90177a243b28e51e
+sub is not a UUID                                                  HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"61cb6e4ed8284a4587f2b
+sub is an unknown UUID                                             HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"ea52cc48659a473586089
+expired                                                            HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"1914b3ef6b87410ea799e
+wrong audience                                                     HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"a434c1b01337456f9d1d2
+wrong issuer                                                       HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"f3af0bb627f54f5daa9c1
+no exp                                                             HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"0dc7ba34106043e5af750
+signed with another secret                                         HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"2b5e23100f144f6585221
+alg=none                                                           HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"324f9817c76642c5afdbf
+alg=HS512 (not in allow-list)                                      HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"234f2cc502b348c3a17e4
+valid token, scope query only, route needs kb:read                 HTTP/1.1 403 Forbidden  {"error":{"code":"forbidden","message":"Missing required scope: kb:read","request_id":"ce14cdb2e8ce40e7afb6b11
+valid token, scope admin, route needs kb:read                      HTTP/1.1 200 OK  {"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c686
+--- disable the principal in the database, same valid token:
+valid JWT, principal disabled                                      HTTP/1.1 401 Unauthorized  {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"efff51f65ba3445ca8927
+valid JWT, principal re-enabled                                    HTTP/1.1 200 OK  {"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c686

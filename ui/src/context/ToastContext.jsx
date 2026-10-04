@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useRef } from 'react'
 import ToastViewport from '../components/ui/Toast'
 
-// Shared toast system (BRANDING.md §8, §15) — replaces alert()/confirm() and
+// Shared toast system (docs/UI_GUIDELINES.md §7, §14) — replaces alert()/confirm() and
 // ad hoc result banners everywhere in the app.
 const ToastContext = createContext(null)
 

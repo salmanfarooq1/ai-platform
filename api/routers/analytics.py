@@ -12,6 +12,12 @@ from datetime import datetime, timedelta, timezone
 from asyncpg import Pool
 from fastapi import APIRouter, Depends, Query, Request
 
+from api.auth import require_scope
+from api.gateway_deps import entry_action, gateway_context
+from core.database.tenant import tenant_connection
+from core.identity.models import Principal, Scope
+from gateway import ActionKind, EnforcementContext, require
+
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
@@ -21,8 +27,11 @@ async def get_db_pool(request: Request) -> Pool:
 
 @router.get("/summary")
 async def analytics_summary(
+    request: Request,
     days: int = Query(default=7, ge=1, le=90, description="Number of days to look back"),
     pool: Pool = Depends(get_db_pool),
+    principal: Principal = Depends(require_scope(Scope.KB_READ)),
+    ctx: EnforcementContext = Depends(gateway_context),
 ):
     """Return cost and usage breakdown for the last N days.
 
@@ -34,9 +43,11 @@ async def analytics_summary(
     Prerequisite: namespace is only accurate after the cache-hit namespace
     fix (bug 1.2) — rows written before that fix carry namespace='global'.
     """
+    await require(ctx, entry_action(request.url.path, ActionKind.ANALYTICS_READ))
     since = datetime.now(timezone.utc) - timedelta(days=days)
 
-    async with pool.acquire() as conn:
+    tenant_id = principal.tenant_id
+    async with tenant_connection(pool, tenant_id) as conn:
         totals = await conn.fetchrow(
             """
             SELECT
@@ -44,9 +55,9 @@ async def analytics_summary(
                 COALESCE(SUM(prompt_tokens + completion_tokens), 0) AS total_tokens,
                 COUNT(*) AS total_requests
             FROM usage_log
-            WHERE created_at >= $1
+            WHERE tenant_id = $2 AND created_at >= $1
             """,
-            since,
+            since, tenant_id,
         )
         by_day = await conn.fetch(
             """
@@ -56,11 +67,11 @@ async def analytics_summary(
                 SUM(prompt_tokens + completion_tokens) AS tokens,
                 COUNT(*) AS requests
             FROM usage_log
-            WHERE created_at >= $1
+            WHERE tenant_id = $2 AND created_at >= $1
             GROUP BY 1
             ORDER BY 1
             """,
-            since,
+            since, tenant_id,
         )
         by_endpoint = await conn.fetch(
             """
@@ -69,11 +80,11 @@ async def analytics_summary(
                 SUM(cost_usd) AS cost_usd,
                 COUNT(*) AS requests
             FROM usage_log
-            WHERE created_at >= $1
+            WHERE tenant_id = $2 AND created_at >= $1
             GROUP BY 1
             ORDER BY cost_usd DESC
             """,
-            since,
+            since, tenant_id,
         )
         by_namespace = await conn.fetch(
             """
@@ -82,11 +93,11 @@ async def analytics_summary(
                 SUM(cost_usd) AS cost_usd,
                 COUNT(*) AS requests
             FROM usage_log
-            WHERE created_at >= $1
+            WHERE tenant_id = $2 AND created_at >= $1
             GROUP BY 1
             ORDER BY cost_usd DESC
             """,
-            since,
+            since, tenant_id,
         )
         by_model = await conn.fetch(
             """
@@ -95,11 +106,11 @@ async def analytics_summary(
                 SUM(cost_usd) AS cost_usd,
                 COUNT(*) AS requests
             FROM usage_log
-            WHERE created_at >= $1
+            WHERE tenant_id = $2 AND created_at >= $1
             GROUP BY 1
             ORDER BY cost_usd DESC
             """,
-            since,
+            since, tenant_id,
         )
 
     total_requests = totals["total_requests"] or 0

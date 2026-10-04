@@ -1,0 +1,95 @@
+NOTICE:  database "gap_ev_mig" does not exist, skipping
+$ alembic upgrade 0001   (a database in the Sprint 002 state)
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+
+-- row counts BEFORE 0002
+         t         | count 
+-------------------+-------
+ documents         |     6
+ document_registry |     3
+ usage_log         |     3
+ feedback          |     1
+(4 rows)
+
+-- tenant_id column exists before?
+ tenant_id_columns 
+-------------------
+                 0
+(1 row)
+
+
+$ alembic upgrade head
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+
+-- row counts AFTER 0002
+         t         | count 
+-------------------+-------
+ documents         |     6
+ document_registry |     3
+ usage_log         |     3
+ feedback          |     1
+(4 rows)
+
+-- tenant_id backfilled (distinct values per table; NOT NULL)
+         t         |              tenant_id               | count 
+-------------------+--------------------------------------+-------
+ documents         | 00000000-0000-0000-0000-000000000001 |     6
+ document_registry | 00000000-0000-0000-0000-000000000001 |     3
+ usage_log         | 00000000-0000-0000-0000-000000000001 |     3
+ feedback          | 00000000-0000-0000-0000-000000000001 |     1
+(4 rows)
+
+    table_name     | is_nullable 
+-------------------+-------------
+ document_registry | NO
+ documents         | NO
+ feedback          | NO
+ usage_log         | NO
+(4 rows)
+
+-- the default tenant and its knowledge bases
+                  id                  |  slug   
+--------------------------------------+---------
+ 00000000-0000-0000-0000-000000000001 | default
+(1 row)
+
+  slug   |               description                
+---------+------------------------------------------
+ default | Uncategorized or general compliance docu
+ kyc_aml | KYC, AML, and Bank Secrecy Act documenta
+ legal   | GDPR, CCPA, HIPAA, and other data protec
+(3 rows)
+
+-- registry primary key
+              pg_get_constraintdef               
+-------------------------------------------------
+ PRIMARY KEY (tenant_id, namespace, document_id)
+(1 row)
+
+-- the FTS trigger still fills fts_vector on existing rows
+ with_fts | total 
+----------+-------
+        6 |     6
+(1 row)
+
+-- readable by the default tenant through the app role
+BEGIN
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-000000000001
+(1 row)
+
+         t         | count 
+-------------------+-------
+ documents         |     6
+ document_registry |     3
+ usage_log         |     3
+ feedback          |     1
+(4 rows)
+
+ROLLBACK
+
+$ alembic upgrade head   (again: no-op)
+0

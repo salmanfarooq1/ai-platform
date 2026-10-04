@@ -1,4 +1,4 @@
-/* Ask mode switch — the selected pill slides between segments (BRANDING.md §8) */
+/* Ask mode switch — the selected pill slides between segments (docs/UI_GUIDELINES.md §7) */
 .track {
   position: relative;
   display: inline-flex;

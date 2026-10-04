@@ -1,4 +1,4 @@
-/* Answer panel body — solid surface, max 68ch prose (BRANDING.md §8) */
+/* Answer panel body — solid surface, max 68ch prose (docs/UI_GUIDELINES.md §7) */
 .wrapper { max-width: 68ch; }
 .answer { font-size: var(--text-body); line-height: var(--leading-body); color: var(--text-primary); }
 .answer :global(p) { margin-bottom: var(--space-3); color: var(--text-primary); }

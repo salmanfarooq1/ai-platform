@@ -1,0 +1,46 @@
+$ identity.py create-tenant acme --name "Acme Ltd"
+tenant acme created: id=d153c600-fd9e-49b2-89ba-4607ee5e52e6
+$ identity.py create-kb acme legal --description "Law"
+knowledge base legal created for tenant acme
+$ identity.py create-principal acme service ingest-bot
+principal ingest-bot created: id=99f1c707-6f0a-43c3-97a2-a4513e53e254
+$ identity.py create-key 99f1c707-6f0a-43c3-97a2-a4513e53e254 --scopes query kb:read
+key created: prefix=yzirg5f2 scopes=kb:read,query
+KEY (shown once, store it now): gap_yzirg5f2_<redacted in this evidence file>
+
+$ psql: what the database holds for that key (owner view)
+  prefix  |  secret_hash_start  | hash_len |     scopes      | revoked_at 
+----------+---------------------+----------+-----------------+------------
+ yzirg5f2 | 4f487c53558ba82b... |       64 | {kb:read,query} | 
+(1 row)
+
+-- is the secret or the full token anywhere in the api_keys row text?
+ secret_in_row | token_in_row 
+---------------+--------------
+ f             | f
+(1 row)
+
+-- does sha256(secret) equal the stored hash?
+ hash_matches 
+--------------
+ t
+(1 row)
+
+-- anywhere else in the database (all text columns of every table, dumped and searched)?
+occurrences of the secret in a full data dump: 0
+
+$ identity.py list-keys --tenant acme
+yzirg5f2  acme/ingest-bot (service)  scopes=kb:read,query  active  last_used=None
+
+$ the key works (app role, auth_lookup_key + verification)
+authenticate before revoke -> ('service', ['kb:read', 'query'])
+
+$ identity.py revoke-key yzirg5f2
+key yzirg5f2 revoked
+$ identity.py revoke-key (again)
+no active key with prefix yzirg5f2
+exit status: 1
+authenticate after revoke  -> None
+
+$ identity.py list-keys
+yzirg5f2  acme/ingest-bot (service)  scopes=kb:read,query  revoked  last_used=2026-10-03 13:57:59.994721+00:00

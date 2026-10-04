@@ -1,0 +1,4 @@
+$ grep -rIn "gap_[a-z0-9]\{8\}_" ui/dist ui/src; grep -rIni "PREVIEW_API_KEY\|authorization\|bearer" ui/dist
+exit=1
+exit=1
+ui/vite.config.js:9:  const headers = env.PREVIEW_API_KEY ? { Authorization: `Bearer ${env.PREVIEW_API_KEY}` } : {}

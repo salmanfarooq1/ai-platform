@@ -2,7 +2,7 @@ import { BRAND } from '../../brand'
 import styles from './Logo.module.css'
 
 // Logo mark: a rounded square with three stacked lines, the last ending in a
-// dot — "a paragraph, with its source marked" (BRANDING.md §2).
+// dot — "a paragraph, with its source marked" (docs/UI_GUIDELINES.md §1).
 export function LogoMark({ size = 32 }) {
   return (
     <div className={styles.mark} style={{ width: size, height: size, borderRadius: size * (9 / 32) }} aria-hidden="true">
@@ -16,7 +16,7 @@ export function LogoMark({ size = 32 }) {
   )
 }
 
-/** Full lockup: mark + name + tagline. `collapsed` shows the mark only. */
+/** Full lockup: mark + name. `collapsed` shows the mark only. */
 export default function Logo({ collapsed = false }) {
   return (
     <div className={styles.lockup}>
@@ -24,7 +24,6 @@ export default function Logo({ collapsed = false }) {
       {!collapsed && (
         <div className={styles.text}>
           <span className={styles.name}>{BRAND.name}</span>
-          <span className={styles.tagline}>{BRAND.taglineCaption}</span>
         </div>
       )}
     </div>

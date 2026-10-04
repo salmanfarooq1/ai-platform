@@ -7,7 +7,7 @@ import { useCollection } from '../../context/CollectionContext'
 import styles from './AgentForm.module.css'
 
 // Deep research form. Namespace comes from the top-bar Collection picker
-// (BRANDING.md §6) — no per-form namespace input.
+// (docs/UI_GUIDELINES.md §5) — no per-form namespace input.
 export default function AgentForm({ onSubmit, loading, config, question, setQuestion }) {
   const { namespace } = useCollection()
   const reduce = useReducedMotion()

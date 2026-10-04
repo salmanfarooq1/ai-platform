@@ -1,4 +1,4 @@
-/* Guardrail banner — inline in the answer area, 3px left bar (BRANDING.md §8) */
+/* Guardrail banner — inline in the answer area, 3px left bar (docs/UI_GUIDELINES.md §7) */
 .banner { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-md); background: var(--bg-muted); border-left: 3px solid; }
 .banner strong { display: block; font-size: var(--text-callout); margin-bottom: 2px; color: var(--text-primary); }
 .banner p { font-size: var(--text-footnote); margin: 0; color: var(--text-secondary); }

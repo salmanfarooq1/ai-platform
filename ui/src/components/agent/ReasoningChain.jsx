@@ -3,7 +3,7 @@ import { ChevronRight, ChevronDown, Search, Brain } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import styles from './ReasoningChain.module.css'
 
-// Deep research reasoning timeline — collapsed by default (BRANDING.md §8).
+// Deep research reasoning timeline — collapsed by default (docs/UI_GUIDELINES.md §7).
 export default function ReasoningChain({ steps = [], toolCallCount }) {
   const [open, setOpen] = useState(false)
   const reduce = useReducedMotion()

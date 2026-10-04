@@ -4,6 +4,8 @@ from asyncpg import Pool
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 
+from api.auth import require_kb, require_scope
+from api.gateway_deps import entry_action, gateway_context
 from api.models.schemas import SearchRequest, SearchResponse, SearchResult
 from api.services.cache import (
     embed_query,
@@ -12,10 +14,12 @@ from api.services.cache import (
     semantic_cache_store,
     set_cached_response,
 )
-from api.services.guardrails import check_input, check_output
-from api.services.llm import generate_with_routing
+from api.services.llm import GENERATION_MAX_TOKENS, generate_with_routing
 from api.services.retriever import RetrieverConfig, retrieve
-from config import FEATURES
+from config import FEATURES, LLM_CONFIG
+from core.identity.models import Principal, Scope
+from gateway import Action, ActionKind, EnforcementContext, check_output, require
+from gateway.estimate import estimate_tokens
 
 router = APIRouter()
 
@@ -29,17 +33,31 @@ async def search(
     request: Request,
     payload: SearchRequest,
     pool: Pool = Depends(get_db_pool),
+    principal: Principal = Depends(require_scope(Scope.QUERY)),
+    ctx: EnforcementContext = Depends(gateway_context),
 ):
-    # Step 0: Input guardrail check (before any cache lookup, DB, or LLM I/O)
-    guard = check_input(payload.query)
-    if guard.blocked:
-        raise HTTPException(
-            status_code=400,
-            detail={"error": "query_blocked", "reason": guard.blocked_reason},
-        )
+    tenant_id = principal.tenant_id
+
+    # Step -1: the gateway decides first: scope and policy for this KB, input guardrails, rate limit and
+    # daily token budget. A denial is a 403 (policy), 400 (guardrail), 429 (limits) or 503 (Redis down).
+    await require(ctx, entry_action(request.url.path, ActionKind.KB_READ, payload.namespace, input_text=payload.query))
+
+    # Step -0.5: the knowledge base must be one of the caller's own (404 otherwise, no existence leak)
+    await require_kb(pool, principal, payload.namespace)
+
+    # Step 0: the model that will answer must be allowed, checked before any cache, embedding or LLM I/O.
+    await require(ctx, Action(
+        ActionKind.MODEL_INVOKE, LLM_CONFIG["model"], estimated_tokens=estimate_tokens(payload.query, GENERATION_MAX_TOKENS),
+        input_text=payload.query,
+    ))
+    # The embedding model too (it embeds the query for the cache lookup and the vector search).
+    await require(ctx, Action(
+        ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens(payload.query),
+        input_text=payload.query,
+    ))
 
     # Step 0.5: Compute effective rerank flag
-    # If the environment disables reranking (e.g., Koyeb 512MB RAM), force it to False.
+    # If the environment disables reranking (e.g., the 512MB free tier), force it to False.
     # We must compute this BEFORE cache lookups so we don't cache non-reranked results
     # under a rerank=True key.
     effective_rerank = payload.rerank and FEATURES["reranker_enabled"]
@@ -48,7 +66,7 @@ async def search(
     # Cheapest possible check with pure Redis GET, no embedding, no DB, no LLM.
     # If this hits, we're done in ~1ms.
     exact_hit = await get_cached_response(
-        payload.query, payload.namespace, payload.top_k,
+        tenant_id, payload.query, payload.namespace, payload.top_k,
         payload.retrieval_mode, effective_rerank,
     )
     if exact_hit:
@@ -71,7 +89,7 @@ async def search(
     # Slightly more expensive than exact (vector search in Redis) but still
     # orders of magnitude cheaper than a DB + LLM round trip.
     semantic_hit = await semantic_cache_lookup(
-        payload.query, payload.namespace, query_embedding,
+        tenant_id, payload.query, payload.namespace, query_embedding,
         payload.retrieval_mode, effective_rerank, payload.top_k,
     )
     if semantic_hit:
@@ -95,6 +113,7 @@ async def search(
         query_embedding=query_embedding,
         namespace=payload.namespace,
         cfg=retriever_config,
+        tenant_id=tenant_id,
     )
 
     if not raw_chunks:
@@ -171,11 +190,11 @@ async def search(
     # without blocking the response. If Redis is down, the functions log
     # a warning internally and swallow the error.
     asyncio.create_task(set_cached_response(
-        payload.query, payload.namespace, payload.top_k, response_data,
+        tenant_id, payload.query, payload.namespace, payload.top_k, response_data,
         payload.retrieval_mode, effective_rerank,
     ))
     asyncio.create_task(semantic_cache_store(
-        payload.query, payload.namespace, query_embedding, response_data,
+        tenant_id, payload.query, payload.namespace, query_embedding, response_data,
         payload.retrieval_mode, effective_rerank, payload.top_k,
     ))
 

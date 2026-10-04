@@ -3,7 +3,7 @@ import styles from './SegmentedControl.module.css'
 
 // Quick answer / Deep research switch. The selected pill slides between
 // segments with a critically damped spring and re-targets mid-slide on
-// rapid clicks (motion's shared layoutId handles interruption) — BRANDING.md §8.
+// rapid clicks (motion's shared layoutId handles interruption) — docs/UI_GUIDELINES.md §7.
 export default function SegmentedControl({ options, value, onChange }) {
   const reduce = useReducedMotion()
   return (

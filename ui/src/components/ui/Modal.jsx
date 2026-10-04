@@ -7,7 +7,7 @@ import styles from './Modal.module.css'
 const FOCUSABLE = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
 
 // Branded modal: focus trap, Esc, restores focus, opens from its trigger's
-// origin and closes back toward it (BRANDING.md §8, §12, apple-design §7).
+// origin and closes back toward it (docs/UI_GUIDELINES.md §7, §11, apple-design §7).
 export default function Modal({ open, onClose, title, children, triggerRef, closeOnEsc = true }) {
   const modalRef = useRef(null)
   const previouslyFocused = useRef(null)

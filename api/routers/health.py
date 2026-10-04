@@ -1,5 +1,6 @@
 import asyncio
 import time
+from typing import Any
 
 from fastapi import APIRouter, Request
 
@@ -13,7 +14,7 @@ _start_time = time.time()
 # We cache the LLM health check so we don't bombard the LLM every 30 seconds.
 # If the LLM is healthy ("ok"), we trust that for 60 seconds.
 # If it's failing, we check it more frequently (every 10 seconds) so we recover faster.
-_embed_cache = {"status": "unknown", "checked_at": 0.0}
+_embed_cache: dict[str, Any] = {"status": "unknown", "checked_at": 0.0}
 _EMBED_OK_TTL = 60
 _EMBED_FAIL_TTL = 10
 _embed_lock = asyncio.Lock()

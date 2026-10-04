@@ -1,0 +1,53 @@
+1. SSE no token -> 401 {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"11c667c3b6cf45cf87bb342147f6071
+2. SSE bogus key -> 401
+3. SSE key with kb:read only (no query scope) -> 403 {"error":{"code":"forbidden","message":"Missing required scope: query","request_id":"275bcd1a63e34b0e8a07da92de52eace"}}
+4. POST to a nonexistent session with a valid key -> 404 Could not find session
+5. A opens SSE -> (200, '/v1/mcp/messages/?session_id=03ec23f2e07644f98abb9bf19beb15b9')
+6. A tools/list -> 202 ['list_namespaces', 'search_documents', 'multi_namespace_search', 'get_ingestion_status', 'get_cost_summary']
+7. A list_namespaces -> {
+  "aonly": "",
+  "default": "Uncategorized or general documents",
+  "legal": ""
+}
+8. A search_documents(legal) -> {
+  "count": 1,
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "document_id": "qa_a.md",
+      "source_filename": "qa_a.md",
+      "score": 0.0328,
+      "content": "ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification win
+9. A search B-only KB 'bonly' -> {"error": "kb_not_found", "reason": "Knowledge base not found"}
+10. A multi_namespace_search(legal,bonly) for B's content -> {"error": "kb_not_found", "reason": "Knowledge base not found"}
+11. A get_ingestion_status(legal) -> {
+  "namespace": "legal",
+  "document_count": 1,
+  "chunk_count": 1,
+  "latest_document": {
+    "document_id": "qa_a.md",
+    "source_filename": "qa_a.md",
+    "ingested_at": "2026-10-03T14:24:07.566675+00:00"
+  }
+}
+12. A reads B's document resource rag://documents/legal/qa_b.md -> {"jsonrpc": "2.0", "id": 8, "result": {"contents": [{"mimeType": "text/plain", "text": "{\n  \"document_id\": \"qa_b.md\",\n  \"namespace\": \"legal\",\n  \"chunks\": []\n}", "uri": "rag://documents/legal/qa_b.md"}]}}
+13. B POSTs into A's SSE session (hijack) -> 404 Could not find session
+    nothing delivered on A's stream
+14. A's other key (kb:read only) POSTs into A's session -> 403 {"error":{"code":"forbidden","message":"Missing required scope: query","request_id":"db2cf27558e74d3894bd5aab69776fbf"}}
+15. POST into A's session with empty bearer -> 202 Accepted
+16. B opens SSE -> (200, '/v1/mcp/messages/?session_id=e469da216791477da998c015ef1808ca')
+17. B list_namespaces -> {
+  "bonly": "",
+  "default": "Uncategorized or general documents",
+  "legal": ""
+}
+18. B search A's content in B's legal -> {"count": 0, "result": "No relevant chunks found"}
+19. B search A-only KB -> {"error": "kb_not_found", "reason": "Knowledge base not found"}
+20. B multi_namespace_search(legal, aonly) -> {"error": "kb_not_found", "reason": "Knowledge base not found"}
+21. B reads A's document resource -> {"jsonrpc": "2.0", "id": 6, "result": {"contents": [{"mimeType": "text/plain", "text": "{\n  \"document_id\": \"qa_a.md\",\n  \"namespace\": \"legal\",\n  \"chunks\": []\n}", "uri": "rag://documents/legal/qa_a.md"}]}}
+22. B search with extra tool arg tenant_id -> {"jsonrpc": "2.0", "id": 7, "result": {"content": [{"text": "{\n  \"count\": 1,\n  \"chunks\": [\n    {\n      \"chunk_index\": 0,\n      \"document_id\": \"qa_b.md\",\n      \"source_filename\": \"qa_b.md\",\n      \"score\": 0.0328,\n    
+
+--- re-run of check 15 (the first run's empty-key case fell back to A's own key: harness bug)
+A opens SSE -> (200, '/v1/mcp/messages/?session_id=0567c8d397944e6584919a42368cff86')
+15a. POST into A's session, no Authorization header -> 401 {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"8dc2eede7f4
+15c. POST into A's session, bogus key -> 401 {"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"f99ce345c3d

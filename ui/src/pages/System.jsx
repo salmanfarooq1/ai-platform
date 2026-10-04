@@ -12,7 +12,7 @@ function formatUptime(s) {
   return `${m}m ${s % 60}s`
 }
 
-// System: service health, uptime, mode, version (BRANDING.md §6).
+// System: service health, uptime, mode, version (docs/UI_GUIDELINES.md §5).
 export default function System({ health, config }) {
   usePageTitle('System')
 

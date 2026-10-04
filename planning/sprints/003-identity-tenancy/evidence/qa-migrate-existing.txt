@@ -1,0 +1,85 @@
+NOTICE:  database "qa_mig" does not exist, skipping
+DROP DATABASE
+CREATE DATABASE
+$ alembic upgrade 0001
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INSERT 0 6
+INSERT 0 3
+INSERT 0 3
+INSERT 0 1
+         t         | count 
+-------------------+-------
+ documents         |     6
+ document_registry |     3
+ usage_log         |     3
+ feedback          |     1
+(4 rows)
+
+$ alembic upgrade head
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+         t         | count | distinct_tenants |                 min                  
+-------------------+-------+------------------+--------------------------------------
+ documents         |     6 |                1 | 00000000-0000-0000-0000-000000000001
+ document_registry |     3 |                1 | 00000000-0000-0000-0000-000000000001
+ usage_log         |     3 |                1 | 00000000-0000-0000-0000-000000000001
+ feedback          |     1 |                1 | 00000000-0000-0000-0000-000000000001
+(4 rows)
+
+  slug   
+---------
+ default
+(1 row)
+
+  slug   
+---------
+ default
+ kyc_aml
+ legal
+(3 rows)
+
+    table_name     | is_nullable 
+-------------------+-------------
+ documents         | NO
+ document_registry | NO
+ usage_log         | NO
+ feedback          | NO
+(4 rows)
+
+ fts 
+-----
+   6
+(1 row)
+
+ version_num 
+-------------
+ 0003
+(1 row)
+
+$ readable by default tenant as gap_app
+BEGIN
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-000000000001
+(1 row)
+
+ docs 
+------
+    6
+(1 row)
+
+ reg 
+-----
+   3
+(1 row)
+
+ROLLBACK
+ docs_no_tenant 
+----------------
+              0
+(1 row)
+

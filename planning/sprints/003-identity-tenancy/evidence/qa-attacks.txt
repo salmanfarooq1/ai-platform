@@ -1,0 +1,724 @@
+===== 1. No / bad credentials on every surface =====
+
+### 1. search, no token
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -d \{\"query\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"c1ab6f06c04a4ea3a2323022cd09c838"}}
+
+
+### 2. documents, no token
+$ curl http://127.0.0.1:8020/v1/documents 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"eaaac4f9774b4c58bdc0a82c2fd068d1"}}
+
+
+### 3. ingest, no token
+$ curl -X POST http://127.0.0.1:8020/v1/ingest\?namespace=legal -F file=@/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/qa_a.md 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"cb801b19194b4cb3a5975990b3ca858d"}}
+
+
+### 4. agent, no token
+$ curl -X POST http://127.0.0.1:8020/v1/agent/query -H Content-Type:\ application/json -d \{\"question\":\"x\"\,\"namespace\":\"legal\"\} 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"12416539de144ce084372a8d4164ec13"}}
+
+
+### 5. analytics, no token
+$ curl http://127.0.0.1:8020/v1/analytics/summary 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"7fdcdd9f08ce41b39363e2e22cc43427"}}
+
+
+### 6. feedback, no token
+$ curl -X POST http://127.0.0.1:8020/v1/feedback -H Content-Type:\ application/json -d \{\"request_id\":\"x\"\,\"endpoint\":\"/v1/search\"\,\"rating\":\"up\"\} 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"40290a1d8dd34349ad153c9e23bdb66f"}}
+
+
+### 7. config, no token
+$ curl http://127.0.0.1:8020/v1/config 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"faeb54c94e1d44209e29736e193d5e7a"}}
+
+
+### 8. MCP sse, no token
+$ curl http://127.0.0.1:8020/v1/mcp/sse 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"d81f8b2ff390412dbe585b3335b0ead9"}}
+
+
+### 9. MCP messages, no token
+$ curl -X POST http://127.0.0.1:8020/v1/mcp/messages/\?session_id=00000000000000000000000000000000 -H Content-Type:\ application/json -d \{\"jsonrpc\":\"2.0\"\,\"id\":1\,\"method\":\"tools/list\"\} 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"5674b235dc0340888be0efd22aed5509"}}
+
+
+### 10. empty bearer
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\  
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"20c018c601d04f71a8379427866fae7f"}}
+
+
+### 11. Basic scheme
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Basic\ YTpi 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"d6549043c5b54af3a35bd75cb2f44580"}}
+
+
+### 12. key with wrong secret, right prefix
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <key-or-fragment> 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"259aa6aeac9f47908a2f1fe6ed6c88fc"}}
+
+
+### 13. key truncated
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <key-or-fragment> 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"31c344fa763040899fadd002045df374"}}
+
+
+### 14. key with trailing space-text
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <A-full-key>\ x 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"1013d356124a4812b7294fe22148b4f6"}}
+
+
+### 15. JWT alg=none (JWT not configured on this server)
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJjNDAwODE5My1jMjcyLTQ3ZmQtOGQ2Yy0wYmY3ODM4OTM4ZWIiLCJ0ZW5hbnRfaWQiOiJjNDAwODE5My1jMjcyLTQ3ZmQtOGQ2Yy0wYmY3ODM4OTM4ZWIiLCJzY29wZSI6ImFkbWluIn0. 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"a24823fcea3a40af91f64e25adaba2a7"}}
+
+
+### 16. api key in query string instead of header
+$ curl http://127.0.0.1:8020/v1/documents\?api_key=<A-full-key>\&token=<A-full-key> 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"b0d55384da76456cbc6a7086215d1c11"}}
+
+===== 2. Path tricks around the auth path filter =====
+
+### 17. //v1/documents (double slash)
+$ curl http://127.0.0.1:8020//v1/documents 
+HTTP/1.1 404 Not Found
+
+{"error":{"code":"not_found","message":"Not Found","request_id":"cd20bf22a7434b6ab58edf96da8f1add"}}
+
+
+### 18. /v1/documents/ (trailing slash, no token)
+$ curl http://127.0.0.1:8020/v1/documents/ 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"32c5e5d7a5674188997deea7fd61d82e"}}
+
+
+### 19. /V1/documents (case)
+$ curl http://127.0.0.1:8020/V1/documents 
+HTTP/1.1 404 Not Found
+
+{"error":{"code":"not_found","message":"Not Found","request_id":"9a27916066324cd0a5d2fdec66e56f36"}}
+
+
+### 20. /v1/./documents
+$ curl --path-as-is http://127.0.0.1:8020/v1/./documents 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"db5d737a181f49dba851dae6a531d5c5"}}
+
+
+### 21. /v1/../v1/documents
+$ curl --path-as-is http://127.0.0.1:8020/v1/../v1/documents 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"10caac8bbe9946cca7428f7b31ce38cd"}}
+
+
+### 22. /%76%31/documents (encoded v1)
+$ curl --path-as-is http://127.0.0.1:8020/%76%31/documents 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"2c8a0d971bb24d50b463e1ee03dfdfb8"}}
+
+
+### 23. legacy unversioned /search
+$ curl -X POST http://127.0.0.1:8020/search -H Content-Type:\ application/json -d \{\"query\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 404 Not Found
+
+{"error":{"code":"not_found","message":"Not Found","request_id":"fb7000a949ee4cff83aca99f2b65fdb8"}}
+
+
+### 24. legacy unversioned /documents
+$ curl http://127.0.0.1:8020/documents 
+HTTP/1.1 404 Not Found
+
+{"error":{"code":"not_found","message":"Not Found","request_id":"1d61696ebee54c04a02c0e084945103f"}}
+
+
+### 25. legacy /mcp/sse
+$ curl http://127.0.0.1:8020/mcp/sse 
+HTTP/1.1 404 Not Found
+
+{"error":{"code":"not_found","message":"Not Found","request_id":"1bbf9ce05a2b4df6b497b538b1f79d41"}}
+
+
+### 26. public: /openapi.json lists routes (info only)
+$ curl http://127.0.0.1:8020/openapi.json -o /dev/null -w '' 
+
+
+===== 3. Tenant A ingests, searches. Tenant B isolation =====
+
+### 27. A ingests legal
+$ curl -X POST http://127.0.0.1:8020/v1/ingest\?namespace=legal -F file=@/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/qa_a.md -H Authorization:\ Bearer\ <A-full-key> 
+HTTP/1.1 200 OK
+x-ratelimit-remaining: 59
+
+{"document_id":"qa_a.md","namespace":"legal","total_chunks":1,"total_time_seconds":0.006,"throughput_chunks_per_second":166.37,"status":"new","content_hash":"85091c5796701d3258e5b14db509b0d5d656d124c35a42468dcb64dc00143a30","chunks_deleted":0}
+
+
+### 28. B ingests its own legal
+$ curl -X POST http://127.0.0.1:8020/v1/ingest\?namespace=legal -F file=@/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/qa_b.md -H Authorization:\ Bearer\ <B-full-key> 
+HTTP/1.1 200 OK
+x-ratelimit-remaining: 59
+
+{"document_id":"qa_b.md","namespace":"legal","total_chunks":1,"total_time_seconds":0.003,"throughput_chunks_per_second":377.09,"status":"new","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunks_deleted":0}
+
+
+### 29. A searches (MISS expected)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <A-full-key> -d \{\"query\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 200 OK
+x-cache: MISS
+x-cache-type: none
+x-ratelimit-remaining: 58
+
+{"query":"Project Zephyr budget","answer":"According to qa_a.md: ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 hours.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"qa_a.md","namespace":"legal","content":"ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 h","score":0.03278688524590164,"metadat
+
+### 30. B searches A's content in B's own legal KB
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 58
+
+{"error":{"code":"not_found","message":"No documents found in namespace 'legal'. Ingest documents first.","request_id":"1b61ff825af14da7aecb2070de56c923"}}
+
+
+### 31. A lists documents
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <A-full-key> 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_a.md","namespace":"legal","source_filename":"qa_a.md","content_hash":"85091c5796701d3258e5b14db509b0d5d656d124c35a42468dcb64dc00143a30","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.566675+00:00"}],"count":1}
+
+
+### 32. B lists documents
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <B-full-key> 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.599736+00:00"}],"count":1}
+
+
+### 33. B lists documents filtered to namespace=legal
+$ curl http://127.0.0.1:8020/v1/documents\?namespace=legal -H Authorization:\ Bearer\ <B-full-key> 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.599736+00:00"}],"count":1}
+
+===== 4. Spoofed tenant inputs (B pretends to be A) =====
+
+### 34. B lists docs with header 'X-Tenant-ID'
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <B-full-key> -H X-Tenant-ID:\ <tenant-A-id> 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.599736+00:00"}],"count":1}
+
+
+### 35. B lists docs with header 'X-Tenant'
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <B-full-key> -H X-Tenant:\ ta 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.599736+00:00"}],"count":1}
+
+
+### 36. B lists docs with header 'X-Tenant-Id'
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <B-full-key> -H X-Tenant-Id:\ <tenant-A-id> 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.599736+00:00"}],"count":1}
+
+
+### 37. B lists docs with header 'X-Forwarded-User'
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <B-full-key> -H X-Forwarded-User:\ <tenant-A-id> 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.599736+00:00"}],"count":1}
+
+
+### 38. B lists docs with header 'X-Principal-ID'
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <B-full-key> -H X-Principal-ID:\ 86ca87c0-7a04-49c3-882b-8c2f1819c8bf 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.599736+00:00"}],"count":1}
+
+
+### 39. B lists docs with ?tenant_id=A&tenant=ta
+$ curl http://127.0.0.1:8020/v1/documents\?tenant_id=<tenant-A-id>\&tenant=ta\&tenant_slug=ta -H Authorization:\ Bearer\ <B-full-key> 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.599736+00:00"}],"count":1}
+
+
+### 40. B search body tenant_id=A
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"legal\"\,\"tenant_id\":\"<tenant-A-id>\"\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 57
+
+{"error":{"code":"not_found","message":"No documents found in namespace 'legal'. Ingest documents first.","request_id":"0cffc173738e432387eacf5b53d10eb0"}}
+
+
+### 41. B ingest with form field tenant_id=A + header
+$ curl -X POST http://127.0.0.1:8020/v1/ingest\?namespace=legal\&tenant_id=<tenant-A-id> -F tenant_id=<tenant-A-id> -F file=@/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/qa_b.md -H Authorization:\ Bearer\ <B-full-key> -H X-Tenant-ID:\ <tenant-A-id> 
+HTTP/1.1 200 OK
+x-ratelimit-remaining: 56
+
+{"document_id":"qa_b.md","namespace":"legal","total_chunks":0,"total_time_seconds":0.0,"throughput_chunks_per_second":0.0,"status":"unchanged","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunks_deleted":0}
+
+
+### 42. B analytics with tenant_id=A
+$ curl http://127.0.0.1:8020/v1/analytics/summary\?tenant_id=<tenant-A-id> -H Authorization:\ Bearer\ <B-full-key> -H X-Tenant-ID:\ <tenant-A-id> 
+HTTP/1.1 200 OK
+
+{"days":7,"total_cost_usd":0.0,"total_requests":2,"total_tokens":0,"avg_cost_per_request":0.0,"by_day":[{"date":"2026-10-03","cost_usd":0.0,"tokens":0,"requests":2}],"by_endpoint":[{"endpoint":"/v1/ingest","cost_usd":0.0,"requests":2}],"by_namespace":[{"namespace":"legal","cost_usd":0.0,"requests":2}],"by_model":[{"model":"unknown","cost_usd":0.0,"requests":2}]}
+
+
+### 43. B feedback body tenant_id=A
+$ curl -X POST http://127.0.0.1:8020/v1/feedback -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"request_id\":\"spoof\"\,\"endpoint\":\"/v1/search\"\,\"rating\":\"down\"\,\"tenant_id\":\"<tenant-A-id>\"\} 
+HTTP/1.1 201 Created
+
+{"status":"recorded"}
+
+--- owner view: which tenant owns what the spoofed writes created
+ slug |    tbl    | count 
+------+-----------+-------
+ ta   | documents |     1
+ tb   | documents |     1
+ tb   | feedback  |     1
+(3 rows)
+
+===== 5. Foreign / missing KB slugs =====
+
+### 44. B searches A-only KB 'aonly'
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"x\"\,\"namespace\":\"aonly\"\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 55
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"1f5c6c43a70146e1b15333abff065297"}}
+
+
+### 45. B searches nonexistent KB 'zzz'
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"x\"\,\"namespace\":\"zzz\"\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 54
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"36b89285b0b448ca952a23de39e0d7c0"}}
+
+
+### 46. B ingests into A-only KB
+$ curl -X POST http://127.0.0.1:8020/v1/ingest\?namespace=aonly -F file=@/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/qa_b.md -H Authorization:\ Bearer\ <B-full-key> 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 53
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"3ad660dd2dcb43c3a5e1e0d4d4c11985"}}
+
+
+### 47. B agent on A-only KB
+$ curl -X POST http://127.0.0.1:8020/v1/agent/query -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"question\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"aonly\"\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 52
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"32a76eb66a4b467286046104295d3e7b"}}
+
+
+### 48. A searches B-only KB 'bonly'
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <A-full-key> -d \{\"query\":\"x\"\,\"namespace\":\"bonly\"\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 57
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"8998d1508ec443fcbdef361b5b371b77"}}
+
+
+### 49. SQL-ish slug
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"x\"\,\"namespace\":\"legal\'\ OR\ \'1\'=\'1\"\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 51
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"5c719cdc20004d4cbc32518a37daf615"}}
+
+
+### 50. wildcard slug
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"x\"\,\"namespace\":\"%\"\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 50
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"0157710641394e9dade16844713030fe"}}
+
+
+### 51. slug with different case 'LEGAL'
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"x\"\,\"namespace\":\"LEGAL\"\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 49
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"f0eabdd6fec14b7f812e92a9f6aeb35b"}}
+
+
+### 52. B lists docs, namespace=aonly
+$ curl http://127.0.0.1:8020/v1/documents\?namespace=aonly -H Authorization:\ Bearer\ <A-full-key> 
+HTTP/1.1 200 OK
+
+{"documents":[],"count":0}
+
+===== 6. Cache replay =====
+
+### 53. A repeats the search (exact HIT for A)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <A-full-key> -d \{\"query\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 200 OK
+x-cache: HIT
+x-cache-type: exact
+x-ratelimit-remaining: 56
+
+{"query":"Project Zephyr budget","answer":"According to qa_a.md: ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 hours.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"qa_a.md","namespace":"legal","content":"ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 h","score":0.03278688524590164,"metadat
+
+### 54. B same query (must NOT be A's cached answer)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 48
+
+{"error":{"code":"not_found","message":"No documents found in namespace 'legal'. Ingest documents first.","request_id":"4f637790a36d408894a021ede0e4b3be"}}
+
+
+### 55. A paraphrase (semantic cache candidate)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <A-full-key> -d \{\"query\":\"project\ zephyr\ budget\ please\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 200 OK
+x-cache: HIT
+x-cache-type: semantic
+x-ratelimit-remaining: 55
+
+{"query":"Project Zephyr budget","answer":"According to qa_a.md: ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 hours.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"qa_a.md","namespace":"legal","content":"ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 h","score":0.03278688524590164,"metadat
+
+### 56. B same paraphrase (must NOT be semantic HIT of A)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"project\ zephyr\ budget\ please\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 47
+
+{"error":{"code":"not_found","message":"No documents found in namespace 'legal'. Ingest documents first.","request_id":"d749273d3be7452bb1ba47d8d232beae"}}
+
+
+### 57. B query that matches B's doc
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"pigeon\ census\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 200 OK
+x-cache: MISS
+x-cache-type: none
+x-ratelimit-remaining: 46
+
+{"query":"pigeon census","answer":"According to qa_b.md: Beta only memo\n\nBeta quarterly pigeon census figures are classified.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"qa_b.md","namespace":"legal","content":"Beta only memo\n\nBeta quarterly pigeon census figures are classified.","score":0.03278688524590164,"metadata":{"chunk_index":0}}],"total_results":1,"flagged":false,"flag_reason":null}
+
+
+### 58. A asks B's content (must not see B doc)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <A-full-key> -d \{\"query\":\"pigeon\ census\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 54
+
+{"error":{"code":"not_found","message":"No documents found in namespace 'legal'. Ingest documents first.","request_id":"81cfc8d8c8a14a28b73fe38fc1cf54dc"}}
+
+
+### 59. B replays A's cached query in A-only KB (kb check precedes cache)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"query\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"aonly\"\} 
+HTTP/1.1 404 Not Found
+x-ratelimit-remaining: 45
+
+{"error":{"code":"kb_not_found","message":"Knowledge base not found","request_id":"0fb7f1e21795476cb40dd8c722e85cc4"}}
+
+
+### 60. ro key (query scope) can read cache hit
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <A-ro-key> -d \{\"query\":\"Project\ Zephyr\ budget\"\,\"namespace\":\"legal\"\,\"top_k\":3\} 
+HTTP/1.1 200 OK
+x-cache: HIT
+x-cache-type: exact
+x-ratelimit-remaining: 53
+
+{"query":"Project Zephyr budget","answer":"According to qa_a.md: ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 hours.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"qa_a.md","namespace":"legal","content":"ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 h","score":0.03278688524590164,"metadat
+--- redis: cache keys and semantic-cache tenant tags
+cache:v2:82a529a6d5b5d1ef
+cache:v2:edca9eb8e318b373
+semcache:cfca6762855c4d3eb1414767554202bb -> tenant_id=64822145-9ae6-4e0e-8d34-cd5819d87d8b
+semcache:f254f550436f463e8b3669ee2e7e4a91 -> tenant_id=c4008193-c272-47fd-8d6c-0bf7838938eb
+===== 7. Scopes =====
+
+### 61. A read-only(query) key ingests
+$ curl -X POST http://127.0.0.1:8020/v1/ingest\?namespace=legal -F file=@/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/qa_a.md -H Authorization:\ Bearer\ <A-ro-key> 
+HTTP/1.1 403 Forbidden
+x-ratelimit-remaining: 52
+
+{"error":{"code":"forbidden","message":"Missing required scope: kb:write","request_id":"d4189296e7b747dbb78a38b50d208363"}}
+
+
+### 62. A read-only key lists docs (kb:read)
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <A-ro-key> 
+HTTP/1.1 403 Forbidden
+
+{"error":{"code":"forbidden","message":"Missing required scope: kb:read","request_id":"e63fa2cc98964b3796966a055c33654a"}}
+
+
+### 63. A read-only key agent
+$ curl -X POST http://127.0.0.1:8020/v1/agent/query -H Content-Type:\ application/json -H Authorization:\ Bearer\ <A-ro-key> -d \{\"question\":\"x\"\,\"namespace\":\"legal\"\} 
+HTTP/1.1 403 Forbidden
+x-ratelimit-remaining: 51
+
+{"error":{"code":"forbidden","message":"Missing required scope: agent","request_id":"e712a49fa3d8430684e5f73fbbf05feb"}}
+
+
+### 64. A read-only key analytics
+$ curl http://127.0.0.1:8020/v1/analytics/summary -H Authorization:\ Bearer\ <A-ro-key> 
+HTTP/1.1 403 Forbidden
+
+{"error":{"code":"forbidden","message":"Missing required scope: kb:read","request_id":"0d29692b206644f2a3e845b9c58d6f3d"}}
+
+
+### 65. A read-only key feedback
+$ curl -X POST http://127.0.0.1:8020/v1/feedback -H Content-Type:\ application/json -H Authorization:\ Bearer\ <A-ro-key> -d \{\"request_id\":\"x\"\,\"endpoint\":\"/v1/search\"\,\"rating\":\"up\"\} 
+HTTP/1.1 201 Created
+
+{"status":"recorded"}
+
+
+### 66. A read-only key config
+$ curl http://127.0.0.1:8020/v1/config -H Authorization:\ Bearer\ <A-ro-key> 
+HTTP/1.1 403 Forbidden
+
+{"error":{"code":"forbidden","message":"Missing required scope: kb:read","request_id":"c1ed6026ccc44ca8b8a5460fed931d4e"}}
+
+===== 8. Agent =====
+
+### 67. A agent, own KB
+$ curl -X POST http://127.0.0.1:8020/v1/agent/query -H Content-Type:\ application/json -H Authorization:\ Bearer\ <A-full-key> -d \{\"question\":\"What\ is\ the\ Project\ Zephyr\ budget\?\"\,\"namespace\":\"legal\"\,\"enable_verifier\":false\} 
+HTTP/1.1 200 OK
+x-ratelimit-remaining: 50
+
+{"question":"What is the Project Zephyr budget?","answer":"According to qa_a.md: ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 hours.","confidence":0.9,"citations":[{"document_id":"qa_a.md","source_filename":"qa_a.md","chunk_index":0,"relevance_score":0.0328,"excerpt":"ACME secret plan\n\nProject Zephyr budget is 4.2 million euros. The breach notification window is 72 h"}],"model_used":"gemi
+
+### 68. B agent, same question, B's legal (fake LLM calls retrieve_chunks(legal))
+$ curl -X POST http://127.0.0.1:8020/v1/agent/query -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-full-key> -d \{\"question\":\"What\ is\ the\ Project\ Zephyr\ budget\?\"\,\"namespace\":\"legal\"\,\"enable_verifier\":false\} 
+HTTP/1.1 200 OK
+x-ratelimit-remaining: 44
+
+{"question":"What is the Project Zephyr budget?","answer":"I could not find relevant documents to answer this question.","confidence":0.0,"citations":[],"model_used":"","verified":null,"verification_notes":"","reasoning_steps":["Called tool: retrieve_chunks({'query': 'What is the Project Zephyr budget?', 'namespace': 'legal', 'top_k': 3})","Tool result: {\"result\": \"No relevant chunks found\", \"count\": 0}"],"tool_calls_made":1,"total_time_se
+===== 9. Rate limit identity =====
+
+### 69. rate-limit header probe 1 (spoofed X-Forwarded-For: 10.0.0.1, same key)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-ro-key> -H X-Forwarded-For:\ 10.0.0.1 -d \{\"query\":\"pigeon\ census\"\,\"namespace\":\"legal\"\} 
+HTTP/1.1 200 OK
+x-cache: MISS
+x-cache-type: none
+x-ratelimit-remaining: 43
+
+{"query":"pigeon census","answer":"According to qa_b.md: Beta only memo\n\nBeta quarterly pigeon census figures are classified.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"qa_b.md","namespace":"legal","content":"Beta only memo\n\nBeta quarterly pigeon census figures are classified.","score":0.03278688524590164,"metadata":{"chunk_index":0}}],"total_results":1,"flagged":false,"flag_reason":null}
+
+
+### 70. rate-limit header probe 2 (spoofed X-Forwarded-For: 10.0.0.2, same key)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-ro-key> -H X-Forwarded-For:\ 10.0.0.2 -d \{\"query\":\"pigeon\ census\"\,\"namespace\":\"legal\"\} 
+HTTP/1.1 200 OK
+x-cache: HIT
+x-cache-type: exact
+x-ratelimit-remaining: 42
+
+{"query":"pigeon census","answer":"According to qa_b.md: Beta only memo\n\nBeta quarterly pigeon census figures are classified.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"qa_b.md","namespace":"legal","content":"Beta only memo\n\nBeta quarterly pigeon census figures are classified.","score":0.03278688524590164,"metadata":{"chunk_index":0}}],"total_results":1,"flagged":false,"flag_reason":null}
+
+
+### 71. rate-limit header probe 3 (spoofed X-Forwarded-For: 10.0.0.3, same key)
+$ curl -X POST http://127.0.0.1:8020/v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-ro-key> -H X-Forwarded-For:\ 10.0.0.3 -d \{\"query\":\"pigeon\ census\"\,\"namespace\":\"legal\"\} 
+HTTP/1.1 200 OK
+x-cache: HIT
+x-cache-type: exact
+x-ratelimit-remaining: 41
+
+{"query":"pigeon census","answer":"According to qa_b.md: Beta only memo\n\nBeta quarterly pigeon census figures are classified.","confidence":0.9,"needs_clarification":false,"rerank_applied":false,"results":[{"document_id":"qa_b.md","namespace":"legal","content":"Beta only memo\n\nBeta quarterly pigeon census figures are classified.","score":0.03278688524590164,"metadata":{"chunk_index":0}}],"total_results":1,"flagged":false,"flag_reason":null}
+
+
+### 72. trailing-slash variant of rate-limited path
+$ curl -X POST -L http://127.0.0.1:8020/v1/search/ -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-ro-key> -d \{\"query\":\"pigeon\ census\"\,\"namespace\":\"legal\"\} 
+HTTP/1.1 307 Temporary Redirect
+location: http://127.0.0.1:8020/v1/search
+HTTP/1.1 200 OK
+x-cache: HIT
+x-cache-type: exact
+x-ratelimit-remaining: 40
+
+HTTP/1.1 200 OK
+date: Sat, 03 Oct 2026 14:24:08 GMT
+server: uvicorn
+content-length: 448
+content-type: application/json
+x-cache: HIT
+x-cache-type: exact
+x-cost-usd: 0.000000
+x-tokens-in: 0
+x-tokens-out: 0
+x-query-id: e59d089a677f4fab947419655b5f8768
+x-ratelimit-limit: 60
+x-ratelimit-remaining: 40
+x-process-time: 8.33ms
+x-request-id: e59d089a677f4fab947419655b5f8768
+x-trace-id: 46ba5539003ecf139096463b1ecc377a
+
+{"query":"pigeon census","answer":"A
+
+### 73. double-slash variant of rate-limited path
+$ curl -X POST http://127.0.0.1:8020//v1/search -H Content-Type:\ application/json -H Authorization:\ Bearer\ <B-ro-key> -d \{\"query\":\"pigeon\ census\"\,\"namespace\":\"legal\"\} 
+HTTP/1.1 404 Not Found
+
+{"error":{"code":"not_found","message":"Not Found","request_id":"1fe5dc29c6f94b2198462e07b4d1849d"}}
+
+===== 10. Revocation / disable (owner-side change, then use) =====
+UPDATE 1
+
+### 74. B key after its principal is disabled
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <B-full-key> 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"4b9927a3c5c74994ba0cdb03c5e1ccee"}}
+
+UPDATE 1
+
+### 75. B key after re-enable
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <B-full-key> 
+HTTP/1.1 200 OK
+
+{"documents":[{"document_id":"qa_b.md","namespace":"legal","source_filename":"qa_b.md","content_hash":"ec2c68699470c6ec0310ee1260db8eb3c1da74e2397fb6194bfe6c2f8e0f229c","chunk_count":1,"last_ingested_at":"2026-10-03T14:24:07.599736+00:00"}],"count":1}
+
+UPDATE 1
+
+### 76. B ro key after revoke
+$ curl http://127.0.0.1:8020/v1/documents -H Authorization:\ Bearer\ <B-ro-key> 
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"3645cc975bfd4697b42646a71eb06691"}}
+
+
+===== 11. Rate-limit independence (limit is 60/min per principal; B sends 70 cached searches, then A sends one) =====
+B status counts:      60 200
+B status counts:      10 429
+A right after:
+HTTP/1.1 200 OK
+x-ratelimit-remaining: 58
+B once more (expect 429):
+HTTP/1.1 429 Too Many Requests
+retry-after: 47
+{"error":{"code":"rate_limit_exceeded","message":"Rate limit of 60 requests per 60s exceeded for this principal. Retry in 47s.","request_id":"fb2f464194ac484198b82696ec2565cc"}}
+B, same window, spoofed X-Forwarded-For + X-Real-IP to evade (expect 429):
+429
+--- redis keys: rl:<principal_id>:<window>, budget:<tenant_id>:<day>
+rl:1cee8dc4-dd9e-4421-a40e-d64b9e0d2e45:29850625
+rl:86ca87c0-7a04-49c3-882b-8c2f1819c8bf:29850625
+budget:c4008193-c272-47fd-8d6c-0bf7838938eb:2026-10-03
+budget:64822145-9ae6-4e0e-8d34-cd5819d87d8b:2026-10-03
+
+===== 12. Direct SQL as gap_app (what a bug or injection in app code could do), tenant A context =====
+BEGIN
+ ctx_set 
+---------
+ t
+(1 row)
+
+-- read tenant B rows explicitly by id/tenant filter
+ b_documents_visible 
+---------------------
+                   0
+(1 row)
+
+ b_keys_visible 
+----------------
+              0
+(1 row)
+
+-- write a row for tenant B
+ERROR:  new row violates row-level security policy for table "documents"
+ROLLBACK
+BEGIN
+ ?column? 
+----------
+ t
+(1 row)
+
+-- update tenant B rows (matches 0 rows under RLS)
+UPDATE 0
+-- escalate own key scopes to admin / un-revoke (own tenant)
+UPDATE 3
+-- create a new KB / delete a KB for own tenant
+INSERT 0 1
+-- tenants table
+UPDATE 0
+DELETE 0
+-- security definer functions callable by app role (intended)
+ lookup_rows 
+-------------
+           1
+(1 row)
+
+ROLLBACK
+BEGIN
+-- no tenant set: switch to empty string / bogus
+ ?column? 
+----------
+ t
+(1 row)
+
+ docs_with_empty_setting 
+-------------------------
+                       0
+(1 row)
+
+ROLLBACK
+-- SET (session level) a different tenant after connecting: app can set any value, so isolation depends on app code calling tenant_connection with the verified id
+ ?column? 
+----------
+ t
+(1 row)
+
+ b_docs_after_session_set 
+--------------------------
+                        1
+(1 row)
+

@@ -8,7 +8,7 @@ const RADIUS = (SIZE - STROKE) / 2
 const CIRC = 2 * Math.PI * RADIUS
 
 // Confidence ring — draws once with a critically damped spring on first
-// reveal; reduced motion shows the final value immediately (BRANDING.md §8, §12).
+// reveal; reduced motion shows the final value immediately (docs/UI_GUIDELINES.md §7, §11).
 export default function ConfidenceGauge({ confidence, floor = 0.45 }) {
   const reduce = useReducedMotion()
   if (confidence == null) return null

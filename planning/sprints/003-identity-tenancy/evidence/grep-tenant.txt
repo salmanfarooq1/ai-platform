@@ -1,0 +1,61 @@
+$ grep -rn "NAMESPACE_REGISTRY" api core config.py   # exact acceptance command, no filters
+exit status: 1 (1 = no match)
+
+$ grep -rn "NAMESPACE_REGISTRY" api core config.py --include=*.py
+exit status: 1 (1 = no match)
+
+$ grep -rn "tenant_id" api/routers api/agent/router.py --include=*.py   # every use in the route modules
+api/routers/config.py:40:    async with tenant_connection(pool, principal.tenant_id) as conn:
+api/routers/search.py:36:    tenant_id = principal.tenant_id
+api/routers/search.py:59:        tenant_id, payload.query, payload.namespace, payload.top_k,
+api/routers/search.py:82:        tenant_id, payload.query, payload.namespace, query_embedding,
+api/routers/search.py:106:        tenant_id=tenant_id,
+api/routers/search.py:183:        tenant_id, payload.query, payload.namespace, payload.top_k, response_data,
+api/routers/search.py:187:        tenant_id, payload.query, payload.namespace, query_embedding, response_data,
+api/routers/ingest.py:38:    tenant_id = principal.tenant_id
+api/routers/ingest.py:50:    status = await check_document_status(pool, doc_id, namespace, content_hash, tenant_id=tenant_id)
+api/routers/ingest.py:68:        chunks_deleted = await delete_document_chunks(pool, doc_id, namespace, tenant_id=tenant_id)
+api/routers/ingest.py:84:            tenant_id=tenant_id,
+api/routers/ingest.py:95:            tenant_id=tenant_id,
+api/routers/feedback.py:51:        async with tenant_connection(pool, principal.tenant_id) as conn:
+api/routers/feedback.py:54:                INSERT INTO feedback (tenant_id, request_id, endpoint, rating, comment)
+api/routers/feedback.py:61:                principal.tenant_id,
+api/routers/feedback.py:82:    async with tenant_connection(pool, principal.tenant_id) as conn:
+api/routers/feedback.py:91:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/feedback.py:95:            since, principal.tenant_id,
+api/routers/analytics.py:44:    tenant_id = principal.tenant_id
+api/routers/analytics.py:45:    async with tenant_connection(pool, tenant_id) as conn:
+api/routers/analytics.py:53:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:55:            since, tenant_id,
+api/routers/analytics.py:65:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:69:            since, tenant_id,
+api/routers/analytics.py:78:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:82:            since, tenant_id,
+api/routers/analytics.py:91:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:95:            since, tenant_id,
+api/routers/analytics.py:104:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:108:            since, tenant_id,
+api/routers/docs.py:43:    tenant_id = principal.tenant_id
+api/routers/docs.py:45:    async with tenant_connection(pool, tenant_id) as conn:
+api/routers/docs.py:51:            WHERE tenant_id = $1 AND ($2::text IS NULL OR namespace = $2)
+api/routers/docs.py:54:            tenant_id, namespace or None,
+api/agent/router.py:114:            # tenant_id reaches the tools through `configurable`, never through model-controlled arguments.
+api/agent/router.py:115:            config={"recursion_limit": recursion_limit, "configurable": {"tenant_id": str(principal.tenant_id)}},
+
+$ grep -rniE "x-tenant|(Query|Header|Form|Body|File|Cookie)\([^)]*tenant|request\.(query_params|headers|cookies|json|form)[^\n]*tenant|tenant[^\n]*request\.(query_params|headers|cookies)" api --include=*.py
+exit status: 1 (1 = no match)
+
+$ grep -rn "state, \"principal\"\|state.principal" api --include=*.py   # the only places identity is read or set
+api/middleware/auth.py:81:        request.state.principal = principal
+api/middleware/token_budget.py:52:        principal = getattr(request.state, "principal", None)
+api/middleware/finops.py:73:            principal = getattr(request.state, "principal", None)
+api/middleware/rate_limit.py:49:        principal = getattr(request.state, "principal", None)
+api/middleware/logging.py:59:        principal = getattr(request.state, "principal", None)
+api/auth.py:4:`request.state.principal`, before the rate limiter and token budget run. The dependencies here are
+api/auth.py:29:    principal = getattr(request.state, "principal", None)
+
+$ pytest tests/unit/test_route_tenant_inputs.py -v
+tests/unit/test_route_tenant_inputs.py::test_no_operation_in_the_openapi_contract_accepts_a_tenant_from_the_caller PASSED [ 33%]
+tests/unit/test_route_tenant_inputs.py::test_request_models_have_no_tenant_field PASSED [ 66%]
+tests/unit/test_route_tenant_inputs.py::test_in_routers_every_use_of_tenant_id_derives_from_the_principal PASSED [100%]
+============================== 3 passed in 3.77s ===============================

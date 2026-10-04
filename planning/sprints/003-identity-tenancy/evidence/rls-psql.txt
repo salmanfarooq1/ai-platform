@@ -1,0 +1,83 @@
+NOTICE:  database "gap_ev_rls" does not exist, skipping
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+$ psql as gap_app (NOSUPERUSER NOBYPASSRLS), no app.tenant_id set
+ current_user | rolsuper | rolbypassrls 
+--------------+----------+--------------
+ gap_app      | f        | f
+(1 row)
+
+ tenant_setting 
+----------------
+ 
+(1 row)
+
+         t         | count 
+-------------------+-------
+ tenants           |     0
+ principals        |     0
+ api_keys          |     0
+ knowledge_bases   |     0
+ documents         |     0
+ document_registry |     0
+ usage_log         |     0
+ feedback          |     0
+(8 rows)
+
+
+$ psql as the owner role (postgres): rows exist
+ current_user | rolsuper 
+--------------+----------
+ postgres     | t
+(1 row)
+
+         t         | count 
+-------------------+-------
+ tenants           |     2
+ principals        |     1
+ api_keys          |     1
+ knowledge_bases   |     5
+ documents         |     2
+ document_registry |     1
+ usage_log         |     1
+ feedback          |     1
+(8 rows)
+
+
+$ psql as gap_app with app.tenant_id set to the acme tenant inside a transaction: only its rows
+BEGIN
+              set_config              
+--------------------------------------
+ 907737be-6402-4ff8-9349-0505933e8888
+(1 row)
+
+         t         | count 
+-------------------+-------
+ tenants           |     1
+ principals        |     1
+ api_keys          |     1
+ knowledge_bases   |     2
+ documents         |     1
+ document_registry |     1
+ usage_log         |     1
+ feedback          |     1
+(8 rows)
+
+ document_id |  content  
+-------------+-----------
+ a.md        | acme text
+(1 row)
+
+ROLLBACK
+
+$ gap_app tries to insert a row for another tenant (default) while acting as acme
+BEGIN
+              set_config              
+--------------------------------------
+ 907737be-6402-4ff8-9349-0505933e8888
+(1 row)
+
+ERROR:  new row violates row-level security policy for table "documents"
+ROLLBACK

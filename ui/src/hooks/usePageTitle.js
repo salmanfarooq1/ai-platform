@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { pageTitle } from '../brand'
 
-/** Sets `document.title` to `Verity — <page>` (BRANDING.md §1). */
+/** Sets `document.title` to `<platform name> — <page>`. */
 export function usePageTitle(page) {
   useEffect(() => {
     document.title = pageTitle(page)

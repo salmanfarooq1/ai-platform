@@ -1,0 +1,12 @@
+$ DATABASE_URL=postgresql://postgres:***@localhost:5432/rag_platform poetry run uvicorn api.main:app --port 8011   # superuser
+UnsafeDatabaseRoleError: DATABASE_URL connects as role 'postgres', which is a superuser. Row-level security does not apply to it, so tenant isolation would not be enforced. Connect as a NOSUPERUSER NOBYPASSRLS role (the app role, gap_app) and put the owner role in MIGRATION_DATABASE_URL.\n
+Application startup failed. Exiting.
+exit status of uvicorn pipeline: 3
+
+$ same, MODE=prod, REDIS_URL set
+UnsafeDatabaseRoleError: DATABASE_URL connects as role 'postgres', which is a superuser. Row-level security does not apply to it, so tenant isolation would not be enforced. Connect as a NOSUPERUSER NOBYPASSRLS role (the app role, gap_app) and put the owner role in MIGRATION_DATABASE_URL.\n
+Application startup failed. Exiting.
+
+$ DATABASE_URL=postgresql://gap_app:***@localhost:5432/rag_platform   # the app role: starts, then we stop it
+{"timestamp": "2026-10-03T13:57:03.662549+00:00", "level": "INFO", "logger": "api.main", "message": "startup complete: DB pool, agent graph, Redis, semantic cache, MCP context ready", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-03T13:57:03.662714+00:00", "level": "INFO", "logger": "uvicorn.error", "message": "Application startup complete.", "request_id": "-", "trace_id": "-"}

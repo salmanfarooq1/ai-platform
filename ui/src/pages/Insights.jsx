@@ -6,7 +6,7 @@ import styles from './Insights.module.css'
 
 const DAYS = [7, 14, 30, 90]
 
-// Insights: cost, usage, latency and quality over time (BRANDING.md §6, §8).
+// Insights: cost, usage, latency and quality over time (docs/UI_GUIDELINES.md §5, §7).
 export default function Insights() {
   usePageTitle('Insights')
   const [days, setDays]       = useState(7)

@@ -1,4 +1,4 @@
-/* Cards: solid surface, hairline border, shadow-sm (BRANDING.md §8, §10) */
+/* Cards: solid surface, hairline border, shadow-sm (docs/UI_GUIDELINES.md §7, §9) */
 .card {
   background: var(--bg-surface);
   border: 1px solid var(--hairline);

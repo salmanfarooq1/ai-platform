@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 
-// One Collection (namespace) picker, shared everywhere (BRANDING.md §6) —
+// One Collection (namespace) picker, shared everywhere (docs/UI_GUIDELINES.md §5) —
 // every page reads it here instead of repeating a namespace <select>.
 const CollectionContext = createContext(null)
 

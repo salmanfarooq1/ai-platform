@@ -29,7 +29,7 @@ const MODES = [
   { value: 'deep',  label: 'Deep research', icon: <Brain size={14} strokeWidth={1.75} /> },
 ]
 
-// Ask merges Search + Agent behind one mode switch (BRANDING.md §6, §7).
+// Ask merges Search + Agent behind one mode switch (docs/UI_GUIDELINES.md §5, §6).
 export default function Ask({ config }) {
   usePageTitle('Ask')
   const reduce = useReducedMotion()
@@ -67,10 +67,10 @@ export default function Ask({ config }) {
 
   function quickErrMsg(e) {
     if (!e) return null
-    if (e.status === 400) return { type: 'blocked', reason: e.body?.detail?.reason }
+    if (e.status === 400) return { type: 'blocked', reason: e.body?.error?.message }
     if (e.status === 404) return { type: 'generic', message: 'No documents found in this collection. Add documents in Library first.' }
     if (e.status === 429) {
-      const isBudget = e.body?.error === 'daily_token_budget_exceeded'
+      const isBudget = e.code === 'daily_token_budget_exceeded'
       return { type: 'generic', message: isBudget ? 'Daily token budget exceeded. Resets at midnight UTC.' : 'Rate limit reached. Try again in a moment.' }
     }
     if (e.status === 502) return { type: 'generic', message: 'AI provider temporarily unavailable.' }
@@ -90,8 +90,8 @@ export default function Ask({ config }) {
             exit={reduce ? { opacity: 0 } : { opacity: 0, height: 0, marginBottom: -24 }}
             transition={reduce ? { duration: 0.15 } : spring}
           >
-            <h1 className={styles.headline}>Answers you can <em>trace</em>.</h1>
-            <p className={styles.sub}>Ask anything about your documents.</p>
+            <h1 className={styles.headline}>Ask your documents.</h1>
+            <p className={styles.sub}>Answers come with citations, a confidence score and a verification check.</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -158,7 +158,7 @@ export default function Ask({ config }) {
 
       {mode === 'deep' && (
         <>
-          {deep.error && <div className={styles.genericError} role="alert">{deep.error.body?.detail || deep.error.message}</div>}
+          {deep.error && <div className={styles.genericError} role="alert">{deep.error.message}</div>}
           {deep.loading && (
             <div className={styles.loading} aria-busy="true">
               <div className={styles.loadingBar} />

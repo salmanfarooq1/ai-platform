@@ -1,12 +1,13 @@
-import json
 import logging
-from typing import Any
+
 import litellm
 from pydantic import BaseModel, Field
-from api.models.schemas import SearchResult
+
 from config import LLM_CONFIG, MODEL_PRICING
 
 logger = logging.getLogger("api.services.llm")
+
+GENERATION_MAX_TOKENS = 4000  # completion tokens asked for; the gateway counts them against the policy cap
 
 class Citation(BaseModel):
     document_id: str
@@ -53,7 +54,7 @@ async def generate_with_citations(
                     )
                 }],
                 response_format=GeneratedAnswer,
-                max_tokens=4000
+                max_tokens=GENERATION_MAX_TOKENS
             )
             break
         except Exception as e:
@@ -64,6 +65,8 @@ async def generate_with_citations(
             else:
                 raise
 
+    if response is None:  # unreachable: the loop either breaks with a response or raises
+        raise RuntimeError("LLM call returned no response")
     finish_reason = response.choices[0].finish_reason
     if finish_reason == "length":
         logger.warning(f"[llm] Response truncated at max_tokens limit. model={model_to_use} query='{query[:60]}'")
@@ -102,6 +105,7 @@ async def generate_with_citations(
         "completion_tokens": completion_tokens,
         "total_cost": llm_cost,
         "routed_model": model_to_use,
+        "model": model_to_use,  # FinOps reads this key to price and log the request
     }
 
     return answer_obj, usage_dict

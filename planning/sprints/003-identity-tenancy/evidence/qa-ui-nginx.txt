@@ -1,0 +1,34 @@
+$ sh ui/docker-require-preview-key.sh (no PREVIEW_API_KEY)
+PREVIEW_API_KEY is not set. Set it as a secret on the UI service (see docs/render-deployment.md).
+exit=1
+$ PREVIEW_API_KEY=dummy sh ui/docker-require-preview-key.sh
+exit=0
+$ which nginx envsubst docker-image render: not available -> nginx template rendering NOT VERIFIED
+neither installed
+$ template placeholders and nginx vars in nginx.conf
+20:        proxy_set_header Authorization "Bearer ${PREVIEW_API_KEY}";
+21:        proxy_set_header X-Real-IP $remote_addr;
+22:        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+23:        proxy_set_header X-Forwarded-Proto $scheme;
+26:    location / { try_files $uri $uri/ /index.html; }
+27:    location ~* \.(js|css|png|svg|ico|woff2)$ {
+$ render.yaml UI service env
+      - key: REDIS_URL
+        sync: false
+
+  - type: web
+    name: ai-platform-ui
+    runtime: docker
+    dockerfilePath: ./ui/Dockerfile.ui
+    dockerContext: ./ui
+    plan: free
+    envVars:
+      # Relative, not the backend's absolute URL: nginx.conf proxies /api/*
+      # to the backend server-side, so the browser only ever talks to this
+      # one origin. Keeps this a single public URL instead of two.
+      - key: VITE_API_URL
+        value: /api
+      # API key of the preview tenant (scopes: query, kb:read, agent). nginx adds it to /api/ calls
+      # server-side, so browsers never hold it. Create it with scripts/admin/identity.py create-key.
+      - key: PREVIEW_API_KEY
+        sync: false

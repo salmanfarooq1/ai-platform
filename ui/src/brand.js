@@ -1,26 +1,24 @@
 // src/brand.js
-// Single source of truth for product name, tagline and page-title format.
-// BRANDING.md §1 — never hardcode these strings in components.
+// Single source of truth for the platform name and page-title format.
+// Never hardcode these strings in components.
 
 export const BRAND = {
-  name: 'Verity',
-  tagline: 'Answers you can trace.',
-  taglineCaption: 'ANSWERS YOU CAN TRACE',
+  name: 'Governed Agent Platform',
 }
 
-/** `Verity — <Page name>` (BRANDING.md §1) */
+/** `Governed Agent Platform — <Page name>` */
 export function pageTitle(page) {
   return page ? `${BRAND.name} — ${page}` : BRAND.name
 }
 
-// Mode badge copy + meaning (BRANDING.md §3)
+// Mode badge copy + meaning (docs/UI_GUIDELINES.md §2)
 export const MODES = {
-  demo: { label: 'Demo', dotVar: '--warning', meaning: 'Free tier, reduced pipeline (no reranker)' },
+  'public-preview': { label: 'Public preview', dotVar: '--warning', meaning: 'Free tier, reduced pipeline (no reranker)' },
   local: { label: 'Local', dotVar: '--brand', meaning: 'Developer machine' },
   prod: { label: 'Production', dotVar: '--success', meaning: 'Full pipeline' },
 }
 
-// Confidence scale (BRANDING.md §4) — used by gauges, badges, citation cards, analytics.
+// Confidence scale (docs/UI_GUIDELINES.md §3) — used by gauges, badges, citation cards, analytics.
 export function confidenceLevel(score, floor = 0.45) {
   if (score == null) return null
   if (score >= 0.75) return 'high'

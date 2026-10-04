@@ -5,7 +5,7 @@ import styles from './Toast.module.css'
 const ICONS = { success: CircleCheck, warning: TriangleAlert, error: CircleAlert, info: Info }
 
 // Toasts enter from below with a critically damped spring and leave the same
-// way they came (BRANDING.md §12, §8). Reduced motion: opacity cross-fade only.
+// way they came (docs/UI_GUIDELINES.md §11, §7). Reduced motion: opacity cross-fade only.
 export default function ToastViewport({ toasts, onDismiss }) {
   const reduce = useReducedMotion()
   const spring = { type: 'spring', bounce: 0, duration: 0.25 }

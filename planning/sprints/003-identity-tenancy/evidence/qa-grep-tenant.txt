@@ -1,0 +1,86 @@
+$ grep -rn "NAMESPACE_REGISTRY" api core config.py
+exit=1
+$ grep -rn "tenant_id" api/routers api/agent api/mcp api/middleware api/auth.py (all request-path uses)
+api/services/usage.py:21:    tenant_id: UUID,
+api/services/usage.py:33:        async with tenant_connection(pool, tenant_id) as conn:
+api/services/usage.py:37:                    (tenant_id, request_id, endpoint, namespace, model,
+api/services/usage.py:50:                tenant_id,
+api/services/retriever.py:44:    tenant_id: UUID,
+api/services/retriever.py:49:    async with tenant_connection(pool, tenant_id) as conn:
+api/services/retriever.py:67:            WHERE tenant_id = $4 AND namespace = $2 AND fts_vector @@ $1
+api/services/retriever.py:71:            tsq, namespace, limit, tenant_id,
+api/services/retriever.py:95:    tenant_id: UUID,
+api/services/retriever.py:111:    async with tenant_connection(pool, tenant_id) as conn:
+api/services/retriever.py:118:                WHERE tenant_id = $5 AND namespace = $2
+api/services/retriever.py:124:            query_embedding, namespace, limit, min_score, tenant_id,
+api/services/retriever.py:221:    tenant_id: UUID,
+api/services/cache.py:21:CACHE_SCHEMA_VERSION = 2  # 2: keys carry tenant_id (Sprint 003)
+api/services/cache.py:58:def cache_key(tenant_id: UUID | str, query: str, namespace: str, top_k: int, retrieval_mode: str = "hybrid", rerank: bool = True) -> str:
+api/services/cache.py:69:    tenant_id is part of the hashed key, so one tenant can never read another's cached answer
+api/services/cache.py:77:    raw = f"{tenant_id}:{normalized}:{namespace}:{top_k}:{retrieval_mode}:{rerank}"
+api/services/cache.py:84:async def get_cached_response(tenant_id: UUID | str, query: str, namespace: str, top_k: int, retrieval_mode: str = "hybrid", rerank: bool = True) -> dict | None:
+api/services/cache.py:92:        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, rerank)
+api/services/cache.py:106:    tenant_id: UUID | str,
+api/services/cache.py:124:        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, rerank)
+api/services/cache.py:150:        "tenant_id", "TAG",
+api/services/cache.py:166:    An index created before Sprint 003 has no tenant_id field, and a query that filters on it would
+api/services/cache.py:167:    error. Such an index is dropped (without deleting the cached hashes, which have no tenant_id and
+api/services/cache.py:177:            if "tenant_id" in str(info):
+api/services/cache.py:180:                logger.warning("[cache] Semantic cache index has no tenant_id field; recreating it")
+api/services/cache.py:201:    tenant_id: UUID | str,
+api/services/cache.py:232:        tenant_tag = str(tenant_id).translate(_TAG_ESCAPE)
+api/services/cache.py:238:            f"(@tenant_id:{{{tenant_tag}}}"
+api/services/cache.py:280:    tenant_id: UUID | str,
+api/services/cache.py:305:                "tenant_id": str(tenant_id),
+api/routers/search.py:59:        tenant_id, payload.query, payload.namespace, payload.top_k,
+api/routers/search.py:82:        tenant_id, payload.query, payload.namespace, query_embedding,
+api/routers/search.py:183:        tenant_id, payload.query, payload.namespace, payload.top_k, response_data,
+api/routers/search.py:187:        tenant_id, payload.query, payload.namespace, query_embedding, response_data,
+api/routers/feedback.py:54:                INSERT INTO feedback (tenant_id, request_id, endpoint, rating, comment)
+api/routers/feedback.py:91:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:45:    async with tenant_connection(pool, tenant_id) as conn:
+api/routers/analytics.py:53:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:55:            since, tenant_id,
+api/routers/analytics.py:65:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:69:            since, tenant_id,
+api/routers/analytics.py:78:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:82:            since, tenant_id,
+api/routers/analytics.py:91:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:95:            since, tenant_id,
+api/routers/analytics.py:104:            WHERE tenant_id = $2 AND created_at >= $1
+api/routers/analytics.py:108:            since, tenant_id,
+api/routers/docs.py:45:    async with tenant_connection(pool, tenant_id) as conn:
+api/routers/docs.py:51:            WHERE tenant_id = $1 AND ($2::text IS NULL OR namespace = $2)
+api/routers/docs.py:54:            tenant_id, namespace or None,
+api/agent/router.py:114:            # tenant_id reaches the tools through `configurable`, never through model-controlled arguments.
+api/agent/tools.py:24:    raw = (config or {}).get("configurable", {}).get("tenant_id")
+api/agent/tools.py:50:        tenant_id = tenant_from_config(config)
+api/agent/tools.py:51:        if tenant_id is None:
+api/agent/tools.py:54:            async with tenant_connection(pool, tenant_id) as conn:
+api/agent/tools.py:101:        tenant_id = tenant_from_config(config)
+api/agent/tools.py:102:        if tenant_id is None:
+api/mcp/resources.py:22:    tenant_id, pool = session_tenant(), session_pool()
+api/mcp/resources.py:23:    if tenant_id is None:
+api/mcp/resources.py:28:        async with tenant_connection(pool, tenant_id) as conn:
+api/mcp/resources.py:45:    tenant_id, pool = session_tenant(), session_pool()
+api/mcp/resources.py:46:    if tenant_id is None:
+api/mcp/resources.py:52:        async with tenant_connection(pool, tenant_id) as conn:
+api/mcp/resources.py:57:                WHERE tenant_id = $3 AND namespace = $1 AND document_id = $2
+api/mcp/resources.py:60:                namespace, document_id, tenant_id,
+api/mcp/tools.py:34:async def _kb_slugs(pool: Pool, tenant_id: UUID) -> dict[str, str]:
+api/mcp/tools.py:35:    async with tenant_connection(pool, tenant_id) as conn:
+api/mcp/tools.py:40:async def _kb_exists(pool: Pool, tenant_id: UUID, slug: str) -> bool:
+api/mcp/tools.py:41:    async with tenant_connection(pool, tenant_id) as conn:
+api/mcp/tools.py:57:    tenant_id, pool = session_tenant(), session_pool()
+api/mcp/tools.py:58:    if tenant_id is None:
+api/mcp/tools.py:63:        return json.dumps(await _kb_slugs(pool, tenant_id), indent=2)
+api/mcp/tools.py:91:    tenant_id, pool = session_tenant(), session_pool()
+api/mcp/tools.py:92:    if tenant_id is None:
+api/mcp/tools.py:98:        if not await _kb_exists(pool, tenant_id, namespace):
+api/mcp/tools.py:163:    tenant_id, pool = session_tenant(), session_pool()
+api/mcp/tools.py:164:    if tenant_id is None:
+api/mcp/tools.py:168:    targets = namespaces or list(await _kb_slugs(pool, tenant_id))
+api/mcp/tools.py:194:    tenant_id, pool = session_tenant(), session_pool()
+$ any request-input read of tenant
+exit=1
+$ openapi: any param named tenant*
