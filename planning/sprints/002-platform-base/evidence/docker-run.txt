@@ -1,0 +1,43 @@
+NOTE: not a container run. Docker build (A9) could not be completed in this sandbox (see docker-build.txt and report.md).
+This file runs the exact command from the Dockerfile CMD directly, against a fresh database, as the closest available check.
+$ createdb gap_cmd_check
+DROP DATABASE
+CREATE DATABASE
+$ sh -c "alembic upgrade head && exec uvicorn api.main:app --host 0.0.0.0 --port 8002 --timeout-keep-alive 65"
+[1]+  Done                    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/gap_cmd_check setsid poetry run sh -c "alembic upgrade head && exec uvicorn api.main:app --host 127.0.0.1 --port 8002 --timeout-keep-alive 65" > /tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/cmd.log 2>&1
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+{"timestamp": "2026-10-03T13:06:33.924175+00:00", "level": "INFO", "logger": "uvicorn.error", "message": "Started server process [9425]", "request_id": "-", "trace_id": "-", "color_message": "Started server process [\u00
+{"timestamp": "2026-10-03T13:06:33.924375+00:00", "level": "INFO", "logger": "uvicorn.error", "message": "Waiting for application startup.", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-03T13:06:34.050001+00:00", "level": "INFO", "logger": "api.db", "message": "[db] Pool ready: 20 connections/worker \u00d7 1 worker(s) = 20 total DB connections", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-03T13:06:34.067010+00:00", "level": "INFO", "logger": "api.cache", "message": "[cache] Semantic cache index created", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-03T13:06:34.067145+00:00", "level": "INFO", "logger": "api.mcp.transport", "message": "[mcp] Context initialized with DB pool", "request_id": "-", "trace_id": "-"}
+$ curl -si localhost:8002/health
+HTTP/1.1 200 OK
+date: Sat, 03 Oct 2026 13:06:34 GMT
+server: uvicorn
+content-length: 291
+content-type: application/json
+x-cost-usd: 0.000000
+x-process-time: 1075.27ms
+x-request-id: 98a175d65ceb4da58507fe5ab61339c5
+x-trace-id: 8bbe48f2f7e79c38bdf9890ffda768b8
+
+{"status":"degraded","db":"ok","redis":"ok","embedding":"error: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7f624e4090a0> [Conn
+$ psql: tables and alembic version
+               List of relations
+ Schema |       Name        | Type  |  Owner   
+--------+-------------------+-------+----------
+ public | alembic_version   | table | postgres
+ public | document_registry | table | postgres
+ public | documents         | table | postgres
+ public | feedback          | table | postgres
+ public | usage_log         | table | postgres
+(5 rows)
+
+ version_num 
+-------------
+ 0001
+(1 row)
+

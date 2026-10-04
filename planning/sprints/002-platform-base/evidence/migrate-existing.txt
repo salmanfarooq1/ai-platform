@@ -1,0 +1,177 @@
+$ createdb gap_mig_existing; apply old schema: git show HEAD:core/database/schema.sql | psql
+NOTICE:  database "gap_mig_existing" does not exist, skipping
+DROP DATABASE
+CREATE DATABASE
+--- \d before ---
+                                                                 Table "public.documents"
+   Column    |          Type          | Collation | Nullable |                Default                | Storage  | Compression | Stats target | Description 
+-------------+------------------------+-----------+----------+---------------------------------------+----------+-------------+--------------+-------------
+ id          | integer                |           | not null | nextval('documents_id_seq'::regclass) | plain    |             |              | 
+ document_id | character varying(255) |           | not null |                                       | extended |             |              | 
+ namespace   | character varying(255) |           | not null | 'default'::character varying          | extended |             |              | 
+ content     | text                   |           |          |                                       | extended |             |              | 
+ embedding   | vector(768)            |           |          |                                       | external |             |              | 
+ metadata    | jsonb                  |           |          |                                       | extended |             |              | 
+ fts_vector  | tsvector               |           |          |                                       | extended |             |              | 
+Indexes:
+    "documents_pkey" PRIMARY KEY, btree (id)
+    "idx_documents_document_id" btree (document_id)
+    "idx_documents_embedding_hnsw" hnsw (embedding vector_cosine_ops) WITH (m='16', ef_construction='64')
+    "idx_documents_fts" gin (fts_vector)
+    "idx_documents_namespace" btree (namespace)
+    "idx_documents_ns_docid" btree (namespace, document_id)
+Triggers:
+    trig_update_fts BEFORE INSERT OR UPDATE ON documents FOR EACH ROW EXECUTE FUNCTION update_fts_vector()
+Access method: heap
+
+                                                            Table "public.document_registry"
+      Column      |           Type           | Collation | Nullable |           Default            | Storage  | Compression | Stats target | Description 
+------------------+--------------------------+-----------+----------+------------------------------+----------+-------------+--------------+-------------
+ document_id      | character varying(255)   |           | not null |                              | extended |             |              | 
+ namespace        | character varying(255)   |           | not null | 'default'::character varying | extended |             |              | 
+ content_hash     | character varying(64)    |           | not null |                              | extended |             |              | 
+ source_filename  | character varying(500)   |           |          |                              | extended |             |              | 
+ chunk_count      | integer                  |           | not null | 0                            | plain    |             |              | 
+ last_ingested_at | timestamp with time zone |           | not null | now()                        | plain    |             |              | 
+Indexes:
+    "document_registry_pkey" PRIMARY KEY, btree (document_id, namespace)
+Access method: heap
+
+                                                                     Table "public.usage_log"
+      Column       |           Type           | Collation | Nullable |                Default                | Storage  | Compression | Stats target | Description 
+-------------------+--------------------------+-----------+----------+---------------------------------------+----------+-------------+--------------+-------------
+ id                | bigint                   |           | not null | nextval('usage_log_id_seq'::regclass) | plain    |             |              | 
+ request_id        | character varying(64)    |           | not null |                                       | extended |             |              | 
+ endpoint          | character varying(100)   |           | not null |                                       | extended |             |              | 
+ namespace         | character varying(255)   |           | not null | 'global'::character varying           | extended |             |              | 
+ model             | character varying(200)   |           | not null |                                       | extended |             |              | 
+ prompt_tokens     | integer                  |           | not null | 0                                     | plain    |             |              | 
+ completion_tokens | integer                  |           | not null | 0                                     | plain    |             |              | 
+ cost_usd          | numeric(12,8)            |           | not null | 0.0                                   | main     |             |              | 
+ routing_decision  | character varying(50)    |           |          |                                       | extended |             |              | 
+ created_at        | timestamp with time zone |           | not null | now()                                 | plain    |             |              | 
+Indexes:
+    "usage_log_pkey" PRIMARY KEY, btree (id)
+    "idx_usage_log_created" btree (created_at DESC)
+    "idx_usage_log_endpoint_date" btree (endpoint, created_at)
+Access method: heap
+
+                                                                  Table "public.feedback"
+   Column   |           Type           | Collation | Nullable |               Default                | Storage  | Compression | Stats target | Description 
+------------+--------------------------+-----------+----------+--------------------------------------+----------+-------------+--------------+-------------
+ id         | bigint                   |           | not null | nextval('feedback_id_seq'::regclass) | plain    |             |              | 
+ request_id | text                     |           | not null |                                      | extended |             |              | 
+ endpoint   | text                     |           | not null |                                      | extended |             |              | 
+ rating     | text                     |           | not null |                                      | extended |             |              | 
+ comment    | text                     |           |          |                                      | extended |             |              | 
+ created_at | timestamp with time zone |           | not null | now()                                | plain    |             |              | 
+Indexes:
+    "feedback_pkey" PRIMARY KEY, btree (id)
+    "idx_feedback_created" btree (created_at DESC)
+    "idx_feedback_request_id" btree (request_id)
+Check constraints:
+    "feedback_rating_check" CHECK (rating = ANY (ARRAY['up'::text, 'down'::text]))
+Access method: heap
+
+                                                                                   List of functions
+ Schema |       Name        | Result data type | Argument data types | Type | Volatility | Parallel |  Owner   | Security | Access privileges | Language | Internal name | Description 
+--------+-------------------+------------------+---------------------+------+------------+----------+----------+----------+-------------------+----------+---------------+-------------
+ public | update_fts_vector | trigger          |                     | func | volatile   | unsafe   | postgres | invoker  |                   | plpgsql  |               | 
+(1 row)
+
+$ alembic upgrade head
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+exit=0
+--- \d after ---
+                                                                 Table "public.documents"
+   Column    |          Type          | Collation | Nullable |                Default                | Storage  | Compression | Stats target | Description 
+-------------+------------------------+-----------+----------+---------------------------------------+----------+-------------+--------------+-------------
+ id          | integer                |           | not null | nextval('documents_id_seq'::regclass) | plain    |             |              | 
+ document_id | character varying(255) |           | not null |                                       | extended |             |              | 
+ namespace   | character varying(255) |           | not null | 'default'::character varying          | extended |             |              | 
+ content     | text                   |           |          |                                       | extended |             |              | 
+ embedding   | vector(768)            |           |          |                                       | external |             |              | 
+ metadata    | jsonb                  |           |          |                                       | extended |             |              | 
+ fts_vector  | tsvector               |           |          |                                       | extended |             |              | 
+Indexes:
+    "documents_pkey" PRIMARY KEY, btree (id)
+    "idx_documents_document_id" btree (document_id)
+    "idx_documents_embedding_hnsw" hnsw (embedding vector_cosine_ops) WITH (m='16', ef_construction='64')
+    "idx_documents_fts" gin (fts_vector)
+    "idx_documents_namespace" btree (namespace)
+    "idx_documents_ns_docid" btree (namespace, document_id)
+Triggers:
+    trig_update_fts BEFORE INSERT OR UPDATE ON documents FOR EACH ROW EXECUTE FUNCTION update_fts_vector()
+Access method: heap
+
+                                                            Table "public.document_registry"
+      Column      |           Type           | Collation | Nullable |           Default            | Storage  | Compression | Stats target | Description 
+------------------+--------------------------+-----------+----------+------------------------------+----------+-------------+--------------+-------------
+ document_id      | character varying(255)   |           | not null |                              | extended |             |              | 
+ namespace        | character varying(255)   |           | not null | 'default'::character varying | extended |             |              | 
+ content_hash     | character varying(64)    |           | not null |                              | extended |             |              | 
+ source_filename  | character varying(500)   |           |          |                              | extended |             |              | 
+ chunk_count      | integer                  |           | not null | 0                            | plain    |             |              | 
+ last_ingested_at | timestamp with time zone |           | not null | now()                        | plain    |             |              | 
+Indexes:
+    "document_registry_pkey" PRIMARY KEY, btree (document_id, namespace)
+Access method: heap
+
+                                                                     Table "public.usage_log"
+      Column       |           Type           | Collation | Nullable |                Default                | Storage  | Compression | Stats target | Description 
+-------------------+--------------------------+-----------+----------+---------------------------------------+----------+-------------+--------------+-------------
+ id                | bigint                   |           | not null | nextval('usage_log_id_seq'::regclass) | plain    |             |              | 
+ request_id        | character varying(64)    |           | not null |                                       | extended |             |              | 
+ endpoint          | character varying(100)   |           | not null |                                       | extended |             |              | 
+ namespace         | character varying(255)   |           | not null | 'global'::character varying           | extended |             |              | 
+ model             | character varying(200)   |           | not null |                                       | extended |             |              | 
+ prompt_tokens     | integer                  |           | not null | 0                                     | plain    |             |              | 
+ completion_tokens | integer                  |           | not null | 0                                     | plain    |             |              | 
+ cost_usd          | numeric(12,8)            |           | not null | 0.0                                   | main     |             |              | 
+ routing_decision  | character varying(50)    |           |          |                                       | extended |             |              | 
+ created_at        | timestamp with time zone |           | not null | now()                                 | plain    |             |              | 
+Indexes:
+    "usage_log_pkey" PRIMARY KEY, btree (id)
+    "idx_usage_log_created" btree (created_at DESC)
+    "idx_usage_log_endpoint_date" btree (endpoint, created_at)
+Access method: heap
+
+                                                                  Table "public.feedback"
+   Column   |           Type           | Collation | Nullable |               Default                | Storage  | Compression | Stats target | Description 
+------------+--------------------------+-----------+----------+--------------------------------------+----------+-------------+--------------+-------------
+ id         | bigint                   |           | not null | nextval('feedback_id_seq'::regclass) | plain    |             |              | 
+ request_id | text                     |           | not null |                                      | extended |             |              | 
+ endpoint   | text                     |           | not null |                                      | extended |             |              | 
+ rating     | text                     |           | not null |                                      | extended |             |              | 
+ comment    | text                     |           |          |                                      | extended |             |              | 
+ created_at | timestamp with time zone |           | not null | now()                                | plain    |             |              | 
+Indexes:
+    "feedback_pkey" PRIMARY KEY, btree (id)
+    "idx_feedback_created" btree (created_at DESC)
+    "idx_feedback_request_id" btree (request_id)
+Check constraints:
+    "feedback_rating_check" CHECK (rating = ANY (ARRAY['up'::text, 'down'::text]))
+Access method: heap
+
+                                                                                   List of functions
+ Schema |       Name        | Result data type | Argument data types | Type | Volatility | Parallel |  Owner   | Security | Access privileges | Language | Internal name | Description 
+--------+-------------------+------------------+---------------------+------+------------+----------+----------+----------+-------------------+----------+---------------+-------------
+ public | update_fts_vector | trigger          |                     | func | volatile   | unsafe   | postgres | invoker  |                   | plpgsql  |               | 
+(1 row)
+
+--- diff before after (empty = identical) ---
+IDENTICAL
+--- alembic_version ---
+ version_num 
+-------------
+ 0001
+(1 row)
+
+--- triggers ---
+     tgname      
+-----------------
+ trig_update_fts
+(1 row)
+

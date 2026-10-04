@@ -24,8 +24,15 @@ dependencies = [
     "beautifulsoup4 (>=4.15.0,<5.0.0)",
     "langgraph (>=1.2.0,<2.0.0)",
     "langchain-core (>=1.4.0,<2.0.0)",
-    "langchain-litellm (>=0.2.0,<1.0.0)",
+    "langchain-litellm (>=0.7.0,<0.8.0)",
     "mcp (>=2.0.0,<3.0.0)",
+    "pydantic-settings (>=2.15.0,<3.0.0)",
+    "alembic (>=1.20.0,<2.0.0)",
+    "opentelemetry-sdk (>=1.45.0,<2.0.0)",
+    "opentelemetry-instrumentation-fastapi (>=0.66b0,<0.67)",
+    "opentelemetry-exporter-otlp-proto-http (>=1.45.0,<2.0.0)",
+    "pyjwt (>=2.15.1,<3.0.0)",
+    "cryptography (>=50.0.2,<51.0.0)",
 ]
 
 
@@ -37,7 +44,7 @@ build-backend = "poetry.core.masonry.api"
 # Kept out of [project.dependencies] so that `poetry install --only main` - what
 # the Dockerfile runs - produces an image without torch. sentence-transformers
 # is only reached through the cross-encoder reranker, which FEATURES
-# ["reranker_enabled"] disables in demo mode to stay inside 512MB of RAM.
+# ["reranker_enabled"] disables in public-preview mode to stay inside 512MB of RAM.
 rerank = [
     "sentence-transformers (>=5.6.0,<6.0.0)",
 ]
@@ -54,13 +61,21 @@ dev = [
     "pytest-asyncio (>=1.4.0,<2.0.0)",
     "httpx (>=0.28.1,<0.29.0)",
     "pytest-cov (>=7.1.0,<8.0.0)",
-    "ruff (>=0.5.0)"
+    "ruff (>=0.5.0)",
+    "mypy (>=2.4.0,<3.0.0)",
+    "asgi-lifespan (>=2.1.0,<3.0.0)",
+    "types-psycopg2 (>=2.9.21.20260911,<3.0.0.0)",
+    "types-requests (>=2.33.0.20260906,<3.0.0.0)",
+    "hypothesis (>=6.168.3,<7.0.0)"
 ]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+# The deepeval pytest plugin (labs group) replaces pytest's skip summary with its own rich
+# output, which crashes on skip reasons that contain brackets. The tests do not use it.
+addopts = "-p no:deepeval"
 markers = [
     "unit: fast, isolated tests with no external dependencies",
     "integration: tests against a real test database/Redis instance",
@@ -68,7 +83,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["api", "core"]
+source = ["api", "core", "gateway"]
 omit = ["*/tests/*"]
 
 [tool.ruff]
@@ -79,3 +94,28 @@ line-length = 120
 select = ["E", "F", "I", "W"]
 ignore = ["E501"]  # line length handled by formatter, not linter
 
+
+[tool.mypy]
+python_version = "3.11"
+files = ["api", "core", "gateway", "config.py"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+check_untyped_defs = true
+# Non-strict baseline. mypy 2.x turns some of these on by default, so they are explicit.
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_any_generics = false
+disallow_untyped_calls = false
+warn_return_any = false
+exclude = ["^migrations/"]
+
+# Strict for the new modules (Sprint 002). Everything else is non-strict for now.
+[[tool.mypy.overrides]]
+module = ["core.settings", "api.errors", "api.observability", "api.versioning"]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_any_generics = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+warn_return_any = true
+no_implicit_reexport = true

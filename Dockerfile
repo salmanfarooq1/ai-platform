@@ -29,7 +29,7 @@ COPY pyproject.toml poetry.lock ./
 # Install runtime dependencies only (no dev/test deps in production image).
 # --no-root: don't install the project itself yet (we haven't copied the code).
 # INCLUDE_RERANK=true pulls in sentence-transformers/torch for the cross-encoder
-# reranker (needed when MODE=prod). Leave it false for demo/free-tier builds,
+# reranker (needed when MODE=prod). Leave it false for public-preview/free-tier builds,
 # where FEATURES["reranker_enabled"] is off anyway and the extra ~3GB is dead weight.
 ARG INCLUDE_RERANK=false
 RUN if [ "$INCLUDE_RERANK" = "true" ]; then \
@@ -60,7 +60,10 @@ COPY --from=builder /app/.venv .venv
 # Copy application code
 COPY --from=builder /app/api api/
 COPY --from=builder /app/core core/
+COPY --from=builder /app/gateway gateway/
 COPY --from=builder /app/config.py config.py
+COPY --from=builder /app/alembic.ini alembic.ini
+COPY --from=builder /app/migrations migrations/
 COPY --from=builder /app/data data/
 
 # Activate the virtualenv by prepending it to PATH.
@@ -75,12 +78,13 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
-# Run uvicorn with production settings.
+# Apply schema migrations, then start uvicorn with production settings.
+# `alembic upgrade head` is idempotent: on a database that is already at head it
+# changes nothing, and on the hosted database that predates migrations the baseline
+# only records its version. Alembic connects with MIGRATION_DATABASE_URL (the owner role) when set,
+# while uvicorn runs as DATABASE_URL (the non-privileged gap_app role). `exec` makes uvicorn PID 1
+# so it receives stop signals.
 # --host 0.0.0.0: listen on all interfaces (required inside a container)
-# --workers 2: two worker processes for basic concurrency
 # --timeout-keep-alive 65: slightly above the typical 60s load balancer timeout
 #   to prevent the LB from sending requests to a closing connection
-CMD ["uvicorn", "api.main:app", \
-     "--host", "0.0.0.0", \
-     "--port", "8000", \
-     "--timeout-keep-alive", "65"]
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn api.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 65"]

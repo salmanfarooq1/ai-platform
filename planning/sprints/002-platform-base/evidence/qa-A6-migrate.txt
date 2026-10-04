@@ -1,0 +1,28 @@
+DROP DATABASE
+NOTICE:  database "qa_fresh" does not exist, skipping
+CREATE DATABASE
+CREATE EXTENSION
+DROP DATABASE
+NOTICE:  database "qa_exist" does not exist, skipping
+CREATE DATABASE
+CREATE EXTENSION
+### fresh
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+0001 (head)
+### existing
+NOTICE:  extension "vector" already exists, skipping
+NOTICE:  trigger "trig_update_fts" for relation "documents" does not exist, skipping
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+### diff before/after (excluding alembic_version row in \d+ list)
+3a4
+>  public | alembic_version   | table    | postgres | permanent   | heap          | 8192 bytes | 
+11c12
+< (7 rows)
+---
+> (8 rows)
+### fresh vs old-schema \d+ tables
+IDENTICAL_FRESH_VS_OLD

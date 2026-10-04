@@ -24,7 +24,44 @@ jobs:
       - name: Install dependencies
         run: poetry install --with dev
       - name: Lint with ruff
-        run: poetry run ruff check api/ core/ tests/
+        run: poetry run ruff check api/ core/ gateway/ tests/
+      - name: No schema DDL outside migrations/ (strict rule 7)
+        # Fails on CREATE TABLE or ALTER TABLE in .py/.sql files outside migrations/.
+        # Exemptions (exact, documented in the script): the frozen legacy schema fixture and scripts/labs/.
+        run: scripts/check_no_ddl.sh
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan history for secrets (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: poetry-
+      - name: Install dependencies
+        run: poetry install --with dev
+      - name: Type check with mypy
+        run: poetry run mypy
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -44,5 +81,90 @@ jobs:
           restore-keys: poetry-
       - name: Install dependencies
         run: poetry install --with dev
-      - name: Run unit tests
+      - name: Run unit tests (includes the OpenAPI snapshot check)
+        # If it fails after an intended API change, run: poetry run python scripts/update_openapi.py
         run: poetry run pytest -m unit -v --cov=api --cov=core --cov-report=term-missing
+
+  integration-e2e-tests:
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis:
+        image: redis/redis-stack-server:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: poetry-
+      - name: Install dependencies
+        run: poetry install --with dev
+      - name: Run integration and e2e tests (none may be skipped)
+        # -rs prints skip reasons. The tests skip when Postgres or Redis is
+        # unreachable, so a skip here means the service containers are broken: fail the job.
+        run: |
+          poetry run pytest -m "integration or e2e" -v -rs | tee pytest-int-e2e.log
+          if grep -qE "^SKIPPED|[0-9]+ skipped" pytest-int-e2e.log; then
+            echo "Integration/e2e tests were skipped. Failing the job."; exit 1
+          fi
+
+  migration-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rag_platform
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rag_platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --only main
+      - name: Upgrade an empty database to head
+        run: poetry run alembic upgrade head
+      - name: Upgrading again is a no-op
+        run: poetry run alembic upgrade head
+      - name: Database is at the single head revision
+        run: |
+          poetry run alembic heads | tee heads.txt
+          test "$(grep -c '(head)' heads.txt)" = "1"
+          poetry run alembic current | grep "(head)"

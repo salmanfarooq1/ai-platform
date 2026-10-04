@@ -102,6 +102,11 @@ from api.services.cache import embed_query
 from api.services.retriever import retrieve, RetrieverConfig
 from config import LLM_CONFIG
 
+# The eval reads one tenant's knowledge bases (row-level security hides every other tenant's rows).
+from uuid import UUID
+
+EVAL_TENANT_ID = UUID(os.environ.get("CORPUS_TENANT_ID", "00000000-0000-0000-0000-000000000001"))  # default tenant
+
 # ---------------------------------------------------------------------------
 # CONFIG — sanity-check every number here before a real run. See docstring
 # above for what's verified vs. estimated.
@@ -465,6 +470,7 @@ async def collect_for_mode(pool, config: RetrieverConfig, mode_name: str,
             query_embedding=embedding,
             namespace=namespace,
             cfg=config,
+            tenant_id=EVAL_TENANT_ID,
         )
 
         if not chunks:

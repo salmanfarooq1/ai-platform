@@ -3,12 +3,16 @@ Ingest the synthetic compliance corpus into the RAG platform.
 Namespace: legal — isolates compliance data from other namespaces.
 """
 import asyncio
+import os
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from core.pipeline.db_ingest import ingestion_pipeline
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _tenant import corpus_tenant_id  # noqa: E402 - the script directory is added to sys.path just above
 
 CORPUS_DIR = Path("data/compliance")
 NAMESPACE = "legal"
@@ -36,6 +40,7 @@ async def main():
             input_file_path=str(path),
             document_id=document_id,
             namespace=NAMESPACE,
+            tenant_id=corpus_tenant_id(),
         )
         print(f"  chunks={metrics['total_chunks']} "
               f"time={metrics['total_time_seconds']}s "

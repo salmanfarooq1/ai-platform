@@ -1,16 +1,19 @@
 import time
+from collections.abc import Iterable
 from itertools import islice
 from pathlib import Path
-from typing import Generator, Iterator
+from typing import Generator
+from uuid import UUID
 
 from asyncpg import Pool
 
 from core.database import bulk_insert, create_pool
+from core.database.tenant import tenant_connection
 from core.ingestion.chunkers import ChunkRecord, get_chunker
 from core.ingestion.embedders import embed_chunks
 
 
-def batch_generator(iterable: Iterator, batch_size: int = 50) -> Generator[list, None, None]:
+def batch_generator(iterable: Iterable, batch_size: int = 50) -> Generator[list, None, None]:
     '''
     Yield fixed-size batches from any iterable.
 
@@ -34,6 +37,9 @@ async def ingestion_pipeline(
     namespace: str = "default",
     batch_size: int = 50,
     pool: Pool = None,       # API passes its shared pool; standalone runs create one
+    source_filename: str | None = None,  # real upload name; the temp path name is useless for citations
+    *,
+    tenant_id: UUID,         # owner of the rows; always the authenticated principal's tenant
 ) -> dict:
     '''
     Chunk → embed → bulk insert into PostgreSQL.
@@ -52,6 +58,9 @@ async def ingestion_pipeline(
 
     chunks: list[ChunkRecord] = chunker(text, source=input_file_path)
 
+    for chunk in chunks:
+        chunk.metadata["source_filename"] = source_filename or Path(input_file_path).name
+
     total_chunks = 0
     owns_pool = pool is None
 
@@ -60,8 +69,8 @@ async def ingestion_pipeline(
 
     for batch in batch_generator(chunks, batch_size):
         embedded_batch = await embed_chunks(batch)
-        async with pool.acquire() as conn:
-            await bulk_insert(conn, embedded_batch, document_id=document_id, namespace=namespace)
+        async with tenant_connection(pool, tenant_id) as conn:
+            await bulk_insert(conn, embedded_batch, document_id=document_id, namespace=namespace, tenant_id=tenant_id)
         total_chunks += len(embedded_batch)
 
     if owns_pool:

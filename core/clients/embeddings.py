@@ -18,7 +18,7 @@ from config import EMBEDDING_DIM, LLM_CONFIG
 # gemini-embedding-001 is a Matryoshka model: it emits 3072 floats natively,
 # with the most significant signal packed into the leading dimensions. Asking
 # for 768 returns that prefix, which keeps us compatible with the VECTOR(768)
-# column in schema.sql without a re-ingest. Google's guidance is to renormalize
+# column in the Alembic baseline without a re-ingest. Google's guidance is to renormalize
 # the truncated slice, because only the full-width vector is unit-norm.
 #
 # Ollama and Azure are deliberately absent: nomic-embed-text is 768 natively,

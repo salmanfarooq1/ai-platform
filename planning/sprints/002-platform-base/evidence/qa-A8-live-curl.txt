@@ -1,0 +1,50 @@
+### GET /health
+HTTP/1.1 200 OK
+date: Sat, 03 Oct 2026 13:13:26 GMT
+server: uvicorn
+content-length: 291
+content-type: application/json
+x-cost-usd: 0.000000
+x-process-time: 1080.88ms
+x-request-id: 1f530ce9429b4980b9c28a5ee2d1af0e
+x-trace-id: 868741971c6b50ed8213b35f45aa9f02
+
+{"status":"degraded","db":"ok","redis":"ok","embedding":"error: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7f42945fd0a0> [Connect call failed ('127.0.0.1', 11434)]","version":"0.4.0","mode":"local","uptime_seconds":8}
+### GET /v1/health
+HTTP/1.1 200 OK
+date: Sat, 03 Oct 2026 13:13:27 GMT
+server: uvicorn
+content-length: 291
+content-type: application/json
+x-cost-usd: 0.000000
+x-process-time: 3.97ms
+x-request-id: 46da9292661a4da6a47e34569b0bfd75
+x-trace-id: 1f37863134a375bd1e72a56b391c2342
+
+{"status":"degraded","db":"ok","redis":"ok","embedding":"error: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7f42945fd0a0> [Connect call failed ('127.0.0.1', 11434)]","version":"0.4.0","mode":"local","uptime_seconds":8}
+### GET /search
+HTTP/1.1 404 Not Found
+date: Sat, 03 Oct 2026 13:13:27 GMT
+server: uvicorn
+content-length: 100
+content-type: application/json
+x-cost-usd: 0.000000
+x-process-time: 0.92ms
+x-request-id: 7862a7384e79480fbca000dfb78d273c
+x-trace-id: 32ccad243d2d3255083ee2395d342f32
+
+{"error":{"code":"not_found","message":"Not Found","request_id":"7862a7384e79480fbca000dfb78d273c"}}
+### POST /v1/search bad body
+HTTP/1.1 422 Unprocessable Entity
+date: Sat, 03 Oct 2026 13:13:27 GMT
+server: uvicorn
+content-length: 124
+content-type: application/json
+x-cost-usd: 0.000000
+x-ratelimit-limit: 60
+x-ratelimit-remaining: 58
+x-process-time: 7.11ms
+x-request-id: 40befb375bff45619c95aa94bdf7db8d
+x-trace-id: 6cd2d40c344d702b80b3215e338abb91
+
+{"error":{"code":"validation_error","message":"body.query: Field required","request_id":"40befb375bff45619c95aa94bdf7db8d"}}

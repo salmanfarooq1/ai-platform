@@ -13,8 +13,11 @@ These are called by the /ingest route handler before and after the chunking pipe
 """
 import hashlib
 import logging
+from uuid import UUID
 
 from asyncpg import Pool
+
+from core.database.tenant import tenant_connection
 
 logger = logging.getLogger("core.lifecycle")
 
@@ -40,6 +43,8 @@ async def check_document_status(
     document_id: str,
     namespace: str,
     new_hash: str,
+    *,
+    tenant_id: UUID,
 ) -> str:
     """
     Compare the new content hash against the stored one.
@@ -50,16 +55,16 @@ async def check_document_status(
       "updated"   — content hash differs, old chunks should be deleted
 
     This query hits the document_registry table, which has a PRIMARY KEY
-    on (document_id, namespace). The lookup is an index scan, not a
+    on (tenant_id, namespace, document_id). The lookup is an index scan, not a
     sequential scan. It returns in microseconds.
     """
-    async with pool.acquire() as conn:
+    async with tenant_connection(pool, tenant_id) as conn:
         row = await conn.fetchrow(
             """
             SELECT content_hash FROM document_registry
-            WHERE document_id = $1 AND namespace = $2
+            WHERE document_id = $1 AND namespace = $2 AND tenant_id = $3
             """,
-            document_id, namespace,
+            document_id, namespace, tenant_id,
         )
 
     if row is None:
@@ -74,6 +79,8 @@ async def delete_document_chunks(
     pool: Pool,
     document_id: str,
     namespace: str,
+    *,
+    tenant_id: UUID,
 ) -> int:
     """
     Delete all chunks for a document_id + namespace from the documents table.
@@ -83,13 +90,13 @@ async def delete_document_chunks(
     This uses DELETE with RETURNING to get the count in a single query
     instead of a separate COUNT query followed by a DELETE.
     """
-    async with pool.acquire() as conn:
+    async with tenant_connection(pool, tenant_id) as conn:
         result = await conn.execute(
             """
             DELETE FROM documents
-            WHERE document_id = $1 AND namespace = $2
+            WHERE document_id = $1 AND namespace = $2 AND tenant_id = $3
             """,
-            document_id, namespace,
+            document_id, namespace, tenant_id,
         )
     # asyncpg returns "DELETE N" where N is the row count
     count = int(result.split()[-1])
@@ -104,6 +111,8 @@ async def register_document(
     content_hash: str,
     chunk_count: int,
     source_filename: str,
+    *,
+    tenant_id: UUID,
 ) -> None:
     """
     Insert or update the document registry entry.
@@ -118,17 +127,17 @@ async def register_document(
     atomic operation, not a SELECT-then-INSERT/UPDATE sequence. No race
     condition between two concurrent ingests of the same document.
     """
-    async with pool.acquire() as conn:
+    async with tenant_connection(pool, tenant_id) as conn:
         await conn.execute(
             """
             INSERT INTO document_registry
-                (document_id, namespace, content_hash, chunk_count, source_filename, last_ingested_at)
-            VALUES ($1, $2, $3, $4, $5, NOW())
-            ON CONFLICT (document_id, namespace) DO UPDATE SET
+                (tenant_id, document_id, namespace, content_hash, chunk_count, source_filename, last_ingested_at)
+            VALUES ($6, $1, $2, $3, $4, $5, NOW())
+            ON CONFLICT (tenant_id, namespace, document_id) DO UPDATE SET
                 content_hash = EXCLUDED.content_hash,
                 chunk_count = EXCLUDED.chunk_count,
                 source_filename = EXCLUDED.source_filename,
                 last_ingested_at = NOW()
             """,
-            document_id, namespace, content_hash, chunk_count, source_filename,
+            document_id, namespace, content_hash, chunk_count, source_filename, tenant_id,
         )

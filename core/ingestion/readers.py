@@ -1,4 +1,6 @@
 # comprehensive custom made generator class for lazy file reading
+from typing import BinaryIO
+
 
 class FileChunkIterator:
     def __init__(self, file_path, chunk_size):
@@ -6,7 +8,7 @@ class FileChunkIterator:
         # using 'open' function, we are essentially creating our own context manager wrapper.
         self.file_path = file_path
         self.chunk_size = chunk_size
-        self.file = None
+        self.file: BinaryIO | None = None
 
     # now we define the __iter__ method, which is used to get an iterator from the FileChunkIterator class.
     # it would essentially convert our FileChunkIterator class into an iterator.
@@ -23,6 +25,8 @@ class FileChunkIterator:
     # NOTE: we have self.file.close() here because we are handeling the case of user not using the 'with' context manager here.
 
     def __next__(self):
+        if self.file is None:
+            raise RuntimeError("Use 'with FileChunkIterator(...) as it:' to iterate")
         chunk = self.file.read(self.chunk_size)
         if not chunk:
             self.file.close()
@@ -34,13 +38,11 @@ class FileChunkIterator:
 
     def __enter__(self):
         self.file = open(self.file_path, 'rb')
-        if self.file is None:
-            raise RuntimeError("Use 'with FileChunkIterator(...) as it:' to iterate")
         return self
 
     # now we define the __exit__ method, which is for the context manager, it is called automatically to close the file.
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if not self.file.closed:
+        if self.file is not None and not self.file.closed:
             self.file.close()
 
 # simpler generator function

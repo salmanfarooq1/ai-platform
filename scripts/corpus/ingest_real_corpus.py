@@ -39,12 +39,16 @@ IMPORTANT: Run the fetch scripts first.
 
 import argparse
 import asyncio
+import os
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from core.pipeline.db_ingest import ingestion_pipeline
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _tenant import corpus_tenant_id  # noqa: E402 - the script directory is added to sys.path just above
 
 # ── Namespace → directory mapping ─────────────────────────────────────────────
 NAMESPACES = {
@@ -88,6 +92,7 @@ async def ingest_namespace(namespace: str, files: list[tuple[Path, str]], dry_ru
                 input_file_path=str(path),
                 document_id=doc_id,
                 namespace=namespace,
+                tenant_id=corpus_tenant_id(),
             )
             print(f"    chunks={metrics['total_chunks']} "
                   f"time={metrics['total_time_seconds']}s "

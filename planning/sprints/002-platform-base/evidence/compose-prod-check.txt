@@ -1,0 +1,5 @@
+$ docker compose -f docker-compose.prod.yml config   (no POSTGRES_PASSWORD)
+error while interpolating services.postgres.environment.POSTGRES_PASSWORD: required variable POSTGRES_PASSWORD is missing a value: set POSTGRES_PASSWORD
+$ POSTGRES_PASSWORD=x docker compose -f docker-compose.prod.yml config | grep -n "DATABASE_URL\|POSTGRES_PASSWORD"
+16:      DATABASE_URL: postgresql://postgres:x@postgres:5432/rag_platform
+33:      POSTGRES_PASSWORD: x

@@ -1,0 +1,18 @@
+### public-preview no DATABASE_URL
+  File "/home/user/ai-platform/core/settings.py", line 123, in get_settings
+    raise SettingsError("Invalid configuration:\n" + "\n".join(lines)) from None
+core.settings.SettingsError: Invalid configuration:
+  - DATABASE_URL, REDIS_URL must be set when MODE=public-preview
+exit=1
+### bogus
+  File "/home/user/ai-platform/core/settings.py", line 123, in get_settings
+    raise SettingsError("Invalid configuration:\n" + "\n".join(lines)) from None
+core.settings.SettingsError: Invalid configuration:
+  - MODE: Input should be 'local', 'public-preview' or 'prod'
+exit=1
+### prod no DATABASE_URL
+  File "/home/user/ai-platform/core/settings.py", line 123, in get_settings
+    raise SettingsError("Invalid configuration:\n" + "\n".join(lines)) from None
+core.settings.SettingsError: Invalid configuration:
+  - DATABASE_URL, REDIS_URL must be set when MODE=prod
+exit=1

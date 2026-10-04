@@ -69,6 +69,7 @@ PREREQUISITES
 import argparse
 import asyncio
 import re
+import os
 import sys
 import time
 from dataclasses import dataclass
@@ -82,6 +83,9 @@ from bs4 import BeautifulSoup
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from core.pipeline.db_ingest import ingestion_pipeline
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _tenant import corpus_tenant_id  # noqa: E402 - the script directory is added to sys.path just above
 
 # ── Output directories ─────────────────────────────────────────────────────────
 LEGAL_DIR   = Path("data/compliance/real/legal")
@@ -503,6 +507,7 @@ async def stage_ingest(
                 input_file_path=str(path),
                 document_id=document_id,
                 namespace=namespace,
+                tenant_id=corpus_tenant_id(),
             )
             chunks = metrics["total_chunks"]
             elapsed = metrics["total_time_seconds"]

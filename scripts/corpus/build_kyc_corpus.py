@@ -7,6 +7,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from core.pipeline.db_ingest import ingestion_pipeline
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _tenant import corpus_tenant_id  # noqa: E402 - the script directory is added to sys.path just above
+
 KYC_DIR = Path("data/compliance/real/kyc_aml")
 
 def fetch_and_parse_xml(part: str, date: str = "2026-07-01") -> list[dict]:
@@ -67,7 +70,8 @@ async def stage_ingest(documents: list[dict]):
             metrics = await ingestion_pipeline(
                 input_file_path=str(filepath),
                 document_id=doc_id,
-                namespace="kyc_aml"
+                namespace="kyc_aml",
+                tenant_id=corpus_tenant_id(),
             )
             chunks = metrics["total_chunks"]
             elapsed = metrics["total_time_seconds"]

@@ -1,0 +1,3 @@
+$ scripts/check_no_ddl.sh
+OK: no CREATE TABLE or ALTER TABLE outside migrations/
+exit=0

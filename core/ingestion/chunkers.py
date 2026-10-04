@@ -24,6 +24,7 @@ import json as _json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 from typing import Callable as _Callable
 
 # ---------------------------------------------------------------------------
@@ -222,7 +223,7 @@ def header_aware_split(
     # Each section is (level, title, body_text, char_start)
     header_pattern = re.compile(r'^(#{1,6})\s+(.+)$', re.MULTILINE)
 
-    sections = []
+    sections: list[dict[str, Any]] = []
     matches  = list(header_pattern.finditer(text))
 
     for idx, match in enumerate(matches):
@@ -243,11 +244,11 @@ def header_aware_split(
 
     # Handle documents with no headers — fall back to recursive
     if not sections:
-        chunks = recursive_split(text, source=source, chunk_size=chunk_size, overlap=overlap)
-        for c in chunks:
+        fallback_chunks = recursive_split(text, source=source, chunk_size=chunk_size, overlap=overlap)
+        for c in fallback_chunks:
             c.metadata["strategy"]       = "header_aware_fallback"
             c.metadata["fallback_reason"] = "no headers found in document"
-        return chunks
+        return fallback_chunks
 
     # --- Build header hierarchy (header_path) ---
     # Track current heading at each level to construct full path
@@ -571,6 +572,14 @@ CHUNKER_REGISTRY: dict[str, _ChunkerFn | None] = {
 }
 
 
+def _registered(key: str) -> _ChunkerFn:
+    """Registry lookup for keys that are known to be implemented."""
+    chunker = CHUNKER_REGISTRY[key]
+    if chunker is None:
+        raise NotImplementedError(f"Chunker for .{key} is planned but not yet implemented.")
+    return chunker
+
+
 def get_chunker(extension: str, text: str = "") -> _ChunkerFn:
     """
     Return the chunker function for a given file extension, with a fallback
@@ -587,7 +596,7 @@ def get_chunker(extension: str, text: str = "") -> _ChunkerFn:
         if text_stripped.startswith("{") or text_stripped.startswith("["):
             try:
                 _json.loads(text)
-                return CHUNKER_REGISTRY["json"]
+                return _registered("json")
             except _json.JSONDecodeError:
                 pass
 
@@ -603,4 +612,4 @@ def get_chunker(extension: str, text: str = "") -> _ChunkerFn:
 
     # 3. Default fallback — if we have no idea what this is, assume it's plain text.
     # We no longer crash the pipeline on `.log` or extensionless files.
-    return CHUNKER_REGISTRY["txt"]
+    return _registered("txt")

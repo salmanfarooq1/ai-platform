@@ -1,0 +1,14 @@
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 3.29s
+
+src/api/client.js:4:export const API_PREFIX = '/v1'
+--- non-/v1 api paths:
+src/api/search.js:3:  return apiFetch('/search', {
+src/api/agent.js:3:  return apiFetch('/agent/query', {
+src/api/feedback.js:4:  const { data } = await apiFetch('/feedback', {
+src/pages/Ask.jsx:134:                  <FeedbackButtons requestId={quick.headers?.queryId} endpoint="/search" />
+src/pages/Ask.jsx:173:                  <FeedbackButtons requestId={deep.headers?.queryId} endpoint="/agent/query" />

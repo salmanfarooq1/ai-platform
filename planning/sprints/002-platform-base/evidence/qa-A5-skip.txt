@@ -1,0 +1,111 @@
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss       [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:26: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:31: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:37: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:44: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:49: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:56: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:61: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:81: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:94: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:118: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [5] tests/e2e/test_errors_and_headers.py:134: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:142: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:150: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:165: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:176: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [9] tests/e2e/test_errors_and_headers.py:188: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:195: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:200: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_errors_and_headers.py:214: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_mcp.py:11: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_mcp.py:16: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_mcp.py:84: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_mcp.py:109: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_network_guard_e2e.py:5: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_network_guard_e2e.py:14: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_search_flow.py:17: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_search_flow.py:91: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_search_flow.py:113: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_search_flow.py:123: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_search_flow.py:149: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_search_flow.py:171: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/e2e/test_search_flow.py:179: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_ingestion_lifecycle.py:30: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_ingestion_lifecycle.py:47: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_ingestion_lifecycle.py:59: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_ingestion_lifecycle.py:75: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_ingestion_lifecycle.py:87: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_ingestion_lifecycle.py:95: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_ingestion_lifecycle.py:113: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_migrations.py:54: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_migrations.py:68: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_migrations.py:76: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_migrations.py:99: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_migrations.py:114: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_network_guard_integration.py:8: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_retrieval.py:18: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_retrieval.py:31: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_retrieval.py:42: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_retrieval.py:54: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_usage_feedback.py:11: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_usage_feedback.py:29: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_usage_feedback.py:38: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_usage_feedback.py:58: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_usage_feedback.py:65: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+66 skipped, 139 deselected in 3.88s

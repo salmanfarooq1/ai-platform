@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 import aiohttp
 
@@ -27,7 +27,14 @@ class AsyncHttpClient:
     # second part of context manager protocoal, it closes what __aenter__ created, no matter whatever exception occurs, if we entered with __aenter__, we would always come out with __aexit__.
     # exc_type, exc_val, exc_tb, we only pass these as it is required in python
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        await self.session.close()
+        if self.session is not None:
+            await self.session.close()
+
+    def _require_open(self) -> tuple[aiohttp.ClientSession, asyncio.Semaphore]:
+        """Session and semaphore exist only inside `async with`. Fail clearly outside it."""
+        if self.session is None or self.semaphore is None:
+            raise RuntimeError("AsyncHttpClient must be used as 'async with AsyncHttpClient() as client:'")
+        return self.session, self.semaphore
 
 
     # here we create core function, that actually makes requests.
@@ -36,11 +43,12 @@ class AsyncHttpClient:
     # in case of failure despite max retries we do not wait and return the error
     # note that it only makes one request
     async def fetch(self, url: str) -> dict:
+        session, semaphore = self._require_open()
         last_error = None
         for attempt in range(max(1, self.max_retries)):
             try:
-                async with self.semaphore:
-                    async with self.session.get(url, timeout = self.timeout) as response:
+                async with semaphore:
+                    async with session.get(url, timeout = self.timeout) as response:
                         if response.status == 200:
                             logging.info(f"fetched : -> {url}")
                             return await response.json()
@@ -55,7 +63,7 @@ class AsyncHttpClient:
         return {'error' : last_error , 'url': url}
 
     # this is just the batch version, here we provide a list of urls and self.fetch() them one by one, and gather() them in the end, and return a list of responses for each url
-    async def fetch_batch(self, urls : list[str]) -> list[dict]:
+    async def fetch_batch(self, urls : list[str]) -> list[dict | BaseException]:
         tasks = []
         for url in urls:
             tasks.append(self.fetch(url))
@@ -64,15 +72,16 @@ class AsyncHttpClient:
 
     # let's create a post method as well
     async def post(self, url : str, data : dict, headers : Optional[dict] = None, timeout : Optional[int] = None) -> dict:
-        timeout = timeout or self.timeout
+        request_timeout: Any = timeout or self.timeout
+        session, semaphore = self._require_open()
         if not headers:
             headers = {'Content-Type':'application/json'}
 
         last_error = None
         for attempt in range(max(1, self.max_retries)):
             try:
-                async with self.semaphore:
-                    async with self.session.post(url, json = data, headers=headers, timeout = timeout ) as response:
+                async with semaphore:
+                    async with session.post(url, json = data, headers=headers, timeout = request_timeout ) as response:
                         if response.status == 200 or response.status == 201:
                             return await response.json()
                         else:

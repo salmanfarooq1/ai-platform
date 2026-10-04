@@ -1,0 +1,20 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/user/ai-platform
+configfile: pyproject.toml
+testpaths: tests
+plugins: rerunfailures-16.4, xdist-3.8.0, repeat-0.9.4, asyncio-1.4.0, langsmith-0.10.15, cov-7.1.0, anyio-4.13.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 205 items / 139 deselected / 66 selected
+
+tests/e2e/test_errors_and_headers.py ...............................     [ 46%]
+tests/e2e/test_mcp.py ....                                               [ 53%]
+tests/e2e/test_network_guard_e2e.py ..                                   [ 56%]
+tests/e2e/test_search_flow.py .......                                    [ 66%]
+tests/integration/test_ingestion_lifecycle.py .......                    [ 77%]
+tests/integration/test_migrations.py .....                               [ 84%]
+tests/integration/test_network_guard_integration.py .                    [ 86%]
+tests/integration/test_retrieval.py ....                                 [ 92%]
+tests/integration/test_usage_feedback.py .....                           [100%]
+
+===================== 66 passed, 139 deselected in 13.16s ======================

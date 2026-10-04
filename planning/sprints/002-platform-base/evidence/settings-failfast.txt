@@ -1,0 +1,30 @@
+$ MODE=public-preview poetry run python -c "import api.main"
+  File "/home/user/ai-platform/core/settings.py", line 123, in get_settings
+    raise SettingsError("Invalid configuration:\n" + "\n".join(lines)) from None
+core.settings.SettingsError: Invalid configuration:
+  - DATABASE_URL, REDIS_URL must be set when MODE=public-preview
+exit=1
+
+$ MODE=public-preview DATABASE_URL=... (no REDIS_URL) poetry run python -c "import config"
+    raise SettingsError("Invalid configuration:\n" + "\n".join(lines)) from None
+core.settings.SettingsError: Invalid configuration:
+  - REDIS_URL must be set when MODE=public-preview
+exit=1
+
+$ MODE=prod poetry run uvicorn api.main:app   (startup must fail)
+  File "/home/user/ai-platform/core/settings.py", line 123, in get_settings
+    raise SettingsError("Invalid configuration:\n" + "\n".join(lines)) from None
+core.settings.SettingsError: Invalid configuration:
+  - DATABASE_URL, REDIS_URL must be set when MODE=prod
+exit=1
+
+$ MODE=bogus poetry run python -c "import api.main"
+  File "/home/user/ai-platform/core/settings.py", line 123, in get_settings
+    raise SettingsError("Invalid configuration:\n" + "\n".join(lines)) from None
+core.settings.SettingsError: Invalid configuration:
+  - MODE: Input should be 'local', 'public-preview' or 'prod'
+exit=1
+
+$ MODE=public-preview DATABASE_URL=... REDIS_URL=... poetry run python -c "import config; print(config.MODE, config.DATABASE_CONFIG[\"pool_size\"])"
+public-preview 5 False
+exit=0

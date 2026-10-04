@@ -17,8 +17,8 @@ services:
     healthCheckPath: /health
     envVars:
       - key: MODE
-        value: demo
-      # Single worker: FEATURES["reranker_enabled"] is already off in demo
+        value: public-preview
+      # Single worker: FEATURES["reranker_enabled"] is already off in public-preview
       # mode, but the DB pool itself is sized (config.py DATABASE_CONFIG
       # pool_size=5) assuming one worker process on a 512MB instance.
       - key: WEB_CONCURRENCY
@@ -27,7 +27,11 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      # The app connects as the non-privileged role (gap_app), so row-level security applies to it.
       - key: DATABASE_URL
+        sync: false
+      # The owner role. Used only by `alembic upgrade head` in the container start command.
+      - key: MIGRATION_DATABASE_URL
         sync: false
       - key: REDIS_URL
         sync: false
@@ -44,3 +48,7 @@ services:
       # one origin. Keeps this a single public URL instead of two.
       - key: VITE_API_URL
         value: /api
+      # API key of the preview tenant (scopes: query, kb:read, agent). nginx adds it to /api/ calls
+      # server-side, so browsers never hold it. Create it with scripts/admin/identity.py create-key.
+      - key: PREVIEW_API_KEY
+        sync: false

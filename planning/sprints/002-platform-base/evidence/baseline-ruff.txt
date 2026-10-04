@@ -1,0 +1,60 @@
+   -         
+78 +
+79 |         from api.mcp.tools import multi_namespace_search
+   |
+
+W293 [*] Blank line contains whitespace
+  --> tests/unit/test_mcp_tools.py:81:1
+   |
+79 |         from api.mcp.tools import multi_namespace_search
+80 |         await multi_namespace_search(query="test")
+81 |         
+   | ^^^^^^^^
+82 |         assert mock_search.call_count == len(NAMESPACE_REGISTRY)
+   |
+help: Remove whitespace from blank line
+   |
+80 |         await multi_namespace_search(query="test")
+   -         
+81 +
+82 |         assert mock_search.call_count == len(NAMESPACE_REGISTRY)
+   |
+
+W293 [*] Blank line contains whitespace
+  --> tests/unit/test_mcp_tools.py:83:1
+   |
+82 |         assert mock_search.call_count == len(NAMESPACE_REGISTRY)
+83 |         
+   | ^^^^^^^^
+84 |         # Verify it passed each namespace exactly once
+85 |         called_namespaces = [call.kwargs.get("namespace") for call in mock_search.mock_calls]
+   |
+help: Remove whitespace from blank line
+   |
+82 |         assert mock_search.call_count == len(NAMESPACE_REGISTRY)
+   -         
+83 +
+84 |         # Verify it passed each namespace exactly once
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> tests/unit/test_usage.py:2:1
+  |
+1 |   """Tests for usage persistence service."""
+2 | / import pytest
+3 | | from unittest.mock import AsyncMock, MagicMock
+  | |______________________________________________^
+  |
+help: Organize imports
+  |
+1 | """Tests for usage persistence service."""
+  - import pytest
+2 | from unittest.mock import AsyncMock, MagicMock
+3 |
+4 + import pytest
+5 +
+6 |
+  |
+
+Found 33 errors.
+[*] 29 fixable with the `--fix` option (4 hidden fixes can be enabled with the `--unsafe-fixes` option).

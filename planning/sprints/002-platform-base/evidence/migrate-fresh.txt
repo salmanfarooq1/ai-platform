@@ -1,0 +1,26 @@
+$ createdb gap_mig_fresh
+DROP DATABASE
+CREATE DATABASE
+$ DATABASE_URL=.../gap_mig_fresh poetry run alembic upgrade head
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+$ poetry run alembic current
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+0001 (head)
+$ psql \dt
+               List of relations
+ Schema |       Name        | Type  |  Owner   
+--------+-------------------+-------+----------
+ public | alembic_version   | table | postgres
+ public | document_registry | table | postgres
+ public | documents         | table | postgres
+ public | feedback          | table | postgres
+ public | usage_log         | table | postgres
+(5 rows)
+
+$ re-run upgrade (idempotent)
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+exit=0

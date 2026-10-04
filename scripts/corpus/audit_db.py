@@ -4,11 +4,24 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from core.database.pool import create_pool
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _tenant import corpus_tenant_id  # noqa: E402 - the script directory is added to sys.path just above
+
+from core.database.pool import create_pool  # noqa: E402
+from core.database.tenant import tenant_connection  # noqa: E402
 
 async def main():
+    """Tenant-scoped: reads the tenant named by CORPUS_TENANT_ID through tenant_connection (row-level security)."""
+    tenant_id = corpus_tenant_id()
     pool = await create_pool()
-    
+    try:
+        async with tenant_connection(pool, tenant_id) as conn:
+            await audit(conn)
+    finally:
+        await pool.close()
+
+
+async def audit(pool):  # `pool` is a tenant-scoped connection; it has the same fetch/fetchval/fetchrow API
     # Namespace counts
     rows = await pool.fetch(
         "SELECT namespace, COUNT(*) as cnt FROM documents GROUP BY namespace ORDER BY namespace"
@@ -51,8 +64,6 @@ async def main():
         print(f"  pg_typeof: {sample['typ']}")
         print(f"  Python type: {type(raw).__name__}")
         print(f"  First 100 chars: {str(raw)[:100]}")
-    
-    await pool.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
