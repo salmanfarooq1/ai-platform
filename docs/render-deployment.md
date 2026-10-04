@@ -1,24 +1,27 @@
-# Render Deployment Runbook (MODE=demo)
+# Render Deployment Runbook (MODE=public-preview)
 
-Status: **prepared and locally verified, not yet deployed.** Everything below
-up to "Remaining steps" has been done and tested. The remaining step needs
-a dashboard action only you can take (connecting the repo).
+Status: the first deploy was prepared and verified locally. Everything up to
+"First-time setup" has been done and tested. Connecting the repo needs a
+dashboard action only you can take. For a database that already holds data, use
+the "Hosted migration checklist" at the end. Whether the hosted services are
+live now is open (`planning/QUESTIONS.md` Q10).
 
 ---
 
-## What MODE=demo actually requires
+## What MODE=public-preview actually requires
 
-`config.py` selects services by `MODE`. In `demo` the platform needs four
-things from the environment:
+`config.py` selects services by `MODE`. In `public-preview` the platform needs these
+variables from the environment:
 
 | Variable | Used by | Notes |
 |---|---|---|
-| `GROQ_API_KEY` | LLM completion (`groq/llama-3.3-70b-versatile`) | Verified working. |
+| `GROQ_API_KEY` | A Groq model, only if `LLM_MODEL` selects one | Still prompted for in `render.yaml`. The default completion model is `gemini/gemini-3.5-flash-lite`. |
 | `GEMINI_API_KEY` | Embeddings (`gemini/gemini-embedding-001`) | Verified working. |
-| `DATABASE_URL` | asyncpg pool, pgvector retrieval | Neon Postgres 16 + `vector` extension. |
-| `REDIS_URL` | Cache, rate limit, token budget | **Must have the RediSearch module.** |
+| `DATABASE_URL` | asyncpg pool, pgvector retrieval | Neon Postgres 16 + `vector` extension. Must be the `gap_app` role, not the owner. |
+| `MIGRATION_DATABASE_URL` | `alembic upgrade head` in the start command | The owner role. |
+| `REDIS_URL` | Cache, rate limit, token budget | **Must have the RediSearch module.** Search, ingest and agent runs answer 503 `dependency_unavailable` while Redis is unreachable. |
 
-Plus `MODE=demo` itself, and `WEB_CONCURRENCY=1` to stay inside 512MB.
+Plus `MODE=public-preview` itself, and `WEB_CONCURRENCY=1` to stay inside 512MB. The UI service also needs `PREVIEW_API_KEY` (see the checklist).
 
 ### Why Redis needs RediSearch
 
@@ -32,14 +35,14 @@ ships RediSearch and JSON. `redis.from_url` accepts its `rediss://` URL as-is.
 
 ### Why the embedding model changed
 
-Demo mode used to default to `ollama/nomic-embed-text`, which resolves to
+Public-preview mode used to default to `ollama/nomic-embed-text`, which resolves to
 `localhost:11434`. There is no Ollama sidecar on a 512MB Render instance, so
 that default could never have worked in the cloud. `/health` would have
 reported the embedding probe down and every search would have failed.
 
 It now defaults to `gemini/gemini-embedding-001`. That model emits 3072 floats
 natively, so `core/clients/embeddings.py` requests 768 and renormalizes the
-truncated vector, keeping the `VECTOR(768)` column in `schema.sql` unchanged.
+truncated vector, keeping the `VECTOR(768)` column from the Alembic baseline (`migrations/versions/0001_baseline.py`) unchanged.
 
 `text-embedding-004` is retired and returns 404 on current API keys. Do not
 switch back to it.
@@ -56,7 +59,7 @@ and works against both the pooled and direct Neon endpoints.
 
 ## What was changed to make this fit a 512MB free instance
 
-The existing `FEATURES["reranker_enabled"] = MODE != "demo"` flag stopped the
+The existing `FEATURES["reranker_enabled"] = MODE != "public-preview"` flag stopped the
 cross-encoder from *loading*, but `api/services/retriever.py` imported
 `sentence_transformers` at module scope, so **torch was imported on every
 boot regardless of the flag**: roughly 300MB resident and a multi-GB image.
@@ -66,7 +69,7 @@ boot regardless of the flag**: roughly 300MB resident and a multi-GB image.
 2. `pyproject.toml`: `sentence-transformers` moved to a `rerank` dependency
    group, `matplotlib`/`deepeval` to a `labs` group.
 3. `Dockerfile`: takes an `INCLUDE_RERANK` build arg, default `false`. Render
-   uses the default, so the demo image never installs torch. A prod build
+   uses the default, so the public-preview image never installs torch. A prod build
    would set `INCLUDE_RERANK=true` to get the reranker back. See Decision 20
    in `ARCHITECTURE.md`.
 4. `core/clients/embeddings.py`: new. Single entry point for all three
@@ -76,7 +79,7 @@ boot regardless of the flag**: roughly 300MB resident and a multi-GB image.
 
 ### Measured result
 
-| | Before | After (demo, `INCLUDE_RERANK=false`) |
+| | Before | After (public-preview, `INCLUDE_RERANK=false`) |
 |---|---|---|
 | Image size | ~3GB (torch) | **119 MiB** |
 | RSS after import | not measured | 268 MB |
@@ -89,8 +92,8 @@ boot regardless of the flag**: roughly 300MB resident and a multi-GB image.
 ### Postgres, Neon: done
 
 Free project created at <https://neon.tech>, pgvector enabled, schema
-applied (`core/database/schema.sql`, which starts with `CREATE EXTENSION IF
-NOT EXISTS vector` and is self-contained). Corpus ingested: **452 chunks**
+applied (originally from `core/database/schema.sql`, now replaced by `alembic upgrade head`; on this
+database the baseline migration `0001` changes no table and only records the Alembic version). Corpus ingested: **452 chunks**
 in the `kyc_aml` namespace, embedded with `gemini/gemini-embedding-001` so
 they match what live queries will produce. `data/compliance/real/legal/`
 (GDPR, CCPA, HIPAA) exists in the repo but has not been ingested yet, so
@@ -115,23 +118,24 @@ Render dashboard as secrets in the step below.
 
 ### Render blueprint: done
 
-`render.yaml` at the repo root defines the service (Docker runtime, free
-plan, `/health` health check, `MODE=demo`, `WEB_CONCURRENCY=1`) and marks
-`GROQ_API_KEY` / `GEMINI_API_KEY` / `DATABASE_URL` / `REDIS_URL` as
+`render.yaml` at the repo root defines the API service (Docker runtime, free
+plan, `/health` health check, `MODE=public-preview`, `WEB_CONCURRENCY=1`) and the UI service
+(`ai-platform-ui`). It marks `GROQ_API_KEY` / `GEMINI_API_KEY` / `DATABASE_URL` /
+`MIGRATION_DATABASE_URL` / `REDIS_URL` (API) and `PREVIEW_API_KEY` (UI) as
 `sync: false` so Render prompts for them as masked secrets instead of
 reading them from the file.
 
 ---
 
-## Remaining steps
+## First-time setup
 
 ### 1. Connect the repo (dashboard action, only you can do this)
 
 1. Push this branch (or merge to `main`) to GitHub.
 2. Render dashboard → **New** → **Blueprint** → select this repo.
-3. Render reads `render.yaml` and prompts for the four secret env vars.
-   Paste in the Groq key, Gemini key, Neon `DATABASE_URL`, and Redis Cloud
-   `REDIS_URL`.
+3. Render reads `render.yaml` and prompts for the secret env vars. Paste in the
+   Groq key, Gemini key, Redis Cloud `REDIS_URL`, and the two database URLs and
+   the UI's `PREVIEW_API_KEY` as the checklist below says.
 4. Deploy. First build installs `poetry install --only main` inside Docker
    and should take a few minutes.
 
@@ -141,21 +145,64 @@ reading them from the file.
 curl https://<service>.onrender.com/health
 ```
 
-Expect `db`, `redis`, and `embedding` all `"ok"` and `"mode":"demo"`. Then
-exercise the deployed corpus:
+Expect `db`, `redis`, and `embedding` all `"ok"` and `"mode":"public-preview"`. Every
+`/v1` route except `/v1/health` needs a key, so search needs the preview key from the checklist:
 
 ```bash
-curl -X POST https://<service>.onrender.com/search \
-  -H 'Content-Type: application/json' \
+curl -X POST https://<service>.onrender.com/v1/search \
+  -H "Authorization: Bearer $PREVIEW_API_KEY" -H 'Content-Type: application/json' \
   -d '{"query": "customer due diligence requirements", "namespace": "kyc_aml"}'
 ```
 
 Note free-tier Render instances spin down after 15 minutes idle and
 cold-start on the next request. Expected on this plan, not a bug.
 
-### 3. README
+## Hosted migration checklist (migrations 0001 to 0005)
 
-Add a "Live Demo" section above "Getting Started" with the URL, noting that
-the deployment runs `MODE=demo`: reranker disabled, so search is hybrid RRF
-(BM25 + vector) without the cross-encoder rerank stage, and only the
-`kyc_aml` namespace has data.
+One ordered list for moving the hosted stack to the current head. The container start command runs
+`alembic upgrade head`, so migrations that are already applied are skipped. Do the steps in order.
+
+1. **Back up the Neon database** (a branch or a dump). Nothing here is reversible, because migrations are forward-only (`planning/QUESTIONS.md` Q4).
+2. **Set `MODE=public-preview`** on the API service, by syncing the Blueprint or in the dashboard. The old value `demo` fails at startup (Q2).
+3. **Create the app role on Neon**, as the owner role (`neondb_owner`), with a generated password kept out of the repo:
+   ```sql
+   CREATE ROLE gap_app LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '<generated>';
+   GRANT CONNECT ON DATABASE neondb TO gap_app;   -- use your database name
+   ```
+   The role must exist before the first deploy of this work: migration `0002` grants it table rights only if it exists. A different
+   name works too: after the migrations, run `psql "$MIGRATION_DATABASE_URL" -v app_role=<name> -f scripts/admin/grant_app_role.sql`.
+   Check that it is unprivileged: `SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = 'gap_app';` must give `f | f`.
+4. **Set the two database URLs on the API service** (`sync: false` secrets), with the same host and pooler setting as before:
+   - `MIGRATION_DATABASE_URL`: the owner role's URL. It is used by `alembic upgrade head` and by `scripts/admin/identity.py`.
+   - `DATABASE_URL`: the `gap_app` URL. The API refuses to start if it is a superuser or `BYPASSRLS` role.
+5. **Deploy the API.** The start command applies the migrations in order:
+   - `0001` baseline: on the hosted database it changes no table and only records the version.
+   - `0002` identity and tenancy: backfills every existing row to the tenant `default` (with the knowledge bases `legal`, `kyc_aml`, `default`) and enables row-level security. It drops and recreates indexes on live tables and takes a short lock, so deploy at low traffic.
+   - `0003` principal lookup, `0004` least privilege for `gap_app`.
+   - `0005` gateway: adds `policies` and `gateway_decisions`, with explicit grants to `gap_app` (SELECT on `policies`; SELECT and INSERT on `gateway_decisions`). No new secret is needed.
+
+   Existing data stays readable by the `default` tenant. Confirm the head with `poetry run alembic current` (owner URL in `MIGRATION_DATABASE_URL`): it must print `0005`.
+6. **Create the preview principal and its key** with the admin CLI, from a machine that can reach Neon, using the owner URL. The key is printed once; copy it straight into the Render dashboard:
+   ```bash
+   export MIGRATION_DATABASE_URL='<owner url>'
+   poetry run python scripts/admin/identity.py create-principal default service ui-preview
+   poetry run python scripts/admin/identity.py create-key <principal-id> --scopes query kb:read agent
+   ```
+   To keep the existing hosted data visible, create the principal in the `default` tenant (above). To start clean,
+   run `create-tenant preview` and `create-kb preview kyc_aml` first and use `preview` instead.
+   The scopes follow Q5: asking and reading only, no `kb:write`. The agent scope is included because the
+   UI's Ask page has an agent mode. Uploads need a separate key with `kb:write`.
+7. **Set `PREVIEW_API_KEY`** on the UI service (`ai-platform-ui`, `sync: false`) to that key and redeploy the UI.
+   nginx adds it to `/api/` calls server-side. The UI container refuses to start without it.
+8. **Check after the deploy:**
+   - `curl https://<api>/health` gives `db`, `redis` and `embedding` `"ok"` and `"mode":"public-preview"`.
+   - `curl https://<api>/v1/documents` gives 401. The same call with the key gives the documents.
+   - The UI loads and answers a question.
+   - Revoke a leaked key with `scripts/admin/identity.py revoke-key <prefix>` (effective on the next request).
+
+After the deploy, behaviour to know:
+- **No policy row means the platform default**, the same access as before (what the key's scopes grant). Restrict a
+  tenant with `poetry run python scripts/admin/identity.py set-policy <tenant> policy.json` (owner URL in
+  `MIGRATION_DATABASE_URL`); `show-policy <tenant>` prints it. A new version applies from the next request (Q8).
+- **Redis is required** for search, ingest and agent runs. If it is unreachable they answer 503 `dependency_unavailable`.
+- **Every governed call adds a row to `gateway_decisions`** (no retention yet, Q7). It holds a hash of the input, never the text. If that row cannot be written on an allow, the call answers 503 `decision_unrecorded`.

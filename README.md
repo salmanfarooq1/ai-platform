@@ -8,12 +8,12 @@ Built incrementally over 12 phases, roughly one per week. Each lab isolates one 
 
 ---
 
-## Live Demo
+## Live preview
 
 - Frontend: https://ai-platform-ui-o2eo.onrender.com
 - API: https://ai-platform-6udm.onrender.com
 
-Runs `MODE=demo` on Render's free tier: reranker disabled (hybrid RRF search only, no cross-encoder stage), completion runs on `gemini/gemini-3.5-flash-lite` rather than Groq, and only the `kyc_aml` namespace is ingested. Free-tier instances spin down after 15 minutes idle, the first request after that can take 30-50s to cold-start.
+Runs `MODE=public-preview` on Render's free tier: reranker disabled (hybrid RRF search only, no cross-encoder stage), completion runs on `gemini/gemini-3.5-flash-lite` rather than Groq, and only the `kyc_aml` namespace is ingested. Free-tier instances spin down after 15 minutes idle, the first request after that can take 30-50s to cold-start.
 
 ---
 
@@ -31,14 +31,45 @@ Runs `MODE=demo` on Render's free tier: reranker disabled (hybrid RRF search onl
 git clone <repo-url>
 cd ai-platform
 
-# install dependencies
-poetry install
+# install dependencies (add --with dev for tests, ruff and mypy)
+poetry install --with dev
 
-# activate shell
-poetry shell
+# run commands with `poetry run <cmd>`, or activate the environment: eval $(poetry env activate)
+
+# start Postgres (pgvector) and Redis Stack. On a fresh volume, docker/postgres-init creates the app login role gap_app.
+docker compose up -d postgres redis
+
+# create the database if needed, apply migrations 0001-0005 as the owner role, and make sure gap_app exists
+scripts/setup_db.sh   # creates rag_platform if missing, then runs: poetry run alembic upgrade head
+
+# create a tenant, a principal and an API key. The key is printed once; only its hash is stored.
+poetry run python scripts/admin/identity.py create-tenant acme
+poetry run python scripts/admin/identity.py create-principal acme service me
+poetry run python scripts/admin/identity.py create-key <principal-id> --scopes query kb:read kb:write agent
+export GAP_KEY=<the key printed above>
+
+# optional: narrow what the tenant may do (see section 15)
+poetry run python scripts/admin/identity.py set-policy acme policy.json
+poetry run python scripts/admin/identity.py show-policy acme
+
+# run the API on :8000 (docs at /docs). All product routes live under /v1.
+poetry run uvicorn api.main:app --reload
+curl localhost:8000/health        # unversioned, for platform health checks
+curl localhost:8000/v1/health     # same payload, versioned
+curl -H "Authorization: Bearer $GAP_KEY" localhost:8000/v1/documents   # every other /v1 route needs a key
+
+# run the UI on :5173
+cd ui && npm ci && npm run dev
+
+# checks
+poetry run ruff check api/ core/ gateway/ tests/
+poetry run mypy
+poetry run pytest -m unit -q
+poetry run pytest -m "integration or e2e" -q -rs   # needs the Postgres and Redis above
+scripts/check_no_ddl.sh                            # no CREATE/ALTER TABLE outside migrations/
 
 # run any lab script
-python scripts/lab_2.5_integration_test.py
+python scripts/labs/lab_2.5_integration_test.py
 ```
 
 > **Note:** Scripts import from `core.*`, which needs project root on `PYTHONPATH`.
@@ -51,20 +82,40 @@ python scripts/lab_2.5_integration_test.py
 
 ## Project Structure
 ```
+api/                           # FastAPI app
+├── main.py                    # app factory, middleware order, the /v1 router
+├── routers/                   # search, ingest, documents, config, analytics, feedback, health
+├── middleware/                # auth, then FinOps, plus request id, logging and latency
+├── auth.py, gateway_deps.py   # scopes per route, gateway enforcement context
+├── agent/                     # LangGraph agent (graph, tools, router, models)
+├── mcp/                       # MCP server, tools, resources, prompts, SSE transport
+└── services/                  # retriever, llm, cache, guardrails, usage writer
+gateway/                       # the governance path (section 15)
+├── enforce.py                 # enforce() and require()
+├── stages.py                  # principal, boundary, policy, guardrails, rate, budget
+├── boundary.py, policy.py     # ExecutionBoundary, PolicyEngine, default policy
+├── limits.py                  # Redis rate limit and token budget
+└── record.py                  # gateway_decisions writer
 core/
-├── clients/
-│   └── async_http_client.py   # async HTTP with retries, semaphore, timeout
-├── database/
-│   ├── pool.py                # asyncpg connection pool with pgvector
-│   ├── bulk_ops.py            # COPY-based bulk insert
-│   └── schema.sql             # documents table definition
-├── ingestion/
-│   ├── readers.py             # lazy file chunk generator
-│   ├── processors.py          # text cleaning generator
-│   └── embedders.py           # embedding generator (768-dim)
-└── pipeline/
-    ├── async_ingest.py        # HTTP-based async ingestion
-    └── db_ingest.py           # database-backed ingestion
+├── clients/                   # async HTTP client, embeddings client
+├── database/                  # pool, tenant_connection (tenant.py), startup role guard, bulk ops
+├── identity/                  # API keys, JWT, principal store, admin helpers
+├── ingestion/                 # readers, chunkers, processors, embedders, document lifecycle
+├── pipeline/                  # async and database-backed ingestion
+├── processing/                # CPU offload to a process pool
+└── settings.py                # validated Settings (pydantic-settings), fails fast at startup
+migrations/versions/           # Alembic: 0001 baseline, 0002 identity and tenancy, 0003 principal lookup,
+                               #   0004 app-role least privilege, 0005 gateway (policies, gateway_decisions)
+docker/postgres-init/          # creates the gap_app login role on a fresh local volume
+scripts/
+├── setup_db.sh                # create the database, migrate as the owner role
+├── admin/identity.py          # tenants, principals, API keys, set-policy, show-policy
+├── labs/                      # the lab scripts from sections 1-7
+└── corpus/                    # corpus building and ingestion (not shipped)
+tests/                         # unit/, integration/, e2e/ (pytest markers of the same names)
+ui/                            # Vite + React frontend and its nginx proxy
+docs/                          # ARCHITECTURE.md, adr/, architecture/FOUNDATION.md, render-deployment.md
+planning/                      # STATE, DECISIONS, ROADMAP, QUESTIONS, RISKS, sprints/
 ```
 
 ---
@@ -87,8 +138,8 @@ core/
 | 6.5 | End-to-end cost reduction via cache | ~60% cost reduction |
 | 7.3 | Vector vs BM25 vs Hybrid precision | 0.17 / 0.16 / 0.17 Precision@5 (corpus ceiling is 0.20) |
 | 7.5 | Reranker Contextual Precision & OOD Refusal | +35.5% Precision lift (0.450 → 0.610), 0.800 Recall, 100% OOD Refusal |
-| 9.1 | Multi-stage Docker build | 2.5GB → 600MB (with reranker) / 119MB (demo, no torch) |
-| 9.2 | Token budget enforcement | 500K tokens/day/namespace, auto-reset at midnight UTC |
+| 9.1 | Multi-stage Docker build | 2.5GB → 600MB (with reranker) / 119MB (public-preview, no torch) |
+| 9.2 | Token budget enforcement | 500K tokens/day/tenant, auto-reset at midnight UTC |
 
 ---
 
@@ -184,7 +235,7 @@ Built exact-match Redis caching: hash the query + namespace + top_k → check Re
 Exact match only catches identical queries. Added a Redis HNSW vector index: embed the query, find the nearest cached query by cosine similarity, return the cached answer if similarity > 0.95. Hit rate went from 41% to 74% on the test set. The key insight: you need the embedding for vector search anyway, so the semantic cache check costs nothing extra.
 
 ### Lab 6.3: Model Routing by Query Complexity
-Not every query needs the most expensive model. A word count + keyword heuristic routes short factual queries to the cheap model and longer analytical queries to the full model. Measured cost per 100 mixed queries before and after.
+Not every query needs the most expensive model. A word count + keyword heuristic routes short factual queries to the cheap model and longer analytical queries to the full model. Measured cost per 100 mixed queries before and after. The classifier was removed later (Decision 7 in `docs/ARCHITECTURE.md`); routing now picks one model.
 
 ### Lab 6.4 & 6.5: Integration & Benchmark
 Wired all three layers (exact cache → semantic cache → full pipeline) into the search route. Dual-layer cache reduces LLM calls by ~60% on a realistic query distribution. Benchmark committed to `benchmarks/lab_6.5_cache_benchmarks.json`.
@@ -228,7 +279,7 @@ Evaluation was executed using `scripts/lab_7.5_deep_eval_v5.py` with `gemini-3.5
 - **Contextual Precision Lift:** Cross-Encoder reranking significantly improved ranking order (+35.5% lift from 0.450 to 0.610), ensuring top-ranked chunks contain the most relevant statutory provisions.
 - **Contextual Recall:** Achieved 0.800 across real legal and financial compliance chunks (up from 0.40 in synthetic tests).
 - **Isolated OOD Refusal:** 100% exact refusal match on non-compliant queries without corrupting in-domain RAG metrics or wasting judge API calls.
-- **Visual Analytics:** High-resolution dashboard generated at `benchmarks/eval_v5_comparison.png` via `scripts/plot_eval_v5.py`.
+- **Visual Analytics:** High-resolution dashboard generated at `benchmarks/lab_7.5_eval_v5_comparison.png` via `scripts/plot_eval_v5.py`.
 
 ---
 
@@ -238,7 +289,7 @@ Evaluation was executed using `scripts/lab_7.5_deep_eval_v5.py` with `gemini-3.5
 Built a document registry using a composite primary key `(document_id, namespace)`. Implemented SHA-256 payload hashing to prevent duplicate embedding costs and cleanly handle document updates by deleting old chunks before re-ingestion.
 
 ### Lab 8.2: API Rate Limiting
-Implemented an LIFO `RateLimitMiddleware` using Redis fixed-window counters (`INCR` + `EXPIRE`). Protected the application layer from unbounded costs and abuse per namespace.
+Implemented an LIFO `RateLimitMiddleware` using Redis fixed-window counters (`INCR` + `EXPIRE`). Protected the application layer from unbounded costs and abuse. Since Sprint 003 the counter is keyed on the authenticated principal, not on a caller-supplied namespace. Since Sprint 004 the limit is the `rate` stage of the gateway (`gateway/limits.py`), and the middleware class is gone.
 
 ### Lab 8.3: Input & Output Guardrails
 Wired up regex-based input validation to block prompt injection (e.g., "ignore instructions") and applied strict query length boundaries. Added an output guardrail based on retrieval `rrf_score` to flag out-of-domain answers below the `CONFIDENCE_FLOOR`.
@@ -251,16 +302,16 @@ Established a production-grade testing foundation. Configured `pytest-asyncio` a
 ## 9. Production Deployment, CI, Guardrails & Governance
 
 ### Containerization
-Multi-stage `Dockerfile` (`python:3.11-slim-bookworm` builder + runtime). Builder installs Poetry and all dependencies; runtime copies only the virtualenv and app code. An `INCLUDE_RERANK` build arg controls whether `sentence-transformers`/torch ship in the image: false for the 512MB demo tier (119MB image, 240MB steady-state RSS), true for a prod build with reranking enabled. See Decision 20 in `ARCHITECTURE.md`.
+Multi-stage `Dockerfile` (`python:3.11-slim-bookworm` builder + runtime). Builder installs Poetry and all dependencies; runtime copies only the virtualenv and app code. An `INCLUDE_RERANK` build arg controls whether `sentence-transformers`/torch ship in the image: false for the 512MB public-preview tier (119MB image, 240MB steady-state RSS), true for a prod build with reranking enabled. See Decision 20 in `docs/ARCHITECTURE.md`.
 
 ### Production Docker Compose
 `docker-compose.prod.yml` runs API + PostgreSQL (pgvector) + Redis stack with health check dependencies (`pg_isready`, `redis-cli ping`) and automatic schema initialization via `docker-entrypoint-initdb.d/`.
 
 ### Free-Tier Cloud Deployment
-`FEATURES["reranker_enabled"] = MODE != "demo"` disables the cross-encoder in demo mode to stay inside 512MB RAM while keeping hybrid RRF search. Demo mode's embedding model is `gemini/gemini-embedding-001` (truncated to 768 dims), not the local `nomic-embed-text` default, since no cloud free tier runs an Ollama sidecar. Deployed via a Render Blueprint (`render.yaml`); see `docs/render-deployment.md` for the full runbook and Decisions 21-23 in `ARCHITECTURE.md` for why.
+`FEATURES["reranker_enabled"] = MODE != "public-preview"` disables the cross-encoder in public-preview mode to stay inside 512MB RAM while keeping hybrid RRF search. Public-preview mode's embedding model is `gemini/gemini-embedding-001` (truncated to 768 dims), not the local `nomic-embed-text` default, since no cloud free tier runs an Ollama sidecar. Deployed via a Render Blueprint (`render.yaml`); see `docs/render-deployment.md` for the full runbook and Decisions 21-23 in `docs/ARCHITECTURE.md` for why.
 
 ### Token Budget Enforcement
-Built `TokenBudgetMiddleware` backed by a Redis counter (`budget:{namespace}:{date}`). Evaluated at the middleware boundary (0.1ms latency, $0.00 cost when budget is exceeded). Counter expires after 25 hours (automatic midnight UTC reset).
+Built `TokenBudgetMiddleware` backed by a Redis counter (`budget:{tenant_id}:{date}`, per tenant since Sprint 003). Evaluated at the middleware boundary (0.1ms latency, $0.00 cost when budget is exceeded). Counter expires after 25 hours (automatic midnight UTC reset). Since Sprint 004 the check is the `budget` stage of the gateway, with the same Redis key and the same 429 code. `TokenBudgetMiddleware` is gone.
 
 ### Health Check Expansion
 Expanded `/health` endpoint with active probes for database (`SELECT 1`), Redis ping, LiteLLM embedding model reachability, process `uptime_seconds`, and deployment `mode`.
@@ -284,7 +335,7 @@ Every agent answer includes citations, a confidence score, the model used, verif
 | Single-step queries | 1 retrieval + synthesis, ~3-4s |
 | Multi-step queries | 2-4 retrievals + synthesis, ~8-12s |
 | With verifier enabled | +1 LLM call minimum; +1 full retrieval round if a retry is triggered |
-| Agent endpoint | `POST /agent/query` |
+| Agent endpoint | `POST /v1/agent/query` |
 
 ---
 
@@ -295,12 +346,12 @@ The platform now speaks the Model Context Protocol (MCP), allowing external AI c
 
 | Component | Count | Details |
 |---|---|---|
-| Tools | 5 | `list_namespaces`, `search_documents`, `multi_namespace_search`, `get_ingestion_status`, `get_cost_summary` |
-| Resources | 3 | Namespace registry, feature flags, document chunks |
+| Tools | 5 | `list_namespaces`, `search_documents`, `multi_namespace_search`, `get_ingestion_status`, `get_cost_summary`. Bearer credential required; search needs `query`, the others `kb:read`; all run as the caller's tenant |
+| Resources | 3 | The caller's knowledge bases, feature flags, document chunks (the tenant's own; `kb:read`) |
 | Prompts | 2 | Compliance research workflow, cost audit workflow |
 
 ### Persistent Cost Tracking
-A `usage_log` table in Postgres stores one row per LLM-consuming request. The FinOps middleware writes via `asyncio.create_task` (fire-and-forget). Monthly cost reports are a simple `GROUP BY` query.
+A `usage_log` table in Postgres stores one row per LLM-consuming request. The FinOps middleware writes via `asyncio.create_task` (fire-and-forget). Token booking after the work stays best effort; decision records do not (section 15). Monthly cost reports are a simple `GROUP BY` query.
 
 ### Gap Fixes
 - Input guardrail added to `/agent/query`
@@ -324,8 +375,45 @@ A `usage_log` table in Postgres stores one row per LLM-consuming request. The Fi
 | Layer | Components |
 |---|---|
 | Transport | FastAPI + SSE (MCP) |
-| Middleware | Rate limit → Request ID → Token budget → FinOps → Latency → Logging |
-| Routes | `/search`, `/ingest`, `/health`, `/agent/query`, `/mcp/sse` |
+| Middleware (outermost first) | CORS → Request ID and trace ID → Logging and error body → Latency → Auth (Sprint 003) → FinOps. The rate limit and token budget were middleware here; since Sprint 004 they are gateway stages |
+| Routes | `/v1/search`, `/v1/ingest`, `/v1/agent/query`, `/v1/documents`, `/v1/analytics/summary`, `/v1/feedback`, `/v1/quality-report`, `/v1/config`, `/v1/health`, `/v1/mcp/sse`. `/` and `/health` stay unversioned. |
+| Errors | One format everywhere: `{"error": {"code", "message", "request_id"}}` |
+| Observability | JSON logs with `request_id` and `trace_id`; OpenTelemetry spans; `X-Request-ID` and `X-Trace-ID` on every response |
 | Services | Hybrid retriever, semantic cache, guardrails, usage writer |
 | Agent | LangGraph (reasoning → tools → synthesis → verification) |
 | Storage | Postgres (pgvector) + Redis |
+
+---
+
+## 13. Platform Base (Sprint 002)
+
+- **Config:** `core/settings.py` validates the environment once. `MODE=public-preview` or `prod` without `DATABASE_URL` and `REDIS_URL` stops the process at startup. `config.py` keeps its public names.
+- **Migrations:** Alembic, forward-only. `poetry run alembic upgrade head` creates the schema (later sprints added `0002`–`0005`). The baseline `0001` is idempotent, so it is safe on a database that already has the tables. The Docker image runs it before starting uvicorn.
+- **API:** every product route is under `/v1`. Old unversioned paths return 404 in the standard error format. MCP clients connect to `/v1/mcp/sse` (see `claude_desktop_config.json`).
+- **Observability:** logs are one JSON object per line. Set `OTEL_EXPORTER_OTLP_ENDPOINT` to export traces. Without it, no exporter and no background thread is created.
+- **Tests:** `unit` has no external services. `integration` and `e2e` use a real Postgres and Redis, with fake LLM and embeddings, and skip with a reason when the services are down. A network guard fails any test that tries to reach a provider.
+
+---
+
+## 14. Identity and Tenancy (Sprint 003)
+
+- **Who is calling:** every `/v1` route except `/v1/health` needs `Authorization: Bearer <token>`. A token is an API key (`gap_<prefix>_<secret>`, only a SHA-256 hash is stored) or a JWT (`JWT_JWKS_URL` or `JWT_SECRET`, with `JWT_ISSUER` and `JWT_AUDIENCE`). The tenant comes only from the verified credential, never from a header, query string or body. A missing or bad credential is 401, a missing scope is 403.
+- **Scopes:** `kb:read`, `kb:write`, `query`, `agent`, `admin` (admin satisfies all). Search and feedback need `query`, ingest needs `kb:write`, documents, config and analytics need `kb:read`, the agent needs `agent`. MCP needs `query`.
+- **Isolation:** migrations `0002`–`0004` add `tenants`, `principals`, `api_keys` and `knowledge_bases`. `documents`, `document_registry`, `usage_log` and `feedback` carry `tenant_id`. Postgres row-level security (`tenant_id = current_setting('app.tenant_id')`) is on every tenant-owned table, and a request-path query only runs inside `tenant_connection()`, which sets that setting for the transaction. No setting means zero rows.
+- **Two database roles:** the app connects as `gap_app` (`DATABASE_URL`), a role without superuser or `BYPASSRLS`, because those bypass row-level security. The app refuses to start otherwise. Migrations and the admin CLI use the owner role (`MIGRATION_DATABASE_URL`).
+- **Knowledge bases:** the old `namespace` parameter is now a knowledge-base slug checked against the caller's own knowledge bases. An unknown KB and another tenant's KB both give the same 404 `kb_not_found`.
+- **Caches and limits:** cache keys and the semantic-cache index carry the tenant. The rate limit counts per principal, the daily token budget per tenant.
+- **Hosted preview:** the UI's nginx proxy adds the preview tenant's key (`PREVIEW_API_KEY`, a Render secret) server-side, so browsers never hold it. The ordered steps for the hosted database are in `docs/render-deployment.md`.
+
+---
+
+## 15. Gateway core (Sprint 004)
+
+- **One entry point:** `gateway.enforce(ctx, action)` returns a `Decision`, and `require()` raises `GatewayDenied` instead. Every model, tool and knowledge-base call goes through it: the search, ingest, documents and agent routes, every agent LLM and tool call, and the MCP tools and resources. Actions are `kb.read`, `kb.write`, `model.invoke`, `tool.call`, `agent.run`, `feedback.write` and `analytics.read`.
+- **Stages, in order:** principal, boundary, policy, input guardrails, rate limit, token budget (`gateway/stages.py`). The first deny wins. The stage list is data, so a new stage is one function and one entry. The rate limit and budget keep their Redis keys, limits and 429 codes; they used to be middleware.
+- **Boundary:** the `ExecutionBoundary` is frozen, built once per request from the caller's scopes and the tenant's active policy, and it can only narrow. The agent and its tools get the boundary, never the raw principal.
+- **Policies:** a tenant narrows what it may do with a policy document: knowledge bases, tools, models, tool-call and token limits. Versions are append-only, one is active per tenant, and the app role can only read them. Publish with `scripts/admin/identity.py set-policy <tenant> <file.json>` and read with `show-policy`. With no policy, scopes grant against the platform defaults, which is the same access as before Sprint 004.
+- **Decision records:** every call writes one `gateway_decisions` row, allow or deny: tenant, principal, action, resource, outcome, stage, reason, policy version, and the SHA-256 of the input. The text is never stored. Row-level security is forced on the table, and `gap_app` can only SELECT and INSERT.
+- **Fail closed:** any exception in a stage is a deny (`internal_error`). If Redis is down, the rate and budget stages deny with 503 `dependency_unavailable`. If the decision write fails on an allow, the call is denied with 503 `decision_unrecorded` and the work is not done. Booking tokens after the work stays best effort, because the tokens are already spent.
+- **HTTP mapping:** a policy, boundary or internal deny is 403 `policy_denied` (the reason is in the message), a blocked query is 400 `query_blocked`, limits are 429, and dependency or record failures are 503. An agent run that hits a denial ends with a partial answer marked `flagged`.
+- **Guards:** an import-lint test keeps `litellm`, `langchain_litellm` and `asyncpg` out of the agent tools and the MCP code, and an AST check proves every agent tool, MCP tool and MCP resource calls the gate. See Decision 26 in `docs/ARCHITECTURE.md` and `docs/adr/0006-gateway-enforce-pipeline.md`.
