@@ -2,33 +2,78 @@ import json
 import logging
 from typing import Literal
 
-from asyncpg import Pool
+from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
+from api.auth import KB_NOT_FOUND_MESSAGE
 from api.services.cache import embed_query
 from api.services.retriever import RetrieverConfig, retrieve
-from config import FEATURES, NAMESPACE_REGISTRY
+from config import FEATURES, LLM_CONFIG
+from core.database.tenant import DbPool, tenant_connection
+from gateway import Action, ActionKind, EnforcementContext, enforce
+from gateway.estimate import estimate_tokens
 
 logger = logging.getLogger("api.agent.tools")
 
 
-@tool
-async def list_namespaces() -> str:
+def gateway_from_config(config: RunnableConfig | None) -> EnforcementContext | None:
+    """The request's enforcement context, put in `configurable` by the route.
+
+    The model cannot set it: it is not a tool argument. Missing means the tools refuse to run (fail
+    closed). The tools see the boundary through it, never the raw principal.
     """
-    List the document namespaces available to search, with a short
-    description of what each one contains.
-
-    Call this if you are unsure which namespace fits the question, instead
-    of guessing (namespaces change over time as new document sets are
-    added, so do not assume the ones you have seen before are the full list).
-
-    Returns:
-        JSON string mapping namespace name to a description.
-    """
-    return json.dumps(NAMESPACE_REGISTRY)
+    ctx = (config or {}).get("configurable", {}).get("gateway")
+    return ctx if isinstance(ctx, EnforcementContext) and ctx.boundary.tenant_id is not None else None
 
 
-def make_retrieve_tool(pool: Pool):
+_NO_TENANT = json.dumps({"error": "unauthenticated", "reason": "No tenant is bound to this agent run"})
+
+
+async def _gate(ctx: EnforcementContext, action: Action, halt: bool) -> str | None:
+    """Run `enforce()`. On a deny returns the JSON the model sees, and (for tool calls) ends the agent loop."""
+    decision = await enforce(ctx, action)
+    if decision.allowed:
+        return None
+    if halt:
+        ctx.halted = decision.reason
+    return json.dumps({"error": "policy_denied", "reason": decision.reason})
+
+
+def make_list_namespaces_tool(pool: DbPool):
+    """Build the list_namespaces tool: it reads the calling tenant's knowledge bases."""
+
+    @tool
+    async def list_namespaces(config: RunnableConfig) -> str:
+        """
+        List the document namespaces (knowledge bases) available to search, with a short
+        description of what each one contains.
+
+        Call this if you are unsure which namespace fits the question, instead
+        of guessing (namespaces change over time as new document sets are
+        added, so do not assume the ones you have seen before are the full list).
+
+        Returns:
+            JSON string mapping namespace name to a description.
+        """
+        ctx = gateway_from_config(config)
+        if ctx is None or ctx.boundary.tenant_id is None:
+            return _NO_TENANT
+        denied = await _gate(ctx, Action(ActionKind.TOOL_CALL, "list_namespaces"), halt=True)
+        if denied is not None:
+            return denied
+        try:
+            async with tenant_connection(pool, ctx.boundary.tenant_id) as conn:
+                rows = await conn.fetch("SELECT slug, description FROM knowledge_bases ORDER BY slug")
+            visible = ctx.boundary.visible_kbs()
+            return json.dumps({r["slug"]: r["description"] for r in rows if visible is None or r["slug"] in visible})
+        except Exception as e:
+            logger.error("[agent/list_namespaces] error: %s", e)
+            return json.dumps({"error": str(e)})
+
+    return list_namespaces
+
+
+def make_retrieve_tool(pool: DbPool):
     """
     Build the retrieve_chunks tool bound to a specific DB pool.
 
@@ -45,6 +90,8 @@ def make_retrieve_tool(pool: Pool):
         namespace: str = "default",
         top_k: int = 5,
         mode: Literal["hybrid", "vector_only", "bm25_only"] = "hybrid",
+        *,
+        config: RunnableConfig,
     ) -> str:
         """
         Search the compliance document database for chunks relevant to a query.
@@ -63,7 +110,27 @@ def make_retrieve_tool(pool: Pool):
         Returns:
             JSON string containing the retrieved chunks with content, scores, and metadata.
         """
+        ctx = gateway_from_config(config)
+        if ctx is None or ctx.boundary.tenant_id is None:
+            return _NO_TENANT
+        tenant_id = ctx.boundary.tenant_id
+        denied = await _gate(ctx, Action(ActionKind.TOOL_CALL, "retrieve_chunks", input_text=query), halt=True)
+        if denied is None:
+            denied = await _gate(ctx, Action(ActionKind.KB_READ, namespace, input_text=query), halt=False)
+        if denied is None:
+            denied = await _gate(ctx, Action(
+                ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens(query),
+                input_text=query,
+            ), halt=False)
+        if denied is not None:
+            return denied
         try:
+            # Same check and same answer as the REST routes and MCP: a namespace that is not one of the
+            # tenant's knowledge bases is "not found", whether it is missing or another tenant's.
+            async with tenant_connection(pool, tenant_id) as conn:
+                known = await conn.fetchval("SELECT 1 FROM knowledge_bases WHERE slug = $1", namespace)
+            if not known:
+                return json.dumps({"error": "kb_not_found", "reason": KB_NOT_FOUND_MESSAGE})
             k = max(1, min(top_k, 20))
             query_embedding = await embed_query(query)
 
@@ -79,6 +146,7 @@ def make_retrieve_tool(pool: Pool):
                 query_embedding=query_embedding,
                 namespace=namespace,
                 cfg=cfg,
+                tenant_id=tenant_id,
             )
 
             if not chunks:

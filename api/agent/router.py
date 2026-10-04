@@ -1,13 +1,18 @@
 import logging
 import time
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from langchain_core.messages import HumanMessage, ToolMessage
 from langgraph.errors import GraphRecursionError
 from pydantic import BaseModel, Field
 
-from api.services.guardrails import check_input
-from config import MODEL_PRICING
+from api.agent.models import AGENT_MAX_TOKENS
+from api.auth import require_kb, require_scope
+from api.gateway_deps import entry_action, gateway_context
+from config import LLM_CONFIG, MODEL_PRICING
+from core.identity.models import Principal, Scope
+from gateway import Action, ActionKind, EnforcementContext, require
+from gateway.estimate import estimate_tokens
 
 logger = logging.getLogger("api.agent")
 router = APIRouter(prefix="/agent", tags=["agent"])
@@ -42,6 +47,8 @@ class AgentResponse(BaseModel):
     tool_calls_made: int
     total_time_seconds: float
     total_cost_usd: float = 0.0
+    flagged: bool = False  # True when a gateway denial cut the run short: the answer is partial
+    flag_reason: str | None = None
 
 
 def _combine_usage(result: dict) -> dict:
@@ -56,7 +63,7 @@ def _combine_usage(result: dict) -> dict:
 
     prompt_tokens = sum(u.get("prompt_tokens", 0) for u in all_calls)
     completion_tokens = sum(u.get("completion_tokens", 0) for u in all_calls)
-    
+
     model = result.get("model_used", "")
     llm_cost = 0.0
     if model and not model.startswith("ollama/"):
@@ -74,15 +81,22 @@ def _combine_usage(result: dict) -> dict:
 
 
 @router.post("/query", response_model=AgentResponse)
-async def agent_query(request: Request, response: Response, payload: AgentRequest) -> AgentResponse:
+async def agent_query(
+    request: Request,
+    response: Response,
+    payload: AgentRequest,
+    principal: Principal = Depends(require_scope(Scope.AGENT)),
+    ctx: EnforcementContext = Depends(gateway_context),
+) -> AgentResponse:
     start = time.perf_counter()
-    
-    guard = check_input(payload.question)
-    if guard.blocked:
-        raise HTTPException(
-            status_code=400,
-            detail={"error": "query_blocked", "reason": guard.blocked_reason},
-        )
+    # The gateway decides first: scope, input guardrails, rate limit and daily token budget.
+    await require(ctx, entry_action(request.url.path, ActionKind.AGENT_RUN, input_text=payload.question))
+    await require_kb(request.app.state.db_pool, principal, payload.namespace)
+    # The model must be allowed before the run starts (each LLM call inside the run is checked again).
+    await require(ctx, Action(
+        ActionKind.MODEL_INVOKE, LLM_CONFIG["model"], estimated_tokens=estimate_tokens(payload.question, AGENT_MAX_TOKENS),
+        input_text=payload.question,
+    ))
 
     graph = request.app.state.agent_graph  # compiled once at startup (see main.py)
 
@@ -103,7 +117,9 @@ async def agent_query(request: Request, response: Response, payload: AgentReques
                 "enable_verifier": payload.enable_verifier,
                 "verify_retries_left": payload.max_verify_retries,
             },
-            config={"recursion_limit": recursion_limit},
+            # The enforcement context (boundary, never the raw principal) reaches the nodes and tools through
+            # `configurable`, never through model-controlled arguments.
+            config={"recursion_limit": recursion_limit, "configurable": {"gateway": ctx}},
         )
     except GraphRecursionError:
         logger.warning(
@@ -142,8 +158,14 @@ async def agent_query(request: Request, response: Response, payload: AgentReques
     request.state.usage = usage_dict
     response.headers["X-Cost-USD"] = f"{usage_dict['total_cost']:.6f}"
 
+    flag_reason = None
+    if ctx.denials:
+        flag_reason = f"Run cut short by policy (reason: {ctx.denials[0].reason}). The answer is partial."
+
     return AgentResponse(
         question=payload.question,
+        flagged=bool(ctx.denials),
+        flag_reason=flag_reason,
         answer=result.get("final_answer", "No answer generated"),
         confidence=result.get("confidence", 0.0),
         citations=[AgentCitation(**c) for c in result.get("citations", [])],

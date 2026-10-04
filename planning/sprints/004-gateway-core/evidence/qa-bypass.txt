@@ -1,0 +1,127 @@
+# Agent run 1: tenant A, default KB, all allowed
+HTTP/1.1 200 OK
+x-query-id: 18e971664627408190ca79c3001831eb
+x-request-id: 18e971664627408190ca79c3001831eb
+{'answer': 'According to doc.txt: GDPR breach notification must happen within 72 hours to the supervisory authority.\n\nControllers must document every brea', 'flagged': False, 'flag_reason': None, 'tool_calls_made': 1, 'verified': True, 'model_used': 'gemini/gemini-3.5-flash-lite', 'error': None}
+fake calls recorded this run:
+{"k": "llm", "kind": "agent_tool_call", "model": "gemini/gemini-3.5-flash-lite"}
+{"k": "embed", "n": 1}
+{"k": "llm", "kind": "agent_final", "model": "gemini/gemini-3.5-flash-lite"}
+{"k": "llm", "kind": "synthesis", "model": "gemini/gemini-3.5-flash-lite"}
+{"k": "llm", "kind": "verifier", "model": "gemini/gemini-3.5-flash-lite"}
+
+# Agent run 2: tenant B, models restricted to some/other-model: expect 403, ZERO fake LLM calls
+HTTP/1.1 403 Forbidden
+{'flagged': 'None', 'flag_reason': 'None', 'tool_calls_made': 'None', 'verified': 'None', 'error': "{'code': 'policy_denied', 'message': 'Denied by policy (reason: model_not_allowed)', 'requ", 'answer': 'None'}
+fake LLM/embedding calls recorded:
+gateway_decisions for request c6d55edbc81c4cf293ad701e97010cb8:
+    action    |           resource           | outcome | stage  |      reason       
+--------------+------------------------------+---------+--------+-------------------
+ agent.run    |                              | allow   | allow  | allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | deny    | policy | model_not_allowed
+(2 rows)
+
+policy version 2 is now active for tenant qa-b
+
+# Agent run 3: tenant B policy v2, retrieve_chunks not in allowed tools: expect partial, flagged
+HTTP/1.1 200 OK
+{'flagged': 'True', 'flag_reason': 'Run cut short by policy (reason: tool_not_allowed). The answer is partial.', 'tool_calls_made': '1', 'verified': 'True', 'error': 'None', 'answer': 'I could not find relevant documents to answer this question.'}
+fake LLM/embedding calls recorded:
+{"k": "llm", "kind": "agent_tool_call", "model": "gemini/gemini-3.5-flash-lite"}
+{"k": "llm", "kind": "verifier", "model": "gemini/gemini-3.5-flash-lite"}
+gateway_decisions for request 70e1fee933274684a32e003f574888de:
+    action    |           resource           | outcome | stage  |      reason      
+--------------+------------------------------+---------+--------+------------------
+ agent.run    |                              | allow   | allow  | allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow  | allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow  | allowed
+ tool.call    | retrieve_chunks              | deny    | policy | tool_not_allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow  | allowed
+(5 rows)
+
+policy version 2 is now active for tenant qa-a
+
+# Agent run 4: tenant A policy v2, max_tool_calls=0: expect tool_call_limit, flagged
+HTTP/1.1 200 OK
+{'flagged': 'True', 'flag_reason': 'Run cut short by policy (reason: tool_call_limit). The answer is partial.', 'tool_calls_made': '1', 'verified': 'True', 'error': 'None', 'answer': 'I could not find relevant documents to answer this question.'}
+fake LLM/embedding calls recorded:
+{"k": "llm", "kind": "agent_tool_call", "model": "gemini/gemini-3.5-flash-lite"}
+{"k": "llm", "kind": "verifier", "model": "gemini/gemini-3.5-flash-lite"}
+gateway_decisions for request accd4671bc28405b9f01c71564a97940:
+    action    |           resource           | outcome |  stage   |     reason      
+--------------+------------------------------+---------+----------+-----------------
+ agent.run    |                              | allow   | allow    | allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow    | allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow    | allowed
+ tool.call    | retrieve_chunks              | deny    | boundary | tool_call_limit
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow    | allowed
+(5 rows)
+
+
+# Agent run 5: tenant A, fake model asks retrieve_chunks(namespace=secret) (KB outside policy): expect kb.read deny and NO embedding call
+{'flagged': 'True', 'flag_reason': 'Run cut short by policy (reason: kb_not_allowed). The answer is partial.', 'answer': 'I could not find relevant documents to answer this question.'}
+{"k": "llm", "kind": "agent_tool_call", "model": "gemini/gemini-3.5-flash-lite"}
+{"k": "llm", "kind": "agent_final", "model": "gemini/gemini-3.5-flash-lite"}
+{"k": "llm", "kind": "verifier", "model": "gemini/gemini-3.5-flash-lite"}
+    action    |           resource           | outcome | stage  |     reason     
+--------------+------------------------------+---------+--------+----------------
+ agent.run    |                              | allow   | allow  | allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow  | allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow  | allowed
+ tool.call    | retrieve_chunks              | allow   | allow  | allowed
+ kb.read      | secret                       | deny    | policy | kb_not_allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow  | allowed
+ model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow  | allowed
+(7 rows)
+
+# MCP session, tenant A (policy v3: kbs=[default])
+tools: ['list_namespaces', 'search_documents', 'multi_namespace_search', 'get_ingestion_status', 'get_cost_summary']
+list_namespaces {} -> {   "default": "Uncategorized or general documents" }
+search_documents {'query': 'breach MCPQUERY1', 'namespace': 'default'} -> {   "count": 1,   "chunks": [     {       "chunk_index": 0,       "document_id": "gdpr.txt",       "source_fil
+search_documents {'query': 'breach MCPQUERY2', 'namespace': 'secret'} -> ERR Error executing tool search_documents: policy: kb_not_allowed
+get_ingestion_status {'namespace': 'secret'} -> ERR Error executing tool get_ingestion_status: policy: kb_not_allowed
+multi_namespace_search {'query': 'breach MCPQUERY3', 'namespaces': ['default', 'secret']} -> ERR Error executing tool multi_namespace_search: policy: kb_not_allowed
+multi_namespace_search {'query': 'breach MCPQUERY4'} -> {   "count": 1,   "chunks": [     {       "chunk_index": 0,       "document_id": "gdpr.txt",       "source_fil
+get_cost_summary {'days': 1} -> {   "days": 1,   "breakdown": [     {       "date": "2026-10-03",       "endpoint": "/v1/agent/query",       "
+resource rag://config/namespaces -> {   "default": "Uncategorized or general documents" }
+resource rag://config/features -> {   "reranker_enabled": true,   "otel_enabled": true,   "azure_monitor": false,   "verifier_enabled"
+resource rag://documents/secret/x -> EXC Error creating resource from template rag://documents/secret/x
+fake calls during MCP session:
+{"k": "embed", "n": 1}
+{"k": "embed", "n": 1}
+{"k": "embed", "n": 1}
+decisions during MCP session:
+ action  | resource | outcome | stage  |     reason     |   rid    
+---------+----------+---------+--------+----------------+----------
+ kb.read |          | allow   | allow  | allowed        | 80dba2a7
+ kb.read |          | allow   | allow  | allowed        | 2869da0e
+ kb.read | default  | allow   | allow  | allowed        | 38ee152d
+ kb.read | secret   | deny    | policy | kb_not_allowed | aa55235c
+ kb.read | secret   | deny    | policy | kb_not_allowed | a06a5239
+ kb.read | default  | allow   | allow  | allowed        | 18f850c8
+ kb.read | secret   | deny    | policy | kb_not_allowed | 18f850c8
+ kb.read |          | allow   | allow  | allowed        | 68b81041
+ kb.read | default  | allow   | allow  | allowed        | 68b81041
+ kb.read |          | allow   | allow  | allowed        | a05af8d1
+ kb.read |          | allow   | allow  | allowed        | 4ab2a8e8
+ kb.read | secret   | deny    | policy | kb_not_allowed | 2f142554
+(12 rows)
+
+
+# Attempt: tenant A policy v4 allows NO tools and NO models (allowed_tools=[], allowed_models=[]). MCP tools (tool-like) still work?
+policy version 4 is now active for tenant qa-a
+list_namespaces {} -> {   "default": "Uncategorized or general documents" }
+search_documents {'query': 'breach MCPQUERY1', 'namespace': 'default'} -> {   "count": 1,   "chunks": [     {       "chunk_index": 0,       "document_id": "gdpr.txt",       "source_fil
+search_documents {'query': 'breach MCPQUERY2', 'namespace': 'secret'} -> ERR Error executing tool search_documents: policy: kb_not_allowed
+multi_namespace_search {'query': 'breach MCPQUERY4'} -> {   "count": 1,   "chunks": [     {       "chunk_index": 0,       "document_id": "gdpr.txt",       "source_fil
+get_cost_summary {'days': 1} -> {   "days": 1,   "breakdown": [     {       "date": "2026-10-03",       "endpoint": "/v1/agent/query",       "
+resource rag://config/namespaces -> {   "default": "Uncategorized or general documents" }
+embedding calls with models=[] (MCP path): 14 total embeds so far
+agent route with models=[]:
+HTTP 403
+
+# Attempt: decision-record write fails (REVOKE INSERT from gap_app, owner action in throwaway DB). Does the call still proceed?
+policy version 5 is now active for tenant qa-a
+search with no decision-write privilege: HTTP 200
+decision rows before=76 after=76  (unchanged = an allowed call with NO decision row)
+server.log "decision not recorded" error lines: 2

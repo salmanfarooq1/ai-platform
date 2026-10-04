@@ -48,5 +48,43 @@ def mock_db_pool():
     from unittest.mock import AsyncMock, MagicMock
     pool = MagicMock()
     conn = AsyncMock()
+    # tenant_connection opens a transaction on the connection.
+    conn.transaction = MagicMock(return_value=AsyncContextManager(None))
     pool.acquire = MagicMock(return_value=AsyncContextManager(conn))
     return pool, conn
+
+
+class GatewayIO:
+    """What the gateway would read from and write to Postgres, held in memory for unit tests.
+
+    `policy` is what `load_active_policy` returns (None means the platform default). `decisions` collects
+    every decision record as (action kind, resource, outcome, stage, reason).
+    """
+
+    def __init__(self):
+        self.policy = (None, None)
+        self.decisions: list[tuple[str, str | None, str, str, str]] = []
+
+    @property
+    def reasons(self) -> list[str]:
+        return [d[4] for d in self.decisions]
+
+
+@pytest.fixture(autouse=True)
+def gateway_io(monkeypatch):
+    """Unit tests never reach Postgres: the policy loader and the decision writer are replaced."""
+    import gateway.policy
+    import gateway.record
+
+    io = GatewayIO()
+
+    async def load_active_policy(pool, tenant_id):
+        return io.policy
+
+    async def write_decision(ctx, action, decision):
+        io.decisions.append((action.kind.value, action.resource, "allow" if decision.allowed else "deny",
+                             decision.stage, decision.reason))
+
+    monkeypatch.setattr(gateway.policy, "load_active_policy", load_active_policy)
+    monkeypatch.setattr(gateway.record, "write_decision", write_decision)
+    return io

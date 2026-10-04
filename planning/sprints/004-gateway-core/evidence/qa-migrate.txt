@@ -1,0 +1,44 @@
+## A8 QA re-run: qa_live at 0004 with data, then 0005
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+tenant qa-a created: id=8419a316-62ce-4fd3-a4d0-95a97827968d
+tenant qa-b created: id=b465c552-9aab-4f28-adbf-b6ae4efcb23c
+knowledge base secret created for tenant qa-a
+principal svc-a created: id=4bf35641-703d-4dca-957a-8aa2fb5434fb
+principal svc-b created: id=b4eba52f-268b-43bb-bb7f-b5057948148e
+                                       Table "public.feedback"
+   Column   |           Type           | Collation | Nullable |               Default                
+------------+--------------------------+-----------+----------+--------------------------------------
+ id         | bigint                   |           | not null | nextval('feedback_id_seq'::regclass)
+ request_id | text                     |           | not null | 
+ endpoint   | text                     |           | not null | 
+ rating     | text                     |           | not null | 
+ comment    | text                     |           |          | 
+ created_at | timestamp with time zone |           | not null | now()
+ tenant_id  | uuid                     |           | not null | 
+Indexes:
+    "feedback_pkey" PRIMARY KEY, btree (id)
+    "idx_feedback_request_id" btree (request_id)
+    "idx_feedback_tenant_created" btree (tenant_id, created_at DESC)
+INSERT 0 1
+## before 0005:
+0004
+3|6|1|2|e473ad9183088c08101e771ddb51c162
+## upgrade:
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+## after:
+0005
+3|6|1|2|e473ad9183088c08101e771ddb51c162
+      relname      | relrowsecurity | relforcerowsecurity 
+-------------------+----------------+---------------------
+ gateway_decisions | t              | t
+ policies          | t              | t
+(2 rows)
+
+    table_name     | privilege_type 
+-------------------+----------------
+ gateway_decisions | INSERT
+ gateway_decisions | SELECT
+ policies          | SELECT
+(3 rows)
+

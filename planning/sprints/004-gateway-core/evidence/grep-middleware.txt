@@ -1,0 +1,15 @@
+$ grep -n "RateLimitMiddleware\|TokenBudgetMiddleware" api/main.py
+exit=1 (1 = no match)
+
+$ ls api/middleware
+__init__.py
+auth.py
+finops.py
+logging.py
+
+$ grep -rn "RateLimitMiddleware\|TokenBudgetMiddleware" api/ gateway/ --include=*.py
+exit=1 (1 = no match)
+
+$ pytest tests/unit/test_gateway_import_lint.py -q
+.........................                                                [100%]
+25 passed in 0.30s

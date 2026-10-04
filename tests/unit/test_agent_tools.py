@@ -1,11 +1,21 @@
 import json
+from uuid import UUID
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from api.agent.graph import _extract_chunks, _extract_llm_usage, should_continue, should_verify, verify_router
 from api.agent.router import _combine_usage
-from api.agent.tools import list_namespaces, make_retrieve_tool
+from api.agent.tools import gateway_from_config, make_list_namespaces_tool, make_retrieve_tool
+from tests.fakes import FakePool
+from tests.gateway_helpers import make_ctx, make_principal
+
+TENANT = "00000000-0000-0000-0000-0000000000aa"
+
+
+def tenant_config():
+    """The run config the route builds: the request's enforcement context, in `configurable`."""
+    return {"configurable": {"gateway": make_ctx(principal=make_principal(tenant=UUID(TENANT)))}}
 
 
 class _FailingPool:
@@ -27,9 +37,41 @@ async def test_retrieve_chunks_handles_db_error(monkeypatch):
     monkeypatch.setattr(tools_module, "embed_query", fake_embed_query)
 
     tool = make_retrieve_tool(_FailingPool())
-    result = await tool.ainvoke({"query": "test query", "namespace": "default"})
+    result = await tool.ainvoke({"query": "test query", "namespace": "default"}, config=tenant_config())
     data = json.loads(result)
     assert "error" in data
+    assert "connection refused" in data["error"]  # it failed in the database call, not before it
+
+
+@pytest.mark.asyncio
+async def test_retrieve_chunks_refuses_to_run_without_a_tenant(monkeypatch):
+    """The tenant is not a tool argument. No tenant in the run config means the tool does nothing."""
+    import api.agent.tools as tools_module
+
+    async def must_not_embed(query: str):
+        raise AssertionError("embedding must not run without a tenant")
+
+    monkeypatch.setattr(tools_module, "embed_query", must_not_embed)
+    tool = make_retrieve_tool(FakePool())
+
+    for config in (None, {"configurable": {}}, {"configurable": {"tenant_id": "not-a-uuid"}}):
+        data = json.loads(await tool.ainvoke({"query": "q", "namespace": "legal"}, config=config))
+        assert data["error"] == "unauthenticated"
+
+
+def test_gateway_from_config_reads_only_an_enforcement_context():
+    cfg = tenant_config()
+    assert gateway_from_config(cfg) is cfg["configurable"]["gateway"]
+    assert str(gateway_from_config(cfg).boundary.tenant_id) == TENANT
+    assert gateway_from_config({"configurable": {"gateway": "x"}}) is None
+    assert gateway_from_config({"configurable": {"tenant_id": TENANT}}) is None  # a bare tenant id is not enough
+    assert gateway_from_config({}) is None
+    assert gateway_from_config(None) is None
+
+
+def test_retrieve_tool_does_not_expose_tenant_to_the_model():
+    schema = make_retrieve_tool(pool=None).args
+    assert set(schema) == {"query", "namespace", "top_k", "mode"}
 
 
 def test_retrieve_tool_has_docstring():
@@ -39,10 +81,22 @@ def test_retrieve_tool_has_docstring():
 
 
 @pytest.mark.asyncio
-async def test_list_namespaces_returns_registry_contents():
-    result = json.loads(await list_namespaces.ainvoke({}))
-    assert "legal" in result
-    assert "kyc_aml" in result
+async def test_list_namespaces_returns_the_tenants_knowledge_bases():
+    pool = FakePool(rows=[{"slug": "kyc_aml", "description": "KYC"}, {"slug": "legal", "description": "Law"}])
+    tool = make_list_namespaces_tool(pool)
+
+    result = json.loads(await tool.ainvoke({}, config=tenant_config()))
+
+    assert result == {"kyc_aml": "KYC", "legal": "Law"}
+    # the read ran inside the tenant's transaction: set_config first, then the query
+    assert pool.conn.queries[0] == ("SELECT set_config('app.tenant_id', $1, true)", (TENANT,))
+    assert "knowledge_bases" in pool.conn.queries[1][0]
+
+
+@pytest.mark.asyncio
+async def test_list_namespaces_without_a_tenant_returns_an_error():
+    data = json.loads(await make_list_namespaces_tool(FakePool()).ainvoke({}, config={"configurable": {}}))
+    assert data["error"] == "unauthenticated"
 
 
 def test_should_continue_routes_to_tools_on_tool_call():
@@ -69,7 +123,7 @@ def test_should_verify_routes_to_verify_when_enabled():
 
 def test_verify_router_retries_when_unsupported_and_retries_remain():
     state = {
-        "verified": False, 
+        "verified": False,
         "verify_retries_left": 1,
         "messages": [HumanMessage(content="[Verifier feedback] needs info")]
     }
@@ -78,7 +132,7 @@ def test_verify_router_retries_when_unsupported_and_retries_remain():
 
 def test_verify_router_ends_when_retries_exhausted():
     state = {
-        "verified": False, 
+        "verified": False,
         "verify_retries_left": 0,
         "messages": [HumanMessage(content="Draft answer")]
     }
@@ -117,7 +171,7 @@ def test_combine_usage_sums_reasoning_and_verifier_and_synthesis_cost():
         "reasoning_usage": [{"prompt_tokens": 100, "completion_tokens": 20, "cost": 0.001}],
         "verifier_usage": [{"prompt_tokens": 50, "completion_tokens": 10, "cost": 0.0005}],
         "synthesis_usage": [{"prompt_tokens": 10, "completion_tokens": 10, "cost": 0.004}],
-        "model_used": "groq/meta-llama/llama-4-scout-17b-16e-instruct",
+        "model_used": "openai/gpt-oss-120b",
     }
     usage = _combine_usage(result)
     assert usage["total_cost"] == pytest.approx(0.0000312)
@@ -150,15 +204,30 @@ def test_chunk_key_matches_llm_expected_shape():
 async def test_agent_query_initializes_reducer_lists_and_runs_graph(monkeypatch):
     """Integration test for the router to verify it properly initializes
     reducer lists and passes them to the graph."""
-    from fastapi.testclient import TestClient
-    from fastapi import FastAPI
-    from api.agent.router import router as agent_router
+    from uuid import UUID, uuid4
 
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    from api.agent.router import router as agent_router
+    from core.identity.models import Principal
+    from gateway import GatewayRuntime
+
+    principal = Principal(id=uuid4(), tenant_id=UUID(TENANT), kind="service", scopes=frozenset({"agent"}))
     app = FastAPI()
+
+    @app.middleware("http")
+    async def authenticate_as_test_principal(request, call_next):
+        request.state.principal = principal  # what AuthMiddleware does after verifying a credential
+        return await call_next(request)
+
     app.include_router(agent_router)
 
     class FakeGraph:
         async def ainvoke(self, state, config):
+            # the tools get the request's enforcement context (boundary), built from the verified principal
+            assert list(config["configurable"]) == ["gateway"]
+            assert str(config["configurable"]["gateway"].boundary.tenant_id) == TENANT
             assert "reasoning_usage" in state
             assert state["reasoning_usage"] == []
             assert state["synthesis_usage"] == []
@@ -171,6 +240,8 @@ async def test_agent_query_initializes_reducer_lists_and_runs_graph(monkeypatch)
             }
 
     app.state.agent_graph = FakeGraph()
+    app.state.db_pool = FakePool()  # the knowledge-base check reads through it
+    app.state.gateway_runtime = GatewayRuntime(pool=app.state.db_pool, get_redis=None)
     client = TestClient(app)
     response = client.post("/agent/query", json={
         "question": "test question",
@@ -186,13 +257,13 @@ async def test_agent_query_initializes_reducer_lists_and_runs_graph(monkeypatch)
 async def test_agent_graph_end_to_end_with_verify_retry(monkeypatch):
     """Integration test covering TG-1 (end to end) and TG-2 (verify-retry loop)."""
     import api.agent.graph as graph_module
-    
+
     call_count = {"agent": 0, "verifier": 0}
-    
+
     class FakeAgentModel:
         def bind_tools(self, tools):
             return self
-            
+
         async def ainvoke(self, messages):
             call_count["agent"] += 1
             if call_count["agent"] == 1:
@@ -208,13 +279,13 @@ async def test_agent_graph_end_to_end_with_verify_retry(monkeypatch):
                 return AIMessage(content='{"supported": false, "notes": "needs more info"}')
             return AIMessage(content='{"supported": true, "notes": "all good"}')
 
-    def fake_chat_lite_llm(model, temperature, max_tokens):
+    def fake_chat_lite_llm(max_tokens):  # the graph now builds models through api.agent.models.chat_model
         if max_tokens == 4000:
             return FakeAgentModel()
         return FakeVerifierModel()
 
-    monkeypatch.setattr(graph_module, "ChatLiteLLM", fake_chat_lite_llm)
-    
+    monkeypatch.setattr(graph_module, "chat_model", fake_chat_lite_llm)
+
     async def fake_generate(question, db_chunks):
         from api.models.schemas import GeneratedAnswer
         ans = GeneratedAnswer(
@@ -225,22 +296,22 @@ async def test_agent_graph_end_to_end_with_verify_retry(monkeypatch):
             needs_clarification=False,
         )
         return ans, {"total_cost": 0.01, "prompt_tokens": 10, "completion_tokens": 10}
-        
+
     monkeypatch.setattr("api.services.llm.generate_with_routing", fake_generate)
-    
+
     class FakePool:
         pass
-        
+
     from langchain_core.tools import tool
     @tool
     async def fake_retrieve(query: str, namespace: str = "default") -> str:
         """Fake retrieve tool."""
         return json.dumps({"chunks": [{"document_id": "doc1", "chunk_index": 0, "content": "fake content"}]})
-        
+
     monkeypatch.setattr(graph_module, "make_retrieve_tool", lambda pool: fake_retrieve)
-    
+
     graph = graph_module.build_agent_graph(FakePool())
-    
+
     result = await graph.ainvoke({
         "messages": [HumanMessage(content="Hello")],
         "reasoning_usage": [],
@@ -248,8 +319,8 @@ async def test_agent_graph_end_to_end_with_verify_retry(monkeypatch):
         "synthesis_usage": [],
         "enable_verifier": True,
         "verify_retries_left": 1
-    }, config={"recursion_limit": 10})
-    
+    }, config={"recursion_limit": 10, "configurable": {"gateway": make_ctx()}})
+
     assert call_count["agent"] == 3
     assert call_count["verifier"] == 2
     assert result["verified"] is True

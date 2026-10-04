@@ -1,0 +1,56 @@
+# QA live run (fake LLM/embeddings via scratchpad launcher); keys redacted
+
+$ A ingest default (allowed)
+HTTP 200
+{"document_id":"gdpr.txt","namespace":"default","total_chunks":1,"total_time_seconds":0.007,"throughput_chunks_per_second":153.43,"status":"new","content_hash":"884c4082b7208fa72f991f22645b90a1286a2a68519b09a177a165f9ede681e7","chunks_deleted":0}
+
+
+$ A ingest secret (kb not in policy)
+HTTP 403
+{"error":{"code":"policy_denied","message":"Denied by policy (reason: kb_not_allowed)","request_id":"3e6c60c79c2a463eb404f565bece86c5"}}
+
+
+$ B ingest default
+HTTP 200
+{"document_id":"gdpr.txt","namespace":"default","total_chunks":1,"total_time_seconds":0.003,"throughput_chunks_per_second":362.44,"status":"new","content_hash":"884c4082b7208fa72f991f22645b90a1286a2a68519b09a177a165f9ede681e7","chunks_deleted":0}
+
+
+$ A search default -> expect 200
+HTTP 200
+{"query":"breach notification deadline SECRETQUERYTEXT1","answer":"According to doc.txt: GDPR breach notification must happen within 72 hours to the supervisory authority.\n\nControllers must document every brea","confidence":0.9,"needs_clarification":false,"rerank_applied":true,"results":[{"document_id":"gdpr.txt","namespace":"default","content":"GDPR breach notification must happen within 72 hou
+
+
+$ A search secret -> expect 403 kb_not_allowed
+HTTP 403
+{"error":{"code":"policy_denied","message":"Denied by policy (reason: kb_not_allowed)","request_id":"15f82dff47f34744a608c2084c9d0b8e"}}
+
+
+$ B search default -> expect 403 model_not_allowed
+HTTP 403
+{"error":{"code":"policy_denied","message":"Denied by policy (reason: model_not_allowed)","request_id":"4796870720644e5a93d7aa314e54ef61"}}
+
+
+$ A search blocked term -> 400
+HTTP 400
+{"error":{"code":"query_blocked","message":"Query contains a term blocked by your organisation's policy","request_id":"42e94a03610b4a39873ffad5c7e264ae"}}
+
+
+$ A search foreign/unknown kb -> 404
+HTTP 403
+{"error":{"code":"policy_denied","message":"Denied by policy (reason: kb_not_allowed)","request_id":"92a088668b524347825fbdbce64e5b21"}}
+
+
+$ no credential -> 401
+HTTP 401
+{"error":{"code":"unauthorized","message":"Missing or invalid credentials","request_id":"ef4ec1641e2c456cb71081bd6a5e970b"}}
+
+
+$ A /config (not gateway-gated): namespaces listed
+HTTP 200
+{"namespaces":{"default":"Uncategorized or general documents","secret":"denied by policy"},"confidence_floor":0.45,"max_query_length":1000,"daily_token_budget":500000,"rate_limit_rpm":60,"rate_limit_window_seconds":60,"reranker_enabled":true,"agent_defaults":{"max_iterations":6,"enable_verifier":true,"max_verify_retries":1}}
+
+
+$ A /documents (policy-filtered)
+HTTP 200
+{"documents":[{"document_id":"gdpr.txt","namespace":"default","source_filename":"doc.txt","content_hash":"884c4082b7208fa72f991f22645b90a1286a2a68519b09a177a165f9ede681e7","chunk_count":1,"last_ingested_at":"2026-10-03T15:16:05.173176+00:00"}],"count":1}
+

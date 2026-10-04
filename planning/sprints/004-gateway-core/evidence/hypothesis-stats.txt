@@ -1,0 +1,48 @@
+$ poetry run pytest tests/unit/test_gateway_boundary.py -v --hypothesis-show-statistics
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0 -- /root/.cache/pypoetry/virtualenvs/ai-platform-OrHxThiT-py3.11/bin/python
+hypothesis profile 'default'
+rootdir: /home/user/ai-platform
+configfile: pyproject.toml
+plugins: rerunfailures-16.4, xdist-3.8.0, repeat-0.9.4, asyncio-1.4.0, hypothesis-6.168.3, langsmith-0.10.15, cov-7.1.0, anyio-4.13.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 8 items
+
+tests/unit/test_gateway_boundary.py::test_narrow_result_is_always_a_subset_of_the_parent_or_raises PASSED [ 12%]
+tests/unit/test_gateway_boundary.py::test_widening_always_raises PASSED  [ 25%]
+tests/unit/test_gateway_boundary.py::test_narrowing_twice_never_recovers_what_the_first_narrowing_dropped PASSED [ 37%]
+tests/unit/test_gateway_boundary.py::test_a_boundary_is_frozen PASSED    [ 50%]
+tests/unit/test_gateway_boundary.py::test_the_default_boundary_is_what_scopes_grant_over_the_platform_defaults PASSED [ 62%]
+tests/unit/test_gateway_boundary.py::test_a_policy_narrows_resources_but_cannot_grant_actions_the_scopes_lack PASSED [ 75%]
+tests/unit/test_gateway_boundary.py::test_unknown_scopes_grant_nothing_and_admin_grants_everything PASSED [ 87%]
+tests/unit/test_gateway_boundary.py::test_the_deny_all_boundary_allows_nothing PASSED [100%]
+============================ Hypothesis Statistics =============================
+
+tests/unit/test_gateway_boundary.py::test_narrow_result_is_always_a_subset_of_the_parent_or_raises:
+
+  - during generate phase (0.85 seconds):
+    - Typical runtimes: ~ 1-2 ms, of which ~ 0-1 ms in data generation
+    - 300 passing, 0 failing, and 8 invalid test cases
+
+  - Stopped because settings.max_examples=300
+
+
+tests/unit/test_gateway_boundary.py::test_widening_always_raises:
+
+  - during generate phase (0.63 seconds):
+    - Typical runtimes: ~ 0-2 ms, of which ~ 0-1 ms in data generation
+    - 300 passing, 0 failing, and 28 invalid test cases
+
+  - Stopped because settings.max_examples=300
+
+
+tests/unit/test_gateway_boundary.py::test_narrowing_twice_never_recovers_what_the_first_narrowing_dropped:
+
+  - during generate phase (0.90 seconds):
+    - Typical runtimes: ~ 1-2 ms, of which ~ 0-1 ms in data generation
+    - 300 passing, 0 failing, and 13 invalid test cases
+
+  - Stopped because settings.max_examples=300
+
+
+============================== 8 passed in 2.56s ===============================

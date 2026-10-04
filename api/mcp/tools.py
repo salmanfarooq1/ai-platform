@@ -8,31 +8,66 @@ arguments, so the caller never has to know about connection management.
 """
 import json
 import logging
-from typing import Any
+from uuid import UUID
 
-from asyncpg import Pool
-
+from api.auth import KB_NOT_FOUND_MESSAGE
+from api.mcp.context import blocked_query_json, gate, scope_denied, session_pool, session_tenant
 from api.mcp.server import mcp
 from api.models.schemas import IngestionStatusResponse, LatestDocumentInfo
 from api.services.cache import embed_query
-from api.services.guardrails import check_input
 from api.services.retriever import RetrieverConfig, retrieve
-from config import FEATURES, NAMESPACE_REGISTRY
+from config import FEATURES, LLM_CONFIG
+from core.database.tenant import DbPool, tenant_connection
+from core.identity.models import Scope
+from gateway import Action, ActionKind, GatewayDenied
+from gateway.estimate import estimate_tokens
 
 logger = logging.getLogger("api.mcp.tools")
 
 MAX_CHUNK_PREVIEW_LENGTH = 800
 
 
+_UNAUTHENTICATED = json.dumps({"error": "unauthenticated", "reason": "No authenticated principal in this MCP session"})
+_NO_POOL = json.dumps({"error": "Database pool not available"})
+
+
+async def _kb_slugs(pool: DbPool, tenant_id: UUID) -> dict[str, str]:
+    async with tenant_connection(pool, tenant_id) as conn:
+        rows = await conn.fetch("SELECT slug, description FROM knowledge_bases ORDER BY slug")
+    return {r["slug"]: r["description"] for r in rows}
+
+
+async def _kb_exists(pool: DbPool, tenant_id: UUID, slug: str) -> bool:
+    async with tenant_connection(pool, tenant_id) as conn:
+        return bool(await conn.fetchval("SELECT 1 FROM knowledge_bases WHERE slug = $1", slug))
+
+
+def _kb_not_found() -> str:
+    return json.dumps({"error": "kb_not_found", "reason": KB_NOT_FOUND_MESSAGE})
+
+
 @mcp.tool()
 async def list_namespaces() -> str:
-    """Return available document namespaces and what each contains.
+    """Return the caller's knowledge bases (namespaces) and what each contains.
 
     Call this before searching if you are not sure which namespace
     holds the regulation you need. The response is a JSON object
     mapping each namespace name to a description of its contents.
     """
-    return json.dumps(NAMESPACE_REGISTRY, indent=2)
+    tenant_id, pool = session_tenant(), session_pool()
+    if tenant_id is None:
+        return _UNAUTHENTICATED
+    if (denied := scope_denied(Scope.KB_READ)) is not None:
+        return denied
+    if pool is None:
+        return _NO_POOL
+    ctx = await gate(Action(ActionKind.TOOL_CALL, "list_namespaces"), Action(ActionKind.KB_READ))
+    visible = ctx.boundary.visible_kbs()
+    try:
+        return json.dumps({k: v for k, v in (await _kb_slugs(pool, tenant_id)).items() if visible is None or k in visible}, indent=2)
+    except Exception as e:
+        logger.error("[mcp/list_namespaces] %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -53,16 +88,29 @@ async def search_documents(
     Returns:
         JSON with matched chunks including content, scores, and metadata.
     """
-    guard = check_input(query)
-    if guard.blocked:
-        return json.dumps({"error": "query_blocked", "reason": guard.blocked_reason})
-
-    ctx: dict[str, Any] = mcp._dependency_overrides.get("app_context", {})
-    pool: Pool | None = ctx.get("pool")
+    tenant_id, pool = session_tenant(), session_pool()
+    if tenant_id is None:
+        return _UNAUTHENTICATED
+    if (denied := scope_denied(Scope.QUERY)) is not None:
+        return denied
     if pool is None:
-        return json.dumps({"error": "Database pool not available"})
+        return _NO_POOL
+
+    # Policy, input guardrails and the token cap on the model that will be used, before any data is read.
+    try:
+        await gate(
+            Action(ActionKind.TOOL_CALL, "search_documents", input_text=query),
+            Action(ActionKind.KB_READ, namespace, input_text=query),
+            Action(ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens(query), input_text=query),
+        )
+    except GatewayDenied as exc:
+        if (blocked := blocked_query_json(exc)) is not None:
+            return blocked
+        raise
 
     try:
+        if not await _kb_exists(pool, tenant_id, namespace):
+            return _kb_not_found()
         k = max(1, min(top_k, 20))
         query_embedding = await embed_query(query)
         cfg = RetrieverConfig(
@@ -76,6 +124,7 @@ async def search_documents(
             query_embedding=query_embedding,
             namespace=namespace,
             cfg=cfg,
+            tenant_id=tenant_id,
         )
 
         if not chunks:
@@ -125,7 +174,19 @@ async def multi_namespace_search(
         top_k: Results per namespace (1-10).
     """
     top_k = max(1, min(top_k, 10))
-    targets = namespaces or list(NAMESPACE_REGISTRY.keys())
+    tenant_id, pool = session_tenant(), session_pool()
+    if tenant_id is None:
+        return _UNAUTHENTICATED
+    if (denied := scope_denied(Scope.QUERY)) is not None:
+        return denied
+    if pool is None:
+        return _NO_POOL
+    ctx = await gate(Action(ActionKind.TOOL_CALL, "multi_namespace_search"), Action(ActionKind.KB_READ))
+    if namespaces:
+        targets = namespaces
+    else:
+        visible = ctx.boundary.visible_kbs()
+        targets = [k for k in await _kb_slugs(pool, tenant_id) if visible is None or k in visible]
     all_results = []
 
     for ns in targets:
@@ -151,32 +212,38 @@ async def get_ingestion_status(
     ingested document. Useful for verifying that a corpus has been
     loaded before running searches against it.
     """
-    ctx: dict[str, Any] = mcp._dependency_overrides.get("app_context", {})
-    pool: Pool | None = ctx.get("pool")
+    tenant_id, pool = session_tenant(), session_pool()
+    if tenant_id is None:
+        return _UNAUTHENTICATED
+    if (denied := scope_denied(Scope.KB_READ)) is not None:
+        return denied
     if pool is None:
-        return json.dumps({"error": "Database pool not available"})
+        return _NO_POOL
+    await gate(Action(ActionKind.TOOL_CALL, "get_ingestion_status"), Action(ActionKind.KB_READ, namespace))
 
     try:
-        async with pool.acquire() as conn:
+        async with tenant_connection(pool, tenant_id) as conn:
+            if not await conn.fetchval("SELECT 1 FROM knowledge_bases WHERE slug = $1", namespace):
+                return _kb_not_found()
             stats = await conn.fetchrow(
                 """
                 SELECT
                     COUNT(DISTINCT document_id) AS doc_count,
                     COUNT(*) AS chunk_count
                 FROM documents
-                WHERE namespace = $1
+                WHERE tenant_id = $2 AND namespace = $1
                 """,
-                namespace,
+                namespace, tenant_id,
             )
             latest = await conn.fetchrow(
                 """
                 SELECT document_id, source_filename, last_ingested_at
                 FROM document_registry
-                WHERE namespace = $1
+                WHERE tenant_id = $2 AND namespace = $1
                 ORDER BY last_ingested_at DESC
                 LIMIT 1
                 """,
-                namespace,
+                namespace, tenant_id,
             )
 
         latest_info: LatestDocumentInfo | None = None
@@ -212,14 +279,18 @@ async def get_cost_summary(
     Args:
         days: Number of days to look back (1-30, default 7).
     """
-    ctx: dict[str, Any] = mcp._dependency_overrides.get("app_context", {})
-    pool: Pool | None = ctx.get("pool")
+    tenant_id, pool = session_tenant(), session_pool()
+    if tenant_id is None:
+        return _UNAUTHENTICATED
+    if (denied := scope_denied(Scope.KB_READ)) is not None:
+        return denied
     if pool is None:
-        return json.dumps({"error": "Database pool not available"})
+        return _NO_POOL
+    await gate(Action(ActionKind.TOOL_CALL, "get_cost_summary"), Action(ActionKind.KB_READ))
 
     try:
         d = max(1, min(days, 30))
-        async with pool.acquire() as conn:
+        async with tenant_connection(pool, tenant_id) as conn:
             rows = await conn.fetch(
                 """
                 SELECT
@@ -230,11 +301,11 @@ async def get_cost_summary(
                     SUM(cost_usd) AS total_cost,
                     COUNT(*) AS request_count
                 FROM usage_log
-                WHERE created_at >= NOW() - MAKE_INTERVAL(days => $1)
+                WHERE tenant_id = $2 AND created_at >= NOW() - MAKE_INTERVAL(days => $1)
                 GROUP BY DATE(created_at), endpoint
                 ORDER BY day DESC, endpoint
                 """,
-                d,
+                d, tenant_id,
             )
 
         result = [

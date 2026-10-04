@@ -1,0 +1,3 @@
+$ poetry run ruff check api/ core/ gateway/ tests/
+All checks passed!
+exit=0

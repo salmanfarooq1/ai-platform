@@ -1,0 +1,63 @@
+== Mutation M2: a failed decision write on an allow no longer becomes a deny (gateway/enforce.py)
+diff --git a/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/enforce.py.orig b/gateway/enforce.py
+index 8a9c9b1..39da203 100644
+--- a/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/enforce.py.orig
++++ b/gateway/enforce.py
+@@ -64,7 +64,7 @@ async def enforce(ctx: EnforcementContext, action: Action, stages: Sequence[tupl
+             "decision not recorded: action=%s outcome=%s stage=%s reason=%s",
+             action.kind.value, "allow" if decision.allowed else "deny", decision.stage, decision.reason, exc_info=True,
+         )
+-        if decision.allowed:
++        if False:
+             decision = Decision(
+                 allowed=False, stage="record", reason="decision_unrecorded", policy_version=_version(ctx),
+                 message="A required service is unavailable. Try again shortly.",
+_ test_a_failed_decision_write_on_an_allow_becomes_a_deny_decision_unrecorded __
+    async def test_a_failed_decision_write_on_an_allow_becomes_a_deny_decision_unrecorded(monkeypatch, caplog):
+
+
+
+
+
+____ test_a_failed_decision_write_on_an_allow_is_a_deny_decision_unrecorded ____
+    async def test_a_failed_decision_write_on_an_allow_is_a_deny_decision_unrecorded(owner_pool, tenant_a, caplog):
+
+
+
+
+
+
+
+FAILED tests/unit/test_gateway_enforce.py::test_a_failed_decision_write_on_an_allow_becomes_a_deny_decision_unrecorded
+FAILED tests/integration/test_gateway.py::test_revoking_insert_on_gateway_decisions_makes_allows_fail_closed
+FAILED tests/integration/test_gateway.py::test_a_failed_decision_write_on_an_allow_is_a_deny_decision_unrecorded
+FAILED tests/e2e/test_gateway_followups.py::test_m2_with_insert_revoked_on_gateway_decisions_search_is_503_decision_unrecorded_and_nothing_is_called
+4 failed, 1 warning in 4.50s
+
+== Mutation L4: the verifier no longer checks ctx.halted (api/agent/graph.py)
+diff --git a/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/graph.py.orig b/api/agent/graph.py
+index cbbd439..aefb3f0 100644
+--- a/tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/graph.py.orig
++++ b/api/agent/graph.py
+@@ -272,7 +272,7 @@ def build_agent_graph(pool: DbPool):
+             f"[{c.get('document_id')}] {c.get('content', '')[:500]}" for c in chunks
+         )
+         ctx = gateway_from_config(config)
+-        if ctx is not None and ctx.halted:
++        if False:
+             # A denial already ended this run: do not spend another model call verifying a partial answer.
+             return {"verification_notes": f"Verification skipped: the run was cut short by policy ({ctx.halted}).",
+                     "verifier_usage": []}
+E       AssertionError: assert ['verifier'] == []
+E       AssertionError: assert 'verifier' not in ['agent_tool_call', 'agent_tool_call', 'synthesis', 'verifier']
+FAILED tests/unit/test_agent_halt.py::test_a_halted_run_makes_no_agent_call_and_no_verifier_call
+FAILED tests/e2e/test_gateway_followups.py::test_l4_no_verifier_call_after_a_halt
+2 failed, 1 warning in 3.01s
+
+== Restore check
+$ sha256sum -c (before vs after)
+gateway/enforce.py: OK
+api/agent/graph.py: OK
+$ git diff --no-index (originals vs tree)
+gateway/enforce.py: identical to the fixed version
+api/agent/graph.py: identical to the fixed version

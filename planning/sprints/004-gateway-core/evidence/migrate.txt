@@ -1,0 +1,41 @@
+## Migration 0005 on a database at 0004 that holds data
+NOTICE:  database "gap_migrate_evidence" does not exist, skipping
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+
+## at 0004:
+alembic_version=0004
+              set_config              
+--------------------------------------
+ fb011c1f-f5b3-41df-b9f8-4a0eeec2b62a
+(1 row)
+
+tenants=3 knowledge_bases=4 documents=5 document_registry=1 usage_log=1 feedback=0
+md5 documents=fe2a71430a95bb6b951dbbcfbe9b6e71 tenants=8ef70f2c1c7657e66d22d60a8650e471 usage_log=7781faeb9ed0a0c02a25184824b66f2f
+
+## upgrade to head:
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+
+## at head:
+alembic_version=0005
+tenants=3 knowledge_bases=4 documents=5 document_registry=1 usage_log=1 feedback=0
+md5 documents=fe2a71430a95bb6b951dbbcfbe9b6e71 tenants=8ef70f2c1c7657e66d22d60a8650e471 usage_log=7781faeb9ed0a0c02a25184824b66f2f
+
+RESULT: row counts and content digests identical before and after: no data loss
+
+## new tables (empty), RLS forced, grants for gap_app:
+policies=0 gateway_decisions=0
+      relname      | rls | forced 
+-------------------+-----+--------
+ gateway_decisions | t   | t
+ policies          | t   | t
+(2 rows)
+
+    table_name     | gap_app_privileges 
+-------------------+--------------------
+ gateway_decisions | INSERT, SELECT
+ policies          | SELECT
+(2 rows)
+

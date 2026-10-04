@@ -1,0 +1,19 @@
+# QA finding M2: rate and budget stages fail closed when Redis is down (live, real Redis container stopped)
+$ docker stop redis
+redis
+$ curl -s -w "\nHTTP %{http_code}\n" -H "Authorization: Bearer $ACME_KEY" -X POST /v1/search -d {...}
+{"error":{"code":"dependency_unavailable","message":"A required service is unavailable. Try again shortly.","request_id":"2f2c873ca8af4fba9ca341550a28a7d4"}}
+HTTP 503
+$ curl ... GET /v1/documents   (not metered, needs no Redis)
+HTTP 200
+$ docker start redis
+redis
+$ curl ... POST /v1/search   (Redis back)
+HTTP 200
+
+$ psql: the Redis-down denials in the decision record
+ action  | resource | outcome | stage |         reason         
+---------+----------+---------+-------+------------------------
+ kb.read | legal    | deny    | rate  | dependency_unavailable
+(1 row)
+

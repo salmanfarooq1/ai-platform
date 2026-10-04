@@ -3,22 +3,28 @@ import logging
 from operator import add
 from typing import Annotated, TypedDict
 
-from asyncpg import Pool
 from langchain_core.messages import (
+    AIMessage,
     BaseMessage,
     HumanMessage,
     SystemMessage,
     ToolMessage,
 )
-from langchain_litellm import ChatLiteLLM
+from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
-from api.agent.tools import list_namespaces, make_retrieve_tool
+from api.agent.models import AGENT_MAX_TOKENS, VERIFIER_MAX_TOKENS, chat_model, completion_cost
+from api.agent.tools import gateway_from_config, make_list_namespaces_tool, make_retrieve_tool
 from config import FEATURES, LLM_CONFIG
+from core.database.tenant import DbPool
+from gateway import Action, ActionKind, EnforcementContext, enforce
+from gateway.estimate import estimate_tokens
 
 logger = logging.getLogger("api.agent.graph")
+
+SYNTHESIS_MAX_TOKENS = 4000  # api/services/llm.py asks for this many completion tokens
 
 
 class AgentState(TypedDict):
@@ -29,7 +35,7 @@ class AgentState(TypedDict):
     reasoning_usage / verifier_usage accumulate via plain list
     concatenation (add) (one entry per LLM call in that role). Both MUST
     be initialized as empty lists wherever ainvoke() is first called
-    (Task 7). Without that initialization, LangGraph raises InvalidUpdateError 
+    (Task 7). Without that initialization, LangGraph raises InvalidUpdateError
     the first time agent_node tries to append to a key that was never in state.
 
     final_answer / confidence / citations / model_used / tokens_used /
@@ -84,7 +90,7 @@ def _extract_chunks(messages: list[BaseMessage]) -> list[dict]:
         if not isinstance(m, ToolMessage):
             continue
         try:
-            data = json.loads(m.content)
+            data = json.loads(str(m.content))  # list-shaped content is not JSON and is skipped below
         except (json.JSONDecodeError, TypeError):
             continue
         for c in data.get("chunks", []):
@@ -110,19 +116,32 @@ def _extract_llm_usage(response: BaseMessage) -> dict:
 
     cost = 0.0
     try:
-        import litellm
-        cost = litellm.completion_cost(
-            model=meta.get("model", LLM_CONFIG["model"]),
-            prompt_tokens=prompt_tokens,
-            completion_tokens=completion_tokens,
-        )
+        cost = completion_cost(meta.get("model", LLM_CONFIG["model"]), prompt_tokens, completion_tokens)
     except Exception:
         pass  # cost is best effort; token counts are the part we rely on
 
     return {"prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens, "cost": cost}
 
 
-async def synthesize_node(state: AgentState) -> dict:
+def _estimate_tokens(messages: list[BaseMessage], max_completion_tokens: int) -> int:
+    """Input size plus the completion tokens this call asks for, for the policy's per-request token cap."""
+    return estimate_tokens("".join(str(m.content) for m in messages), max_completion_tokens)
+
+
+async def _model_allowed(config: RunnableConfig | None, texts: str, estimated_tokens: int) -> bool:
+    """`enforce(model.invoke)` for one LLM call of this run. A deny ends the loop (`ctx.halted`)."""
+    ctx: EnforcementContext | None = gateway_from_config(config)
+    if ctx is None:
+        return False  # no gateway context: fail closed
+    decision = await enforce(ctx, Action(
+        ActionKind.MODEL_INVOKE, LLM_CONFIG["model"], estimated_tokens=estimated_tokens, input_text=texts,
+    ))
+    if not decision.allowed:
+        ctx.halted = decision.reason
+    return decision.allowed
+
+
+async def synthesize_node(state: AgentState, config: RunnableConfig | None = None) -> dict:
     """
     Deterministic finalizer. Always runs once the agent stops requesting
     tools. Not an LLM tool call, so there is no path where a query returns
@@ -130,10 +149,10 @@ async def synthesize_node(state: AgentState) -> dict:
     """
     from api.services.llm import generate_with_routing
 
-    question = next(
+    question = str(next(
         (m.content for m in state["messages"] if isinstance(m, HumanMessage)),
         "",
-    )
+    ))
     chunks = _extract_chunks(state["messages"])
 
     if not chunks:
@@ -154,6 +173,15 @@ async def synthesize_node(state: AgentState) -> dict:
         }
         for c in chunks
     ]
+
+    if not await _model_allowed(config, question, estimate_tokens(question, SYNTHESIS_MAX_TOKENS)):
+        return {
+            "final_answer": "I could not generate an answer: the model call is not permitted within your limits.",
+            "confidence": 0.0,
+            "citations": [],
+            "model_used": "",
+            "synthesis_usage": [{"prompt_tokens": 0, "completion_tokens": 0, "cost": 0.0}],
+        }
 
     answer_obj, usage_dict = await generate_with_routing(question, db_chunks)
 
@@ -205,22 +233,20 @@ def verify_router(state: AgentState) -> str:
     return "end"
 
 
-def build_agent_graph(pool: Pool):
-    tools = [make_retrieve_tool(pool), list_namespaces]
-    reasoning_model = ChatLiteLLM(
-        model=LLM_CONFIG["model"],
-        temperature=0,
-        max_tokens=4000,
-    ).bind_tools(tools)
+def build_agent_graph(pool: DbPool):
+    tools = [make_retrieve_tool(pool), make_list_namespaces_tool(pool)]
+    reasoning_model = chat_model(AGENT_MAX_TOKENS).bind_tools(tools)
+    verifier_model = chat_model(VERIFIER_MAX_TOKENS)
 
-    verifier_model = ChatLiteLLM(
-        model=LLM_CONFIG["model"],
-        temperature=0,
-        max_tokens=500,
-    )
-
-    async def agent_node(state: AgentState) -> dict:
+    async def agent_node(state: AgentState, config: RunnableConfig) -> dict:
         messages = [SystemMessage(content=AGENT_SYSTEM_PROMPT), *state["messages"]]
+        ctx = gateway_from_config(config)
+        if ctx is not None and ctx.halted:
+            # A denial already ended this run: no more model calls, go straight to synthesis.
+            return {"messages": [AIMessage(content="")], "reasoning_usage": []}
+        question = next((str(m.content) for m in state["messages"] if isinstance(m, HumanMessage)), "")
+        if not await _model_allowed(config, question, _estimate_tokens(messages, AGENT_MAX_TOKENS)):
+            return {"messages": [AIMessage(content="")], "reasoning_usage": []}
         response = None
         for attempt in range(3):
             try:
@@ -233,16 +259,27 @@ def build_agent_graph(pool: Pool):
                     await asyncio.sleep(35)
                 else:
                     raise
+        if response is None:  # unreachable: the loop either breaks with a response or raises
+            raise RuntimeError("Reasoning model returned no response")
         return {
             "messages": [response],
             "reasoning_usage": [_extract_llm_usage(response)],
         }
 
-    async def verify_node_inner(state: AgentState) -> dict:
+    async def verify_node_inner(state: AgentState, config: RunnableConfig) -> dict:
         chunks = _extract_chunks(state["messages"])
         excerpts = "\n\n".join(
             f"[{c.get('document_id')}] {c.get('content', '')[:500]}" for c in chunks
         )
+        ctx = gateway_from_config(config)
+        if ctx is not None and ctx.halted:
+            # A denial already ended this run: do not spend another model call verifying a partial answer.
+            return {"verification_notes": f"Verification skipped: the run was cut short by policy ({ctx.halted}).",
+                    "verifier_usage": []}
+        draft = str(state.get("final_answer", ""))
+        if not await _model_allowed(config, draft, estimate_tokens(draft + excerpts, VERIFIER_MAX_TOKENS)):
+            return {"verification_notes": "Verification skipped: the model call is not permitted within your limits.",
+                    "verifier_usage": []}
         response = await verifier_model.ainvoke([
             SystemMessage(content=VERIFIER_SYSTEM_PROMPT),
             HumanMessage(
@@ -251,7 +288,7 @@ def build_agent_graph(pool: Pool):
         ])
 
         try:
-            parsed = json.loads(response.content)
+            parsed = json.loads(str(response.content))
             supported = bool(parsed.get("supported", True))
             notes = parsed.get("notes", "")
         except (json.JSONDecodeError, TypeError):

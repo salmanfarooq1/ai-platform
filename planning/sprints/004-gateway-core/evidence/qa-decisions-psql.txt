@@ -1,0 +1,29 @@
+# A5 psql: decisions with policy_version and 64-char input_hash
+ outcome |      reason       | n  | pvmin | pvmax | hash64 | hashnull 
+---------+-------------------+----+-------+-------+--------+----------
+ allow   | allowed           | 54 |     1 |     4 |     36 |       18
+ deny    | kb_not_allowed    | 16 |     1 |     4 |      9 |        7
+ deny    | model_not_allowed |  3 |     1 |     4 |      3 |        0
+ deny    | query_blocked     |  1 |     1 |     1 |      1 |        0
+ deny    | tool_call_limit   |  1 |     2 |     2 |      1 |        0
+ deny    | tool_not_allowed  |  1 |     2 |     2 |      1 |        0
+(6 rows)
+
+# pg_dump grep for query text (expect 0 hits each)
+SECRETQUERYTEXT1: 0
+SECRETQUERYTEXT2: 0
+SECRETQUERYTEXT3: 0
+MCPQUERY1: 0
+MCPQUERY2: 0
+NORECORDQUERY: 0
+forbiddenword: 0
+breach notification deadline: 0
+# Redis down
+search:
+{"error":{"code":"dependency_unavailable","message":"A required service is unavailable. Try again shortly.","request_id":"42308a2551774f0ebb6e540becee2b8f"}} HTTP 503
+agent:
+{"error":{"code":"dependency_unavailable","message":"A required service is unavailable. Try again shortly.","request_id":"8396052b874240b18f127a0f02ba0ab1"}} HTTP 503
+mcp sse connect:
+{"error":{"code":"dependency_unavailable","message":"A required service is unavailable. Try again shortly.","request_id":"62d5362436f741f88581159b943a8540"}} HTTP 503
+documents (no rate/budget flag):
+HTTP 200

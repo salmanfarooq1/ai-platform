@@ -1,0 +1,51 @@
+$ psql -c "SELECT t.slug, p.version, p.active, p.created_by, p.document FROM policies p JOIN tenants t ..."
+ tenant | version | active | created_by |                                                                                         document                                                                                          
+--------+---------+--------+------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ acme   |       1 | t      | live-run   | {"allowed_kbs": ["legal"], "allowed_tools": "*", "blocked_terms": [], "allowed_models": "*", "max_tool_calls": 5, "max_query_length": 1000, "max_tokens_per_request": 100000}
+ globex |       1 | t      | live-run   | {"allowed_kbs": "*", "allowed_tools": "*", "blocked_terms": [], "allowed_models": ["some/other-model"], "max_tool_calls": 50, "max_query_length": 1000, "max_tokens_per_request": 100000}
+(2 rows)
+
+
+$ psql -c "SELECT ... FROM gateway_decisions ORDER BY created_at"   (input_hash shown in full; length column = char_length)
+ tenant |    action    |           resource           | outcome |   stage    |      reason       | pol_ver | hash_len |  input_hash_prefix  |   req    
+--------+--------------+------------------------------+---------+------------+-------------------+---------+----------+---------------------+----------
+ acme   | kb.write     | legal                        | allow   | allow      | allowed           |       1 |          |                     | 76b7aeac
+ acme   | kb.read      | legal                        | allow   | allow      | allowed           |       1 |       64 | 4cb0965b700717a2... | 4ab3eb3c
+ acme   | model.invoke | gemini/gemini-3.5-flash-lite | allow   | allow      | allowed           |       1 |       64 | 4cb0965b700717a2... | 4ab3eb3c
+ acme   | kb.read      | kyc_aml                      | deny    | policy     | kb_not_allowed    |       1 |       64 | 4cb0965b700717a2... | 6a5ed797
+ globex | kb.read      | legal                        | allow   | allow      | allowed           |       1 |       64 | 4cb0965b700717a2... | 23bb0fff
+ globex | model.invoke | gemini/gemini-3.5-flash-lite | deny    | policy     | model_not_allowed |       1 |       64 | 4cb0965b700717a2... | 23bb0fff
+ acme   | kb.read      | legal                        | deny    | guardrails | query_blocked     |       1 |       64 | 97355fa9d3f7932d... | db3bac4f
+ acme   | kb.read      |                              | allow   | allow      | allowed           |       1 |          |                     | 516d9173
+(8 rows)
+
+
+$ psql -c "SELECT count(*) AS rows, count(*) FILTER (WHERE input_hash IS NOT NULL AND char_length(input_hash)=64) AS with_64char_hash, count(*) FILTER (WHERE input_hash IS NOT NULL AND char_length(input_hash)<>64) AS bad_hash FROM gateway_decisions"
+ rows | with_64char_hash | bad_hash 
+------+------------------+----------
+    8 |                6 |        0
+(1 row)
+
+
+$ sha256 of the exact query text sent in steps 2-4:
+4cb0965b700717a2ecad48ba44669bd3f91260852340c14acb292c1e4479301e
+(matches the input_hash of the search rows above: check)
+5 rows carry exactly that hash
+
+$ pg_dump --data-only --inserts -t gateway_decisions gap_live > dump.sql   (owner role)
+dump size: 3877 bytes, 8 INSERT rows
+$ grep -c "zebra-quartz-marker-7731" dump.sql
+0
+$ grep -ci "breach notification" dump.sql
+0
+$ grep -ci "ignore all previous" dump.sql
+0
+$ grep -c "reveal secrets" dump.sql
+0
+
+$ psql -c "SELECT count(*) FROM gateway_decisions WHERE gateway_decisions::text ILIKE %zebra-quartz%"
+ hits 
+------
+    0
+(1 row)
+
