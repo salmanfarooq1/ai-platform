@@ -1,0 +1,19 @@
+## 4. Rule → automated check
+| Rule | How it is enforced | Sprint |
+|---|---|---|
+| 1 | Test: a request with a spoofed `namespace` or tenant header gets 401/403. Lint: no route reads tenant from request input. | 003 |
+| 2 | Integration test: with tenant A set, queries return no rows from tenant B. Migration check: every table has `tenant_id` and a row-level security policy. | 003 |
+| 3 | Unit tests: each `enforce()` stage raising an exception results in deny. | 004 |
+| 4 | Import-lint: agent and tool modules cannot import provider or DB modules directly. Test: a tool outside the ExecutionBoundary is refused. | 004 |
+| 5 | Property test: the delegated boundary is always a subset of the parent's. | 004 |
+| 6 | Test: wipe Redis, and the service still answers correctly. Test: a raw file's hash matches its stored key. | 006 |
+| 7 | CI check: `alembic upgrade head` on an empty DB, then a schema diff against the models shows no drift. No `CREATE TABLE` outside `migrations/`. | 002 |
+| 8 | CI: the OpenAPI snapshot diff fails on breaking changes. Test: every public route is under `/v1`. | 002 |
+| 9 | Review checklist in the PR template. Contract tests for MCP (existing) and A2A (Phase 2). | 002 onward |
+| 10 | Test: every response carries a trace ID, and a receipt row exists for each `enforce()` call. | 002 (trace), 007 (receipt) |
+| 11 | Test: sending the same job or write twice with one idempotency key gives one effect. | 006 |
+| 12 | Import-lint: provider SDKs (`litellm`, `groq`, …) are imported only in `adapters/`. Test: vector rows have a non-null model and dimension. | 005 |
+| 13 | Test: kill the API process mid-job, and the job resumes in a worker with no state lost. | 006 |
+| 14 | Unit tests: a bad `MODE` or missing required settings fails at startup. Secret scanning in CI. | 000 (mode), 002 |
+| 15 | Branch protection: CI is required. The eval gate fails if retrieval or agent scores drop below baseline. | 002, 007 |
+

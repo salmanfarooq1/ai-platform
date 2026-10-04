@@ -1,0 +1,9 @@
+OK api/agent/graph.py
+OK api/main.py
+OK api/middleware/rate_limit.py
+OK api/routers/ingest.py
+OK api/services/llm.py
+OK config.py
+OK core/clients/embeddings.py
+OK core/database/schema.sql
+OK core/ingestion/lifecycle.py

@@ -1,0 +1,5 @@
+docs/adr/0001-modular-monolith.md 4 1
+docs/adr/0002-postgres-source-of-truth.md 4 1
+docs/adr/0003-tenancy-row-level-security.md 4 1
+docs/adr/0004-governance-outside-the-agent.md 4 1
+docs/adr/0005-ports-and-adapters.md 4 1
