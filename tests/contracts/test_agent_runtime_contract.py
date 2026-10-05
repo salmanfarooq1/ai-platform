@@ -1,11 +1,14 @@
 """One contract for every `AgentRuntime`: start, status, wait, stop (also during a tool call) and cleanup.
 
-Two runtimes pass it: the in-process one and the queued one (Sprint 007), where a run is a job that a worker
-executes (the worker is a real `Worker` on real Postgres). OpenShell (009) must pass it too. A runner stands in for
-the agent: it can finish at once, fail, or sit inside a tool call. A run's output is JSON, because the queued runtime
-stores it with the job.
+Three runtimes pass it: the in-process one, the queued one (Sprint 007), where a run is a job that a worker
+executes (the worker is a real `Worker` on real Postgres), and the OpenShell one (Sprint 009). The OpenShell runtime
+runs here against `FakeSandboxDriver` (tests/fake_sandbox.py), NOT a real sandbox: no sandbox can run in this
+container. The same suite is what a real driver must pass; `scripts/verify/openshell.sh` is where that is checked.
+A runner stands in for the agent: it can finish at once, fail, or sit inside a tool call. A run's output is JSON,
+because the queued runtime stores it with the job and the sandbox prints it.
 """
 import asyncio
+import json
 from uuid import UUID, uuid4
 
 import asyncpg
@@ -15,7 +18,9 @@ import pytest_asyncio
 
 from adapters.inprocess_runtime import InProcessAgentRuntime
 from adapters.job_runtime import JobAgentRuntime
-from ports import RunNotFound, RunSpec, RunState
+from adapters.openshell_runtime import OpenShellAgentRuntime, SandboxConfig
+from ports import EgressRule, RunNotFound, RunSpec, RunState, SandboxLimits
+from tests.fake_sandbox import FakeSandboxDriver, SandboxProcess
 from workers.handlers.agent_run import make_agent_run_handler
 from workers.loop import Worker
 
@@ -35,7 +40,7 @@ def controls():
     return Controls()
 
 
-@pytest_asyncio.fixture(params=["in-process", "job-queue"])
+@pytest_asyncio.fixture(params=["in-process", "job-queue", "openshell"])
 async def runtime(request, controls):
     async def runner(spec: RunSpec):
         mode = spec.input.get("mode", "quick")
@@ -54,6 +59,10 @@ async def runtime(request, controls):
     if request.param == "in-process":
         yield InProcessAgentRuntime(runner)
         return
+    if request.param == "openshell":
+        async for rt in _openshell_runtime(request, controls):
+            yield rt
+        return
     request.getfixturevalue("clean_state")  # truncates, so the tenant row is added after it
     owner = psycopg2.connect(request.getfixturevalue("database_url"))
     owner.autocommit = True
@@ -69,6 +78,42 @@ async def runtime(request, controls):
     finally:
         worker.stop()
         await asyncio.wait_for(task, 10)
+        await pool.close()
+
+
+async def _openshell_runtime(request, controls):
+    """The OpenShell runtime on real Postgres, with a fake sandbox whose program behaves like the runner above."""
+
+    async def program(proc: SandboxProcess) -> int:
+        payload = json.loads(proc.stdin)["input"]
+        mode = payload.get("mode", "quick")
+        if mode == "fail":
+            return 1
+        if mode == "tool":  # inside a tool call until it is released; a stop must reach it
+            controls.in_tool.set()
+            try:
+                await controls.release.wait()
+            except asyncio.CancelledError:
+                controls.tool_was_cancelled = True
+                raise
+        controls.finished.append(proc.env["EXECUTION_ID"])
+        proc.stdout("starting\n" + json.dumps({"result": {"answer": payload.get("question", ""), "execution_id": proc.env["EXECUTION_ID"]}}) + "\n")
+        return 0
+
+    request.getfixturevalue("clean_state")
+    owner = psycopg2.connect(request.getfixturevalue("database_url"))
+    owner.autocommit = True
+    with owner.cursor() as cur:
+        cur.execute("INSERT INTO tenants (id, slug, name) VALUES (%s, %s, 'Contract') ON CONFLICT DO NOTHING", (str(TENANT), f"rt-{str(TENANT)[:8]}"))
+    owner.close()
+    pool = await asyncpg.create_pool(dsn=request.getfixturevalue("app_database_url"), min_size=1, max_size=6, statement_cache_size=0)
+    config = SandboxConfig(
+        gateway_url="http://gateway.test:8000", egress=EgressRule("gateway.test", 8000),
+        limits=SandboxLimits("1", "512Mi", 30), work_dir="/sandbox/work", read_only=("/usr",), entry_source="pass",
+    )
+    try:
+        yield OpenShellAgentRuntime(FakeSandboxDriver(program), pool, config)
+    finally:
         await pool.close()
 
 
@@ -110,8 +155,10 @@ async def test_a_failing_run_is_a_failed_result_with_the_error_not_an_exception(
     handle = await runtime.start(spec(mode="fail"))
     result = await runtime.wait(handle.run_id)
     assert result.status.state is RunState.FAILED
-    # The in-process runtime keeps the text in memory. The queued one stores a code only (QA L2): text can hold secrets.
-    assert result.status.error == ("the agent crashed" if isinstance(runtime, InProcessAgentRuntime) else "agent_run_failed")
+    # The in-process runtime keeps the text in memory. The queued one and the OpenShell one store a code only (QA L2):
+    # text can hold secrets. OpenShell's code names the exit status of the sandboxed program.
+    expected = {InProcessAgentRuntime: "the agent crashed", OpenShellAgentRuntime: "sandbox_exit_1"}.get(type(runtime), "agent_run_failed")
+    assert result.status.error == expected
     assert result.output is None
 
 

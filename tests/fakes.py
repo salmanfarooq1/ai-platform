@@ -193,6 +193,21 @@ class FakeLLM:
         })
 
 
+class SandboxAnswerLLM(FakeLLM):
+    """Answers the sandbox agent's prompt (an answer from numbered passages, with a closing confidence line).
+    Every other prompt behaves as in `FakeLLM`."""
+
+    async def acompletion(self, *, model: str, messages: list[dict[str, Any]], **kwargs: Any) -> Any:
+        first = str(messages[0].get("content") or "")
+        if "numbered passages" not in first:
+            return await super().acompletion(model=model, messages=messages, **kwargs)
+        self.calls.append({"kind": "sandbox_answer", "model": model, "messages": messages, "kwargs": kwargs})
+        return litellm.ModelResponse(
+            model=model, usage={"prompt_tokens": 40, "completion_tokens": 9, "total_tokens": 49},
+            choices=[{"index": 0, "finish_reason": "stop", "message": {"role": "assistant", "content": "Notify within 72 hours [1].\nConfidence: 0.8"}}],
+        )
+
+
 class FakeChatModel:
     """What `FakeLLM.chat_model()` returns: LangChain messages in, an AIMessage out, via `FakeLLM.acompletion`."""
 

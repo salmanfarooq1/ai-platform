@@ -17,6 +17,7 @@ def test_the_adapters_really_hold_the_sdks():
     assert "langchain_litellm" in text["litellm_chat.py"]
     assert "import redis.asyncio" in text["redis_cache.py"]
     assert "import boto3" in text["s3_object_store.py"]
+    assert "import openshell" in text["openshell_driver.py"]  # the sandbox SDK (Sprint 009)
     assert "from core.database.tenant import DbPool" in text["pg_knowledge.py"]
 
 

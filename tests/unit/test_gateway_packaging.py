@@ -7,14 +7,15 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 def test_the_dockerfile_runtime_stage_copies_the_gateway_package():
     runtime = (ROOT / "Dockerfile").read_text().split("AS runtime", 1)[1]
     assert "COPY --from=builder /app/gateway gateway/" in runtime
-    for package in ("api", "core", "ports", "adapters", "workers"):  # ports and adapters: Sprint 006; workers: Sprint 007
+    # ports and adapters: Sprint 006; workers: Sprint 007; sandbox_agent: Sprint 009 (the runtime hands its source to a sandbox)
+    for package in ("api", "core", "ports", "adapters", "workers", "sandbox_agent"):
         assert f"COPY --from=builder /app/{package} {package}/" in runtime
 
 
 def test_ci_lints_and_typechecks_the_gateway_package():
-    assert "ruff check api core gateway ports adapters workers tests scripts/e2e" in (ROOT / ".github" / "workflows" / "tests.yml").read_text()
+    assert "ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e" in (ROOT / ".github" / "workflows" / "tests.yml").read_text()
     mypy_files = (ROOT / "pyproject.toml").read_text().split("[tool.mypy]", 1)[1].split("\n", 3)[2]
-    assert '"gateway"' in mypy_files and '"ports"' in mypy_files and '"adapters"' in mypy_files and '"workers"' in mypy_files
+    assert '"gateway"' in mypy_files and '"ports"' in mypy_files and '"adapters"' in mypy_files and '"workers"' in mypy_files and '"sandbox_agent"' in mypy_files
 
 
 def test_the_limits_module_uses_the_same_api_prefix_as_the_app():

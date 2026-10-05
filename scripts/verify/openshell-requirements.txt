@@ -1,0 +1,11 @@
+# The OpenShell Python SDK, pinned by hash, for scripts/verify/openshell.sh only. It is not a dependency of the platform:
+# the default image and `poetry install` never install it. Install with:
+#   poetry run pip install --no-deps --require-hashes -r scripts/verify/openshell-requirements.txt
+# The other packages the SDK needs (grpcio, protobuf, googleapis-common-protos, httpx) are already in the project's lock file.
+# openshell 0.1.2: Apache-2.0, PyPI py3-none-any wheel, uploaded 2026-09-28. The hash is the one PyPI publishes and the one in
+# the release's openshell-checksums-sha256.txt (v0.1.2).
+openshell==0.1.2 \
+    --hash=sha256:8c409da4f176d42418d92366fe201f47cceef2c0fa432bfbce2bf938649d59cf
+# cloudpickle 3.1.2: BSD-3-Clause, py3-none-any wheel. The SDK imports it at load time.
+cloudpickle==3.1.2 \
+    --hash=sha256:9acb47f6afd73f60dc1df93bb801b472f05ff42fa6c84167d25cb206be1fbf4a

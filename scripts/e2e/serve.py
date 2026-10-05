@@ -13,6 +13,10 @@ What it does, in order:
    in this script; the product code has no fake switch. On exit the throwaway database is dropped.
 
 5. Runs the eval gate once and records it in `eval_runs`, so the Trust page has a real history to show.
+6. Makes two sandboxed agent runs (Sprint 009) so the Agent runs page has sandbox events to show. They run through the real
+   `AGENT_RUNTIME=openshell` runtime, run tokens and gateway routes, but the sandbox is `FakeSandboxDriver`
+   (tests/fake_sandbox.py): no real sandbox runs here. One run finishes cleanly. In the other the sandbox refuses a
+   direct call to a model provider and a read outside the work directory. The serving app uses the default runtime.
 
 With `--preview` the app runs with MODE=public-preview and PREVIEW_PRINCIPAL_ID set to the seeded principal. That mode
 needs a receipt signing key, so a throwaway one is made in memory for the process (it is never written anywhere).
@@ -117,6 +121,61 @@ async def ingest_and_close_seed_key(app_dsn_owner: str, seeded: dict[str, str]) 
         revoke_key(conn, seeded["seed_prefix"])
 
 
+SANDBOX_QUESTION = "How long must customer records be kept?"
+SANDBOX_GATEWAY = "http://gateway.sandbox:8000"
+
+
+async def seed_sandbox_runs(owner_dsn: str, seeded: dict[str, str]) -> dict[str, str]:
+    """Two sandboxed runs by the seeded principal, made through a throwaway app. Returns their execution ids by name."""
+    import asyncpg
+    import httpx
+    from asgi_lifespan import LifespanManager
+
+    from api.main import create_app
+    from core.settings import get_settings
+    from tests.fake_sandbox import FakeSandboxDriver, SandboxProcess, blocking_gateway_caller, entry_program
+    from tests.fakes import FakeEmbeddings, SandboxAnswerLLM
+
+    settings = get_settings()
+    saved = (settings.agent_runtime, settings.sandbox_gateway_url)
+    settings.agent_runtime, settings.sandbox_gateway_url = "openshell", SANDBOX_GATEWAY
+    world: dict = {}
+    clean = entry_program(blocking_gateway_caller(lambda: world["client"], lambda: world["loop"]))
+
+    async def probing(proc: SandboxProcess) -> int:
+        """The agent runs as usual, and first the sandbox refuses a provider call and a read outside the work directory."""
+        for attempt in (lambda: proc.check_egress("api.openai.com", 443), lambda: proc.resolve_path("/var/lib/dpkg/status")):
+            try:
+                attempt()
+            except (ConnectionRefusedError, PermissionError):
+                pass
+        return await clean(proc)
+
+    driver = FakeSandboxDriver(clean)
+    llm = SandboxAnswerLLM(agent_namespace=ALLOWED_KB)
+    try:
+        app = create_app(adapter_overrides={"llm": llm, "chat": llm, "embeddings": FakeEmbeddings()}, embedded_workers=1, sandbox_driver=driver)
+        async with LifespanManager(app):
+            world["loop"] = asyncio.get_running_loop()
+            async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=SANDBOX_GATEWAY) as client:
+                world["client"] = client
+                headers = {"Authorization": f"Bearer {seeded['api_key']}"}
+                for program in (clean, probing):
+                    driver.program = program
+                    resp = await client.post("/v1/agent/query", json={"question": SANDBOX_QUESTION, "namespace": ALLOWED_KB}, headers=headers)
+                    resp.raise_for_status()
+    finally:
+        settings.agent_runtime, settings.sandbox_gateway_url = saved
+    owner = await asyncpg.connect(owner_dsn)
+    try:
+        ids = [str(r["execution_id"]) for r in await owner.fetch("SELECT execution_id FROM jobs WHERE kind = 'agent_run' ORDER BY created_at")]
+    finally:
+        await owner.close()
+    if len(ids) != 2:
+        raise RuntimeError(f"expected two sandboxed runs, found {len(ids)}")
+    return {"completed": ids[0], "blocked": ids[1]}
+
+
 def sweep_leftover_databases() -> None:
     """Drop `gap_e2e_*` databases a killed earlier run left behind.
 
@@ -184,6 +243,7 @@ def main() -> int:
         module.FEATURES["reranker_enabled"] = False
 
     asyncio.run(ingest_and_close_seed_key(owner_dsn, seeded))
+    sandbox_runs = asyncio.run(seed_sandbox_runs(owner_dsn, seeded))
     harness.clean_redis()
 
     args.state_dir.mkdir(parents=True, exist_ok=True)
@@ -191,6 +251,7 @@ def main() -> int:
         "api_key": seeded["api_key"], "writer_key": seeded["writer_key"], "principal_id": seeded["principal_id"], "tenant": TENANT_SLUG,
         "allowed_kb": ALLOWED_KB, "denied_kb": DENIED_KB, "preview": args.preview,
         "base_url": f"http://{args.host}:{args.port}",
+        "sandbox_runs": sandbox_runs,
     }
     state_file = args.state_dir / "state.json"
     state_file.write_text(json.dumps(state, indent=2))
