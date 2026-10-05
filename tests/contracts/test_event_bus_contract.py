@@ -1,20 +1,42 @@
-"""One contract for every `EventBus` adapter. The outbox (Sprint 007) and the Kafka adapter (010) must pass it too."""
+"""One contract for every `EventBus` adapter: in-process, a recording fake and the Postgres outbox (Sprint 007).
+The Kafka adapter (010) must pass it too."""
 from datetime import timezone
+from uuid import uuid4
 
+import asyncpg
+import psycopg2
 import pytest
+import pytest_asyncio
 
 from adapters.inprocess_events import InProcessEventBus
+from adapters.pg_outbox_events import OutboxEventBus
 from ports import CloudEvent
 from tests.fakes import FakeEventBus
 
+TENANT = str(uuid4())  # a real uuid: the outbox keys its rows by tenant
 
-@pytest.fixture(params=["in-process", "fake-recording"])
-def bus(request):
-    return {"in-process": InProcessEventBus, "fake-recording": FakeEventBus}[request.param]()
+
+@pytest_asyncio.fixture(params=["in-process", "fake-recording", "outbox"])
+async def bus(request):
+    if request.param != "outbox":
+        yield {"in-process": InProcessEventBus, "fake-recording": FakeEventBus}[request.param]()
+        return
+    owner_dsn = request.getfixturevalue("database_url")
+    request.getfixturevalue("clean_state")
+    conn = psycopg2.connect(owner_dsn)
+    conn.autocommit = True
+    with conn.cursor() as cur:
+        cur.execute("INSERT INTO tenants (id, slug, name) VALUES (%s, %s, %s)", (TENANT, f"contract-{TENANT[:8]}", "Contract"))
+    conn.close()
+    pool = await asyncpg.create_pool(dsn=request.getfixturevalue("app_database_url"), min_size=1, max_size=3, statement_cache_size=0)
+    try:
+        yield OutboxEventBus(pool)
+    finally:
+        await pool.close()
 
 
 def event(type="platform.test.thing.v1", **data):
-    return CloudEvent(type=type, source="/test", subject="s-1", tenantid="tenant-1", data=data or {"k": "v"})
+    return CloudEvent(type=type, source="/test", subject="s-1", tenantid=TENANT, data=data or {"k": "v"})
 
 
 async def test_a_subscriber_gets_the_events_of_its_type_only(bus):
@@ -89,7 +111,7 @@ def test_a_cloud_event_is_a_valid_cloudevents_1_0_envelope():
     body = ev.to_dict()
     assert body["specversion"] == "1.0"
     assert {"id", "source", "type", "time", "subject", "tenantid", "data", "datacontenttype"} <= set(body)
-    assert body["tenantid"] == "tenant-1" and body["data"] == {"decision_id": "d-1"}
+    assert body["tenantid"] == TENANT and body["data"] == {"decision_id": "d-1"}
     assert ev.time.tzinfo is not None and ev.time.utcoffset() == timezone.utc.utcoffset(None)
     assert event().id != event().id  # a fresh id per event
 

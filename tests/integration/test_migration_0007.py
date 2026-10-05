@@ -122,7 +122,7 @@ def test_0007_does_not_change_the_grants_of_the_app_role_on_the_tables(blank_db)
     harness.migrate(blank_db, "0006")
     before = _exec(blank_db, "SELECT table_name, privilege_type FROM information_schema.role_table_grants "
                              "WHERE grantee = 'gap_app' ORDER BY 1, 2")
-    harness.migrate(blank_db)
+    harness.migrate(blank_db, "0007")  # 0008 adds the job tables and their grants: this test is about 0007 only
     assert _exec(blank_db, "SELECT table_name, privilege_type FROM information_schema.role_table_grants "
                            "WHERE grantee = 'gap_app' ORDER BY 1, 2") == before
 

@@ -12,13 +12,19 @@ Run subsets with:
     poetry run pytest                 # everything
 """
 import ipaddress
+import os
 import socket
 from typing import Any
 
-import litellm
-import pytest
+# Workers in the tests poll and retry fast. Set before any module reads the settings (setdefault: a caller may override).
+os.environ.setdefault("JOB_POLL_INTERVAL_SECONDS", "0.05")
+os.environ.setdefault("JOB_BEAT_INTERVAL_SECONDS", "0.1")
+os.environ.setdefault("JOB_BACKOFF_BASE_SECONDS", "0.05")
 
-from tests.fakes import NetworkBlockedError, blocked
+import litellm  # noqa: E402
+import pytest  # noqa: E402
+
+from tests.fakes import NetworkBlockedError, blocked  # noqa: E402
 
 # Fixtures shared by the integration and e2e tiers.
 pytest_plugins = ["tests.db_fixtures"]

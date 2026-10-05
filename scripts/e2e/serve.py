@@ -38,6 +38,8 @@ DENIED_KB = "legal"
 DOCUMENT = b"# Retention rule\n\nCustomer records must be kept for seven years and then deleted.\n"
 POLICY = {"allowed_kbs": [ALLOWED_KB], "allowed_tools": "*", "allowed_models": "*"}
 KEY_SCOPES = ["audit:read", "query", "kb:read", "agent"]
+# A second key that may also write, for the test that uploads a document through the Library.
+WRITER_SCOPES = ["audit:read", "query", "kb:read", "kb:write", "agent"]
 
 
 def seed(owner_dsn: str) -> dict[str, str]:
@@ -50,9 +52,10 @@ def seed(owner_dsn: str) -> dict[str, str]:
         create_kb(conn, TENANT_SLUG, DENIED_KB, "Legal documents")
         principal_id = create_principal(conn, TENANT_SLUG, "user", "e2e-user")
         key = create_key(conn, principal_id, KEY_SCOPES)
-        seed_key = create_key(conn, principal_id, ["kb:write"])
+        seed_key = create_key(conn, principal_id, ["kb:write", "kb:read"])
+        writer_key = create_key(conn, principal_id, WRITER_SCOPES)
         set_policy(conn, TENANT_SLUG, POLICY, "e2e-seed")
-    return {"principal_id": str(principal_id), "api_key": key.token, "seed_token": seed_key.token, "seed_prefix": seed_key.prefix}
+    return {"principal_id": str(principal_id), "api_key": key.token, "writer_key": writer_key.token, "seed_token": seed_key.token, "seed_prefix": seed_key.prefix}
 
 
 def fake_adapters() -> dict:
@@ -70,16 +73,24 @@ async def ingest_and_close_seed_key(app_dsn_owner: str, seeded: dict[str, str]) 
     from api.main import create_app
     from core.identity.admin import admin_connection, revoke_key
 
-    app = create_app(adapter_overrides=fake_adapters())
+    # Ingestion is a job: this app runs one embedded worker, and the seed waits for the job to finish.
+    app = create_app(adapter_overrides=fake_adapters(), embedded_workers=1)
     async with LifespanManager(app):
         transport = httpx.ASGITransport(app=app)
+        headers = {"Authorization": f"Bearer {seeded['seed_token']}"}
         async with httpx.AsyncClient(transport=transport, base_url="http://seed") as client:
             resp = await client.post(
                 "/v1/ingest", params={"namespace": ALLOWED_KB},
-                files={"file": ("retention.md", DOCUMENT, "text/markdown")},
-                headers={"Authorization": f"Bearer {seeded['seed_token']}"},
+                files={"file": ("retention.md", DOCUMENT, "text/markdown")}, headers=headers,
             )
             resp.raise_for_status()
+            for _ in range(200):
+                job = (await client.get(f"/v1/jobs/{resp.json()['job_id']}", headers=headers)).json()
+                if job["status"] in ("succeeded", "failed", "dead"):
+                    break
+                await asyncio.sleep(0.1)
+            if job["status"] != "succeeded":
+                raise RuntimeError(f"the seed document was not ingested: {job['status']} {job['error_code']}")
     with admin_connection(app_dsn_owner) as conn:
         revoke_key(conn, seeded["seed_prefix"])
 
@@ -125,6 +136,8 @@ def main() -> int:
     os.environ["MIGRATION_DATABASE_URL"] = owner_dsn
     os.environ["REDIS_URL"] = harness.REDIS_URL
     os.environ["MODE"] = "public-preview" if args.preview else "local"
+    # Raw uploads go under the state directory (gitignored), never into the repository's data/objects.
+    os.environ["OBJECT_STORE_DIR"] = str(args.state_dir / "objects")
     os.environ.pop("JWT_SECRET", None)
     os.environ.pop("JWT_JWKS_URL", None)
     seeded = seed(owner_dsn)
@@ -150,7 +163,7 @@ def main() -> int:
 
     args.state_dir.mkdir(parents=True, exist_ok=True)
     state = {
-        "api_key": seeded["api_key"], "principal_id": seeded["principal_id"], "tenant": TENANT_SLUG,
+        "api_key": seeded["api_key"], "writer_key": seeded["writer_key"], "principal_id": seeded["principal_id"], "tenant": TENANT_SLUG,
         "allowed_kb": ALLOWED_KB, "denied_kb": DENIED_KB, "preview": args.preview,
         "base_url": f"http://{args.host}:{args.port}",
     }
@@ -162,7 +175,8 @@ def main() -> int:
 
     from api.main import create_app
 
-    uvicorn.run(create_app(adapter_overrides=fake_adapters()), host=args.host, port=args.port, log_level="warning")
+    # One embedded worker and the outbox relay run in this process, on the same fakes (the product has no fake switch).
+    uvicorn.run(create_app(adapter_overrides=fake_adapters(), embedded_workers=1, embedded_relay=True), host=args.host, port=args.port, log_level="warning")
     return 0
 
 

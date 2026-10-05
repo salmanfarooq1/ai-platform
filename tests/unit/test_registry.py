@@ -3,11 +3,13 @@ import pytest
 
 from adapters.inprocess_events import InProcessEventBus
 from adapters.inprocess_runtime import InProcessAgentRuntime
+from adapters.job_runtime import JobAgentRuntime
 from adapters.litellm_chat import LitellmChat
 from adapters.litellm_embeddings import LitellmEmbeddings
 from adapters.litellm_llm import LitellmLLM
 from adapters.local_object_store import LocalObjectStore
 from adapters.pg_knowledge import PgKnowledgeStore
+from adapters.pg_outbox_events import OutboxEventBus
 from adapters.redis_cache import RedisCache
 from adapters.registry import PORT_NAMES, build_adapters
 from adapters.s3_object_store import S3ObjectStore
@@ -23,6 +25,9 @@ def settings(**env):
 
 def test_the_default_bundle_has_the_real_adapter_for_every_port(tmp_path):
     adapters = build_adapters(settings(object_store_dir=str(tmp_path)), pool=object())
+    # Since Sprint 007 the durable adapters are the default: the outbox bus and the queued runtime.
+    assert isinstance(adapters.events, OutboxEventBus) and isinstance(adapters.runtime, JobAgentRuntime)
+    adapters = build_adapters(settings(object_store_dir=str(tmp_path), event_bus="inprocess", agent_runtime="inprocess"), pool=object())
     assert isinstance(adapters.llm, LitellmLLM) and isinstance(adapters.chat, LitellmChat)
     assert isinstance(adapters.embeddings, LitellmEmbeddings) and isinstance(adapters.knowledge, PgKnowledgeStore)
     assert isinstance(adapters.cache, RedisCache) and isinstance(adapters.objects, LocalObjectStore)
@@ -38,9 +43,10 @@ def test_the_providers_come_from_settings_not_from_the_call_sites():
 def test_an_override_replaces_one_port_and_the_real_one_is_never_built():
     fake_llm, store, cache = FakeLLM(), FakeKnowledgeStore(), FakeCache()
     adapters = build_adapters(settings(), overrides={"llm": fake_llm, "chat": fake_llm, "knowledge": store, "cache": cache,
-                                                      "embeddings": FakeEmbeddings()})  # no pool needed: knowledge is faked
+                                                      "embeddings": FakeEmbeddings(), "events": InProcessEventBus(),
+                                                      "runtime": InProcessAgentRuntime()})  # no pool needed: all faked
     assert adapters.llm is fake_llm and adapters.chat is fake_llm and adapters.knowledge is store and adapters.cache is cache
-    assert isinstance(adapters.events, InProcessEventBus)  # the rest stay real
+    assert isinstance(adapters.objects, LocalObjectStore)  # the rest stay real
 
 
 def test_the_postgres_knowledge_store_needs_a_pool():

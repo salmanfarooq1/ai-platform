@@ -21,7 +21,7 @@ GUARDED_FILES = [
 ]
 
 # Ports rule: where each banned module may be imported. Everything else is a violation.
-PORTS_ROOTS = ("api", "core", "gateway", "ports")  # directories of shipped code outside adapters/
+PORTS_ROOTS = ("api", "core", "gateway", "ports", "workers")  # directories of shipped code outside adapters/
 SDK_ONLY_IN_ADAPTERS = ("litellm", "langchain_litellm", "boto3", "botocore", "aioboto3", "aiobotocore", "redis")
 ASYNCPG_ALLOWED = ("adapters/", "core/database/", "core/identity/store.py")
 

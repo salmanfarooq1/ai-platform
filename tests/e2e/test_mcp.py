@@ -7,6 +7,7 @@ from api.mcp.context import current_principal
 from api.mcp.server import mcp
 from core.identity.models import Principal
 from tests.e2e.conftest import eventually
+from tests.jobs_helpers import post_ingest
 
 EXPECTED_TOOLS = {"list_namespaces", "search_documents", "multi_namespace_search", "get_ingestion_status", "get_cost_summary"}
 
@@ -17,7 +18,7 @@ async def test_in_process_server_lists_the_tools(app):
 
 
 async def test_in_process_tool_reads_the_real_database(client, app, tenant_a, fake_llm, fake_embeddings):
-    await client.post("/v1/ingest", params={"namespace": "legal"},
+    await post_ingest(client, params={"namespace": "legal"},
                       files={"file": ("gdpr.md", b"# GDPR\n\nBreach notification within 72 hours.\n", "text/markdown")})
 
     # The session's principal is what SseApp binds from the verified credential.

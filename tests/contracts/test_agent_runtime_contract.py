@@ -1,15 +1,23 @@
 """One contract for every `AgentRuntime`: start, status, wait, stop (also during a tool call) and cleanup.
 
-The in-process adapter is the only runtime until the workers (Sprint 007) and OpenShell (009); both must pass this
-suite when they arrive. A runner stands in for the agent: it can finish at once, fail, or sit inside a tool call.
+Two runtimes pass it: the in-process one and the queued one (Sprint 007), where a run is a job that a worker
+executes (the worker is a real `Worker` on real Postgres). OpenShell (009) must pass it too. A runner stands in for
+the agent: it can finish at once, fail, or sit inside a tool call. A run's output is JSON, because the queued runtime
+stores it with the job.
 """
 import asyncio
 from uuid import UUID, uuid4
 
+import asyncpg
+import psycopg2
 import pytest
+import pytest_asyncio
 
 from adapters.inprocess_runtime import InProcessAgentRuntime
+from adapters.job_runtime import JobAgentRuntime
 from ports import RunNotFound, RunSpec, RunState
+from workers.handlers.agent_run import make_agent_run_handler
+from workers.loop import Worker
 
 TENANT = uuid4()
 
@@ -27,8 +35,8 @@ def controls():
     return Controls()
 
 
-@pytest.fixture
-def runtime(controls):
+@pytest_asyncio.fixture(params=["in-process", "job-queue"])
+async def runtime(request, controls):
     async def runner(spec: RunSpec):
         mode = spec.input.get("mode", "quick")
         if mode == "fail":
@@ -41,9 +49,27 @@ def runtime(controls):
                 controls.tool_was_cancelled = True
                 raise
         controls.finished.append(spec.execution_id)
-        return {"answer": spec.input.get("question", ""), "execution_id": spec.execution_id}
+        return {"answer": spec.input.get("question", ""), "execution_id": str(spec.execution_id)}
 
-    return InProcessAgentRuntime(runner)
+    if request.param == "in-process":
+        yield InProcessAgentRuntime(runner)
+        return
+    request.getfixturevalue("clean_state")  # truncates, so the tenant row is added after it
+    owner = psycopg2.connect(request.getfixturevalue("database_url"))
+    owner.autocommit = True
+    with owner.cursor() as cur:
+        cur.execute("INSERT INTO tenants (id, slug, name) VALUES (%s, %s, 'Contract') ON CONFLICT DO NOTHING", (str(TENANT), f"rt-{str(TENANT)[:8]}"))
+    owner.close()
+    pool = await asyncpg.create_pool(dsn=request.getfixturevalue("app_database_url"), min_size=1, max_size=6, statement_cache_size=0)
+    handler = make_agent_run_handler(InProcessAgentRuntime(runner), None)  # type: ignore[arg-type]
+    worker = Worker(pool, {"agent_run": handler}, name="contract", poll_interval=0.02, beat_interval=0.05, shutdown_grace=1.0)
+    task = asyncio.create_task(worker.run(4))
+    try:
+        yield JobAgentRuntime(pool, poll_interval=0.02, stop_wait_seconds=5.0)
+    finally:
+        worker.stop()
+        await asyncio.wait_for(task, 10)
+        await pool.close()
 
 
 def spec(**input):
@@ -55,7 +81,7 @@ async def test_a_run_starts_with_an_execution_id_and_finishes_with_its_output(ru
     assert isinstance(handle.execution_id, UUID) and handle.run_id
     result = await runtime.wait(handle.run_id)
     assert result.status.state is RunState.SUCCEEDED and result.status.error is None
-    assert result.output == {"answer": "what is the deadline?", "execution_id": handle.execution_id}
+    assert result.output == {"answer": "what is the deadline?", "execution_id": str(handle.execution_id)}
     assert (result.status.run_id, result.status.execution_id) == (handle.run_id, handle.execution_id)
     assert (result.status.tenant_id, result.status.kind) == (TENANT, "agent.query")
     assert result.status.finished_at is not None and result.status.finished_at >= result.status.started_at
@@ -83,7 +109,9 @@ async def test_status_is_running_until_the_run_ends(runtime, controls):
 async def test_a_failing_run_is_a_failed_result_with_the_error_not_an_exception(runtime):
     handle = await runtime.start(spec(mode="fail"))
     result = await runtime.wait(handle.run_id)
-    assert result.status.state is RunState.FAILED and result.status.error == "the agent crashed"
+    assert result.status.state is RunState.FAILED
+    # The in-process runtime keeps the text in memory. The queued one stores a code only (QA L2): text can hold secrets.
+    assert result.status.error == ("the agent crashed" if isinstance(runtime, InProcessAgentRuntime) else "agent_run_failed")
     assert result.output is None
 
 

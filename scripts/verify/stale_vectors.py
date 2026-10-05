@@ -13,6 +13,7 @@ Exit code 0 only if every expectation held. Drops the database at the end.
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -36,10 +37,24 @@ def check(label: str, ok: bool, detail: str = "") -> None:
         failures.append(label)
 
 
+def wait_for_job(job_id: str) -> dict:
+    """Poll the job until a worker has finished it (ingestion answers 202 and a worker does the work)."""
+    for _ in range(200):
+        job = httpx.get(f"{BASE}/v1/jobs/{job_id}", headers=HEADERS, timeout=10).json()
+        if job["status"] in ("succeeded", "failed", "dead"):
+            return job
+        time.sleep(0.1)
+    raise SystemExit("the ingest job did not finish")
+
+
+HEADERS: dict[str, str] = {}
+
+
 def start_server(owner_dsn: str, embed_model: str) -> subprocess.Popen:
     env = {
         **os.environ, "MODE": "local", "DATABASE_URL": harness.app_url(owner_dsn), "MIGRATION_DATABASE_URL": owner_dsn,
         "REDIS_URL": harness.REDIS_URL, "EMBED_MODEL": embed_model, "LOG_LEVEL": "WARNING",
+        "OBJECT_STORE_DIR": os.path.join(tempfile.gettempdir(), "gap-stale-objects"),
     }
     proc = subprocess.Popen([sys.executable, str(ROOT / "scripts" / "verify" / "serve_fakes.py"), "--port", str(PORT)], env=env, cwd=ROOT)
     for _ in range(120):
@@ -72,14 +87,17 @@ def main() -> int:
         principal = create_principal(conn, "live", "service", "live-service")
         token = create_key(conn, principal, ["kb:read", "kb:write", "query"]).token
     headers = {"Authorization": f"Bearer {token}"}
+    HEADERS.update(headers)
     try:
         print("phase 1: EMBED_MODEL=fake/model-a")
         server = start_server(owner_dsn, "fake/model-a")
         try:
-            ingested = httpx.post(f"{BASE}/v1/ingest", params={"namespace": "legal"}, headers=headers,
-                                  files={"file": ("gdpr.md", DOC, "text/markdown")}, timeout=30).json()
-            chunks = ingested["total_chunks"]
-            print(f"  ingested gdpr.md: {chunks} chunk(s), status {ingested['status']}")
+            accepted = httpx.post(f"{BASE}/v1/ingest", params={"namespace": "legal"}, headers=headers,
+                                  files={"file": ("gdpr.md", DOC, "text/markdown")}, timeout=30)
+            job = wait_for_job(accepted.json()["job_id"])
+            chunks = job["progress"]["total"]
+            print(f"  ingest answered {accepted.status_code}; job {job['status']}: {chunks} chunk(s)")
+            check("the ingest job succeeded", job["status"] == "succeeded", str(job["error_code"]))
             found = httpx.post(f"{BASE}/v1/search", json=QUERY, headers=headers, timeout=30)
             check("search finds the chunk", found.status_code == 200 and "72 hours" in found.json()["answer"],
                   f"HTTP {found.status_code}, cited {[r['document_id'] for r in found.json().get('results', [])]}")

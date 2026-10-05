@@ -114,7 +114,7 @@ def truncate_tables(dsn: str) -> None:
     conn.autocommit = True
     with conn.cursor() as cur:
         cur.execute("TRUNCATE documents, document_registry, usage_log, feedback, api_keys, principals, "
-            "knowledge_bases, policies, gateway_decisions, tenants RESTART IDENTITY")
+            "knowledge_bases, policies, gateway_decisions, jobs, outbox, processed_events, tenants RESTART IDENTITY")
     conn.close()
 
 

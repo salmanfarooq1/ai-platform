@@ -18,6 +18,7 @@ from ports import DECISION_RECORDED, RunState
 from tests.e2e.conftest import adapter_overrides, eventually
 from tests.e2e.test_search_flow import QUERY, ingest
 from tests.fakes import FakeEmbeddings, FakeLLM, fake_embedding
+from tests.jobs_helpers import post_ingest
 
 AGENT = {"question": "breach notification supervisory authority 72 hours", "namespace": "legal"}
 OTHER_MODEL = "test/other-embedding-model"
@@ -25,8 +26,12 @@ OTHER_MODEL = "test/other-embedding-model"
 
 async def second_app(request, tenant, **extra):
     """A second app on the same database and Redis, as after a restart with another EMBED_MODEL."""
+    # The first app "goes away" (its worker stops), so only this app's worker, with these adapters, runs the jobs.
+    first = request.getfixturevalue("app")
+    if first.state.embedded is not None:
+        await first.state.embedded.stop()
     overrides = {**adapter_overrides(request), **extra}
-    application = create_app(adapter_overrides=overrides)
+    application = create_app(adapter_overrides=overrides, embedded_workers=1)
     manager = LifespanManager(application)
     await manager.__aenter__()
     transport = httpx.ASGITransport(app=application, raise_app_exceptions=False)
@@ -74,7 +79,7 @@ async def test_changing_the_embedding_model_makes_old_chunks_stale_not_wrong(
         assert await pool.fetchval("SELECT count(*) FROM documents") == chunks
 
         # re-ingesting under the new model (the document is unchanged, so replace it) makes it searchable again
-        await client2.post("/v1/ingest", params={"namespace": "legal"}, files={"file": (
+        await post_ingest(client2, params={"namespace": "legal"}, files={"file": (
             "gdpr2.md", b"# GDPR\n\nBreach notification supervisory authority within 72 hours.\n", "text/markdown")})
         found = await client2.post("/v1/search", json=QUERY)
         assert found.status_code == 200 and found.json()["results"][0]["document_id"] == "gdpr2.md"
@@ -278,14 +283,20 @@ async def test_a_run_that_crashes_is_a_500_with_the_standard_error_and_a_failed_
     fake_llm.use(Crashing())
     resp = await client.post("/v1/agent/query", json=AGENT)
     assert resp.status_code == 500
-    assert resp.json()["error"]["message"] == "Agent execution failed: model exploded"
+    # QA L2: the caller gets no exception text. The cause is in the worker's log and the run has a code.
+    assert resp.json()["error"]["message"] == "Agent execution failed" and "model exploded" not in resp.text
     [execution_id] = {r["execution_id"] for r in await pool.fetch(
         "SELECT execution_id FROM gateway_decisions WHERE execution_id IS NOT NULL")}
     status = await app.state.adapters.runtime.status(str(execution_id))
-    assert status.state is RunState.FAILED and status.error == "model exploded"
+    assert status.state is RunState.FAILED and status.error == "agent_run_failed"
+    assert await pool.fetchval("SELECT error_detail FROM jobs WHERE execution_id = $1", execution_id) is None  # no text stored
 
 
-async def test_a_client_that_disconnects_mid_run_stops_the_run(app, client, tenant_a, fake_llm, fake_embeddings):
+async def _terminal(runtime, execution_id):
+    return (await runtime.status(str(execution_id))).state.terminal
+
+
+async def test_a_client_that_disconnects_mid_run_stops_the_run(app, client, pool, tenant_a, fake_llm, fake_embeddings):
     """Cancelling the request cancels the run, including the model call it is inside (cleanup stops it)."""
     started, cancelled = asyncio.Event(), asyncio.Event()
 
@@ -306,8 +317,9 @@ async def test_a_client_that_disconnects_mid_run_stops_the_run(app, client, tena
         await task
     await asyncio.wait_for(cancelled.wait(), 5)  # the model call inside the run was cancelled, not left running
     runtime = app.state.adapters.runtime
-    await eventually(lambda: all(e.status.state.terminal for e in runtime._runs.values()))
-    assert [e.status.state for e in runtime._runs.values()] == [RunState.STOPPED]
+    [execution_id] = [r["execution_id"] for r in await pool.fetch("SELECT execution_id FROM jobs")]  # one run, one job
+    await eventually(lambda: _terminal(runtime, execution_id))
+    assert (await runtime.status(str(execution_id))).state is RunState.STOPPED
 
 
 async def test_stopping_a_real_agent_run_during_a_tool_call_cancels_the_tool(app, tenant_a, fake_llm, fake_embeddings):

@@ -3,6 +3,7 @@ import re
 from datetime import datetime, timezone
 
 from tests.e2e.conftest import eventually
+from tests.jobs_helpers import post_ingest
 
 GDPR = b"# GDPR breach notification\n\nA personal data breach must be notified to the supervisory authority within 72 hours.\n"
 GDPR_V2 = b"# GDPR breach notification\n\nA personal data breach must be notified to the supervisory authority within 48 hours.\n"
@@ -10,8 +11,8 @@ QUERY = {"query": "breach notification supervisory authority 72 hours", "namespa
 
 
 async def ingest(client, content=GDPR, name="gdpr.md", namespace="legal"):
-    return await client.post("/v1/ingest", params={"namespace": namespace},
-                             files={"file": (name, content, "text/markdown")})
+    # Ingestion answers 202 and a worker does the work: wait for the job, then answer as the route once did.
+    return await post_ingest(client, params={"namespace": namespace}, files={"file": (name, content, "text/markdown")})
 
 
 async def test_ingest_search_documents_feedback_analytics(client, pool, fake_llm, fake_embeddings):

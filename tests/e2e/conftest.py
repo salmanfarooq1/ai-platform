@@ -42,6 +42,9 @@ def platform_config(monkeypatch, app_database_url, clean_state):
     return app_database_url
 
 
+WORKERS = 1
+
+
 def adapter_overrides(request) -> dict[str, Any]:
     """The adapters the test app is built with (through `adapters/registry.py`).
 
@@ -49,10 +52,15 @@ def adapter_overrides(request) -> dict[str, Any]:
     ports get the fakes the test asked for (`fake_llm`, `fake_embeddings`). A test that asks for none keeps the
     real LiteLLM adapters, which the network guard blocks: that is what the network-guard tests rely on.
     """
+    from adapters.local_object_store import LocalObjectStore
     from adapters.redis_cache import RedisCache
     from config import EMBEDDING_DIM
 
-    overrides: dict[str, Any] = {"cache": RedisCache(harness.REDIS_URL, EMBEDDING_DIM)}
+    # Raw uploads go to a throwaway directory (Sprint 007), never into the repository's data/objects.
+    overrides: dict[str, Any] = {
+        "cache": RedisCache(harness.REDIS_URL, EMBEDDING_DIM),
+        "objects": LocalObjectStore(request.getfixturevalue("tmp_path")),
+    }
     if "fake_llm" in request.fixturenames:
         llm = request.getfixturevalue("fake_llm")
         overrides.update(llm=llm, chat=llm)
@@ -65,8 +73,11 @@ def adapter_overrides(request) -> dict[str, Any]:
 async def app(platform_config, request):
     """A fresh app instance with its real lifespan started."""
     from api.main import create_app
+    from tests import jobs_helpers
 
-    application = create_app(adapter_overrides=adapter_overrides(request))
+    jobs_helpers.OWNER["dsn"] = request.getfixturevalue("database_url")  # to read what ingest jobs did
+    # One embedded worker runs the jobs (ingestion, agent runs) in this process, on the app's own ports.
+    application = create_app(adapter_overrides=adapter_overrides(request), embedded_workers=WORKERS)
     async with LifespanManager(application):
         yield application
 

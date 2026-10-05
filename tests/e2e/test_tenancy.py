@@ -16,6 +16,7 @@ from core.identity.models import Principal
 from tests.e2e.conftest import eventually
 from tests.e2e.test_mcp import SseProbe
 from tests.e2e.test_search_flow import GDPR, GDPR_V2, QUERY, ingest
+from tests.jobs_helpers import post_ingest
 
 NEAR_QUERY = {**QUERY, "query": QUERY["query"] + " please"}
 WHATEVER = {"query": "anything about retention", "namespace": "legal", "rerank": False}
@@ -254,7 +255,7 @@ async def test_spoofing_the_tenant_in_the_header_or_query_changes_nothing(client
     # B writes while claiming to be A: the rows land under B.
     kwargs = spoof(tenant_a.id)
     kwargs["params"] = {**kwargs.get("params", {}), "namespace": "legal"}
-    assert (await client_b.post("/v1/ingest", files={"file": ("b.md", GDPR_V2, "text/markdown")}, **kwargs)).status_code == 200
+    assert (await post_ingest(client_b, files={"file": ("b.md", GDPR_V2, "text/markdown")}, **kwargs)).status_code == 200
     owners = {str(r["tenant_id"]) for r in await pool.fetch("SELECT tenant_id FROM documents WHERE document_id = 'b.md'")}
     assert owners == {tenant_b.id}
     # and A is unharmed
@@ -268,7 +269,7 @@ async def test_spoofing_the_tenant_in_a_json_body_or_form_field_changes_nothing(
     error_of(resp, 404, "not_found")
     assert "72 hours" not in resp.text
     # extra multipart field on ingest
-    resp = await client_b.post("/v1/ingest", params={"namespace": "legal"},
+    resp = await post_ingest(client_b, params={"namespace": "legal"},
                                files={"file": ("sneaky.md", GDPR_V2, "text/markdown")}, data={"tenant_id": tenant_a.id})
     assert resp.status_code == 200
     owners = {str(r["tenant_id"]) for r in await pool.fetch("SELECT tenant_id FROM documents WHERE document_id = 'sneaky.md'")}
@@ -703,7 +704,9 @@ async def test_an_mcp_session_enforces_tool_scopes_end_to_end(app, make_client, 
 
 
 async def test_ingest_failures_do_not_leak_exception_text(client, app, monkeypatch, json_logs, fake_embeddings):
-    import api.routers.ingest as ingest_module
+    """Ingestion runs in a worker now (Sprint 007): a failure is a job with a stable error code. The exception text
+    never reaches the job, its API or the answers the caller sees; it stays in the log."""
+    import workers.handlers.ingest as ingest_module
 
     async def unsupported(**kwargs):
         raise ValueError("cannot parse /tmp/secret-path/tmpab12cd.pdf: internal parser detail")
@@ -711,14 +714,18 @@ async def test_ingest_failures_do_not_leak_exception_text(client, app, monkeypat
     async def crash(**kwargs):
         raise RuntimeError("password=hunter2 host=db.internal")
 
-    for failing, status, code, message in ((unsupported, 415, "unsupported_media_type", "Unsupported or unreadable file"),
-                                           (crash, 500, "http_500", "Ingestion failed")):
+    # (failing pipeline, the job's final status, its error code, the code the old route answered)
+    for failing, final_status, code, http in ((unsupported, "failed", "unsupported_file", 415), (crash, "dead", "internal_error", 500)):
         monkeypatch.setattr(ingest_module, "ingestion_pipeline", failing)
-        resp = await ingest(client, name=f"{status}.md")
-        assert resp.status_code == status
-        err = resp.json()["error"]
-        assert err["message"] == message and err["request_id"] == resp.headers["X-Request-ID"]
-        assert "secret-path" not in resp.text and "hunter2" not in resp.text and "parser detail" not in resp.text
+        resp = await ingest(client, name=f"{http}.md")
+        assert resp.accepted.status_code == 202  # the route itself accepts the file; the failure is the job's
+        assert resp.status_code == http  # the helper's mapping of the job's outcome to the old answer
+        assert resp.headers["X-Request-ID"] == resp.json()["error"]["request_id"]
+        job = (await client.get(f"/v1/jobs/{resp.accepted.json()['job_id']}")).json()
+        assert (job["status"], job["error_code"]) == (final_status, code)  # what the route's API says, not the helper
+        assert {"failed": 415, "dead": 500}[job["status"]] == http
+        for surface in (resp.text, json.dumps(job)):
+            assert "secret-path" not in surface and "hunter2" not in surface and "parser detail" not in surface
     logged = json.dumps(json_logs())  # the detail is in the log instead
     assert "secret-path" in logged and "hunter2" in logged
 

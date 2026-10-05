@@ -167,7 +167,7 @@ async def test_request_log_line_is_json_with_both_ids(client, json_logs):
 async def test_logs_written_inside_the_request_carry_its_ids(client, json_logs, fake_embeddings):
     resp = await client.post("/v1/ingest", params={"namespace": "legal"},
                              files={"file": ("a.md", b"# A\n\nsome text\n", "text/markdown")})
-    assert resp.status_code == 200
+    assert resp.status_code == 202
 
     inner = [line for line in json_logs() if line["logger"] == "api.finops"]
     assert inner, "FinOps logs while the request is still being processed"

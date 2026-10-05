@@ -26,7 +26,7 @@ def main() -> int:
 
     llm = FakeLLM()
     uvicorn.run(
-        create_app(adapter_overrides={"llm": llm, "chat": llm, "embeddings": FakeEmbeddings()}),
+        create_app(adapter_overrides={"llm": llm, "chat": llm, "embeddings": FakeEmbeddings()}, embedded_workers=1),  # one worker runs the ingest jobs
         host="127.0.0.1", port=args.port, log_level="warning",
     )
     return 0
