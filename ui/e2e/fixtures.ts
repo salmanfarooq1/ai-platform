@@ -7,6 +7,8 @@ const HERE = path.dirname(fileURLToPath(import.meta.url))
 
 export interface E2EState {
   api_key: string
+  /** A key that may also write (kb:write), for the upload test. */
+  writer_key: string
   principal_id: string
   tenant: string
   allowed_kb: string

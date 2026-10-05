@@ -45,7 +45,7 @@ export function UploadDialog({ open, onOpenChange, kb, onDone }: UploadDialogPro
           ) : null}
           {m.data ? (
             <p role="status" className="text-callout text-allow">
-              Added {m.data.document_id} as {m.data.total_chunks} passages ({m.data.status}).
+              Queued: {file?.name ?? 'the file'} is stored and will be ingested. Close this and watch its status in the table.
             </p>
           ) : null}
           <div className="flex justify-end gap-2">

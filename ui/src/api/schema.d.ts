@@ -38,6 +38,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/agent/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Runs
+         * @description The tenant's agent runs, newest first, with a keyset cursor.
+         */
+        get: operations["list_runs_v1_agent_runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/agent/runs/{execution_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Run
+         * @description One run: its status, and its answer once it succeeded. It reads the job, so it also works after a restart.
+         */
+        get: operations["get_run_v1_agent_runs__execution_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/analytics/summary": {
         parameters: {
             query?: never;
@@ -204,8 +244,54 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ingest */
+        /**
+         * Ingest
+         * @description Accept a file for ingestion and return at once with the job that will ingest it (`GET /v1/jobs/{id}`).
+         *
+         *     The raw bytes are stored under their SHA-256 before anything is parsed. The same `Idempotency-Key` (per tenant)
+         *     returns the same job with 200 instead of creating a second one.
+         */
         post: operations["ingest_v1_ingest_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Jobs
+         * @description The tenant's jobs, newest first, with a keyset cursor. Filter by `kind` and `status`.
+         */
+        get: operations["list_jobs_v1_jobs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Job
+         * @description One job of the caller's tenant: its status, attempts and progress.
+         */
+        get: operations["get_job_v1_jobs__job_id__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -473,6 +559,22 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * AgentAccepted
+         * @description `202` from `/v1/agent/query` when the run takes longer than the sync wait. Poll `decisions_url`'s run.
+         */
+        AgentAccepted: {
+            /**
+             * Execution Id
+             * Format: uuid
+             */
+            execution_id: string;
+            /**
+             * Job Id
+             * Format: uuid
+             */
+            job_id: string;
+        };
+        /**
          * AgentCitation
          * @description Mirrors schemas.py Citation exactly.
          */
@@ -566,6 +668,45 @@ export interface components {
             verification_notes: string;
             /** Verified */
             verified?: boolean | null;
+        };
+        /** AgentRun */
+        AgentRun: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Decisions Url */
+            decisions_url: string;
+            /** Error Code */
+            error_code?: string | null;
+            /**
+             * Execution Id
+             * Format: uuid
+             */
+            execution_id: string;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Job Id
+             * Format: uuid
+             */
+            job_id: string;
+            result: components["schemas"]["AgentResponse"] | null;
+            /** Started At */
+            started_at: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "succeeded" | "failed" | "stopped";
+        };
+        /** AgentRunPage */
+        AgentRunPage: {
+            /** Items */
+            items: components["schemas"]["AgentRun"][];
+            /** Next Cursor */
+            next_cursor: string | null;
         };
         /** Body_ingest_v1_ingest_post */
         Body_ingest_v1_ingest_post: {
@@ -728,30 +869,76 @@ export interface components {
             /** Version */
             version: string;
         };
-        /** IngestResponse */
-        IngestResponse: {
+        /** Job */
+        Job: {
+            /** Attempts */
+            attempts: number;
             /**
-             * Chunks Deleted
-             * @default 0
+             * Created At
+             * Format: date-time
              */
-            chunks_deleted: number;
-            /** Content Hash */
-            content_hash?: string | null;
-            /** Document Id */
-            document_id: string;
-            /** Namespace */
-            namespace: string;
+            created_at: string;
+            /** Error Code */
+            error_code: string | null;
+            /** Execution Id */
+            execution_id: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "ingest" | "agent_run";
+            /** Max Attempts */
+            max_attempts: number;
+            progress: components["schemas"]["JobProgress"];
+            /** Resource */
+            resource: string | null;
             /**
              * Status
-             * @default new
+             * @enum {string}
              */
-            status: string;
-            /** Throughput Chunks Per Second */
-            throughput_chunks_per_second: number;
-            /** Total Chunks */
-            total_chunks: number;
-            /** Total Time Seconds */
-            total_time_seconds: number;
+            status: "queued" | "running" | "succeeded" | "failed" | "dead";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * JobAccepted
+         * @description `202` for a new job, `200` when the idempotency key already named one. `status` is the job's status now:
+         *     `queued` for a new job.
+         */
+        JobAccepted: {
+            /**
+             * Job Id
+             * Format: uuid
+             */
+            job_id: string;
+            /**
+             * Status
+             * @default queued
+             * @enum {string}
+             */
+            status: "queued" | "running" | "succeeded" | "failed" | "dead";
+        };
+        /** JobPage */
+        JobPage: {
+            /** Items */
+            items: components["schemas"]["Job"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** JobProgress */
+        JobProgress: {
+            /** Done */
+            done: number;
+            /** Total */
+            total: number;
         };
         /** KeySummary */
         KeySummary: {
@@ -1170,6 +1357,78 @@ export interface operations {
                     "application/json": components["schemas"]["AgentResponse"];
                 };
             };
+            /** @description The run is still going after the sync wait: poll /v1/agent/runs/{execution_id} */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentAccepted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_runs_v1_agent_runs_get: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRunPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_run_v1_agent_runs__execution_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                execution_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRun"];
+                };
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -1242,6 +1501,8 @@ export interface operations {
                 principal?: string | null;
                 policy_version?: number | null;
                 request_id?: string | null;
+                /** @description Only decisions caused by this agent run */
+                execution_id?: string | null;
                 since?: string | null;
                 until?: string | null;
                 cursor?: string | null;
@@ -1395,7 +1656,9 @@ export interface operations {
                 namespace?: string;
                 document_id?: string | null;
             };
-            header?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -1405,13 +1668,87 @@ export interface operations {
             };
         };
         responses: {
+            /** @description The Idempotency-Key already named a job: it is returned */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobAccepted"];
+                };
+            };
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobAccepted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_jobs_v1_jobs_get: {
+        parameters: {
+            query?: {
+                kind?: ("ingest" | "agent_run") | null;
+                status?: ("queued" | "running" | "succeeded" | "failed" | "dead") | null;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             /** @description Successful Response */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["IngestResponse"];
+                    "application/json": components["schemas"]["JobPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_job_v1_jobs__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
                 };
             };
             /** @description Validation Error */

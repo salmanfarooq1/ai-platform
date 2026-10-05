@@ -41,6 +41,8 @@ export interface ApiResult<T> {
   data: T
   requestId: string | null
   headers: Headers
+  /** The HTTP status: 200 or 202 (a job was accepted and is still running). */
+  status: number
 }
 
 function withQuery(path: string, query?: Query): string {
@@ -91,8 +93,8 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
   }
   if (!res.ok) throw await toApiError(res)
   const requestId = res.headers.get('X-Request-ID')
-  if (res.status === 204) return { data: undefined as T, requestId, headers: res.headers }
-  return { data: (await res.json()) as T, requestId, headers: res.headers }
+  if (res.status === 204) return { data: undefined as T, requestId, headers: res.headers, status: res.status }
+  return { data: (await res.json()) as T, requestId, headers: res.headers, status: res.status }
 }
 
 export async function get<T>(path: string, query?: Query, signal?: AbortSignal): Promise<T> {

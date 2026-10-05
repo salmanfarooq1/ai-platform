@@ -3,8 +3,8 @@ import { Brain, MagnifyingGlass, PaperPlaneRight } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '@/api/endpoints'
-import { isApiError } from '@/api/client'
-import type { AgentResponse, SearchResponse, Verdict } from '@/api/types'
+import { ApiError, isApiError } from '@/api/client'
+import type { AgentAccepted, AgentResponse, SearchResponse, Verdict } from '@/api/types'
 import { DenyCallout } from '@/components/governance/deny-callout'
 import { ErrorState, PageHeader } from '@/components/governance/states'
 import { VerdictBadge } from '@/components/governance/verdict-badge'
@@ -23,6 +23,33 @@ type Outcome =
   | { kind: 'denied'; reason: string; message: string; requestId: string | null }
 
 const KB_KEY = 'collection'
+const POLL_START_MS = 1000
+const POLL_MAX_MS = 4000
+const POLL_GIVE_UP_MS = 10 * 60_000
+
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
+
+function isAccepted(data: AgentResponse | AgentAccepted): data is AgentAccepted {
+  return 'execution_id' in data && 'job_id' in data && !('answer' in data)
+}
+
+/** The run is still going after the API's sync wait (202). Follow it by execution id until it ends, slowing the
+ *  poll as it goes. A failed or stopped run becomes an error; a run that does not end in ten minutes gives up. */
+async function followRun(executionId: string, onWaiting: () => void): Promise<AgentResponse> {
+  onWaiting()
+  const started = Date.now()
+  let delay = POLL_START_MS
+  for (;;) {
+    await wait(delay)
+    const run = await api.agentRun(executionId)
+    if (run.status === 'succeeded' && run.result) return run.result
+    if (run.status === 'failed' || run.status === 'stopped') {
+      throw new ApiError(500, run.error_code ?? 'agent_run_failed', run.status === 'stopped' ? 'The run was stopped.' : 'The agent run failed.', null)
+    }
+    if (Date.now() - started > POLL_GIVE_UP_MS) throw new ApiError(504, 'run_timeout', 'The run is taking too long. Check the Agent runs page.', null)
+    delay = Math.min(delay * 1.5, POLL_MAX_MS)
+  }
+}
 
 /** The plain sentence and the policy field for a denied ask. The stage comes from the recorded decision. */
 function DenyDetail({ requestId, reason }: { requestId: string | null; reason: string }) {
@@ -54,6 +81,7 @@ export default function AskPage() {
     if (!kb && !touched.current && kbs.length > 0) setKb(kbs[0] ?? '')
   }, [kbs, kb])
 
+  const [stillWorking, setStillWorking] = useState(false)
   const ask = useMutation<Outcome, unknown, { mode: Mode; question: string; kb: string }>({
     mutationFn: async ({ mode, question, kb }) => {
       try {
@@ -62,13 +90,18 @@ export default function AskPage() {
           return { kind: 'answer', mode, data: r.data, requestId: r.requestId, queryId: r.headers.get('X-Query-ID') }
         }
         const r = await api.agent({ question, namespace: kb })
-        return { kind: 'answer', mode, data: r.data, requestId: r.requestId, queryId: r.headers.get('X-Query-ID') }
+        if (r.status === 202 && isAccepted(r.data)) {
+          const data = await followRun(r.data.execution_id, () => setStillWorking(true))
+          return { kind: 'answer', mode, data, requestId: r.requestId, queryId: r.headers.get('X-Query-ID') }
+        }
+        return { kind: 'answer', mode, data: r.data as AgentResponse, requestId: r.requestId, queryId: r.headers.get('X-Query-ID') }
       } catch (e) {
         const denial = denyFromError(e)
         if (denial) return { kind: 'denied', ...denial }
         throw e
       }
     },
+    onSettled: () => setStillWorking(false),
     onSuccess: (out, vars) => {
       const verdict: Verdict = out.kind === 'denied' ? 'deny' : 'allow'
       addHistory({ mode: vars.mode, kb: vars.kb, question: vars.question, requestId: out.requestId, verdict, reason: out.kind === 'denied' ? out.reason : null })
@@ -136,6 +169,7 @@ export default function AskPage() {
 
       {ask.isPending ? (
         <div role="status" aria-label="Working on the answer" className="flex flex-col gap-3">
+          {stillWorking ? <p className="text-callout text-fg-secondary">Still working. The run is queued or running on a worker, and the answer appears here when it ends.</p> : null}
           <Skeleton className="h-7 w-64" /><Skeleton className="h-28" /><Skeleton className="h-20" />
         </div>
       ) : null}

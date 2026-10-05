@@ -1,6 +1,6 @@
 import { get, request, type ApiResult } from './client'
 import type {
-  AgentRequest, AgentResponse, DecisionDetail, DecisionFilters, DecisionPage, DocumentRow, HealthResponse, IngestResponse,
+  AgentAccepted, AgentRequest, AgentResponse, AgentRun, AgentRunPage, DecisionDetail, DecisionFilters, DecisionPage, DocumentRow, HealthResponse, JobAccepted, JobPage,
   PlatformConfig, PolicyList, ReasonCode, RequestDetail, RequestFilters, RequestPage, Overview, PolicyVersion, PrincipalSummary, SearchRequest, SearchResponse, SessionInfo, UsageSummary,
 } from './types'
 
@@ -33,13 +33,19 @@ export const api = {
   },
   search: (body: Partial<SearchRequest> & Pick<SearchRequest, 'query'>): Promise<ApiResult<SearchResponse>> =>
     request<SearchResponse>('/v1/search', { method: 'POST', json: body }),
-  agent: (body: Partial<AgentRequest> & Pick<AgentRequest, 'question'>): Promise<ApiResult<AgentResponse>> =>
-    request<AgentResponse>('/v1/agent/query', { method: 'POST', json: body }),
+  // 200 with the answer, or 202 with the run's ids when the worker is still busy after the sync wait.
+  agent: (body: Partial<AgentRequest> & Pick<AgentRequest, 'question'>): Promise<ApiResult<AgentResponse | AgentAccepted>> =>
+    request<AgentResponse | AgentAccepted>('/v1/agent/query', { method: 'POST', json: body }),
+  agentRun: (executionId: string) => get<AgentRun>(`/v1/agent/runs/${encodeURIComponent(executionId)}`),
+  agentRuns: (cursor?: string, limit = 50) => get<AgentRunPage>('/v1/agent/runs', { cursor, limit }),
+  jobs: (filters: { kind?: 'ingest' | 'agent_run'; status?: string } = {}, cursor?: string, limit = 100) =>
+    get<JobPage>('/v1/jobs', { ...filters, cursor, limit }),
   documents: async (namespace: string) =>
     (await get<{ documents: DocumentRow[]; count: number }>('/v1/documents', { namespace })).documents,
   ingest: async (file: File, namespace: string) => {
     const form = new FormData()
     form.append('file', file)
-    return (await request<IngestResponse>('/v1/ingest', { method: 'POST', query: { namespace }, form })).data
+    // 202: the file is stored and a worker ingests it. The answer names the job; the Library follows it.
+    return (await request<JobAccepted>('/v1/ingest', { method: 'POST', query: { namespace }, form })).data
   },
 }

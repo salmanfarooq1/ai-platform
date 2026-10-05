@@ -38,7 +38,7 @@ describe('WalkthroughPage', () => {
     vi.spyOn(api, 'config').mockResolvedValue(config({ default: 'General' }))
     const search = vi.spyOn(api, 'search').mockImplementation(async ({ query }) => {
       if (query === BLOCKED_QUESTION) throw new ApiError(400, 'query_blocked', 'Query matches a known prompt injection pattern', 'req-b')
-      return { data: { answer: 'The documents cover retention.' } as never, requestId: 'req-a', headers: new Headers() }
+      return { data: { answer: 'The documents cover retention.' } as never, requestId: 'req-a', headers: new Headers(), status: 200 }
     })
     vi.spyOn(api, 'requestDetail').mockImplementation(async (id) => (id === 'req-b' ? blockedDetail : allowedDetail))
     page()

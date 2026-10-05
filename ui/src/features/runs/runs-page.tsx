@@ -9,10 +9,10 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useReasonCodes } from '@/lib/reasons'
 import { cn, formatTime } from '@/lib/utils'
-import { runStatusWord } from './run-status'
+import { runDuration, runStatusWord } from './run-status'
 
-// Runs are decisions with the action agent.run, one per request id, until a runs API exists (blueprint section 4).
-// Each carries the run's execution id, and its status comes from the agent runtime (see run-status.ts).
+// Runs are listed from their decisions (the verdict, and the runs that were refused before they started) and joined
+// by execution id to GET /v1/agent/runs, which gives each run's status and times (see run-status.ts).
 function RunTimeline({ id }: { id: string }) {
   const q = useQuery({ queryKey: ['decision', id], queryFn: () => api.decision(id), retry: false })
   const { byCode } = useReasonCodes()
@@ -45,20 +45,28 @@ export default function RunsPage() {
     getNextPageParam: (last) => last.next_cursor ?? undefined,
     retry: false,
   })
+  // The runs endpoint is where status and times come from. Poll it only while a run is queued or running.
+  const runs = useQuery({
+    queryKey: ['agent-runs'],
+    queryFn: () => api.agentRuns(),
+    retry: false,
+    refetchInterval: (r) => (r.state.data?.items.some((x) => x.status === 'queued' || x.status === 'running') ? 3000 : false),
+  })
+  const byExecution = new Map((runs.data?.items ?? []).map((r) => [r.execution_id, r]))
   const items = q.data?.pages.flatMap((p) => p.items) ?? []
   return (
     <div>
       <PageHeader title="Agent runs">Each run is one agent request, with its execution id and status. Select a run to see the calls it made.</PageHeader>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="min-w-0">
-          {q.isLoading ? <TableSkeleton rows={6} cols={6} /> : null}
+          {q.isLoading ? <TableSkeleton rows={6} cols={7} /> : null}
           {q.error ? <ErrorState error={q.error} onRetry={() => void q.refetch()} title="Could not load runs." /> : null}
           {q.data && items.length === 0 ? <EmptyState title="No agent runs yet.">Ask a question in Agent mode. Each run and every tool call it makes appear here.</EmptyState> : null}
           {items.length > 0 ? (
             <div className="overflow-x-auto rounded-sm border border-hairline bg-surface">
               <table className="w-full border-collapse text-footnote">
                 <caption className="sr-only">Agent runs, newest first</caption>
-                <thead><tr className="bg-muted text-left text-fg-secondary">{['Started', 'Verdict', 'Status', 'Execution id', 'Principal', 'Request id'].map((h) => <th key={h} scope="col" className="px-3 py-2 font-medium">{h}</th>)}</tr></thead>
+                <thead><tr className="bg-muted text-left text-fg-secondary">{['Started', 'Verdict', 'Status', 'Duration', 'Execution id', 'Principal', 'Request id'].map((h) => <th key={h} scope="col" className="px-3 py-2 font-medium">{h}</th>)}</tr></thead>
                 <tbody>
                   {items.map((d) => (
                     <tr key={d.id} className={cn('h-8 border-t border-hairline', d.id === selected ? 'bg-selected' : 'hover:bg-muted')}>
@@ -66,7 +74,8 @@ export default function RunsPage() {
                         <button type="button" className="underline-offset-2 hover:underline" aria-label={`Open run from ${formatTime(d.created_at)}`} onClick={() => setParams({ run: d.id }, { replace: true })}>{formatTime(d.created_at)}</button>
                       </td>
                       <td className="px-3"><VerdictBadge size="sm" verdict={d.outcome === 'deny' ? 'deny' : 'allow'} reason={d.reason} /></td>
-                      <td className="px-3" data-testid="run-row-status">{runStatusWord(d.run_status)}</td>
+                      <td className="px-3" data-testid="run-row-status">{runStatusWord(byExecution.get(d.execution_id ?? '')?.status ?? d.run_status)}</td>
+                      <td className="mono tabular px-3 text-fg-secondary" data-testid="run-row-duration">{d.execution_id && byExecution.has(d.execution_id) ? runDuration(byExecution.get(d.execution_id)?.started_at, byExecution.get(d.execution_id)?.finished_at) : 'None'}</td>
                       <td className="mono px-3 text-fg-secondary" data-testid="run-row-execution-id" title={d.execution_id ?? undefined}>{d.execution_id ? d.execution_id.slice(0, 8) : 'None'}</td>
                       <td className="px-3">{d.principal ? (d.principal.name ?? d.principal.id.slice(0, 8)) : 'unknown'}</td>
                       <td className="mono px-3 text-fg-secondary">{d.request_id}</td>
