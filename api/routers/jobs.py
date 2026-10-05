@@ -45,7 +45,9 @@ async def get_job(
     await require(ctx, entry_action(request.url.path, ActionKind.KB_READ))
     async with tenant_connection(request.app.state.db_pool, principal.tenant_id) as conn:
         row = await job_store.get(conn, job_id)
-    if row is None or (row.namespace is not None and not ctx.boundary.allows_kb(row.namespace)):
+    if row is None or row.kind not in job_store.USER_KINDS or (
+        row.namespace is not None and not ctx.boundary.allows_kb(row.namespace)
+    ):
         raise job_not_found()
     return job_view(row)
 

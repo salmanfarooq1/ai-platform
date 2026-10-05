@@ -15,7 +15,9 @@ from api.agent.schemas import AgentCitation, AgentResponse
 from api.services.usage import record_usage as log_usage
 from config import MODEL_PRICING
 from core.database.tenant import DbPool, tenant_connection
+from core.pricing import rates_for
 from gateway import EnforcementContext, GatewayRuntime
+from gateway.limits import record_cost
 from gateway.limits import record_usage as book_tokens
 
 logger = logging.getLogger("api.agent.response")
@@ -42,7 +44,7 @@ def combine_usage(result: dict) -> dict:
     model = result.get("model_used", "")
     llm_cost = 0.0
     if model and not model.startswith("ollama/"):
-        rates = MODEL_PRICING.get(model, {"input": 0.0, "output": 0.0})
+        rates = rates_for(MODEL_PRICING, model)
         llm_cost = (prompt_tokens / 1_000_000) * rates["input"] + (completion_tokens / 1_000_000) * rates["output"]
 
     return {
@@ -134,6 +136,7 @@ async def book_agent_usage(
     try:
         if total > 0:
             headers = await book_tokens(runtime, tenant_id, total)
+        await record_cost(runtime, tenant_id, float(usage.get("total_cost", 0.0) or 0.0))
         await log_usage(
             pool=pool, tenant_id=tenant_id, request_id=request_id, endpoint="/v1/agent/query",
             namespace=usage.get("namespace", "global"), model=usage.get("model", "unknown"),

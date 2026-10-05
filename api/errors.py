@@ -101,6 +101,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 _DENY_STATUS: dict[str, int] = {
     "rate_limit_exceeded": 429,
     "daily_token_budget_exceeded": 429,
+    "cost_cap_exceeded": 429,
     "dependency_unavailable": 503,
     "decision_unrecorded": 503,
     "query_blocked": 400,

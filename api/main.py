@@ -16,6 +16,7 @@ from api.mcp.transport import handle_messages, handle_sse, init_mcp_context
 from api.middleware.auth import AuthMiddleware
 from api.middleware.finops import FinOpsMiddleware
 from api.middleware.logging import LatencyMiddleware, LoggingMiddleware, RequestIDMiddleware
+from api.middleware.metrics import MetricsMiddleware
 from api.observability import setup_logging, setup_tracing
 from api.routers.analytics import router as analytics_router
 from api.routers.config import router as config_router
@@ -25,13 +26,19 @@ from api.routers.feedback import router as feedback_router
 from api.routers.health import router as health_router
 from api.routers.ingest import router as ingest_router
 from api.routers.jobs import router as jobs_router
+from api.routers.receipts import router as receipts_router
 from api.routers.search import router as search_router
+from api.routers.trust import metrics_router
+from api.routers.trust import router as trust_router
 from api.versioning import API_PREFIX
 from api.web_edge.routes import router as session_router
+from config import MODEL_PRICING
 from core.database.pool import create_pool
 from core.identity.jwt import JwtVerifier
+from core.pricing import check_priced
 from core.settings import get_settings
 from gateway import GatewayRuntime
+from gateway.receipts import keyring_from_settings
 from workers.embedded import start_embedded
 
 setup_logging()
@@ -43,6 +50,8 @@ def _lifespan(adapter_overrides: Mapping[str, Any] | None, embedded_workers: int
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # STARTUP
+        # A hosted mode refuses to start when a model it may call has no price (an unpriced model would dodge the cost cap).
+        check_priced(MODEL_PRICING, settings.mode, [settings.llm_model, settings.embed_model, *settings.embed_fallbacks])
         app.state.db_pool = await create_pool()
         app.state.jwt_verifier = JwtVerifier.from_settings(settings)
         # The composition root: one adapter per port, built from Settings (adapters/registry.py). The runtime's
@@ -53,6 +62,7 @@ def _lifespan(adapter_overrides: Mapping[str, Any] | None, embedded_workers: int
         )
         adapters = app.state.adapters
         app.state.agent_graph = build_agent_graph(adapters)
+        app.state.receipt_keys = keyring_from_settings(settings)
         app.state.gateway_runtime = GatewayRuntime(pool=app.state.db_pool, cache=adapters.cache, events=adapters.events)
         await adapters.cache.ensure_semantic_index()
         init_mcp_context(app.state.db_pool, adapters)
@@ -63,7 +73,7 @@ def _lifespan(adapter_overrides: Mapping[str, Any] | None, embedded_workers: int
         if n_workers > 0 or with_relay:
             embedded = start_embedded(
                 settings, app.state.db_pool, adapters, app.state.gateway_runtime, app.state.agent_graph,
-                workers=n_workers, relay=with_relay,
+                workers=n_workers, relay=with_relay, keyring=app.state.receipt_keys,
             )
             app.state.embedded = embedded
         logger.info("startup complete: DB pool, adapters, agent graph, semantic cache, MCP context ready")
@@ -131,6 +141,7 @@ def create_app(
             "X-RateLimit-Limit", "X-RateLimit-Remaining",
         ],
     )
+    app.add_middleware(MetricsMiddleware)  # outermost: counts every request, preflights and denials included
 
 
     @app.get("/")
@@ -153,7 +164,10 @@ def create_app(
     v1.include_router(feedback_router)
     v1.include_router(session_router)
     v1.include_router(console_router)
+    v1.include_router(receipts_router)
+    v1.include_router(trust_router)
     app.include_router(v1)
+    app.include_router(metrics_router)  # `/metrics`, unversioned like `/health`: Prometheus expects it there
 
     # SseServerTransport.handle_post_message is a raw ASGI app, not a FastAPI
     # endpoint function. It must be mounted directly, not registered as an

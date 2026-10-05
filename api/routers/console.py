@@ -146,6 +146,30 @@ async def list_decisions(
     return DecisionPage(items=items, next_cursor=next_cursor)
 
 
+async def fetch_decision_detail(pool: DbPool, owner_id: UUID, wanted: UUID) -> DecisionDetail | None:
+    """One decision of the tenant with its request trace, or None when it is not the tenant's (or not there)."""
+    async with tenant_connection(pool, owner_id) as conn:
+        row = await conn.fetchrow(
+            f"SELECT {_DECISION_COLUMNS}, d.input_hash {_DECISION_FROM} WHERE d.id = $1", wanted,
+        )
+        if row is None:
+            return None
+        trace_rows = await conn.fetch(
+            f"SELECT {_DECISION_COLUMNS} {_DECISION_FROM} WHERE d.request_id = $1 "
+            f"ORDER BY d.created_at ASC, d.id ASC LIMIT {TRACE_CAP}",
+            row["request_id"],
+        )
+        tenant = await conn.fetchrow("SELECT id, slug FROM tenants WHERE id = $1", owner_id)
+    if tenant is None:
+        return None
+    [base] = await with_run_status(pool, owner_id, [_summary(row)])
+    trace = await with_run_status(pool, owner_id, [_summary(r) for r in trace_rows])
+    return DecisionDetail(
+        **base.model_dump(), tenant=TenantRef(id=tenant["id"], slug=tenant["slug"]),
+        input_sha256=row["input_hash"], trace=trace,
+    )
+
+
 @router.get("/decisions/{decision_id}", response_model=DecisionDetail)
 async def get_decision(
     request: Request,
@@ -160,26 +184,10 @@ async def get_decision(
         wanted = UUID(decision_id)
     except ValueError:
         raise _not_found("Decision") from None
-    async with tenant_connection(pool, principal.tenant_id) as conn:
-        row = await conn.fetchrow(
-            f"SELECT {_DECISION_COLUMNS}, d.input_hash {_DECISION_FROM} WHERE d.id = $1", wanted,
-        )
-        if row is None:
-            raise _not_found("Decision")
-        trace_rows = await conn.fetch(
-            f"SELECT {_DECISION_COLUMNS} {_DECISION_FROM} WHERE d.request_id = $1 "
-            f"ORDER BY d.created_at ASC, d.id ASC LIMIT {TRACE_CAP}",
-            row["request_id"],
-        )
-        tenant = await conn.fetchrow("SELECT id, slug FROM tenants WHERE id = $1", principal.tenant_id)
-    if tenant is None:
+    detail = await fetch_decision_detail(pool, principal.tenant_id, wanted)
+    if detail is None:
         raise _not_found("Decision")
-    [base] = await with_run_status(pool, principal.tenant_id, [_summary(row)])
-    trace = await with_run_status(pool, principal.tenant_id, [_summary(r) for r in trace_rows])
-    return DecisionDetail(
-        **base.model_dump(), tenant=TenantRef(id=tenant["id"], slug=tenant["slug"]),
-        input_sha256=row["input_hash"], trace=trace,
-    )
+    return detail
 
 
 def _policy_version(row: DbRecord) -> PolicyVersion:

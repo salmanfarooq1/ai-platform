@@ -24,6 +24,7 @@ from core.identity.jwt import JwtError, JwtVerifier
 from core.identity.keys import KEY_PREFIX_TAG
 from core.identity.models import Principal, Scope
 from core.identity.store import authenticate_api_key, confirm_jwt_principal
+from core.settings import get_settings
 
 logger = logging.getLogger("api.auth")
 
@@ -50,7 +51,9 @@ def _bearer_token(request: Request) -> str | None:
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        if request.method == "OPTIONS" or not requires_auth(path):
+        # `/metrics` is outside `/v1`. It is public only when METRICS_PUBLIC is true; otherwise the route needs `admin`.
+        guarded_metrics = path == "/metrics" and not get_settings().metrics_public
+        if request.method == "OPTIONS" or not (requires_auth(path) or guarded_metrics):
             return await call_next(request)
         if request.method == "POST" and path in SESSION_CREATE_PATHS:
             return await call_next(request)

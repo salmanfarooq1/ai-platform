@@ -629,6 +629,46 @@
         "title": "DenyReasonCount",
         "type": "object"
       },
+      "EvalGate": {
+        "description": "The latest run of the eval regression gate.",
+        "properties": {
+          "baseline": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Baseline",
+            "type": "object"
+          },
+          "latest": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Latest",
+            "type": "object"
+          },
+          "run_at": {
+            "format": "date-time",
+            "title": "Run At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "baseline",
+          "latest",
+          "run_at"
+        ],
+        "title": "EvalGate",
+        "type": "object"
+      },
       "FeedbackRequest": {
         "properties": {
           "comment": {
@@ -1335,6 +1375,99 @@
         "title": "ReasonCode",
         "type": "object"
       },
+      "Receipt": {
+        "description": "A signed receipt. `canonical` is the exact text that was signed: the canonical JSON of the chain link and the\ndecision record. It holds no input text, only the SHA-256 that is on the decision.",
+        "properties": {
+          "alg": {
+            "const": "Ed25519",
+            "title": "Alg",
+            "type": "string"
+          },
+          "canonical": {
+            "title": "Canonical",
+            "type": "string"
+          },
+          "chain": {
+            "$ref": "#/components/schemas/ReceiptChain"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionDetail"
+          },
+          "key_id": {
+            "title": "Key Id",
+            "type": "string"
+          },
+          "signature": {
+            "description": "Base64 Ed25519 signature over the UTF-8 bytes of `canonical`",
+            "title": "Signature",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "chain",
+          "signature",
+          "key_id",
+          "alg",
+          "canonical"
+        ],
+        "title": "Receipt",
+        "type": "object"
+      },
+      "ReceiptChain": {
+        "description": "Where the decision sits in the tenant's hash chain.",
+        "properties": {
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "prev_hash": {
+            "title": "Prev Hash",
+            "type": "string"
+          },
+          "row_hash": {
+            "title": "Row Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prev_hash",
+          "row_hash",
+          "position"
+        ],
+        "title": "ReceiptChain",
+        "type": "object"
+      },
+      "ReceiptKey": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "alg": {
+            "const": "Ed25519",
+            "title": "Alg",
+            "type": "string"
+          },
+          "key_id": {
+            "title": "Key Id",
+            "type": "string"
+          },
+          "public_key": {
+            "description": "Base64 of the 32 raw public key bytes",
+            "title": "Public Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key_id",
+          "alg",
+          "public_key",
+          "active"
+        ],
+        "title": "ReceiptKey",
+        "type": "object"
+      },
       "RequestDetail": {
         "properties": {
           "decisions": {
@@ -1723,6 +1856,86 @@
         "title": "TenantRef",
         "type": "object"
       },
+      "TrustSummary": {
+        "properties": {
+          "eval_gate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EvalGate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "eval_history": {
+            "items": {
+              "$ref": "#/components/schemas/EvalGate"
+            },
+            "title": "Eval History",
+            "type": "array"
+          },
+          "grafana_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grafana Url"
+          },
+          "last_purge_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Purge At"
+          },
+          "metrics_public": {
+            "title": "Metrics Public",
+            "type": "boolean"
+          },
+          "oldest_decision_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldest Decision At"
+          },
+          "retention_days": {
+            "title": "Retention Days",
+            "type": "integer"
+          },
+          "retention_is_default": {
+            "title": "Retention Is Default",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "retention_days",
+          "retention_is_default",
+          "oldest_decision_at",
+          "last_purge_at",
+          "eval_gate",
+          "eval_history",
+          "metrics_public",
+          "grafana_url"
+        ],
+        "title": "TrustSummary",
+        "type": "object"
+      },
       "UsageByDay": {
         "properties": {
           "cost_usd": {
@@ -1878,6 +2091,50 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "VerifyCheck": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "title": "VerifyCheck",
+        "type": "object"
+      },
+      "VerifyResult": {
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/VerifyCheck"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "valid": {
+            "title": "Valid",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "valid",
+          "checks"
+        ],
+        "title": "VerifyResult",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -1908,6 +2165,24 @@
           }
         },
         "summary": "Root"
+      }
+    },
+    "/metrics": {
+      "get": {
+        "description": "Prometheus text format: request counts and latency per route, decisions per outcome, jobs per status and the\noutbox lag. Open when `METRICS_PUBLIC` is true, otherwise it needs the `admin` scope.",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {}
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Metrics",
+        "tags": [
+          "trust"
+        ]
       }
     },
     "/v1/agent/query": {
@@ -3038,6 +3313,132 @@
         ]
       }
     },
+    "/v1/receipts/keys": {
+      "get": {
+        "description": "The public keys receipts may be signed with. No secret is ever returned.",
+        "operationId": "list_receipt_keys_v1_receipts_keys_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReceiptKey"
+                  },
+                  "title": "Response List Receipt Keys V1 Receipts Keys Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Receipt Keys",
+        "tags": [
+          "receipts"
+        ]
+      }
+    },
+    "/v1/receipts/verify": {
+      "post": {
+        "description": "Run the receipt checks on a receipt the caller holds. It does not matter whose tenant it names: the checks\nuse only the receipt and the public keys.",
+        "operationId": "verify_a_receipt_v1_receipts_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Receipt"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verify A Receipt",
+        "tags": [
+          "receipts"
+        ]
+      }
+    },
+    "/v1/receipts/{decision_id}": {
+      "get": {
+        "description": "The signed receipt of one decision of the caller's tenant.",
+        "operationId": "get_receipt_v1_receipts__decision_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "decision_id",
+            "required": true,
+            "schema": {
+              "title": "Decision Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Receipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Receipt",
+        "tags": [
+          "receipts"
+        ]
+      }
+    },
     "/v1/requests": {
       "get": {
         "description": "Decisions grouped by request id, newest request first, with filters and a keyset cursor.\n\nA request is a deny when any of its decisions was a deny. `since` and `until` apply to the time of the\nfirst decision of the request. Requests made only of allowed console reads (`audit.read`, `analytics.read`)\nare left out unless `include_console_reads` is true. A denied console read is never left out.",
@@ -3424,6 +3825,33 @@
         "summary": "Start Preview",
         "tags": [
           "session"
+        ]
+      }
+    },
+    "/v1/trust/summary": {
+      "get": {
+        "description": "How long decisions are kept, the oldest one and the last purge, the eval gate and where the metrics are.",
+        "operationId": "trust_summary_v1_trust_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Trust Summary",
+        "tags": [
+          "trust"
         ]
       }
     },
