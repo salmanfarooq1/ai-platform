@@ -1,0 +1,2 @@
+skip check ok: 10 allowed live-MinIO skips
+exit=0

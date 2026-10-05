@@ -225,6 +225,11 @@ Migration `0002` adds identity and tenancy on top of the `0001` baseline.
 - **Visibility:** jobs carry `namespace` and `principal_id`. Job and run routes show only the knowledge bases the boundary allows; `/v1/agent/runs` shows a caller without `audit:read` only its own runs (ADR-0011).
 - **Migration chain:** `0008` jobs, outbox, processed events.
 
+### Kafka event bus (Sprint 010)
+- **Layout:** `adapters/kafka_event_bus.py` (the adapter, the only `aiokafka` import), `tests/fake_kafka.py` (the in-memory broker), `docker-compose.yml` profile `kafka` (Redpanda and a topic job), `scripts/verify/kafka.sh`, `docs/runbooks/kafka.md`.
+- **Flow:** the API writes the outbox in the decision's transaction, as before. With `EVENT_BUS=kafka` the relay publishes the rows to `platform.<type without version>` keyed by tenant id, in CloudEvents binary mode. Kafka is never reached inside a request. A consumer group handler is deduped by CloudEvent id through `processed_events`, and a message that keeps failing goes to `<topic>.dlq` (ADR-0008).
+- **Switching:** `EVENT_BUS=outbox` again needs no migration. There is none in this sprint (the chain still ends at `0010`).
+
 ## Known Open Gaps (Deferred by Design)
 
 - **Real-time citation content validation:** The code validates that a `chunk_id` exists in the database, but does not run an LLM check on the live path to prove the chunk content strictly entails the sentence. Doing this synchronously would add 300ms+ latency and double LLM token cost per request. Offline DeepEval faithfulness scoring measures citation quality in batch. Live citation validation is deferred.

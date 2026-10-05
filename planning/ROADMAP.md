@@ -21,7 +21,7 @@ Milestones only, with no dates. Each sprint is done when its acceptance checks p
 | 007 | Durable jobs and raw storage | A Postgres-backed queue with retries, a dead-letter queue and idempotency keys. A transactional outbox behind the EventBus. Ingestion and agent runs move to workers. Raw files go to object storage by hash. The Library shows ingestion progress | 6, 11, 13 | done |
 | 008 | Trust baseline | Audit receipts, an eval regression gate in CI, a cost circuit breaker, Prometheus metrics through OpenTelemetry (`/metrics`) with an optional Prometheus and Grafana compose profile, retention and purge for `gateway_decisions` (Q7), and the Trust pages in the UI | 10, 15 | done |
 | 009 | Sandboxed agent execution | An NVIDIA OpenShell adapter for AgentRuntime (Apache-2.0, pinned v0.1.x). The agent completes an authorized task, can't reach a model provider directly, can't read unrelated files, and the gateway denies an unauthorized tool argument. OpenShell events join `gateway_decisions` by `execution_id`. The Agent runs page shows sandbox events | 4, 5 | done |
-| 010 | Kafka event bus adapter | A Kafka adapter for the EventBus through an optional Redpanda compose profile. The Postgres outbox stays the default | 12 | next |
+| 010 | Kafka event bus adapter | A Kafka adapter for the EventBus through an optional Redpanda compose profile. The Postgres outbox stays the default | 12 | done |
 
 ## Sprint pack rule
 - **Feature sprints are vertical slices.** The blueprint first fixes the API contract (typed, under `/v1`, in the OpenAPI snapshot). Then a backend builder brief, a frontend builder brief, and at least one e2e test that runs across both.

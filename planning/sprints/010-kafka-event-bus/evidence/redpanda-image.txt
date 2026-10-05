@@ -1,0 +1,1 @@
+image=redpandadata/redpanda:v24.2.7 id=sha256:82a69763bef8d8b55ea5a520fa1b38f993908ef68946819ca1aed43541824c48 digest=redpandadata/redpanda@sha256:82a69763bef8d8b55ea5a520fa1b38f993908ef68946819ca1aed43541824c48

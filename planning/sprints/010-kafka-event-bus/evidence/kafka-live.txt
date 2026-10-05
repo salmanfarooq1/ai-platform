@@ -1,0 +1,66 @@
+ Container redpanda Creating 
+ Container redpanda Created 
+ Container redpanda Starting 
+ Container redpanda Started 
+ Container redpanda Running 
+ Container kafka-topics Creating 
+ Container kafka-topics Created 
+Attaching to kafka-topics
+ Container redpanda Waiting 
+ Container redpanda Healthy 
+ Container kafka-topics Starting 
+ Container kafka-topics Started 
+kafka-topics  | TOPIC                      STATUS
+kafka-topics  | platform.gateway.decision  OK
+kafka-topics  | TOPIC                          STATUS
+kafka-topics  | platform.gateway.decision.dlq  OK
+kafka-topics  | TOPIC                      STATUS
+kafka-topics  | platform.ingest.completed  OK
+kafka-topics  | TOPIC                          STATUS
+kafka-topics  | platform.ingest.completed.dlq  OK
+kafka-topics  | TOPIC                   STATUS
+kafka-topics  | platform.gateway.purge  OK
+kafka-topics  | TOPIC                       STATUS
+kafka-topics  | platform.gateway.purge.dlq  OK
+kafka-topics  | NAME                           PARTITIONS  REPLICAS
+kafka-topics  | platform.gateway.decision      3           1
+kafka-topics  | platform.gateway.decision.dlq  3           1
+kafka-topics  | platform.gateway.purge         3           1
+kafka-topics  | platform.gateway.purge.dlq     3           1
+kafka-topics  | platform.ingest.completed      3           1
+kafka-topics  | platform.ingest.completed.dlq  3           1
+[Kkafka-topics exited with code 0
+== broker: localhost:19092
+== client library: aiokafka 0.14.0
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0 -- /root/.cache/pypoetry/virtualenvs/ai-platform-OrHxThiT-py3.11/bin/python
+hypothesis profile 'default'
+rootdir: /home/user/ai-platform
+configfile: pyproject.toml
+plugins: rerunfailures-16.4, xdist-3.8.0, repeat-0.9.4, asyncio-1.4.0, hypothesis-6.168.3, langsmith-0.10.15, cov-7.1.0, anyio-4.13.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 45 items / 24 deselected / 21 selected
+
+tests/contracts/test_event_bus_contract.py::test_a_subscriber_gets_the_events_of_its_type_only[kafka-live] PASSED [  4%]
+tests/contracts/test_event_bus_contract.py::test_handlers_run_in_subscription_order_and_a_wildcard_gets_everything[kafka-live] PASSED [  9%]
+tests/contracts/test_event_bus_contract.py::test_the_callers_transaction_context_reaches_the_handler[kafka-live] PASSED [ 14%]
+tests/contracts/test_event_bus_contract.py::test_a_failing_handler_does_not_stop_the_others_or_fail_the_publisher[kafka-live] PASSED [ 19%]
+tests/contracts/test_event_bus_contract.py::test_publishing_with_no_subscriber_is_fine[kafka-live] PASSED [ 23%]
+tests/integration/test_kafka_bus.py::test_publish_writes_one_record_per_event_keyed_by_tenant_in_binary_mode[kafka-live] PASSED [ 28%]
+tests/integration/test_kafka_bus.py::test_a_consumer_gets_the_event_and_the_offset_is_committed_after_the_handler[kafka-live] PASSED [ 33%]
+tests/integration/test_kafka_bus.py::test_a_handler_that_fails_is_tried_again_and_nothing_goes_to_the_dead_letter_topic[kafka-live] PASSED [ 38%]
+tests/integration/test_kafka_bus.py::test_a_poison_message_goes_to_the_dead_letter_topic_after_max_attempts_and_the_next_one_still_runs[kafka-live] PASSED [ 42%]
+tests/integration/test_kafka_bus.py::test_a_record_that_is_not_a_cloud_event_goes_to_the_dead_letter_topic_at_once[kafka-live] PASSED [ 47%]
+tests/integration/test_kafka_bus.py::test_a_record_read_and_not_committed_is_delivered_again_and_handled_once_after_dedupe[kafka-live] PASSED [ 52%]
+tests/integration/test_kafka_bus.py::test_1000_events_over_3_tenants_keep_each_tenants_order[kafka-live] PASSED [ 57%]
+tests/integration/test_kafka_bus.py::test_a_relay_killed_mid_batch_loses_nothing_and_each_event_is_handled_once[kafka-live] PASSED [ 61%]
+tests/integration/test_kafka_bus.py::test_a_failed_send_leaves_the_row_in_the_outbox_and_the_next_pass_sends_it[kafka-live] PASSED [ 66%]
+tests/integration/test_kafka_bus.py::test_the_relay_closes_the_producer[kafka-live] PASSED [ 71%]
+tests/integration/test_kafka_bus.py::test_a_failed_dead_letter_send_does_not_lose_the_poison_record[kafka-live] PASSED [ 76%]
+tests/integration/test_kafka_bus.py::test_a_failed_commit_replays_the_record_and_the_handler_runs_once[kafka-live] PASSED [ 80%]
+tests/integration/test_kafka_bus.py::test_the_error_header_and_the_log_carry_the_class_and_never_the_message[kafka-live] PASSED [ 85%]
+tests/integration/test_kafka_bus.py::test_a_send_that_was_applied_but_not_acknowledged_is_sent_again_and_handled_once[kafka-live] PASSED [ 90%]
+tests/integration/test_kafka_bus.py::test_a_send_that_never_returns_fails_within_the_send_timeout[kafka-live] PASSED [ 95%]
+tests/e2e/test_kafka_flow.py::test_a_decision_row_leads_to_exactly_one_consumed_event_even_when_the_relay_dies_mid_batch[kafka-live] PASSED [100%]
+
+====================== 21 passed, 24 deselected in 20.40s ======================

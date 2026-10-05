@@ -1,0 +1,175 @@
+name: ai-platform
+services:
+  kafka-topics:
+    profiles:
+      - kafka
+    command:
+      - |
+        set -e
+        for topic in platform.gateway.decision platform.ingest.completed platform.gateway.purge; do
+          for name in "$$topic" "$$topic.dlq"; do
+            rpk topic create "$$name" -p 3 -r 1 -X brokers=redpanda:9092 || true
+          done
+        done
+        rpk topic list -X brokers=redpanda:9092
+    container_name: kafka-topics
+    depends_on:
+      redpanda:
+        condition: service_healthy
+        required: true
+    entrypoint:
+      - /bin/bash
+      - -c
+    image: redpandadata/redpanda:v24.2.7
+    networks:
+      default: null
+    restart: "no"
+  ollama:
+    container_name: ollama
+    image: ollama/ollama
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 11434
+        published: "11434"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: ollama_data
+        target: /root/.ollama
+        volume: {}
+  postgres:
+    container_name: postgres
+    environment:
+      APP_DB_PASSWORD: gap_app
+      POSTGRES_PASSWORD: postgres
+    image: pgvector/pgvector:pg16
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 5432
+        published: "5432"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: pgdata
+        target: /var/lib/postgresql/data
+        volume: {}
+      - type: bind
+        source: /home/user/ai-platform/docker/postgres-init
+        target: /docker-entrypoint-initdb.d
+        read_only: true
+        bind: {}
+  redis:
+    container_name: redis
+    image: redis/redis-stack-server:latest
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 6379
+        published: "6379"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: redis_data
+        target: /data
+        volume: {}
+  redpanda:
+    profiles:
+      - kafka
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --overprovisioned
+      - --node-id=0
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+    container_name: redpanda
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - rpk cluster info -X brokers=localhost:9092 >/dev/null 2>&1
+      timeout: 5s
+      interval: 5s
+      retries: 24
+      start_period: 10s
+    image: redpandadata/redpanda:v24.2.7
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 19092
+        published: "19092"
+        protocol: tcp
+    restart: unless-stopped
+  worker:
+    build:
+      context: /home/user/ai-platform
+      dockerfile: Dockerfile
+    command:
+      - python
+      - -m
+      - workers
+      - --concurrency
+      - "2"
+    container_name: worker
+    depends_on:
+      postgres:
+        condition: service_started
+        required: true
+      redis:
+        condition: service_started
+        required: true
+    environment:
+      DATABASE_URL: postgresql://gap_app:gap_app@postgres:5432/rag_platform
+      MODE: local
+      OBJECT_STORE_DIR: /data/objects
+      REDIS_URL: redis://redis:6379
+      WORKER_HEALTH_FILE: /tmp/worker-health
+      WORKER_METRICS_PORT: "9100"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import os, sys, time; sys.exit(0 if time.time() - os.path.getmtime('/tmp/worker-health') < 30 else 1)
+      timeout: 5s
+      interval: 15s
+      retries: 3
+      start_period: 20s
+    image: gap-platform
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: objects
+        target: /data/objects
+        volume: {}
+networks:
+  default:
+    name: ai-platform_default
+volumes:
+  objects:
+    name: ai-platform_objects
+  ollama_data:
+    name: ai-platform_ollama_data
+  pgdata:
+    name: ai-platform_pgdata
+  redis_data:
+    name: ai-platform_redis_data
+exit=0
+ollama
+postgres
+redis
+redpanda
+worker
+kafka-topics

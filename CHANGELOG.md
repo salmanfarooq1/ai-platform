@@ -2,6 +2,21 @@
 
 One short entry per sprint, newest first. Full detail lives in `planning/sprints/`.
 
+## Sprint 010: Kafka event bus adapter
+- **What was built:**
+  - **Kafka adapter (ADR-0008, runbook).** `EVENT_BUS=kafka` makes the outbox relay publish to Kafka through `adapters/kafka_event_bus.py` (`aiokafka`, Apache-2.0, pinned `==0.14.0`). Topic `platform.<type without version>`, key = tenant id, CloudEvents in binary mode (`ce_*` headers), `acks=all` and an idempotent producer. `outbox` stays the default. The API still writes the outbox in the decision's transaction, so Kafka is never reached inside a request.
+  - **Consumer groups.** `KafkaEventBus.consume` runs handlers deduped by CloudEvent id (`processed_events`), commits the offset after the handler succeeds, and sends a message to `<topic>.dlq` with error headers after `KAFKA_MAX_ATTEMPTS`.
+  - **Compose profile `kafka`.** One Redpanda node (`redpandadata/redpanda:v24.2.7`) and a topic job. `scripts/verify/kafka.sh` runs the tests on it.
+  - **No migration.** Switching `EVENT_BUS` back to `outbox` needs no data change.
+- **API change:** none. New settings: `KAFKA_BOOTSTRAP`, `KAFKA_CLIENT_ID`, `KAFKA_GROUP_ID`, `KAFKA_SECURITY_PROTOCOL`, `KAFKA_SASL_MECHANISM`, `KAFKA_SASL_USERNAME`, `KAFKA_SASL_PASSWORD` (a secret), `KAFKA_MAX_ATTEMPTS`, `KAFKA_RETRY_BACKOFF_SECONDS`. `EVENT_BUS` accepts `kafka`. New dependency `aiokafka`.
+- **Live check:** 16 tests on a live Redpanda v24.2.7 (`evidence/kafka-live.txt`): the EventBus contract suite, consumer, dead-letter, redelivery, relay-restart, 1,000-event ordering over 3 tenants, and decision to consumer end to end.
+- **Test delta:**
+  - Backend: 1523 → 1561 passed (+38), 10 skipped (the live MinIO runs, unchanged). New: 16 unit, 10 integration, 2 e2e, 5 contract (the adapter runs the EventBus suite), 5 import-lint (one more banned SDK). The suite uses the in-memory broker (`tests/fake_kafka.py`), a model and not a recording.
+  - Frontend: 207 Vitest and 82 Playwright, unchanged (no UI change; the checks were run).
+- **QA fixes:** H1 a failed dead-letter send or commit seeks the partition back, so the poison record is not covered by the next commit; M1 `x-error` holds the exception class and `x-error-code` only, and the log has no message; M2 the relay stops a tenant's batch at its first failed or locked row; M3 the fake can apply a send and lose its acknowledgement; L1 the weaker live redelivery check is stated; L2 `KAFKA_REQUEST_TIMEOUT_SECONDS` (10) and `KAFKA_SEND_TIMEOUT_SECONDS` (15) bound a send. Each fix was checked by removing it and watching its test fail. Live run repeated: 21 passed.
+- **QA test delta:** backend 1561 → 1568 (+7), 10 skipped; Vitest 207; Playwright 82.
+- **Not verified here:** SASL or TLS against a secured broker, several brokers, several consumers in one group, a broker restart during a run, a Kafka that is not Redpanda, the `docker.redpanda.com` registry (refused here), CI on GitHub, and a Docker image build.
+
 ## Sprint 009: sandboxed agent runs
 - **What was built:**
   - **OpenShell runtime (ADR-0009 updated, runbook).** `AGENT_RUNTIME=openshell` makes a worker run each agent run in an NVIDIA OpenShell sandbox (Apache-2.0, pinned 0.1.2). It sits behind a new `SandboxDriver` port (`ports/sandbox.py`) with an OpenShell SDK driver and a test double. The sandbox's one network route is the gateway, it writes one work directory, and it has CPU, memory and wall-clock limits. The default runtime does not change.

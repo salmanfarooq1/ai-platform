@@ -12,11 +12,27 @@ You are the Builder for Sprint 010 in `/home/user/ai-platform`. This is infrastr
 Everything in the blueprint. Write or append the ADR sections the blueprint names. If a container limit blocks a live check, build behind the port, add the verify script and runbook, and mark it "not verified here".
 
 ## Tests
-These run on real Postgres and Redis. Cover every bullet in acceptance A2–A5.
-- For the race test, run two workers concurrently in the same test.
-- For the crash test, kill a worker mid-job and check the job is re-claimed after its lease expires.
-- Add Playwright for A6.
-- Keep all existing tests green: the backend baseline is in the 006 report, and the UI has 162 Vitest tests and 70 Playwright tests.
+These run on real Postgres and Redis. Cover A1 to A5 and every test the blueprint lists:
+- the contract suite
+- 1,000-event ordering over 3 tenants
+- a relay restart mid-batch, with no loss and no double handling after dedupe
+- the poison message reaching `<topic>.dlq`
+- the switch back to `outbox` with no data migration
+
+**Baseline at the end of Sprint 009:**
+- 1523 backend tests, with 10 skips, all live MinIO.
+- 207 Vitest and 82 Playwright tests. The UI is unchanged in this sprint, but run its checks anyway.
+
+`scripts/check_skips.py --expect 10` must still pass. The pytest suite uses the in-memory Kafka fake. A live Redpanda run goes in `scripts/verify/kafka.sh` and its evidence, never in a skipped pytest.
+
+## Notes from the Architect
+- **Pinning:** pin `aiokafka` exactly, and pin the Redpanda image by version. If the image can be pulled here, run `scripts/verify/kafka.sh` live and save the output.
+- **The fake models real Kafka behaviour:** partitions by key hash, offsets, commit only after the handler succeeds, redelivery of uncommitted messages, and DLQ after `max_attempts`. Don't make it simpler than the contract needs.
+- **The decision rule still holds:** a decision row is never lost because of the bus. Kafka is reached only by the relay, never inside the decision transaction.
+- **SASL:** settings come from the environment only and are never logged. Use `SecretStr`.
+- **Migrations:** add none unless one is truly needed. If one is needed, it is `0011`.
+- **Docs to update:** ADR-0008 (Kafka section), `docs/runbooks/kafka.md`, ARCHITECTURE, README, `.env.example`, CHANGELOG (with a test delta), STATE, ROADMAP and QUESTIONS.
+- **No model or tool attribution** in any file.
 
 ## Run
 If Postgres, Redis or dockerd is down: `(dockerd > /tmp/dockerd.log 2>&1 &)`, then `docker compose up -d postgres redis`.
@@ -25,7 +41,7 @@ Run:
 - `poetry run ruff check api core gateway ports adapters workers tests scripts/e2e`
 - `poetry run mypy`
 - `scripts/check_no_ddl.sh`
-- the full pytest suite (0 skipped)
+- the full pytest suite, and `scripts/check_skips.py --expect 10`
 
 Then in `ui/`: `npm run tokens:check`, lint, tsc, `npm test -- --run`, `npm run build`, `npx playwright test`. Never run `playwright install`.
 

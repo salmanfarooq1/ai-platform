@@ -1,0 +1,9 @@
+ Container redpanda Started 
+kafka-topics  | platform.ingest.completed.dlq  3           1
+[Kkafka-topics exited with code 0
+relay target: KafkaEventBus bootstrap: localhost:19092
+published and closed
+--- rpk topic consume (the command in the runbook)
+key=3c97e8d6-30ae-4bb9-80a0-b804d6735125 headers=ce_specversion:1.0,ce_id:a6e303d8-bcfe-4ad2-8e3c-73d64fb32239,ce_source:/gateway,ce_type:platform.gateway.decision.v1,ce_time:2026-10-05T10:31:10.355612+00:00,ce_tenantid:3c97e8d6-30ae-4bb9-80a0-b804d6735125,content-type:application/json,ce_subject:d-1, value={"decision_id":"d-1","outcome":"allow"}
+ Container kafka-topics Removed 
+ Container redpanda Removed 
