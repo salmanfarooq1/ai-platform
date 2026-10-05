@@ -1,0 +1,36 @@
+$ playwright test e2e/landing.spec.ts (lines from the full run in playwright.txt)
+chunks: gsap-CcIkNsPr.js, hero-scene-DXSaxU3m.js, index-CPL7e_ZJ.js, landing-page-DuVw2Cet.js, react-D8PSM9aF.js, webgl-BvwVgzyW.js
+chunks containing WebGL code: landing-page-DuVw2Cet.js, webgl-BvwVgzyW.js
+app chunks checked: index-CPL7e_ZJ.js, react-D8PSM9aF.js
+  ✓  22 [chromium] › e2e/landing.spec.ts:9:3 › A7 landing page: build output › the WebGL code is its own chunk and no /app chunk contains it (36ms)
+first-contentful-paint ms: 260 webgl requests: [{"name":"hero-scene-DXSaxU3m.js","start":3703.7000000001863},{"name":"webgl-BvwVgzyW.js","start":3704.0999999996275}]
+  ✓  23 [chromium] › e2e/landing.spec.ts:33:3 › A7 landing page: motion on › the WebGL chunk loads after first paint, and the scroll story pins (4.6s)
+  ✓  24 [chromium] › e2e/landing.spec.ts:60:3 › A7 landing page: motion on › scrolling moves the story from the first panel to the last (1.1s)
+  ✓  25 [chromium] › e2e/landing.spec.ts:77:3 › A7 landing page: reduced motion › no GSAP, no WebGL, the poster is shown and every story step is visible (2.8s)
+
+$ ls -la ui/dist/assets (build output)
+69652 Geist-Variable-Bj2R_7yk.woff2
+71368 GeistMono-Variable-Dispecij.woff2
+122934 gsap-CcIkNsPr.js
+2028 hero-scene-DXSaxU3m.js
+26552 index-CJ2OG1Ti.css
+438631 index-CPL7e_ZJ.js
+16937 landing-page-DuVw2Cet.js
+171484 react-D8PSM9aF.js
+878605 webgl-BvwVgzyW.js
+
+$ grep -lE "WebGLRenderer|@react-three" ui/dist/assets/*.js  (which chunks hold three.js code)
+ui/dist/assets/webgl-BvwVgzyW.js
+
+$ grep -cE "WebGLRenderer|THREE\." on the /app chunks (index and react), expect 0
+ui/dist/assets/index-CPL7e_ZJ.js: 0
+ui/dist/assets/react-D8PSM9aF.js: 0
+
+$ grep -E "webgl|gsap|hero-scene" ui/dist/index.html  (entry html preloads), expect no output
+(no matches)
+
+$ grep -o "assets/[a-z-]*-[A-Za-z0-9_-]*\.js" ui/dist/assets/index-*.js | sort -u  (what the entry chunk can load)
+assets/landing-page-DuVw2Cet.js
+assets/react-D8PSM9aF.js
+
+Note: landing-page-*.js matches the WebGL context probe (a getContext call that decides whether to load the scene). It holds no three.js code.

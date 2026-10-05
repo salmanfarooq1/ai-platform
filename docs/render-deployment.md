@@ -21,7 +21,7 @@ variables from the environment:
 | `MIGRATION_DATABASE_URL` | `alembic upgrade head` in the start command | The owner role. |
 | `REDIS_URL` | Cache, rate limit, token budget | **Must have the RediSearch module.** Search, ingest and agent runs answer 503 `dependency_unavailable` while Redis is unreachable. |
 
-Plus `MODE=public-preview` itself, and `WEB_CONCURRENCY=1` to stay inside 512MB. The UI service also needs `PREVIEW_API_KEY` (see the checklist).
+Plus `MODE=public-preview` itself, and `WEB_CONCURRENCY=1` to stay inside 512MB. `PREVIEW_PRINCIPAL_ID` turns on the read-only preview session (see the checklist). The UI service needs no secret.
 
 ### Why Redis needs RediSearch
 
@@ -121,7 +121,7 @@ Render dashboard as secrets in the step below.
 `render.yaml` at the repo root defines the API service (Docker runtime, free
 plan, `/health` health check, `MODE=public-preview`, `WEB_CONCURRENCY=1`) and the UI service
 (`ai-platform-ui`). It marks `GROQ_API_KEY` / `GEMINI_API_KEY` / `DATABASE_URL` /
-`MIGRATION_DATABASE_URL` / `REDIS_URL` (API) and `PREVIEW_API_KEY` (UI) as
+`MIGRATION_DATABASE_URL` / `REDIS_URL` / `PREVIEW_PRINCIPAL_ID` (API) as
 `sync: false` so Render prompts for them as masked secrets instead of
 reading them from the file.
 
@@ -135,7 +135,7 @@ reading them from the file.
 2. Render dashboard → **New** → **Blueprint** → select this repo.
 3. Render reads `render.yaml` and prompts for the secret env vars. Paste in the
    Groq key, Gemini key, Redis Cloud `REDIS_URL`, and the two database URLs and
-   the UI's `PREVIEW_API_KEY` as the checklist below says.
+   `PREVIEW_PRINCIPAL_ID` as the checklist below says.
 4. Deploy. First build installs `poetry install --only main` inside Docker
    and should take a few minutes.
 
@@ -146,11 +146,11 @@ curl https://<service>.onrender.com/health
 ```
 
 Expect `db`, `redis`, and `embedding` all `"ok"` and `"mode":"public-preview"`. Every
-`/v1` route except `/v1/health` needs a key, so search needs the preview key from the checklist:
+`/v1` route except `/v1/health` needs a key, so search needs a key with the `query` scope:
 
 ```bash
 curl -X POST https://<service>.onrender.com/v1/search \
-  -H "Authorization: Bearer $PREVIEW_API_KEY" -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer $GAP_KEY" -H 'Content-Type: application/json' \
   -d '{"query": "customer due diligence requirements", "namespace": "kyc_aml"}'
 ```
 
@@ -192,8 +192,8 @@ One ordered list for moving the hosted stack to the current head. The container 
    run `create-tenant preview` and `create-kb preview kyc_aml` first and use `preview` instead.
    The scopes follow Q5: asking and reading only, no `kb:write`. The agent scope is included because the
    UI's Ask page has an agent mode. Uploads need a separate key with `kb:write`.
-7. **Set `PREVIEW_API_KEY`** on the UI service (`ai-platform-ui`, `sync: false`) to that key and redeploy the UI.
-   nginx adds it to `/api/` calls server-side. The UI container refuses to start without it.
+7. **Set `PREVIEW_PRINCIPAL_ID`** on the API service (`sync: false`) to the id of that principal and redeploy the API.
+   Visitors then get a read-only session at `POST /v1/session/preview`. The UI proxy adds no key.
 8. **Check after the deploy:**
    - `curl https://<api>/health` gives `db`, `redis` and `embedding` `"ok"` and `"mode":"public-preview"`.
    - `curl https://<api>/v1/documents` gives 401. The same call with the key gives the documents.

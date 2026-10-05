@@ -58,8 +58,19 @@ curl localhost:8000/health        # unversioned, for platform health checks
 curl localhost:8000/v1/health     # same payload, versioned
 curl -H "Authorization: Bearer $GAP_KEY" localhost:8000/v1/documents   # every other /v1 route needs a key
 
-# run the UI on :5173
+# run the UI on :5173. Vite proxies /v1 to the API on :8000, so the session cookie is same-site.
 cd ui && npm ci && npm run dev
+# Open http://localhost:5173 and use "Open the workspace". Sign in with an API key. The key needs the audit:read scope
+# to open the governance screens (Decisions, Policies, Keys, Usage, Agent runs):
+#   poetry run python scripts/admin/identity.py create-key <principal-id> --scopes query kb:read kb:write agent audit:read
+
+# UI checks (from ui/). gen:api rewrites src/api/schema.d.ts from docs/openapi.json.
+cd ui && npm run lint && npm run typecheck && npm test -- --run && npm run build
+cd ui && npm run gen:api
+# UI end-to-end tests: real API with fakes, real Postgres and Redis (needs the docker compose services above).
+# Run `npx playwright install chromium` once on a new machine. Then:
+cd ui && npm run e2e
+scripts/verify/lighthouse.sh   # landing page performance, target 85 or more
 
 # checks
 poetry run ruff check api/ core/ gateway/ tests/
@@ -113,7 +124,7 @@ scripts/
 ├── labs/                      # the lab scripts from sections 1-7
 └── corpus/                    # corpus building and ingestion (not shipped)
 tests/                         # unit/, integration/, e2e/ (pytest markers of the same names)
-ui/                            # Vite + React frontend and its nginx proxy
+ui/                            # Vite + React + TypeScript frontend (Tailwind, shadcn/ui), e2e tests, nginx config
 docs/                          # ARCHITECTURE.md, adr/, architecture/FOUNDATION.md, render-deployment.md
 planning/                      # STATE, DECISIONS, ROADMAP, QUESTIONS, RISKS, sprints/
 ```
@@ -403,7 +414,7 @@ A `usage_log` table in Postgres stores one row per LLM-consuming request. The Fi
 - **Two database roles:** the app connects as `gap_app` (`DATABASE_URL`), a role without superuser or `BYPASSRLS`, because those bypass row-level security. The app refuses to start otherwise. Migrations and the admin CLI use the owner role (`MIGRATION_DATABASE_URL`).
 - **Knowledge bases:** the old `namespace` parameter is now a knowledge-base slug checked against the caller's own knowledge bases. An unknown KB and another tenant's KB both give the same 404 `kb_not_found`.
 - **Caches and limits:** cache keys and the semantic-cache index carry the tenant. The rate limit counts per principal, the daily token budget per tenant.
-- **Hosted preview:** the UI's nginx proxy adds the preview tenant's key (`PREVIEW_API_KEY`, a Render secret) server-side, so browsers never hold it. The ordered steps for the hosted database are in `docs/render-deployment.md`.
+- **Hosted preview:** the UI's nginx proxy only forwards `/v1` to the API and adds no key. A visitor gets a read-only session for the principal in `PREVIEW_PRINCIPAL_ID` (ADR-0007). The ordered steps for the hosted database are in `docs/render-deployment.md`.
 
 ---
 

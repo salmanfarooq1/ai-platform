@@ -2,6 +2,35 @@
 
 One short entry per sprint, newest first. Full detail lives in `planning/sprints/`.
 
+## Sprint 005: frontend foundation and showcase
+- **What was built:**
+  - **Web edge (ADR-0007):**
+    - Sign in with an API key. The browser gets an HttpOnly, SameSite=Strict cookie session (Secure outside local) and a CSRF token.
+    - The session lives in Redis and never holds the key.
+    - A revoked key or a disabled principal ends its sessions.
+    - Preview mode starts an automatic read-only session for `PREVIEW_PRINCIPAL_ID` (migration `0006`, `auth_lookup_preview`).
+    - Bearer keys and JWTs work as before.
+  - **Console API:** read-only, under RLS, and gated by the new scope `audit:read` and action `audit.read`.
+    - `GET /v1/decisions` with filters and a cursor, and `/v1/decisions/{id}` with the request trace.
+    - `/v1/policies` and `/v1/policies/{version}`.
+    - `/v1/principals`, with no secrets.
+    - `/v1/usage/summary`.
+  - **New UI** (`ui/`): React and Vite in strict TypeScript, Tailwind with hand-built shadcn-pattern components on Radix, a typed client generated from `docs/openapi.json`, and TanStack Query.
+    - Workspace: Ask, Library and History.
+    - Governance: Decisions explorer, Policies, Keys, Usage and Agent runs.
+    - Also Trust (a placeholder) and System.
+    - A public landing page with a GSAP scroll story and a lazy three.js hero.
+    - The old JavaScript UI and the nginx preview-key injection are removed.
+  - **Design:** the project design skill `.claude/skills/governed-design/` merges apple-design, the MIT taste skill and `docs/UI_GUIDELINES.md` (now 2.0.0).
+  - **Tests and CI:** Vitest, Playwright (against the real API with fakes and real Postgres and Redis), axe, and a CI workflow for the frontend.
+- **Test delta:** backend 709 before, 805 after (0 skipped). Frontend: 34 Vitest and 36 Playwright tests. Lighthouse desktop performance on the landing page is 99. axe found 0 violations in both themes.
+- **QA follow-ups:**
+  - M1: crafted cursors give 400.
+  - M2: revoking a key ends its cookie session.
+  - L1 to L4 are fixed: history is cleared on sign-out, CSRF on sign-out, CI path filters, and session cleanup on failure.
+  - M3 (the sign-in limit behind a proxy) is parked as Q12.
+- **Not verified here:** the UI Docker image build (npm in the build container), and the CI workflow on GitHub.
+
 ## Sprint 004 — gateway core
 - **What was built:**
   - `gateway/`: `enforce(ctx, action) -> Decision` with the stages principal, boundary, policy, input guardrails, rate and budget, in that order. Any exception in any stage is a deny (`internal_error`). `require()` raises `GatewayDenied`. Typed actions `kb.read`, `kb.write`, `model.invoke`, `tool.call`, `agent.run`.

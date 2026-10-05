@@ -13,7 +13,7 @@ The target design and its strict rules live in `docs/architecture/FOUNDATION.md`
 
 ## Stack
 - **Backend:** Python 3.11, Poetry 2, FastAPI with async `asyncpg`, Postgres 16 with pgvector, Redis, LiteLLM, LangGraph, MCP.
-- **UI:** Vite with React 18 and CSS modules, in `ui/`.
+- **UI:** Vite with React 18 and TypeScript (strict), Tailwind and shadcn/ui, TanStack Query, in `ui/`. Playwright tests are in `ui/e2e/`.
 - **Hosting:** Render free tier (`render.yaml`). The database is Neon Postgres.
 - **Modes:** the `MODE` env var is `local`, `public-preview` or `prod`.
 
@@ -41,18 +41,19 @@ scripts/setup_db.sh                       # create rag_platform if missing, migr
 poetry run alembic upgrade head           # migrate only (runs as MIGRATION_DATABASE_URL, falls back to DATABASE_URL)
 poetry run python scripts/admin/identity.py --help   # tenants, principals, API keys (the key is printed once), set-policy / show-policy
 poetry run uvicorn api.main:app --reload  # run API on :8000 (product routes are under /v1)
-cd ui && npm ci && npm run dev            # run UI on :5173
+cd ui && npm ci && npm run dev            # run UI on :5173 (Vite proxies /v1 to :8000)
 poetry run pytest -m unit -q              # unit tests (no external services)
 poetry run pytest -m "integration or e2e" -q -rs  # real Postgres + Redis, fake LLM; skips with a reason if they are down
 poetry run ruff check api/ core/ gateway/ tests/   # lint
 poetry run mypy                           # typecheck (api/ core/ gateway/ config.py)
 poetry run python scripts/update_openapi.py  # refresh docs/openapi.json after an intended API change (unit test fails on drift)
 scripts/check_no_ddl.sh                   # no CREATE/ALTER TABLE outside migrations/
-cd ui && npm run build                    # UI build check
+cd ui && npm run lint && npm run typecheck && npm test -- --run && npm run build   # UI checks
+cd ui && npm run e2e                      # Playwright against the real API with fakes (needs postgres and redis)
 ```
 - **Typecheck:** `poetry run mypy`, configured in `pyproject.toml`. Strict for `core/settings.py`, `api/errors.py`, `api/observability.py`, `api/versioning.py`, non-strict elsewhere.
 - **Schema:** Alembic only (`migrations/`, forward-only). Add a migration for any schema change; never edit `0001` or `0002`. Migrations run as the owner role (`MIGRATION_DATABASE_URL`); the app runs as `gap_app` (`DATABASE_URL`).
-- **Identity and tenancy:** every `/v1` route except `/v1/health` needs `Authorization: Bearer <API key or JWT>`. The tenant comes only from the verified credential, never from a header, query or body. Every request-path query goes through `tenant_connection(pool, tenant_id)`; Postgres row-level security does the rest. The app refuses to start as a superuser or `BYPASSRLS` role, so tests and local runs use `gap_app`, never `postgres`. Scopes: `kb:read`, `kb:write`, `query`, `agent`, `admin`.
+- **Identity and tenancy:** every `/v1` route except `/v1/health` needs `Authorization: Bearer <API key or JWT>`. The tenant comes only from the verified credential, never from a header, query or body. Every request-path query goes through `tenant_connection(pool, tenant_id)`; Postgres row-level security does the rest. The app refuses to start as a superuser or `BYPASSRLS` role, so tests and local runs use `gap_app`, never `postgres`. Scopes: `kb:read`, `kb:write`, `query`, `agent`, `audit:read`, `admin`. Browsers sign in at `POST /v1/session` and then use a `gap_session` cookie plus `X-CSRF-Token` (ADR-0007); bearer keys and JWTs work unchanged.
 - **Gateway:** every model, tool and KB call goes through `gateway.enforce()` (routes `require()` it, the agent and MCP tools too); any error is a deny. A tenant narrows what it may do with a policy (`identity.py set-policy <tenant> <file.json>`); with none, scopes grant against the platform defaults. Every call writes a `gateway_decisions` row (SHA-256 of the input, never the text). A failed decision write on an allow is a deny (503 `decision_unrecorded`). Agent tools and MCP code must not import `litellm`, `langchain_litellm` or `asyncpg` (import-lint test). A table added by a migration needs an explicit `GRANT` to `gap_app`.
 - **API:** every product route is under `/v1`. Only `/` and `/health` are unversioned. Errors are always `{"error": {"code", "message", "request_id"}}`. 401 = no or bad credential, 403 = missing scope, 404 `kb_not_found` = unknown or foreign knowledge base (same body for both).
 - **Tests:** the integration and e2e tiers need `docker compose up -d postgres redis`. They create a throwaway database, connect as `gap_app`, use fake LLM and embeddings (`tests/fakes.py`), and a guard fixture blocks any real network call. The `tenants` fixture gives two tenants with keys of different scopes.

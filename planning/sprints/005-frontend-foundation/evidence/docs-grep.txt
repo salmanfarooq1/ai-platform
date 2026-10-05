@@ -1,0 +1,20 @@
+Scope: 81 files under ui/src, ui/e2e, ui/public, ui/index.html, ui config, docs/UI_GUIDELINES.md, scripts/verify, the frontend workflow
+
+$ em-dash (U+2014) and en-dash (U+2013) search
+matches: 0
+
+$ banned words (case-insensitive, whole word): demo, elevate, seamless, unleash, next-gen, revolutionize, game-changer, delve
+docs/UI_GUIDELINES.md:233: - No filler words such as "elevate", "seamless", "unleash" or "next-gen". No invented numbers.
+matches: 1 (the one match is docs/UI_GUIDELINES.md quoting the banned words as the rule itself)
+
+$ 'demo' as a word in the docs this sprint edited (AGENTS.md and render-deployment.md hold the pre-existing rule text and the old MODE value)
+README.md 0
+AGENTS.md 1
+docs/UI_GUIDELINES.md 0
+docs/render-deployment.md 1
+docs/ARCHITECTURE.md 0
+
+$ docs/UI_GUIDELINES.md header
+# UI guidelines
+
+> Version 2.0.0, October 2026

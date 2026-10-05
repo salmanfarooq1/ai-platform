@@ -126,7 +126,7 @@ Superseded by the Sprint 000 mode rename (`planning/DECISIONS.md`): the hosted m
 **Context:** Koyeb was the original target platform (CLI installed, secrets flow documented). Koyeb had a platform-side outage during deployment that blocked progress and was unrelated to anything in this codebase.
 **Decision:** Switched to Render's free tier, deployed via a `render.yaml` Blueprint (Docker runtime, `/health` check, four secrets prompted at setup rather than committed).
 **Trade-off:** Render's free tier spins the instance down after 15 minutes idle and cold-starts on the next request. Same constraint Koyeb's free tier would have had; not a regression, just a different provider absorbing it.
-Superseded in part by Decision 25 (Sprint 003): `render.yaml` also holds the secrets `MIGRATION_DATABASE_URL` and, on the UI service, `PREVIEW_API_KEY`.
+Superseded in part by Decision 25 (Sprint 003): `render.yaml` also holds the secrets `MIGRATION_DATABASE_URL` and, on the UI service, `PREVIEW_API_KEY`. Sprint 005 removed `PREVIEW_API_KEY` and the nginx key injection (ADR-0007): the API service now has `PREVIEW_PRINCIPAL_ID` and the UI service holds no secret.
 
 ## Decision 24: Platform base: validated settings, Alembic, `/v1`, one error format, structured logs and traces
 **Context:** Every later sprint changes schema, API and config. Without migrations, a versioned API and validated settings, each of those changes is unsafe and unprovable.

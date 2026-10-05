@@ -1,476 +1,286 @@
 # UI guidelines
 
-> Version 1.0.0 · September 2026
-> Authoritative reference for the ai-platform web UI (`ui/`).
-> Built on the `apple-design` skill (`.claude/skills/apple-design/SKILL.md`). Section numbers in brackets, like [§12], point to that skill.
+> Version 2.0.0, October 2026
+> The reference for the web UI in `ui/`.
+> Built on the project design skill (`.claude/skills/governed-design/SKILL.md`), which merges the `apple-design` skill, the taste skill and this file. When they disagree, accessibility and honesty come first, then this file, then the skill. Section numbers in brackets, like [§12], point to the `apple-design` skill.
 
 ---
 
 ## Overview
 
-The platform is a retrieval and reasoning workspace. People ask questions about their documents. It answers with citations, a confidence level, and a record of how it got there.
+The platform runs governed agents on business data. The UI has two jobs. It lets people ask questions and read answers with their evidence. It lets engineers and risk owners see what the platform allowed or denied, under which policy.
 
-The whole UI serves one feeling: **calm confidence**. Every answer should look traceable, not magical.
+**Three rules that do not bend:**
 
-**Three non-negotiable rules:**
-
-1. **Every answer shows its evidence.** Citations, confidence and verification status sit next to the answer, never hidden behind a click.
-2. **Content first, chrome second.** Navigation and toolbars are light, translucent layers. The answer is the loudest thing on screen.
+1. **Every answer shows its evidence.** Citations, confidence and the verdict sit next to the answer.
+2. **Every call leaves a receipt.** The UI can open the decision behind any answer. It never shows the input text, because the platform does not store it.
 3. **Nothing waits for no reason.** Feedback starts on press. Motion is interruptible. No artificial delays.
 
 ---
 
-## 1. Logo
+## 1. Stack and files
 
-### Logo mark
-
-A **rounded square with three stacked lines**, where the last line is shorter and ends in a dot. It reads as "a paragraph, with its source marked."
-
-```
-┌─────────┐
-│ ─────── │
-│ ─────── │
-│ ────  ● │   ← dot: Brand Ink Blue
-└─────────┘
-```
-
-| Property | Value |
+| Part | Choice |
 |---|---|
-| Container | 32 × 32 px, radius 9 px |
-| Container fill | `--ink` (near-black in light, near-white in dark) |
-| Lines | Inverse of container, stroke 2, round caps |
-| Dot | `--brand` (Ink Blue) — the only decorative use of the brand color |
-| SVG viewBox | `0 0 24 24` |
+| Build | Vite, React 18, React Router 6, TypeScript in strict mode |
+| Styling | Tailwind, mapped to the CSS variables in `ui/src/styles/tokens.css` |
+| Components | shadcn/ui patterns on Radix primitives, in `ui/src/components/ui` |
+| Data | TanStack Query. Types come from `docs/openapi.json` through `npm run gen:api` |
+| Icons | Phosphor (`@phosphor-icons/react`), regular weight in the app, light on the landing page |
+| Fonts | Geist Sans and Geist Mono from the `geist` npm package, self-hosted |
+| Landing only | GSAP with ScrollTrigger and SplitText, three.js through `@react-three/fiber` and `@react-three/drei` |
 
-### Lockup
+Layout of `ui/src`: `app` (router, providers, shell, session, theme), `api` (client, endpoints, generated schema), `features/<area>` (screens), `components/ui` (base components), `components/governance` (verdict badge, trace, receipt, states), `landing` (its own lazy chunk).
 
-```
-[mark]  Governed Agent Platform
-```
-
-| Element | Style |
-|---|---|
-| Name | 15px, weight 700, tracking `-0.01em` |
-| Gap | 10px |
-
-Collapsed sidebar or mobile top bar: mark only.
+The shadcn registry is not reachable from every build machine. The components in `components/ui` are written from the shadcn patterns on Radix, and each file names its source in a comment. Never hard-code a hex color in a component. Use a token.
 
 ---
 
-## 2. Mode Badge
+## 2. Console and workspace
 
-The platform runs in modes (`public-preview`, `local`, `prod`) from `/config`. A small pill in the sidebar and on the Overview page shows the mode, so people know what they are talking to.
+The app has two characters. They share tokens and components. They differ in density and tone.
 
-| Mode | Dot color | Meaning |
-|---|---|---|
-| Public preview | Amber `--warning` | Free tier, reduced pipeline (no reranker) |
-| Local | Blue `--brand` | Developer machine |
-| Production | Green `--success` | Full pipeline |
+| Surface | Screens | Density | Character |
+|---|---|---|---|
+| Workspace | Ask, Library, History | Calm. 12px radius cards, generous spacing | The answer and its evidence are the loudest thing on the page |
+| Console | Decisions, Policies, Keys, Usage, Agent runs | Dense. Compact rows (32px), mono for ids | Exact, quiet, scannable. Tables, filters, timelines |
+| Trust and System | Trust, System | Plain and factual | Numbers and states, no decoration |
+| Landing | `/` | Editorial, large type, one scroll story | The only place with scroll-driven motion and WebGL |
 
-Pill: radius full, 1px `--hairline` border, translucent `--material-thin` fill, 11px weight 600 uppercase text, tracking `0.06em`.
+Console tables have a density switch: compact (32px rows) by default, comfortable (40px). Numbers are right-aligned in tabular figures. The console has no scroll-triggered entry animation.
 
 ---
 
-## 3. Color
+## 3. Color and themes
 
-Apple-style color: neutral, adaptive to light and dark, with one quiet brand color. Color carries **meaning**, not decoration.
+Color carries meaning. It is never the only signal: every state also has a word or an icon.
 
-### Brand
+### Brand and neutrals
 
 | Token | Light | Dark | Role |
 |---|---|---|---|
-| `--brand` | `#2F5BEA` | `#6E8BFF` | Primary action, focus ring, links, selected state, logo dot |
-| `--brand-pressed` | `#2449C4` | `#5A77EE` | Primary button while pressed |
-| `--brand-tint` | `rgba(47,91,234,0.10)` | `rgba(110,139,255,0.16)` | Selected rows, active nav fill, highlighted citation |
+| `--brand` | `#2F5BEA` | `#6E8BFF` | Primary action, focus ring, links, selected state |
+| `--brand-tint` | `rgba(47,91,234,0.10)` | `rgba(110,139,255,0.16)` | Selected rows and active nav |
 | `--ink` | `#0B0D12` | `#F3F4F6` | Logo container, strongest text |
-
-### Neutrals (surfaces)
-
-| Token | Light | Dark | Role |
-|---|---|---|---|
-| `--bg-canvas` | `#F6F6F4` | `#0E0F12` | Page background (warm off-white / soft black, never pure) |
-| `--bg-surface` | `#FFFFFF` | `#16181D` | Cards, panels, modals |
+| `--bg-canvas` | `#F6F6F4` | `#0E0F12` | Page background. Never pure white or pure black |
+| `--bg-surface` | `#FFFFFF` | `#16181D` | Cards, panels, dialogs |
 | `--bg-muted` | `#F0F0EE` | `#1C1F25` | Inputs, code blocks, table headers |
-| `--material-thin` | `rgba(255,255,255,0.62)` | `rgba(22,24,29,0.62)` | Translucent sidebar, top bar, toolbars |
+| `--material-thin` | `rgba(255,255,255,0.62)` | `rgba(22,24,29,0.62)` | Sidebar and top bar |
 | `--hairline` | `rgba(0,0,0,0.07)` | `rgba(255,255,255,0.08)` | Every border and divider |
 | `--text-primary` | `#0B0D12` | `#F3F4F6` | Body and headings |
 | `--text-secondary` | `#565B66` | `#A3A8B3` | Supporting copy |
-| `--text-tertiary` | `#8B909B` | `#6F7480` | Labels, metadata, timestamps |
+| `--text-tertiary` | `#5F646F` | `#8E94A0` | Labels, metadata, timestamps |
 
-### Semantic
+### Semantic and verdict tokens
 
-Apple's four feedback kinds [§16]: status, completion, warning, error. Each has one color.
+Each has a text color and a `-tint` for its background. The contrast column is the text color on `--bg-surface`, and on its own tint laid over the surface. All pass WCAG AA (4.5:1) for normal text.
 
-| Token | Light | Dark | Used for |
-|---|---|---|---|
-| `--success` | `#1F9D55` | `#34C77B` | Verified answers, ingest complete, healthy service |
-| `--warning` | `#C27C0E` | `#F0A93B` | Low confidence, partial verification, public-preview mode |
-| `--danger` | `#D6362F` | `#FF6961` | Errors, guardrail blocks, failed ingest |
-| `--info` | `--brand` | `--brand` | In-progress status, neutral notices |
+| Token | Light | Dark | Contrast light (surface / tint) | Contrast dark (surface / tint) |
+|---|---|---|---|---|
+| `--allow` | `#146B41` | `#4CD38A` | 6.5 / 5.6 | 9.3 / 7.1 |
+| `--deny` | `#BF2A22` | `#FF7A72` | 5.9 / 5.0 | 7.0 / 5.6 |
+| `--escalate` | `#8F5600` | `#F2B04A` | 6.0 / 5.2 | 9.4 / 7.2 |
+| `--success`, `--warning`, `--danger` | same as allow, escalate, deny | same | same | same |
+
+### Themes
+
+- The default follows `prefers-color-scheme`. The theme toggle in the top bar sets `data-theme="light"` or `data-theme="dark"` on `<html>` and saves the choice in `localStorage`. A small script in `index.html` applies it before first paint.
+- Tokens are defined three times in `tokens.css`: `:root` (light), `@media (prefers-color-scheme: dark)` guarded by `:root:not([data-theme="light"])`, and `[data-theme="dark"]`.
+- Theme changes ease over 200ms.
+- Every screen is checked in both themes with axe (see section 12).
 
 ### Confidence scale
 
-Retrieval confidence and verification scores map to one scale everywhere (gauge, badges, citation cards, analytics).
-
 | Range | Label | Color |
 |---|---|---|
-| 0.75 – 1.00 | HIGH | `--success` |
-| 0.50 – 0.74 | MEDIUM | `--warning` |
-| 0.00 – 0.49 | LOW | `--danger` |
+| 0.75 to 1.00 | HIGH | `--success` |
+| 0.50 to 0.74 | MEDIUM | `--warning` |
+| below 0.50 | LOW | `--danger` |
 
-Gauges and progress bars always use the scale color on a `--bg-muted` track. Never gray.
-
-### Color rules
-
-- Color is never the only signal. Pair it with a label or icon.
-- Put color on solid layers, not on translucent materials [§12].
-- Theme changes ease over 200ms. No abrupt brightness jumps [§14].
+The tint is always painted over `--bg-surface`, not over whatever is behind the element. This keeps contrast the same in selected rows and on tinted panels.
 
 ---
 
 ## 4. Typography
 
-**One family: Inter** (variable, with optical sizing). Mono: **JetBrains Mono** for IDs, chunk text and code. No display serif. Apple defaults to the system face; Inter is the closest cross-platform match, and falls back to `system-ui` [§15].
-
-```css
---font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
---font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-```
-
-### Type scale
-
-Tracking and leading change with size [§15]. Large text is tight. Small text is slightly open. All sizes are in `rem` so the user's text-size setting scales the layout.
+Geist Sans for the UI. Geist Mono for ids, hashes, codes and JSON. Inter and JetBrains Mono are retired.
 
 | Token | Size | Weight | Leading | Tracking | Use |
 |---|---|---|---|---|---|
-| `display` | `clamp(2.25rem, 4vw, 3.25rem)` | 700 | 1.05 | `-0.025em` | Hero headline on Ask page only |
-| `title-1` | `1.75rem` | 700 | 1.15 | `-0.02em` | Page titles |
-| `title-2` | `1.25rem` | 600 | 1.25 | `-0.012em` | Section titles, modal titles |
+| `display` | `clamp(2.25rem, 4vw, 3.25rem)` | 600 | 1.05 | `-0.025em` | Landing headline |
+| `title-1` | `1.75rem` | 650 | 1.15 | `-0.02em` | Page titles, stat values |
+| `title-2` | `1.25rem` | 600 | 1.25 | `-0.012em` | Section titles |
 | `headline` | `1rem` | 600 | 1.35 | `-0.006em` | Card titles |
-| `body` | `0.9375rem` | 400 | 1.55 | `0` | Answers, prose, user content |
-| `callout` | `0.875rem` | 400 | 1.45 | `0` | Supporting copy |
+| `body` | `0.9375rem` | 400 | 1.55 | `0` | Answers and prose |
+| `callout` | `0.875rem` | 400 | 1.45 | `0` | Supporting copy, controls |
 | `footnote` | `0.8125rem` | 500 | 1.4 | `0.005em` | Metadata, table cells |
-| `caption` | `0.6875rem` | 600 | 1.3 | `0.06em` | UPPERCASE labels, badges |
+| `caption` | `0.6875rem` | 600 | 1.3 | `0.06em` | Uppercase labels |
 
-### Casing rules
-
-- **Sentence case** for buttons, nav items, titles and body. This is the Apple convention: calm, readable.
-- **UPPERCASE only for `caption`**: micro-labels, badges, table headers.
-- Never uppercase user content, answers or document text.
-- Emphasis uses **weight**, not size or color [§15].
-- Numbers in stats and tables use `font-variant-numeric: tabular-nums`.
+- Sentence case for buttons, nav and titles. Uppercase only for `caption`.
+- Sizes are in `rem`. Tailwind exposes them as `text-body`, `text-callout`, and so on.
+- Numbers in tables and stats use tabular figures (`.tabular`).
+- Emphasis uses weight, not size or color.
 
 ---
 
-## 5. Information Architecture
+## 5. Information architecture
 
-The old UI had six flat tabs (Dashboard, Search, Agent, Ingest, Analytics, Documents). Two pairs were the same job split in two. Nav labels should name their contents, not vague umbrellas [§16 Wayfinding].
+| Group | Item | Route | Contains |
+|---|---|---|---|
+| Public | Landing | `/` | What the platform does, the scroll story, the call to action |
+| Public | Sign in | `/signin` | API key form. In public-preview mode also "Continue in read-only preview" |
+| Workspace | Ask | `/app/ask` | Question box with Search and Agent modes and a knowledge base field. Answer, verdict, confidence, evidence, receipt link |
+| Workspace | Library | `/app/library` | Documents table and the upload dialog |
+| Workspace | History | `/app/history` | This browser's asks, each linking to its trace |
+| Governance | Decisions | `/app/decisions`, `/app/decisions/:id` | Filter chips, table, detail panel |
+| Governance | Policies | `/app/policies` | Version list and the JSON document |
+| Governance | Keys | `/app/keys` | Principals, key prefixes and scopes |
+| Governance | Usage | `/app/usage` | Three stat tiles, a chart, denials by stage |
+| Governance | Agent runs | `/app/runs` | Runs table and a step timeline |
+| Platform | Trust | `/app/trust` | A placeholder until the trust sprint |
+| Platform | System | `/app/system` | Service health, mode, limits |
 
-### New navigation — four destinations
-
-| Nav item | Route | Icon (Lucide) | Contains | Replaces |
-|---|---|---|---|---|
-| **Ask** | `/` | `MessageSquareText` | One question box with a mode switch: *Quick answer* (RAG search) or *Deep research* (multi-step agent with verification) | Search + Agent |
-| **Library** | `/library` | `Library` | Searchable, paginated documents table. "Add documents" opens an upload modal. | Documents + Ingest |
-| **Insights** | `/insights` | `ChartNoAxesColumn` | Cost, usage, latency and answer quality over time | Analytics |
-| **System** | `/system` | `Activity` | Service health, uptime, mode, embedding status, version | Dashboard |
-
-- Ask is the home page because asking is the product's purpose [§16 Purpose].
-- Old routes redirect: `/search` and `/agent` → `/`, `/ingest` and `/documents` → `/library`, `/analytics` → `/insights`, `/dashboard` → `/system`.
-- The namespace selector (e.g. `kyc_aml`, `legal`) lives once, in the top bar, as a "Collection" picker. Every page reads it. It is not repeated in each form.
-- The sidebar shows a small health dot next to **System** when a service is down. Wayfinding: problems are visible from anywhere.
-
-### Wayfinding checklist (every page)
-
-- Where am I? Page title plus active nav item.
-- What's here? One line of supporting copy under the title.
-- Where can I go? Sidebar always visible on desktop.
-- How do I get out? Every modal has a close button, `Esc`, and a Cancel action.
+- `/app/*` without a session redirects to `/signin` and returns the person to the page they asked for.
+- The shell has a grouped sidebar (Workspace, Governance, Platform), a top bar with the tenant crumb, a mode chip and a theme toggle, and a skip link. Below 768px the sidebar becomes a menu in the top bar.
+- Agent runs are built from decisions with the action `agent.run`, grouped by request id, until the platform has a runs API.
+- History is stored in `localStorage` only. It holds the question text for this browser, and nothing is sent anywhere.
 
 ---
 
-## 6. Layout
+## 6. Governance patterns
 
-### App shell
+These patterns are our own. They always apply.
 
-```
-┌───────────────┬──────────────────────────────────────────────┐
-│ [Logo lockup] │  Top bar (translucent): Collection ▾   Theme │
-│               ├──────────────────────────────────────────────┤
-│ ● PUBLIC PREVIEW        │                                              │
-│               │   Page title                                 │
-│ Ask           │   Supporting line                            │
-│ Library       │                                              │
-│ Insights      │   [ content column, max 1080px, centered ]   │
-│ System   ●    │                                              │
-│               │                                              │
-│ v1.x.x        │                                              │
-└───────────────┴──────────────────────────────────────────────┘
-```
+### Verdict states
 
-| Region | Standard |
+Each verdict has a token pair, an icon and a word.
+
+| Verdict | Token | Icon | Word |
+|---|---|---|---|
+| Allow | `--allow` | check circle | Allowed |
+| Deny | `--deny` | prohibit | Denied, plus the reason code in mono |
+| Escalate | `--escalate` | hand | Needs approval |
+| Not recorded | `--warning` | warning circle | Not recorded |
+
+Component: `VerdictBadge` in `components/governance`. It carries `data-verdict` for tests.
+
+### Trace timeline
+
+A vertical rail of the gateway decisions in one request, oldest first. Each step shows the action and resource in mono, its verdict, the stage, a timestamp in mono and the time to the next step. The denied step is the visual anchor: a left bar in `--deny`. The step that is open is marked with `aria-current="step"`. Steps never open in a modal.
+
+Component: `TraceTimeline`.
+
+### Receipt
+
+A definition list in mono: decision id, request id, policy version, tenant, principal, action, resource, stage, reason, input SHA-256 and time. Each value has a copy button. A missing value reads "none". The raw input is never shown.
+
+Component: `Receipt`.
+
+### Secrets
+
+The Keys screen shows the prefix, scopes, created time and last-used time. A last-used time that the platform does not track reads "not tracked". A secret appears once, when a key is created, in a copy-once dialog, and is never fetched again. Editing keys and policies is not in the UI. The admin CLI is the writer.
+
+---
+
+## 7. States
+
+Every screen has a loading, an empty and an error state.
+
+- **Loading:** skeletons in the final layout shape. Never a centered spinner on a table.
+- **Empty:** say what would appear here and how to make it appear. Example: "No decisions yet. Every model, tool and knowledge base call writes one row here."
+- **Error:** show the API error `code` and `request_id` in mono, a plain message, and a "Try again" button. Components: `ErrorState`, `EmptyState`, `TableSkeleton`.
+- **Denied:** a denial is not an error. It has its own panel with the verdict badge, the reason code and a link to the receipt.
+- **Read-only session:** actions the session cannot do are disabled, and the page says why.
+
+---
+
+## 8. Components
+
+- Buttons: primary is `--brand` fill. Secondary is a bordered surface. Ghost is text only. Press feedback is `scale(0.97)` on pointer-down. One primary button per view.
+- Inputs: `--bg-muted` fill, hairline border, 36px height, a 2px `--brand` focus ring with offset. Invalid inputs set `aria-invalid` and show the message below.
+- Segmented control: Radix toggle group. Used for the Ask mode, the verdict filter and the row density.
+- Cards: `--bg-surface`, hairline border, 12px radius in the workspace and 8px in the console. No cards inside cards.
+- Tables: real `<table>` with a caption, `scope="col"` headers, a muted header row and hairline dividers. Rows are links for keyboard use. Numbers are right-aligned.
+- Dialog: Radix dialog. Focus is trapped, `Esc` closes, focus returns to the trigger.
+- Stat tile: `caption` label, `title-1` value in tabular figures.
+- Chart: one brand series, hairline gridlines, axis labels in `caption`, and a hidden table with the same numbers.
+- Radius: 8px console, 12px workspace, up to 24px on the landing page only.
+- Shadows are near flat in the app (opacity below 0.06). Hairlines do the structure.
+
+---
+
+## 9. Motion
+
+- **In the app:** only motion that explains a change, such as a row expanding, a panel sliding or a timeline revealing. 150 to 250ms. Animate `transform` and `opacity` only.
+- **Interruptible:** an animation can be redirected from its current value. Input is never blocked during a transition [§3].
+- **Landing page:** GSAP with ScrollTrigger and SplitText runs the pinned scroll story ("Agent asks, Gateway, Policy, Allow or deny, Receipt") and the heading reveals. The story shows five panels that use the real console components with an example request, labelled as an example.
+- **WebGL:** one three.js hero on the whole site, none in the app. A static poster is always in the page. The scene loads as its own chunk a few seconds after the page load and an idle moment, only when motion is allowed and WebGL works. It pauses when it is off screen.
+- **Reduced motion:** GSAP is not loaded. The story is a plain list showing every step. The WebGL chunk is not requested and the poster stays. Springs become short fades.
+- **Narrow screens:** below 768px the story is the plain list too, because the pinned layout does not fit.
+- **Performance:** the landing page scores 85 or more in Lighthouse on desktop. Check it with `scripts/verify/lighthouse.sh`.
+
+---
+
+## 10. Voice and copy
+
+- Short, plain sentences. Technical detail lives in the console, not on the workspace surface.
+- Labels name the thing: "Add documents", not "Submit".
+- Status copy says what is happening now.
+- Errors say what happened and what to do next.
+- Empty states invite the next step.
+- Low confidence answers say so and tell the person to check the sources.
+- No em-dash or en-dash in visible copy. Use a hyphen, a period or a colon.
+- No filler words such as "elevate", "seamless", "unleash" or "next-gen". No invented numbers.
+- The hosted mode is called `public-preview`. The platform has no brand name. Use functional names.
+
+---
+
+## 11. Iconography, depth and ambient background
+
+- Phosphor icons only, regular weight in the app, light on the landing page. No emoji. Sizes: nav 18px, buttons 16px, inline 14px.
+- The sidebar and top bar use `--material-thin` with a 24px blur. Cards and dialogs are solid. A translucent layer never sits on another translucent layer.
+- `prefers-reduced-transparency` and `prefers-contrast: more` make materials solid.
+- The canvas can carry a quiet top wash from `--ambient-wash`. Nothing moves in it.
+
+---
+
+## 12. Accessibility
+
+- WCAG AA in both themes. Body text 4.5:1, large text 3:1.
+- Every control works with the keyboard and has a visible focus ring. The shell has a skip link.
+- Landmarks: `header`, `nav`, `main`, `aside` with labels. One `h1` per page.
+- Live regions: the answer region is polite. Errors use `role="alert"`.
+- Respect `prefers-reduced-motion`, `prefers-reduced-transparency` and `prefers-contrast`.
+- axe runs in Playwright (`ui/e2e/a11y.spec.ts`) on the landing page, Ask (answer and denial) and Decisions (allow and deny detail), in both themes. The bar is zero serious or critical violations.
+
+---
+
+## 13. Pre-flight for any UI change
+
+- [ ] Both themes are checked, and text passes AA.
+- [ ] It works with the keyboard, focus is visible, and Radix primitives keep their ARIA.
+- [ ] It works with reduced motion.
+- [ ] Loading, empty and error states exist.
+- [ ] No hard-coded colors, no em-dashes and no banned words.
+- [ ] A verdict uses an icon, a word and a color together.
+- [ ] Vitest and Testing Library cover the components, and Playwright covers the flow.
+
+---
+
+## 14. History
+
+These parts of version 1 are still true and were kept: calm confidence as the goal, the neutral and brand tokens, the confidence scale, the type scale and casing rules, materials and depth, the motion rules (feedback on press, interruptible, transform and opacity only), and the accessibility rules.
+
+What changed in version 2:
+
+| Version 1 | Version 2 |
 |---|---|
-| Sidebar | 248px, `--material-thin` + `backdrop-filter: blur(24px) saturate(180%)`, right hairline |
-| Top bar | 56px, sticky, same translucent material. No hard bottom border: use a soft scroll-edge fade that appears only once content scrolls under it [§12] |
-| Content column | `max-width: 1080px`, centered, gutters 40px desktop / 24px tablet / 16px mobile |
-| Vertical rhythm | 24px between major blocks, 48px bottom padding |
-| Canvas | `--bg-canvas` with the ambient wash (Section 10) |
-
-Below 900px the sidebar becomes a bottom tab bar with the four destinations (icon + label). No horizontal page scroll at any width.
-
-### Ask page layout
-
-```
-          ● PUBLIC PREVIEW · kyc_aml
-     Ask your documents.
-  Ask anything about your documents.
-
-┌──────────────────────────────────────────┐
-│  [ Quick answer | Deep research ]        │  ← segmented control
-│                                          │
-│  Ask a question…                         │  ← large textarea, 1.125rem
-│                                          │
-│  Options ▾                       [ Ask ] │  ← advanced options one level deeper
-└──────────────────────────────────────────┘
-   Try: [chip] [chip] [chip]
-
-┌───────────────────────────┬──────────────┐
-│ Answer (markdown)         │ Confidence   │
-│                           │ ◔ 0.82 HIGH  │
-│                           │ Verified ✓   │
-│ [👍 👎 feedback]           │ 1.2s · $0.00 │
-└───────────────────────────┴──────────────┘
-  Sources (3)
-  [citation card] [citation card] [citation card]
-
-  ▸ Reasoning steps (Deep research only, collapsed by default)
-```
-
-- Before a question is asked, the hero is centered and the input card sits in the optical middle. After the first answer, the hero shrinks away and the input card docks to the top of the column. Both states use the same element, animated with a spring [§7].
-- **Options** (top-k, retrieval mode, rerank, max iterations, verifier) are hidden behind a disclosure. Common path first, advanced one level deeper [§16 Simplicity].
-
----
-
-## 7. Components
-
-All values below are CSS tokens in `ui/src/styles/tokens.css`. Components use CSS modules.
-
-### Radius
-
-| Token | Value | Use |
-|---|---|---|
-| `--radius-sm` | 8px | Chips, small icon buttons, inline code |
-| `--radius-md` | 12px | Buttons, inputs, nav rows, badges |
-| `--radius-lg` | 16px | Cards, citation cards, table container |
-| `--radius-xl` | 22px | Ask input card, modals, answer panel |
-| `--radius-full` | 9999px | Pills, toggles, avatars, gauges |
-
-Nested corners are concentric: inner radius = outer radius − padding.
-
-### Buttons
-
-| Variant | Style | Use |
-|---|---|---|
-| Primary | `--brand` fill, white text, 15px weight 600, height 40px, `--radius-md` | One per view: Ask, Upload, Save |
-| Secondary | `--bg-muted` fill, `--text-primary` text | Alternative actions |
-| Ghost | Transparent, `--text-secondary`, hover `--bg-muted` | Tertiary: Clear, Cancel, Copy |
-| Destructive | `--danger` text on ghost; fill only in confirm dialogs | Delete |
-
-- **Press feedback on pointer-down**: `:active { transform: scale(0.97) }` with 100ms ease-out [§1].
-- Loading keeps the button's width. Label becomes a spinner plus "Asking…".
-- Disabled: 40% opacity, `cursor: not-allowed`.
-
-### Inputs
-
-- `--bg-muted` fill, 1px `--hairline` border, `--radius-md`, 40px height (textarea grows).
-- Hover: border darkens slightly. Size never changes.
-- Focus: 3px `--brand-tint` ring plus 1px `--brand` border. No layout shift.
-- Invalid: `--danger` border and an inline message below. Validate inline, not only on submit [§16].
-
-### Segmented control (Ask mode)
-
-- `--bg-muted` track, `--radius-md`, 2px inset.
-- Selected segment is a `--bg-surface` pill with a soft shadow. The pill **slides** between segments with a critically damped spring (`bounce: 0, duration: 0.3`). If the user clicks again mid-slide, it re-targets from the current position [§3].
-
-### Cards
-
-- `--bg-surface`, 1px `--hairline`, `--radius-lg`, padding 20px, shadow `--shadow-sm`.
-- No cards inside cards. Group with spacing instead.
-
-### Answer panel
-
-- `--bg-surface`, `--radius-xl`, padding 28px.
-- Markdown body in `body` style. Max line length 68ch.
-- Inline citation markers `[1]` render as small `--brand-tint` pills. Hovering one highlights its citation card below (and vice versa). Proximity plus mapping [§16].
-- Right rail: confidence gauge, verification badge, latency, cost, model.
-
-### Confidence gauge
-
-- Ring, stroke 6, scale color on `--bg-muted` track, value in `title-2` tabular-nums, label in `caption`.
-- The ring draws once with a critically damped spring on first reveal. Reduced motion: appears at final value.
-
-### Citation card
-
-- Header: source title (`headline`), page/chunk id (`footnote`, mono), relevance score as a small scale-colored pill.
-- Body: excerpt, 3 lines clamped, expandable.
-- Selected (linked from answer marker): `--brand-tint` background, `--brand` 1px border.
-
-### Reasoning steps (Deep research)
-
-- Vertical timeline. Each step: small status icon (`Search`, `Brain`, `ShieldCheck`), step name, one-line summary, duration.
-- Collapsed by default behind "Show reasoning (N steps)". Expanding uses height spring + opacity.
-- While the agent runs, the current step shows a live status line. Ongoing status is always visible [§16].
-
-### Guardrail banner
-
-- Inline in the answer area, not a toast: `--danger` or `--warning` left bar (3px), icon `ShieldAlert`, short title, one line of detail.
-
-### Data table (Library)
-
-- Always has search and pagination (10 / 25 / 50).
-- Header row: `caption` style on `--bg-muted`. Rows 48px, hairline dividers, hover `--bg-muted`.
-- Right-aligned action column with icon buttons and tooltips.
-- Loading, empty, no-results and error states are purpose-built rows. Empty state has a primary "Add documents" button.
-- On narrow screens the table scrolls inside its container; the page does not.
-
-### Upload modal (Library → Add documents)
-
-- Opens from the button with `transform-origin` at the button [§7]. Closes back toward it.
-- Modal: `--bg-surface`, `--radius-xl`, max-width 560px, dimming scrim `rgba(0,0,0,0.35)`. Page behind does not scroll.
-- Body: numbered steps — **1 Choose collection**, **2 Drop files**, **3 Review and upload**.
-- Drop zone: dashed `--hairline` border, `--radius-lg`. On drag-over: `--brand-tint` fill and a gentle scale to 1.01.
-- Per-file progress rows. Result reported by toast plus an inline summary.
-- Focus is trapped. `Esc` closes when not uploading. Focus returns to the trigger.
-
-### Toasts
-
-- Bottom-right on desktop, top-center on mobile (never over the tab bar or primary action).
-- `--bg-surface` over a light blur, `--radius-lg`, `--shadow-lg`, 3px semantic left bar plus Lucide icon (`CircleCheck`, `TriangleAlert`, `CircleAlert`, `Info`).
-- Success and info auto-dismiss after 4s. Errors stay until dismissed.
-- Enter from below with a critically damped spring; exit the same way they came [§7].
-- Success: `role="status"`. Warning and error: `role="alert"`.
-- No `alert()`, `confirm()` or ad hoc banners for operation results.
-
-### Stat tile (System, Insights)
-
-- Label in `caption`, value in `title-1` tabular-nums, delta or sub-label in `footnote`.
-- Status dot for service tiles uses the semantic color plus a text label ("Healthy", "Degraded", "Down").
-
-### Charts (Insights)
-
-- One brand-blue series by default. Additional series use a neutral ramp, not a rainbow.
-- Hairline gridlines, `caption` axis labels, tabular numbers, tooltip on hover.
-- Quality chart uses the confidence scale colors.
-
----
-
-## 8. Iconography
-
-- **Lucide React only** (`lucide-react`). No emoji or Unicode glyphs in UI chrome.
-- Stroke width 1.75. Icons inherit text color.
-- Sizes: nav 18px, buttons 16px, inline labels 14px, empty states 28px.
-- Icons sit on the text baseline and are optically centered in buttons.
-
----
-
-## 9. Depth & Materials
-
-Apple uses translucent layers to show hierarchy [§12].
-
-| Layer | Material | Shadow |
-|---|---|---|
-| Canvas | `--bg-canvas` + ambient wash | none |
-| Sidebar, top bar, tab bar | `--material-thin` + blur 24px, saturate 180% | none, hairline edge |
-| Cards | `--bg-surface` (solid) | `--shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.03)` |
-| Ask card, answer panel | `--bg-surface` (solid) | `--shadow-md: 0 8px 24px -8px rgba(0,0,0,0.10)` |
-| Modals, toasts, popovers | `--bg-surface` (solid) | `--shadow-lg: 0 24px 48px -12px rgba(0,0,0,0.18)` |
-
-Rules:
-
-- Bigger surfaces read as thicker: deeper shadow.
-- Never put a translucent surface on another translucent surface.
-- Modal tasks dim the background. Non-blocking panels (reasoning, filters) do not.
-- In dark mode, shadows are weaker; separation comes from a slightly lighter surface and the hairline.
-- `prefers-reduced-transparency: reduce` → materials become solid `--bg-surface`, no blur.
-- `prefers-contrast: more` → hairlines become `--text-tertiary`, materials solid.
-
----
-
-## 10. Ambient Background
-
-A quiet atmosphere, never a flat page, and never loud.
-
-- Top wash: linear gradient from `--brand` at 6% (light) / 10% (dark) opacity to transparent, 480px tall, full width.
-- Nothing moves. No animated gradients, no looping motion [§14].
-- `pointer-events: none`, behind all content.
-
----
-
-## 11. Motion
-
-Springs, not durations. Critically damped by default [§4].
-
-| Token | Motion (framer-motion / `motion`) | Use |
-|---|---|---|
-| `spring.default` | `{ type: 'spring', bounce: 0, duration: 0.35 }` | Most UI: panels, docking input card, segmented pill, disclosures |
-| `spring.snappy` | `{ type: 'spring', bounce: 0, duration: 0.25 }` | Small elements: toasts, chips, tooltips |
-| `spring.momentum` | `{ type: 'spring', bounce: 0.2, duration: 0.4 }` | Only after a flick or drag release (e.g. swiping a toast away) |
-| `press` | CSS `transform: scale(0.97)`, 100ms ease-out | Button and row press feedback |
-
-Rules:
-
-- **Feedback on pointer-down**, never only on click [§1].
-- **Interruptible**: every animation re-targets from its current value. Never block input during a transition [§3].
-- **Symmetric paths**: modals return to the trigger, toasts leave the way they came [§7].
-- **Animate only `transform` and `opacity`** [§11].
-- List reveals (citations, table rows): stagger 30ms, max 6 items, then the rest appear together.
-- No bounce on things that just appear. Bounce only when a gesture carried momentum.
-- **`prefers-reduced-motion: reduce`** → replace slides and springs with 150ms opacity cross-fades. Gauges show their final value. Keep color and opacity changes that aid understanding [§14].
-
----
-
-## 12. Voice & Copy
-
-- Plain, short sentences. No jargon on the surface; technical detail (RRF, rerank, top-k) lives inside Options and tooltips.
-- Labels name the thing: "Add documents", not "Submit". "Ask", not "Run query".
-- Status copy says what is happening now: "Searching 3 sources…", "Verifying answer…".
-- Errors say what happened and what to do: "Upload failed. The file is over 20 MB. Try a smaller file."
-- Empty states invite the next step: "No documents yet. Add documents to start asking questions."
-- Confidence copy is honest: LOW confidence answers show "Low confidence. Check the sources before relying on this."
-
----
-
-## 13. Accessibility
-
-- Contrast: body text at least 4.5:1, large text 3:1, in both themes.
-- Every interactive element is reachable by keyboard with a visible focus ring (`--brand`, 2px, offset 2px).
-- Hit targets at least 40 × 40 px (44 on touch).
-- Landmarks: `nav`, `main`, `header`. One `h1` per page.
-- Live regions: agent step status and toasts announce politely.
-- Respect `prefers-reduced-motion`, `prefers-reduced-transparency`, `prefers-contrast`, and the user's font size.
-
----
-
-## 14. What's Off-Brand
-
-| ❌ Never | ✅ Instead |
-|---|---|
-| Emoji or Unicode glyphs as icons (◈ ⌕ ▲) | Lucide icons |
-| Pure white `#FFF` or pure black `#000` page | `--bg-canvas` warm off-white / soft black |
-| Heavy borders | 1px `--hairline` |
-| Hard 1px divider under the sticky top bar | Scroll-edge fade that appears only on scroll |
-| Uppercase buttons | Sentence case buttons; uppercase only for captions |
-| One fixed `letter-spacing` everywhere | Size-specific tracking from the type scale |
-| Linear or fixed-duration CSS animations on interactive elements | Critically damped springs |
-| Bounce on menus, modals or toasts that just appear | Bounce only after a flick |
-| Feedback only on click / release | Feedback on pointer-down |
-| Locking input during a transition | Interruptible, re-targeting motion |
-| A modal that opens from the center of the screen | Scales out from its trigger, returns to it |
-| Translucent layer stacked on translucent layer | Solid surface over material |
-| Gray progress bars or gauges | Confidence scale colors |
-| Answers without visible sources or confidence | Evidence always beside the answer |
-| Separate pages for the same task (Search vs Agent) | One page, a mode switch |
-| Advanced knobs (top-k, rerank) on the main path | Behind an Options disclosure |
-| `alert()` / `confirm()` | Toasts and branded modals |
-| Namespace selector repeated in every form | One Collection picker in the top bar |
-| Color as the only signal | Color plus label or icon |
+| Four destinations: Ask, Library, Insights, System | Three groups with eleven screens, plus the landing page and sign-in |
+| Preview key added by nginx | A session cookie from `POST /v1/session`. No key in the browser or the proxy |
+| CSS modules | Tailwind on the token variables, with shadcn/ui patterns |
+| Inter and JetBrains Mono | Geist Sans and Geist Mono |
+| Lucide icons | Phosphor icons |
+| One collection picker in the top bar | A knowledge base field on Ask and Library. The field accepts any slug, so a person can see a denial |
+| Plain JavaScript | TypeScript in strict mode, with a client generated from the OpenAPI file |
+
+The old logo and mode badge rules still hold. The logo is a rounded square with three lines, the last one shorter and ending in a dot in `--brand`. The mode chip in the top bar shows `public-preview`, `local` or `prod`, and adds "read-only" for a preview session.

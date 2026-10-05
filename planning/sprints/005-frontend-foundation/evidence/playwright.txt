@@ -1,0 +1,55 @@
+
+Running 36 tests using 1 worker
+
+  ✓   1 [setup] › e2e/auth.setup.ts:8:1 › sign in once and keep the session cookie (606ms)
+axe landing (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=23
+  ✓   2 [chromium] › e2e/a11y.spec.ts:21:5 › axe, light theme › landing page (5.8s)
+axe ask (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓   3 [chromium] › e2e/a11y.spec.ts:27:5 › axe, light theme › Ask, with an answer (1.8s)
+axe ask denied (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓   4 [chromium] › e2e/a11y.spec.ts:34:5 › axe, light theme › Ask, with a denial (1.6s)
+axe decisions denied (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓   5 [chromium] › e2e/a11y.spec.ts:41:5 › axe, light theme › Decisions, with a denied decision open (2.4s)
+axe decisions (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓   6 [chromium] › e2e/a11y.spec.ts:49:5 › axe, light theme › Decisions, with a decision open (2.3s)
+axe landing (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=23
+  ✓   7 [chromium] › e2e/a11y.spec.ts:21:5 › axe, dark theme › landing page (5.7s)
+axe ask (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓   8 [chromium] › e2e/a11y.spec.ts:27:5 › axe, dark theme › Ask, with an answer (1.6s)
+axe ask denied (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓   9 [chromium] › e2e/a11y.spec.ts:34:5 › axe, dark theme › Ask, with a denial (1.6s)
+axe decisions denied (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓  10 [chromium] › e2e/a11y.spec.ts:41:5 › axe, dark theme › Decisions, with a denied decision open (2.5s)
+axe decisions (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓  11 [chromium] › e2e/a11y.spec.ts:49:5 › axe, dark theme › Decisions, with a decision open (2.4s)
+  ✓  12 [chromium] › e2e/governance.spec.ts:11:5 › A6 governed ask, across the real API › signed out › allow: sign in, ask, open the call in Decisions, see Allowed and the policy version (1.3s)
+  ✓  13 [chromium] › e2e/governance.spec.ts:33:5 › A6 governed ask, across the real API › signed out › an unauthenticated visit to /app is sent to sign-in, and a bad key shows the error code (605ms)
+  ✓  14 [chromium] › e2e/governance.spec.ts:41:5 › A6 governed ask, across the real API › signed out › sign out ends the session (669ms)
+  ✓  15 [chromium] › e2e/governance.spec.ts:49:3 › A6 governed ask, across the real API › deny: a knowledge base the policy does not allow shows Denied and its reason code (1.2s)
+  ✓  16 [chromium] › e2e/governance.spec.ts:63:3 › A6 governed ask, across the real API › decisions filters narrow the table and the empty state explains itself (1.0s)
+  ✓  17 [chromium] › e2e/governance.spec.ts:75:3 › A10 parity: Ask, Library and System work in the new UI › Ask in agent mode returns an answer with a verdict and evidence (1.0s)
+  ✓  18 [chromium] › e2e/governance.spec.ts:84:3 › A10 parity: Ask, Library and System work in the new UI › Library lists the ingested document (693ms)
+  ✓  19 [chromium] › e2e/governance.spec.ts:90:3 › A10 parity: Ask, Library and System work in the new UI › System shows healthy services and the mode (575ms)
+  ✓  20 [chromium] › e2e/governance.spec.ts:97:3 › A10 parity: Ask, Library and System work in the new UI › History links an ask to its decision trace (1.2s)
+  ✓  21 [chromium] › e2e/governance.spec.ts:106:3 › A10 parity: Ask, Library and System work in the new UI › Policies, Keys, Usage and Agent runs render real data (1.3s)
+chunks: gsap-CcIkNsPr.js, hero-scene-DXSaxU3m.js, index-CPL7e_ZJ.js, landing-page-DuVw2Cet.js, react-D8PSM9aF.js, webgl-BvwVgzyW.js
+chunks containing WebGL code: landing-page-DuVw2Cet.js, webgl-BvwVgzyW.js
+app chunks checked: index-CPL7e_ZJ.js, react-D8PSM9aF.js
+  ✓  22 [chromium] › e2e/landing.spec.ts:9:3 › A7 landing page: build output › the WebGL code is its own chunk and no /app chunk contains it (36ms)
+first-contentful-paint ms: 260 webgl requests: [{"name":"hero-scene-DXSaxU3m.js","start":3703.7000000001863},{"name":"webgl-BvwVgzyW.js","start":3704.0999999996275}]
+  ✓  23 [chromium] › e2e/landing.spec.ts:33:3 › A7 landing page: motion on › the WebGL chunk loads after first paint, and the scroll story pins (4.6s)
+  ✓  24 [chromium] › e2e/landing.spec.ts:60:3 › A7 landing page: motion on › scrolling moves the story from the first panel to the last (1.1s)
+  ✓  25 [chromium] › e2e/landing.spec.ts:77:3 › A7 landing page: reduced motion › no GSAP, no WebGL, the poster is shown and every story step is visible (2.8s)
+  ✓  26 [chromium] › e2e/preview.spec.ts:6:1 › read-only preview: continue without a key, see the mode chip, cannot add documents (953ms)
+  ✓  27 [chromium] › e2e/responsive.spec.ts:12:1 › landing page fits a phone (613ms)
+  ✓  28 [chromium] › e2e/responsive.spec.ts:20:3 › /app/ask fits a phone (994ms)
+  ✓  29 [chromium] › e2e/responsive.spec.ts:20:3 › /app/decisions fits a phone (844ms)
+  ✓  30 [chromium] › e2e/responsive.spec.ts:20:3 › /app/library fits a phone (904ms)
+  ✓  31 [chromium] › e2e/responsive.spec.ts:20:3 › /app/policies fits a phone (837ms)
+  ✓  32 [chromium] › e2e/responsive.spec.ts:20:3 › /app/keys fits a phone (801ms)
+  ✓  33 [chromium] › e2e/responsive.spec.ts:20:3 › /app/usage fits a phone (837ms)
+  ✓  34 [chromium] › e2e/responsive.spec.ts:20:3 › /app/runs fits a phone (860ms)
+  ✓  35 [chromium] › e2e/responsive.spec.ts:20:3 › /app/system fits a phone (867ms)
+  ✓  36 [chromium] › e2e/responsive.spec.ts:20:3 › /app/history fits a phone (828ms)
+
+  36 passed (1.3m)
