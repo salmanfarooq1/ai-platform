@@ -6,6 +6,7 @@ import type { AgentResponse, SearchResponse } from '@/api/types'
 import { VerdictBadge } from '@/components/governance/verdict-badge'
 import { cn } from '@/lib/utils'
 import { FeedbackButtons } from './feedback-buttons'
+import { GovernanceLine } from './governance-line'
 import { confidenceLevel, type ConfidenceLevel } from './confidence'
 
 const LEVEL_CLS: Record<ConfidenceLevel, string> = { high: 'bg-success-tint text-success', medium: 'bg-warning-tint text-warning', low: 'bg-danger-tint text-danger' }
@@ -63,19 +64,20 @@ export function AnswerView({ kind, data, requestId, queryId, floor }: AnswerView
           <span className="rounded-full bg-muted px-2.5 py-1 text-callout text-fg-secondary">{agent.verified ? 'Verified against sources' : 'Not verified'}</span>
         ) : null}
         {requestId ? (
-          <Link to={`/app/decisions?request_id=${encodeURIComponent(requestId)}`} className="ml-auto inline-flex items-center gap-1 text-callout font-medium text-brand underline-offset-2 hover:underline">
+          <Link to={`/app/decisions?request_id=${encodeURIComponent(requestId)}`} className="ml-auto inline-flex items-center gap-1 text-callout font-medium text-seal underline-offset-2 hover:underline">
             Open receipt in Decisions <ArrowUpRight size={14} aria-hidden="true" />
           </Link>
         ) : null}
       </div>
 
+      <GovernanceLine requestId={requestId} />
       {data.flagged ? (
         <p role="note" className="rounded-sm bg-warning-tint px-3 py-2 text-callout text-warning">
           This answer was flagged{data.flag_reason ? `: ${data.flag_reason}` : ''}. Check the evidence before relying on it.
         </p>
       ) : null}
 
-      <div className="rounded-md border border-hairline bg-surface p-4 text-body leading-relaxed text-fg [&_a]:text-brand [&_li]:ml-5 [&_li]:list-disc [&_p+p]:mt-3 [&_table]:text-callout">
+      <div className="rounded-md border border-hairline bg-surface p-4 text-body leading-relaxed text-fg [&_a]:text-seal [&_li]:ml-5 [&_li]:list-disc [&_p+p]:mt-3 [&_table]:text-callout">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.answer}</ReactMarkdown>
       </div>
 

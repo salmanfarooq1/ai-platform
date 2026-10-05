@@ -88,11 +88,49 @@ test.describe('A7 landing page: reduced motion', () => {
     await expect(page.locator('canvas')).toHaveCount(0)
     await expect(page.getByTestId('scroll-story')).toHaveAttribute('data-motion', 'static')
     expect(await page.locator('.pin-spacer').count()).toBe(0)
-    for (const title of ['Agent asks', 'Gateway', 'Policy', 'Allow or deny', 'Receipt']) {
+    for (const title of ['Agent asks', 'Gateway', 'Policy', 'Allow or deny', 'Record']) {
       await expect(page.getByTestId('scroll-story').getByRole('heading', { level: 3, name: title, exact: true }).first()).toBeVisible()
     }
     // The text is shown in full, not held back by a reveal.
     const opacity = await page.locator('#story-title').evaluate((el) => getComputedStyle(el).opacity)
     expect(opacity).toBe('1')
+  })
+})
+
+test.describe('005b landing page: copy and sections', () => {
+  test('the headline and subline are exact, and the hero is built from real components labelled as examples', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your agents can only ever do less.')
+    await expect(page.getByText('Control what your agents can do. See everything they did.', { exact: true })).toBeVisible()
+    const examples = page.getByTestId('hero-examples')
+    await expect(examples).toContainText('Example data')
+    await expect(examples.getByRole('region', { name: 'Receipt' })).toBeVisible()
+    await expect(examples.getByTestId('deny-callout')).toContainText('Denied at Tenant policy')
+  })
+
+  test('has the use cases, the one reason the gateway sits outside the agent, and no problem section', async ({ page }) => {
+    await page.goto('/')
+    const cases = page.locator('#use-cases')
+    for (const text of ['An internal knowledge assistant over company documents', 'An agent with tool access', 'A team that must see what its agents did']) {
+      await expect(cases).toContainText(text)
+    }
+    await expect(cases).toContainText('The policy lists which knowledge bases can be read.')
+    await expect(cases).not.toContainText('and nothing else')
+    await expect(page.getByRole('heading', { level: 2, name: 'Why the gateway sits outside the agent' })).toBeVisible()
+    await expect(page.getByText('Checks inside agent code can be skipped or changed by that code.').first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: /problem/i })).toHaveCount(0)
+  })
+
+  test('How it works is a public page without GSAP or WebGL', async ({ page }) => {
+    const urls: string[] = []
+    page.on('request', (r) => urls.push(r.url()))
+    await page.goto('/how-it-works')
+    await expect(page.getByRole('heading', { level: 1, name: 'How a call is checked' })).toBeVisible()
+    await page.waitForLoadState('networkidle')
+    expect(urls.filter((u) => /\/assets\/(webgl|gsap|hero-scene)-/.test(u))).toEqual([])
+    await expect(page.locator('canvas')).toHaveCount(0)
+    await expect(page.getByRole('region', { name: 'Receipt' })).toBeVisible()
+    await expect(page.getByText('With no tenant policy, the scopes on the key decide what is allowed, and a policy can only narrow that.')).toBeVisible()
+    await expect(page.getByText('Nothing is allowed by default')).toHaveCount(0)
   })
 })

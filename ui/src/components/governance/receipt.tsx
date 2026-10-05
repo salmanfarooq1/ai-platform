@@ -3,7 +3,10 @@ import { formatTime } from '@/lib/utils'
 import { CopyValue } from './copy-value'
 
 /** The decision receipt. Only the SHA-256 of the input is shown. The raw input is never stored. */
-export function Receipt({ decision }: { decision: DecisionDetail }) {
+const COMPACT = new Set(['Decision id', 'Policy version', 'Action', 'Resource', 'Input SHA-256'])
+
+/** `compact` keeps the five fields that identify the call. The full receipt is the default. */
+export function Receipt({ decision, compact = false }: { decision: DecisionDetail; compact?: boolean }) {
   const rows: Array<[string, string | null]> = [
     ['Decision id', decision.id],
     ['Request id', decision.request_id],
@@ -21,7 +24,7 @@ export function Receipt({ decision }: { decision: DecisionDetail }) {
     <section aria-label="Receipt">
       <h3 className="mb-2">Receipt</h3>
       <dl className="grid grid-cols-[110px_minmax(0,1fr)] gap-x-3 gap-y-2 text-footnote">
-        {rows.map(([k, v]) => (
+        {rows.filter(([k]) => !compact || COMPACT.has(k)).map(([k, v]) => (
           <div key={k} className="contents">
             <dt className="text-fg-secondary">{k}</dt>
             <dd className="min-w-0">

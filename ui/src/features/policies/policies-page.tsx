@@ -44,7 +44,7 @@ export default function PoliciesPage() {
                   type="button"
                   aria-current={v.version === selected ? 'true' : undefined}
                   onClick={() => setParams({ v: String(v.version) }, { replace: true })}
-                  className={cn('flex w-full items-center justify-between rounded-sm border border-hairline px-3 py-2 text-left text-callout', v.version === selected ? 'bg-brand-tint' : 'bg-surface hover:bg-muted')}
+                  className={cn('flex w-full items-center justify-between rounded-sm border border-hairline px-3 py-2 text-left text-callout', v.version === selected ? 'bg-selected' : 'bg-surface hover:bg-muted')}
                 >
                   <span className="mono">v{v.version}</span>
                   <span className="text-footnote text-fg-secondary">{v.active ? 'Active' : formatTime(v.created_at)}</span>

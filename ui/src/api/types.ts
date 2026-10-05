@@ -19,6 +19,12 @@ export type AgentResponse = S['AgentResponse']
 export type AgentCitation = S['AgentCitation']
 export type HealthResponse = S['HealthResponse']
 export type IngestResponse = S['IngestResponse']
+export type Overview = S['Overview']
+export type RequestPage = S['RequestPage']
+export type RequestSummary = S['RequestSummary']
+export type RequestDetail = S['RequestDetail']
+export type ReasonCode = S['ReasonCode']
+export type FirstDeny = S['FirstDeny']
 
 export type Outcome = 'allow' | 'deny'
 
@@ -54,4 +60,12 @@ export interface DecisionFilters {
   policy_version?: number
   request_id?: string
   since?: string
+}
+
+export interface RequestFilters {
+  outcome?: Outcome
+  action?: string
+  policy_version?: number
+  since?: string
+  include_console_reads?: boolean
 }

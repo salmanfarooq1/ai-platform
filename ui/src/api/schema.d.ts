@@ -212,6 +212,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Overview
+         * @description Requests checked and blocked in the window, the top deny reasons and today's token budget.
+         *
+         *     It counts requests (decisions grouped by request id), so the numbers match the request list. A request is
+         *     blocked when any of its decisions was a deny. Requests made only of console reads (`audit.read`,
+         *     `analytics.read`) are left out unless `include_console_reads` is true.
+         */
+        get: operations["overview_v1_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/policies": {
         parameters: {
             query?: never;
@@ -284,6 +308,70 @@ export interface paths {
          *     thumbs-down rate indicates a retrieval or generation regression.
          */
         get: operations["quality_report_v1_quality_report_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/reason-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reason Codes
+         * @description The plain-language catalogue of every reason code. It holds no tenant data.
+         */
+        get: operations["reason_codes_v1_reason_codes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Requests
+         * @description Decisions grouped by request id, newest request first, with filters and a keyset cursor.
+         *
+         *     A request is a deny when any of its decisions was a deny. `since` and `until` apply to the time of the
+         *     first decision of the request. Requests made only of console reads (`audit.read`, `analytics.read`) are
+         *     left out unless `include_console_reads` is true.
+         */
+        get: operations["list_requests_v1_requests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Request
+         * @description One request with its decisions, oldest first. A foreign id and a missing id give the same 404.
+         */
+        get: operations["get_request_v1_requests__request_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -567,6 +655,13 @@ export interface components {
             /** Rate */
             rate: number;
         };
+        /** DenyReasonCount */
+        DenyReasonCount: {
+            /** Count */
+            count: number;
+            /** Reason */
+            reason: string;
+        };
         /** FeedbackRequest */
         FeedbackRequest: {
             /** Comment */
@@ -580,6 +675,17 @@ export interface components {
             rating: "up" | "down";
             /** Request Id */
             request_id: string;
+        };
+        /** FirstDeny */
+        FirstDeny: {
+            /** Action */
+            action: string;
+            /** Reason */
+            reason: string;
+            /** Resource */
+            resource: string | null;
+            /** Stage */
+            stage: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -652,6 +758,46 @@ export interface components {
             revoked: boolean;
             /** Scopes */
             scopes: string[];
+        };
+        /** Overview */
+        Overview: {
+            /** Blocked */
+            blocked: number;
+            budget: components["schemas"]["OverviewBudget"];
+            /** By Day */
+            by_day: components["schemas"]["OverviewDay"][];
+            /** Checked */
+            checked: number;
+            /** Days */
+            days: number;
+            /** Deny Rate */
+            deny_rate: number;
+            /** Top Deny Reasons */
+            top_deny_reasons: components["schemas"]["DenyReasonCount"][];
+        };
+        /** OverviewBudget */
+        OverviewBudget: {
+            /** Limit Tokens */
+            limit_tokens: number;
+            /**
+             * Period
+             * @constant
+             */
+            period: "day";
+            /** Used Tokens */
+            used_tokens: number;
+        };
+        /** OverviewDay */
+        OverviewDay: {
+            /** Blocked */
+            blocked: number;
+            /** Checked */
+            checked: number;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
         };
         /** PolicyDocumentView */
         PolicyDocumentView: {
@@ -728,6 +874,68 @@ export interface components {
             kind: string;
             /** Name */
             name: string;
+        };
+        /** ReasonCode */
+        ReasonCode: {
+            /** Code */
+            code: string;
+            /** Policy Field */
+            policy_field: string | null;
+            /** Sentence */
+            sentence: string;
+            /** Stage */
+            stage: string;
+            /** Title */
+            title: string;
+        };
+        /** RequestDetail */
+        RequestDetail: {
+            /** Decisions */
+            decisions: components["schemas"]["DecisionSummary"][];
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "allow" | "deny";
+            /** Policy Version */
+            policy_version: number | null;
+            principal: components["schemas"]["PrincipalRef"] | null;
+            /** Request Id */
+            request_id: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            tenant: components["schemas"]["TenantRef"];
+        };
+        /** RequestPage */
+        RequestPage: {
+            /** Items */
+            items: components["schemas"]["RequestSummary"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** RequestSummary */
+        RequestSummary: {
+            /** Checks */
+            checks: number;
+            first_deny: components["schemas"]["FirstDeny"] | null;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "allow" | "deny";
+            /** Policy Version */
+            policy_version: number | null;
+            principal: components["schemas"]["PrincipalRef"] | null;
+            /** Request Id */
+            request_id: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
         };
         /** SearchRequest */
         SearchRequest: {
@@ -1207,6 +1415,40 @@ export interface operations {
             };
         };
     };
+    overview_v1_overview_get: {
+        parameters: {
+            query?: {
+                /** @description Number of days to look back */
+                days?: number;
+                /** @description Also count requests made only of console reads */
+                include_console_reads?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Overview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_policies_v1_policies_get: {
         parameters: {
             query?: never;
@@ -1297,6 +1539,99 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reason_codes_v1_reason_codes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReasonCode"][];
+                };
+            };
+        };
+    };
+    list_requests_v1_requests_get: {
+        parameters: {
+            query?: {
+                outcome?: ("allow" | "deny") | null;
+                /** @description Only requests with a decision of this action */
+                action?: string | null;
+                /** @description Only requests of this principal id */
+                principal?: string | null;
+                policy_version?: number | null;
+                since?: string | null;
+                until?: string | null;
+                /** @description Also list requests made only of console reads */
+                include_console_reads?: boolean;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_request_v1_requests__request_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestDetail"];
                 };
             };
             /** @description Validation Error */

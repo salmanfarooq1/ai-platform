@@ -18,8 +18,8 @@ export const DialogContent = forwardRef<ElementRef<typeof DialogPrimitive.Conten
         {...props}
       >
         {children}
-        <DialogPrimitive.Close aria-label="Close" className="absolute right-3 top-3 rounded-sm p-1 text-fg-secondary hover:bg-muted">
-          <X size={16} />
+        <DialogPrimitive.Close aria-label="Close" className="absolute right-3 top-3 rounded-sm p-1 text-fg-secondary transition-colors duration-fast hover:bg-muted hover:text-fg">
+          <X size={16} aria-hidden="true" />
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>

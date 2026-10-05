@@ -6,7 +6,7 @@ test.use({ baseURL: 'http://127.0.0.1:4174', storageState: { cookies: [], origin
 test('read-only preview: continue without a key, see the mode chip, cannot add documents', async ({ page }) => {
   await page.goto('/signin')
   await page.getByRole('button', { name: 'Continue in read-only preview' }).click()
-  await expect(page).toHaveURL(/\/app\/ask$/)
+  await expect(page).toHaveURL(/\/app\/walkthrough$/)
   await expect(page.getByTestId('mode-chip')).toContainText('Public preview')
   await expect(page.getByTestId('mode-chip')).toContainText('read-only')
   await page.goto('/app/library')

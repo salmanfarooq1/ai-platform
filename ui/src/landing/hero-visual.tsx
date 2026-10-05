@@ -57,8 +57,8 @@ export function HeroVisual() {
   }, [])
 
   return (
-    <div ref={box} className="relative aspect-[5/4] w-full overflow-hidden rounded-xl" data-testid="hero-visual" data-webgl={Scene && !reduced ? (ready ? 'ready' : 'loading') : 'off'}>
-      <img src="/hero-poster.svg" width={800} height={640} alt="" decoding="async" className="absolute inset-0 h-full w-full object-cover" data-testid="hero-poster" />
+    <div ref={box} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden opacity-30 [mask-image:linear-gradient(to_bottom,black_55%,transparent)]" data-testid="hero-visual" data-webgl={Scene && !reduced ? (ready ? 'ready' : 'loading') : 'off'}>
+      <Poster />
       {Scene && !reduced ? (
         <div className="absolute inset-0 transition-opacity duration-500" style={{ opacity: ready ? 1 : 0 }}>
           <Suspense fallback={null}>
@@ -68,6 +68,22 @@ export function HeroVisual() {
         </div>
       ) : null}
     </div>
+  )
+}
+
+/** The static poster: a gateway ring with a few requests, drawn with the design tokens. It is always in the page. */
+function Poster() {
+  const dots: Array<[number, number, number]> = [[110, 410, 7], [190, 330, 6], [260, 452, 5], [330, 365, 7], [470, 300, 6], [560, 250, 7], [640, 330, 5], [710, 270, 6], [600, 415, 5]]
+  const denied: Array<[number, number, number]> = [[395, 450, 7], [455, 520, 5], [520, 585, 4]]
+  return (
+    <svg viewBox="0 0 800 640" preserveAspectRatio="xMidYMid slice" focusable="false" className="absolute inset-0 h-full w-full" data-testid="hero-poster">
+      <g transform="translate(400 320) rotate(-18)" fill="none" stroke="var(--seal)">
+        <ellipse rx="150" ry="215" strokeWidth="7" />
+        <ellipse rx="177" ry="254" strokeWidth="2" strokeOpacity="0.4" />
+      </g>
+      <g fill="var(--allow)">{dots.map(([x, y, r]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={r} />)}</g>
+      <g fill="var(--deny)">{denied.map(([x, y, r]) => <circle key={`${x}-${y}`} cx={x} cy={y} r={r} />)}</g>
+    </svg>
   )
 }
 

@@ -3,7 +3,7 @@ import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes } fro
 import { cn } from '@/lib/utils'
 
 const field =
-  'w-full rounded-sm border border-hairline bg-muted px-3 text-callout text-fg placeholder:text-fg-tertiary focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50'
+  'w-full rounded-sm border border-hairline bg-muted px-3 text-callout text-fg placeholder:text-fg-tertiary transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal disabled:opacity-50 aria-[invalid=true]:border-deny'
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(({ className, ...props }, ref) => (
   <input ref={ref} className={cn(field, 'h-9', className)} {...props} />

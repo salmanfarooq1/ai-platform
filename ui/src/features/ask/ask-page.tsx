@@ -1,10 +1,11 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Brain, MagnifyingGlass, PaperPlaneRight } from '@phosphor-icons/react'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '@/api/endpoints'
 import { isApiError } from '@/api/client'
 import type { AgentResponse, SearchResponse, Verdict } from '@/api/types'
+import { DenyCallout } from '@/components/governance/deny-callout'
 import { ErrorState, PageHeader } from '@/components/governance/states'
 import { VerdictBadge } from '@/components/governance/verdict-badge'
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Input, Textarea } from '@/components/ui/input'
 import { addHistory } from '@/features/history/history-store'
 import { AnswerView } from './answer-view'
-import { denyReason } from './deny'
+import { GovernanceLine } from './governance-line'
+import { denyFromError } from './deny'
 
 type Mode = 'search' | 'agent'
 type Outcome =
@@ -22,17 +24,34 @@ type Outcome =
 
 const KB_KEY = 'collection'
 
+/** The plain sentence and the policy field for a denied ask. The stage comes from the recorded decision. */
+function DenyDetail({ requestId, reason }: { requestId: string | null; reason: string }) {
+  const q = useQuery({
+    queryKey: ['request', requestId],
+    queryFn: () => api.requestDetail(requestId as string),
+    enabled: !!requestId,
+    retry: 1,
+    retryDelay: 300,
+    staleTime: 30_000,
+  })
+  const denied = q.data?.decisions.find((d) => d.outcome === 'deny')
+  if (!denied) return null
+  return <DenyCallout reason={denied.reason || reason} stage={denied.stage} policyVersion={denied.policy_version} action={denied.action} resource={denied.resource} />
+}
+
 export default function AskPage() {
   const [mode, setMode] = useState<Mode>('search')
   const [question, setQuestion] = useState('')
   const [kb, setKb] = useState(() => { try { return localStorage.getItem(KB_KEY) ?? '' } catch { return '' } })
+  // Once the field has had focus, the page never fills it in. A late reply from the config call must not overwrite a value being typed.
+  const touched = useRef(false)
   const config = useQuery({ queryKey: ['config'], queryFn: api.config, retry: false, staleTime: 300_000 })
   const kbs = Object.keys(config.data?.namespaces ?? {})
 
   // Start on the first knowledge base the policy shows. The field also accepts another slug, so a person can
   // see what the gateway does with a knowledge base the tenant policy does not allow.
   useEffect(() => {
-    if (!kb && kbs.length > 0) setKb(kbs[0] ?? '')
+    if (!kb && !touched.current && kbs.length > 0) setKb(kbs[0] ?? '')
   }, [kbs, kb])
 
   const ask = useMutation<Outcome, unknown, { mode: Mode; question: string; kb: string }>({
@@ -45,9 +64,8 @@ export default function AskPage() {
         const r = await api.agent({ question, namespace: kb })
         return { kind: 'answer', mode, data: r.data, requestId: r.requestId, queryId: r.headers.get('X-Query-ID') }
       } catch (e) {
-        if (isApiError(e) && e.status === 403 && e.code === 'policy_denied') {
-          return { kind: 'denied', reason: denyReason(e.message), message: e.message, requestId: e.requestId }
-        }
+        const denial = denyFromError(e)
+        if (denial) return { kind: 'denied', ...denial }
         throw e
       }
     },
@@ -87,6 +105,7 @@ export default function AskPage() {
               aria-label="Knowledge base"
               list="kb-options"
               value={kb}
+              onFocus={() => { touched.current = true }}
               onChange={(e) => setKb(e.target.value.trim())}
               placeholder={config.isLoading ? 'Loading' : 'slug'}
               spellCheck={false}
@@ -128,8 +147,10 @@ export default function AskPage() {
           <VerdictBadge verdict="deny" reason={out.reason} />
           <p className="text-callout text-fg">This request was stopped by the gateway before any data was read.</p>
           <p className="mono text-footnote text-fg-secondary">{out.message}</p>
+          <DenyDetail requestId={out.requestId} reason={out.reason} />
+          <GovernanceLine requestId={out.requestId} />
           {out.requestId ? (
-            <Link to={`/app/decisions?request_id=${encodeURIComponent(out.requestId)}`} className="text-callout font-medium text-brand underline-offset-2 hover:underline">
+            <Link to={`/app/decisions?request_id=${encodeURIComponent(out.requestId)}`} className="text-callout font-medium text-seal underline-offset-2 hover:underline">
               Open receipt in Decisions
             </Link>
           ) : null}

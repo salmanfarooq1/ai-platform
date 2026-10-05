@@ -31,7 +31,7 @@ export function Segmented<T extends string>({ value, onChange, options, label, c
         <ToggleGroup.Item
           key={o.value}
           value={o.value}
-          className="inline-flex h-7 items-center gap-1.5 rounded-[6px] px-3 text-footnote font-medium text-fg-secondary transition-colors data-[state=on]:bg-surface data-[state=on]:text-fg data-[state=on]:shadow-sm"
+          className="inline-flex h-7 items-center gap-1.5 rounded-[calc(var(--radius-sm)-2px)] px-3 text-footnote font-medium text-fg-secondary transition-colors duration-fast hover:text-fg data-[state=on]:bg-surface data-[state=on]:text-fg data-[state=on]:shadow-sm"
         >
           {o.icon}
           {o.label}

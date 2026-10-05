@@ -59,7 +59,7 @@ export function ScrollStory() {
       <div ref={pin} className={reduced ? 'py-16' : 'flex min-h-screen flex-col justify-center py-10'}>
         <div className="mx-auto w-full max-w-[1200px] px-4 md:px-8">
           <h2 id="story-title" data-reveal className="mb-8 max-w-2xl text-[clamp(1.6rem,3vw,2.4rem)] font-semibold leading-tight tracking-[-0.02em]">
-            One governed request, from the first question to the receipt
+            One request, from the question to the record
           </h2>
           {reduced ? (
             <ol className="m-0 flex list-none flex-col gap-10 p-0">
@@ -75,7 +75,7 @@ export function ScrollStory() {
               <ol className="m-0 flex list-none flex-col gap-5 p-0">
                 {STORY_STEPS.map((s, i) => (
                   <li key={s.id} data-step className="relative max-w-md pl-4">
-                    <span data-bar aria-hidden="true" className="absolute inset-y-0 left-0 w-0.5 rounded-full bg-brand" style={{ opacity: i === 0 ? 1 : 0 }} />
+                    <span data-bar aria-hidden="true" className="absolute inset-y-0 left-0 w-0.5 rounded-full bg-seal" style={{ opacity: i === 0 ? 1 : 0 }} />
                     <h3 className="text-title-2">{s.title}</h3>
                     <p className="mt-1 text-callout text-fg-secondary">{s.body}</p>
                   </li>

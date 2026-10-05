@@ -30,7 +30,7 @@ export default function HistoryPage() {
                 <p className="mono text-footnote text-fg-secondary">{formatTime(r.at)} {r.mode} {r.kb}</p>
               </div>
               {r.requestId ? (
-                <Link className="text-callout text-brand underline-offset-2 hover:underline" to={`/app/decisions?request_id=${encodeURIComponent(r.requestId)}`}>
+                <Link className="text-callout text-seal underline-offset-2 hover:underline" to={`/app/decisions?request_id=${encodeURIComponent(r.requestId)}`}>
                   Open trace
                 </Link>
               ) : <span className="text-footnote text-fg-tertiary">No trace id</span>}

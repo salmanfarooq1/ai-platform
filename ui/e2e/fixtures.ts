@@ -20,11 +20,13 @@ export function readState(name = 'state.json'): E2EState {
   return JSON.parse(fs.readFileSync(path.resolve(HERE, '.state', name), 'utf8')) as E2EState
 }
 
-export async function signIn(page: Page, key = readState().api_key): Promise<void> {
+/** `first` is true for a browser that has never signed in: it lands on the walkthrough. Later sign-ins land on the Overview. */
+export async function signIn(page: Page, key = readState().api_key, { first = true }: { first?: boolean } = {}): Promise<void> {
   await page.goto('/signin')
   await page.getByLabel('API key').fill(key)
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-  await expect(page).toHaveURL(/\/app\/ask$/)
+  // A new browser opens the walkthrough first. After that, sign-in opens the Overview.
+  await expect(page).toHaveURL(first ? /\/app\/walkthrough$/ : /\/app$/)
 }
 
 export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
@@ -32,7 +34,11 @@ export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<voi
 }
 
 export async function ask(page: Page, kb: string, question: string): Promise<void> {
-  await page.getByRole('combobox', { name: 'Knowledge base' }).fill(kb)
+  const field = page.getByRole('combobox', { name: 'Knowledge base' })
+  // The page fills in the first allowed knowledge base when its config call returns. A person sees that before typing,
+  // so wait for it. Without this, Playwright's focus, select and insert can straddle that re-render and double the text.
+  await expect(field).not.toHaveValue('')
+  await field.fill(kb)
   await page.getByRole('textbox', { name: 'Question' }).fill(question)
   await page.getByRole('button', { name: 'Ask', exact: true }).click()
 }

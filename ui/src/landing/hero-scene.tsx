@@ -14,10 +14,11 @@ function unit(n: number): number {
   return x - Math.floor(x)
 }
 
-function cssColor(name: string, fallback: string): THREE.Color {
+// Colours come from the design tokens at runtime. No colour literal lives in this file.
+function cssColor(name: string): THREE.Color {
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   const c = new THREE.Color()
-  try { c.set(v || fallback) } catch { c.set(fallback) }
+  try { if (v) c.set(v) } catch { /* keep the default colour */ }
   return c
 }
 
@@ -38,8 +39,8 @@ function Requests() {
   useLayoutEffect(() => {
     const m = mesh.current
     if (!m) return
-    const allow = cssColor('--allow', '#4CD38A')
-    const deny = cssColor('--deny', '#FF7A72')
+    const allow = cssColor('--allow')
+    const deny = cssColor('--deny')
     seeds.forEach((s, i) => m.setColorAt(i, s.denied ? deny : allow))
     if (m.instanceColor) m.instanceColor.needsUpdate = true
   }, [seeds])
@@ -77,7 +78,7 @@ function Requests() {
 }
 
 function Gateway() {
-  const ring = useMemo(() => cssColor('--brand', '#6E8BFF'), [])
+  const ring = useMemo(() => cssColor('--seal'), [])
   return (
     <Float speed={1.2} rotationIntensity={0.15} floatIntensity={0.3}>
       <mesh>

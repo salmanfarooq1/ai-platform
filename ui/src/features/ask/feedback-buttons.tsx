@@ -21,10 +21,10 @@ export function FeedbackButtons({ queryId, endpoint }: { queryId: string; endpoi
   const btn = 'rounded-sm p-1.5 text-fg-secondary hover:bg-muted disabled:opacity-60'
   return (
     <div role="group" aria-label="Rate this answer" className="flex items-center gap-1">
-      <button type="button" className={cn(btn, sent === 'up' && 'bg-brand-tint text-fg')} disabled={!!sent} aria-pressed={sent === 'up'} aria-label="Helpful" onClick={() => void rate('up')}>
+      <button type="button" className={cn(btn, sent === 'up' && 'bg-selected text-fg')} disabled={!!sent} aria-pressed={sent === 'up'} aria-label="Helpful" onClick={() => void rate('up')}>
         <ThumbsUp size={16} />
       </button>
-      <button type="button" className={cn(btn, sent === 'down' && 'bg-brand-tint text-fg')} disabled={!!sent} aria-pressed={sent === 'down'} aria-label="Not helpful" onClick={() => void rate('down')}>
+      <button type="button" className={cn(btn, sent === 'down' && 'bg-selected text-fg')} disabled={!!sent} aria-pressed={sent === 'down'} aria-label="Not helpful" onClick={() => void rate('down')}>
         <ThumbsDown size={16} />
       </button>
       {sent ? <span className="ml-2 text-footnote text-fg-secondary">Thanks for the feedback</span> : null}

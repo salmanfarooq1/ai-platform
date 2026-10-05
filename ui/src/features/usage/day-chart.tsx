@@ -1,6 +1,6 @@
 import type { UsageSummary } from '@/api/types'
 
-/** A bar chart of requests per day. Bars use the brand token. A visually hidden table carries the same numbers. */
+/** A bar chart of requests per day. Bars use the ink token. A visually hidden table carries the same numbers. */
 export function DayChart({ days }: { days: UsageSummary['by_day'] }) {
   const W = 640
   const H = 160
@@ -25,7 +25,7 @@ export function DayChart({ days }: { days: UsageSummary['by_day'] }) {
           const x = pad.l + i * bw + bw * 0.15
           return (
             <g key={d.date}>
-              <rect x={x} y={H - pad.b - h} width={bw * 0.7} height={h} rx="3" fill="var(--brand)">
+              <rect x={x} y={H - pad.b - h} width={bw * 0.7} height={h} rx="3" fill="var(--ink)">
                 <title>{`${d.date}: ${d.requests} requests`}</title>
               </rect>
               {days.length <= 14 || i % Math.ceil(days.length / 10) === 0 ? (

@@ -1,14 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { api } from '@/api/endpoints'
 import type { DecisionDetail } from '@/api/types'
+import { DenyCallout } from '@/components/governance/deny-callout'
 import { Receipt } from '@/components/governance/receipt'
 import { ErrorState } from '@/components/governance/states'
 import { TraceTimeline } from '@/components/governance/trace-timeline'
 import { VerdictBadge } from '@/components/governance/verdict-badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useReasonCodes } from '@/lib/reasons'
 
 export function DecisionDetailView({ decision }: { decision: DecisionDetail }) {
   const denied = decision.outcome === 'deny'
+  const { byCode } = useReasonCodes()
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
@@ -18,10 +22,12 @@ export function DecisionDetailView({ decision }: { decision: DecisionDetail }) {
           {decision.resource ? <> on <code className="mono">{decision.resource}</code></> : null}
           {decision.policy_version !== null ? <> under policy version <code className="mono">{decision.policy_version}</code></> : <> under the platform default policy</>}.
         </p>
+        {denied ? <DenyCallout reason={decision.reason} stage={decision.stage} policyVersion={decision.policy_version} /> : null}
+        <Link to={`/app/requests/${encodeURIComponent(decision.request_id)}`} className="self-start text-callout text-seal underline-offset-2 hover:underline">Open the whole request</Link>
       </div>
       <section aria-label="Stage trace">
         <h3 className="mb-2">Trace</h3>
-        <TraceTimeline steps={decision.trace} currentId={decision.id} />
+        <TraceTimeline steps={decision.trace} currentId={decision.id} reasons={byCode} />
       </section>
       <Receipt decision={decision} />
     </div>

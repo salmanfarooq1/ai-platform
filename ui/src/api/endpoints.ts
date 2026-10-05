@@ -1,7 +1,7 @@
 import { get, request, type ApiResult } from './client'
 import type {
   AgentRequest, AgentResponse, DecisionDetail, DecisionFilters, DecisionPage, DocumentRow, HealthResponse, IngestResponse,
-  PlatformConfig, PolicyList, PolicyVersion, PrincipalSummary, SearchRequest, SearchResponse, SessionInfo, UsageSummary,
+  PlatformConfig, PolicyList, ReasonCode, RequestDetail, RequestFilters, RequestPage, Overview, PolicyVersion, PrincipalSummary, SearchRequest, SearchResponse, SessionInfo, UsageSummary,
 } from './types'
 
 export const api = {
@@ -20,6 +20,11 @@ export const api = {
   policies: () => get<PolicyList>('/v1/policies'),
   policy: (version: number) => get<PolicyVersion>(`/v1/policies/${version}`),
   principals: () => get<PrincipalSummary[]>('/v1/principals'),
+  overview: (days = 7) => get<Overview>('/v1/overview', { days }),
+  requests: (filters: RequestFilters, cursor?: string, limit = 50) =>
+    get<RequestPage>('/v1/requests', { ...filters, cursor, limit }),
+  requestDetail: (id: string) => get<RequestDetail>(`/v1/requests/${encodeURIComponent(id)}`),
+  reasonCodes: () => get<ReasonCode[]>('/v1/reason-codes'),
   usage: (days = 7) => get<UsageSummary>('/v1/usage/summary', { days }),
 
   // Workspace

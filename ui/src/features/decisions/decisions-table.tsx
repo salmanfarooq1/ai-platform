@@ -44,7 +44,7 @@ export function DecisionsTable({ items, isLoading, error, onRetry, selectedId, s
           {items.map((d) => {
             const selected = d.id === selectedId
             return (
-              <tr key={d.id} data-outcome={d.outcome} aria-selected={selected || undefined} className={cn(rowH, 'border-t border-hairline', selected ? 'bg-brand-tint' : 'hover:bg-muted')}>
+              <tr key={d.id} data-outcome={d.outcome} aria-selected={selected || undefined} className={cn(rowH, 'border-t border-hairline', selected ? 'bg-selected' : 'hover:bg-muted')}>
                 <td className="mono whitespace-nowrap px-3">
                   <Link to={`/app/decisions/${d.id}${search}`} className="rounded-sm underline-offset-2 hover:underline" aria-label={`Open decision ${d.action} at ${formatTime(d.created_at)}`}>
                     {formatTime(d.created_at)}

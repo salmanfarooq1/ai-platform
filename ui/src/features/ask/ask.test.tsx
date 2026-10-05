@@ -1,6 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
-import { ROUTER_FUTURE } from '@/app/future'
+import { screen } from '@testing-library/react'
+import { renderWithProviders } from '@/test/render'
 import { describe, expect, it } from 'vitest'
 import type { SearchResponse } from '@/api/types'
 import { AnswerView } from './answer-view'
@@ -31,7 +30,7 @@ describe('AnswerView', () => {
   }
 
   it('shows the verdict, confidence, evidence and the receipt link', () => {
-    render(<MemoryRouter future={ROUTER_FUTURE}><AnswerView kind="search" data={data} requestId="req-1" /></MemoryRouter>)
+    renderWithProviders(<AnswerView kind="search" data={data} requestId="req-1" />)
     expect(screen.getByText('Allowed')).toBeInTheDocument()
     expect(screen.getByTestId('confidence')).toHaveTextContent('HIGH 90%')
     expect(screen.getByText('seven years', { selector: 'strong' })).toBeInTheDocument()
@@ -40,13 +39,13 @@ describe('AnswerView', () => {
   })
 
   it('has no receipt link without a request id, and says when there is no evidence', () => {
-    render(<MemoryRouter future={ROUTER_FUTURE}><AnswerView kind="search" data={{ ...data, results: [], total_results: 0 }} requestId={null} /></MemoryRouter>)
+    renderWithProviders(<AnswerView kind="search" data={{ ...data, results: [], total_results: 0 }} requestId={null} />)
     expect(screen.queryByRole('link', { name: /Open receipt/ })).not.toBeInTheDocument()
     expect(screen.getByText('No sources were returned for this answer.')).toBeInTheDocument()
   })
 
   it('shows the flag reason when the answer is flagged', () => {
-    render(<MemoryRouter future={ROUTER_FUTURE}><AnswerView kind="search" data={{ ...data, flagged: true, flag_reason: 'low confidence' }} requestId="r" /></MemoryRouter>)
+    renderWithProviders(<AnswerView kind="search" data={{ ...data, flagged: true, flag_reason: 'low confidence' }} requestId="r" />)
     expect(screen.getByRole('note')).toHaveTextContent('low confidence')
   })
 })

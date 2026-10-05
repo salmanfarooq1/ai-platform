@@ -11,11 +11,12 @@ test.describe('A6 governed ask, across the real API', () => {
     test('allow: sign in, ask, open the call in Decisions, see Allowed and the policy version', async ({ page }) => {
       await signIn(page)
       await expect(page.getByTestId('tenant-crumb')).toHaveText(state().tenant)
+      await page.goto('/app/ask') // sign-in opens the walkthrough or the Overview, so go to Ask
 
       await ask(page, state().allowed_kb, 'How long must customer records be kept?')
       const answer = page.getByRole('region', { name: 'Answer' })
       await expect(answer).toContainText('seven years')
-      await expect(answer.getByText('Allowed')).toBeVisible()
+      await expect(answer.getByText('Allowed', { exact: true })).toBeVisible() // exact: the governance line also says "allowed"
       await expect(answer.getByTestId('confidence')).toBeVisible()
       await expect(answer.getByRole('region', { name: 'Evidence' })).toContainText('retention.md')
 
@@ -40,7 +41,8 @@ test.describe('A6 governed ask, across the real API', () => {
 
     test('sign out ends the session', async ({ page }) => {
       await signIn(page)
-      await page.getByRole('button', { name: 'Sign out' }).click()
+      await page.getByRole('button', { name: 'Session menu' }).click()
+      await page.getByRole('menuitem', { name: 'Sign out' }).click()
       await page.goto('/app/ask')
       await expect(page).toHaveURL(/\/signin$/)
     })
@@ -78,7 +80,7 @@ test.describe('A10 parity: Ask, Library and System work in the new UI', () => {
     await page.getByRole('radio', { name: 'Agent' }).click()
     await ask(page, state().allowed_kb, 'How long must customer records be kept?')
     const answer = page.getByRole('region', { name: 'Answer' })
-    await expect(answer.getByText('Allowed')).toBeVisible()
+    await expect(answer.getByText('Allowed', { exact: true })).toBeVisible() // exact: the governance line also says "allowed"
     await expect(answer.getByRole('region', { name: 'Evidence' })).toBeVisible()
   })
 

@@ -1,4 +1,5 @@
-import type { DecisionSummary } from '@/api/types'
+import type { DecisionSummary, ReasonCode } from '@/api/types'
+import { stageLabel } from '@/lib/stages'
 import { cn, formatTime } from '@/lib/utils'
 import { VerdictBadge } from './verdict-badge'
 
@@ -6,6 +7,8 @@ interface TraceTimelineProps {
   steps: DecisionSummary[]
   /** The decision the viewer opened. It is marked in the rail. */
   currentId?: string
+  /** The reason catalogue. With it, a denied step shows its plain sentence. */
+  reasons?: Record<string, ReasonCode>
 }
 
 function stepDurationMs(steps: DecisionSummary[], i: number): number | null {
@@ -16,7 +19,7 @@ function stepDurationMs(steps: DecisionSummary[], i: number): number | null {
 }
 
 /** A vertical rail of the gateway decisions in one request, oldest first. The deny step anchors a denied trace. */
-export function TraceTimeline({ steps, currentId }: TraceTimelineProps) {
+export function TraceTimeline({ steps, currentId, reasons }: TraceTimelineProps) {
   if (steps.length === 0) {
     return <p className="text-footnote text-fg-secondary">No steps were recorded for this request.</p>
   }
@@ -32,7 +35,7 @@ export function TraceTimeline({ steps, currentId }: TraceTimelineProps) {
               aria-hidden="true"
               className={cn('relative mt-1 h-[15px] w-[15px] shrink-0 rounded-full border-2 bg-surface', denied ? 'border-deny bg-deny' : 'border-allow')}
             />
-            <div className={cn('min-w-0 flex-1 rounded-sm px-2 py-1', denied && 'border-l-2 border-l-deny bg-surface', s.id === currentId && !denied && 'bg-brand-tint')}>
+            <div className={cn('min-w-0 flex-1 rounded-sm px-2 py-1', denied && 'border-l-2 border-l-deny [background:linear-gradient(var(--deny-tint),var(--deny-tint)),var(--bg-surface)]', s.id === currentId && !denied && 'bg-selected')}>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <code className="mono text-footnote font-medium">{s.action}</code>
                 {s.resource ? <code className="mono text-footnote text-fg-secondary">{s.resource}</code> : null}
@@ -40,9 +43,15 @@ export function TraceTimeline({ steps, currentId }: TraceTimelineProps) {
               </div>
               <div className="mono mt-0.5 flex flex-wrap gap-x-3 text-footnote text-fg-secondary">
                 <span>{formatTime(s.created_at)}</span>
-                <span>stage {s.stage}</span>
+                <span className={denied ? 'font-semibold text-deny' : undefined}>stage {s.stage}</span>
                 {ms !== null ? <span>{ms} ms to next</span> : null}
               </div>
+              {denied ? (
+                <p className="mt-1 text-footnote text-fg" data-testid="trace-deny-sentence">
+                  <span className="font-semibold text-deny">{stageLabel(s.stage)}.</span>{' '}
+                  {reasons?.[s.reason]?.sentence ?? 'The gateway stopped this call.'}
+                </p>
+              ) : null}
             </div>
           </li>
         )

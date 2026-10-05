@@ -1,7 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useSyncExternalStore } from 'react'
 
 export type Theme = 'light' | 'dark' | 'auto'
 const KEY = 'theme'
+
+// One shared store, so the session menu and the top bar always agree.
+let current: Theme | null = null
+const listeners = new Set<() => void>()
 
 function read(): Theme {
   try {
@@ -10,6 +14,16 @@ function read(): Theme {
   } catch {
     return 'auto'
   }
+}
+
+function snapshot(): Theme {
+  if (current === null) current = read()
+  return current
+}
+
+function subscribe(fn: () => void): () => void {
+  listeners.add(fn)
+  return () => { listeners.delete(fn) }
 }
 
 function apply(theme: Theme): void {
@@ -24,7 +38,7 @@ export function resolvedIsDark(theme: Theme): boolean {
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(read)
+  const theme = useSyncExternalStore(subscribe, snapshot, () => 'auto' as Theme)
   useEffect(() => { apply(theme) }, [theme])
   const setTheme = useCallback((next: Theme) => {
     try {
@@ -33,7 +47,8 @@ export function useTheme() {
     } catch {
       // Storage can be blocked. The choice still applies for this page view.
     }
-    setThemeState(next)
+    current = next
+    listeners.forEach((fn) => fn())
   }, [])
   const toggle = useCallback(() => setTheme(resolvedIsDark(theme) ? 'light' : 'dark'), [theme, setTheme])
   return { theme, isDark: resolvedIsDark(theme), setTheme, toggle }

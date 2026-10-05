@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
+import { useDensity } from '@/lib/density'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { api } from '@/api/endpoints'
 import type { DecisionFilters, Outcome } from '@/api/types'
@@ -17,7 +18,7 @@ export default function DecisionsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
-  const [density, setDensity] = useState<'compact' | 'comfortable'>('compact')
+  const [density, setDensity] = useDensity()
 
   const outcome = (params.get('outcome') as Outcome | null) ?? undefined
   const action = params.get('action') ?? ''
@@ -108,7 +109,7 @@ export default function DecisionsPage() {
             </div>
           ) : null}
         </div>
-        <aside aria-label="Decision detail" className="h-fit rounded-sm border border-hairline bg-surface p-4 lg:sticky lg:top-[calc(var(--topbar-height)+16px)]">
+        <aside aria-label="Decision detail" className="h-fit rounded-sm border border-hairline bg-surface p-4 lg:sticky lg:top-[calc(var(--layout-topbar-height)+16px)]">
           <DecisionPanel id={id} />
         </aside>
       </div>

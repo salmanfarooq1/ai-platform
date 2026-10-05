@@ -16,7 +16,13 @@ test('landing page fits a phone', async ({ page }) => {
   await expect(page.getByTestId('scroll-story')).toHaveAttribute('data-motion', 'static') // the plain list, not the pinned layout
 })
 
-for (const route of ['/app/ask', '/app/decisions', '/app/library', '/app/policies', '/app/keys', '/app/usage', '/app/runs', '/app/system', '/app/history']) {
+test('how it works fits a phone', async ({ page }) => {
+  await page.goto('/how-it-works')
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await noSidewaysScroll(page, 'how it works')
+})
+
+for (const route of ['/app', '/app/walkthrough', '/app/requests', '/app/ask', '/app/decisions', '/app/library', '/app/policies', '/app/keys', '/app/usage', '/app/runs', '/app/system', '/app/history']) {
   test(`${route} fits a phone`, async ({ page }) => {
     await openApp(page, route)
     await page.waitForLoadState('networkidle')

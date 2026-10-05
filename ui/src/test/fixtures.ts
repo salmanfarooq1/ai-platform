@@ -1,4 +1,4 @@
-import type { DecisionDetail, DecisionSummary } from '@/api/types'
+import type { DecisionDetail, DecisionSummary, ReasonCode } from '@/api/types'
 
 export function decision(over: Partial<DecisionSummary> = {}): DecisionSummary {
   return {
@@ -30,3 +30,11 @@ export function detail(over: Partial<DecisionDetail> = {}): DecisionDetail {
     ...over,
   }
 }
+
+/** A short reason catalogue, like GET /v1/reason-codes. */
+export const CATALOGUE: ReasonCode[] = [
+  { code: 'allowed', title: 'Allowed', sentence: 'The call passed every check.', policy_field: null, stage: 'allow' },
+  { code: 'kb_not_allowed', title: 'Knowledge base not allowed', sentence: 'The policy does not list this knowledge base.', policy_field: 'allowed_kbs', stage: 'policy' },
+  { code: 'token_limit', title: 'Token limit exceeded', sentence: 'The call would use more tokens than the policy allows for one request.', policy_field: 'max_tokens_per_request', stage: 'policy' },
+  { code: 'query_blocked', title: 'Input blocked', sentence: 'The input matched a guardrail.', policy_field: 'blocked_terms', stage: 'guardrails' },
+]
