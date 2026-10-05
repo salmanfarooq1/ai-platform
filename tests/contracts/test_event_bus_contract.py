@@ -1,5 +1,6 @@
 """One contract for every `EventBus` adapter: in-process, a recording fake and the Postgres outbox (Sprint 007).
-The Kafka adapter (010) must pass it too."""
+The Kafka adapter (Sprint 010) passes it too, on the in-memory broker by default and on a live one when
+KAFKA_LIVE_BOOTSTRAP is set (scripts/verify/kafka.sh). The backend is in the test id."""
 from datetime import timezone
 from uuid import uuid4
 
@@ -12,12 +13,21 @@ from adapters.inprocess_events import InProcessEventBus
 from adapters.pg_outbox_events import OutboxEventBus
 from ports import CloudEvent
 from tests.fakes import FakeEventBus
+from tests.kafka_helpers import BACKEND as KAFKA_BACKEND
+from tests.kafka_helpers import make_bus
 
 TENANT = str(uuid4())  # a real uuid: the outbox keys its rows by tenant
 
 
-@pytest_asyncio.fixture(params=["in-process", "fake-recording", "outbox"])
+@pytest_asyncio.fixture(params=["in-process", "fake-recording", "outbox", KAFKA_BACKEND])
 async def bus(request):
+    if request.param == KAFKA_BACKEND:
+        kafka_bus, _ = make_bus()
+        try:
+            yield kafka_bus
+        finally:
+            await kafka_bus.close()
+        return
     if request.param != "outbox":
         yield {"in-process": InProcessEventBus, "fake-recording": FakeEventBus}[request.param]()
         return
