@@ -5,10 +5,10 @@ import argparse
 import requests
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from core.pipeline.db_ingest import ingestion_pipeline
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _tenant import corpus_tenant_id  # noqa: E402 - the script directory is added to sys.path just above
+from _standalone import standalone_ingest  # noqa: E402 - same reason: the script directory is on sys.path
 
 KYC_DIR = Path("data/compliance/real/kyc_aml")
 
@@ -67,7 +67,7 @@ async def stage_ingest(documents: list[dict]):
         print(f"  [INGEST] {doc['filename']:<35} (namespace=kyc_aml, doc_id={doc_id})")
         
         try:
-            metrics = await ingestion_pipeline(
+            metrics = await standalone_ingest(
                 input_file_path=str(filepath),
                 document_id=doc_id,
                 namespace="kyc_aml",

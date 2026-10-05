@@ -97,8 +97,10 @@ from deepeval.metrics import (
 )
 from deepeval.test_case import LLMTestCase
 
+from adapters.registry import build_adapters
+from api.services.embedding import embed_query
 from core.database.pool import create_pool
-from api.services.cache import embed_query
+from core.settings import get_settings
 from api.services.retriever import retrieve, RetrieverConfig
 from config import LLM_CONFIG
 
@@ -430,6 +432,7 @@ class GeminiJudge(DeepEvalBaseLLM):
 # Generation + retrieval
 # ---------------------------------------------------------------------------
 _embedding_cache: dict = {}
+ADAPTERS = None  # the ports of this run (adapters/registry.py), set in main() once the pool exists
 
 
 async def get_cached_embedding(question: str):
@@ -437,7 +440,7 @@ async def get_cached_embedding(question: str):
     rerank flag differs) — embedding it twice per question was pure waste.
     This halves embedding calls for the full run (26 -> 13)."""
     if question not in _embedding_cache:
-        _embedding_cache[question] = await embed_query(question)
+        _embedding_cache[question] = await embed_query(ADAPTERS.embeddings, question)
     return _embedding_cache[question]
 
 
@@ -465,7 +468,7 @@ async def collect_for_mode(pool, config: RetrieverConfig, mode_name: str,
 
         embedding = await get_cached_embedding(question)
         chunks = await retrieve(
-            pool=pool,
+            store=ADAPTERS.knowledge,
             query=question,
             query_embedding=embedding,
             namespace=namespace,
@@ -506,7 +509,7 @@ async def collect_for_mode(pool, config: RetrieverConfig, mode_name: str,
             await rate_limiter.acquire()
             is_error = False
             try:
-                answer_obj, _meta = await generate_with_citations(eval_query, db_chunks)
+                answer_obj, _meta = await generate_with_citations(ADAPTERS.llm, eval_query, db_chunks)
                 answer = answer_obj.answer
 
                 # Confirmed shape (from a real dry run, 2026-07-27): _meta is a
@@ -638,7 +641,9 @@ async def run_dry_run(pool, rate_limiter, cost_guard, metrics):
 
 # ---------------------------------------------------------------------------
 async def main():
+    global ADAPTERS
     pool = await create_pool()
+    ADAPTERS = build_adapters(get_settings(), pool=pool)
 
     rate_limiter = RateLimiter(GEMINI_RPM_CAP)
     cost_guard = CostGuard(MAX_RUN_COST_USD, verbose=DRY_RUN)

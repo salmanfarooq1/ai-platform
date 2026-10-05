@@ -1,0 +1,22 @@
+axe landing (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=23
+  ✓   2 [chromium] › e2e/a11y.spec.ts:21:5 › axe, light theme › landing page (5.8s)
+axe ask (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓   3 [chromium] › e2e/a11y.spec.ts:27:5 › axe, light theme › Ask, with an answer (1.8s)
+axe ask denied (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓   4 [chromium] › e2e/a11y.spec.ts:34:5 › axe, light theme › Ask, with a denial (1.6s)
+axe decisions denied (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓   5 [chromium] › e2e/a11y.spec.ts:41:5 › axe, light theme › Decisions, with a denied decision open (2.4s)
+axe decisions (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓   6 [chromium] › e2e/a11y.spec.ts:49:5 › axe, light theme › Decisions, with a decision open (2.3s)
+axe landing (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=23
+  ✓   7 [chromium] › e2e/a11y.spec.ts:21:5 › axe, dark theme › landing page (5.7s)
+axe ask (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓   8 [chromium] › e2e/a11y.spec.ts:27:5 › axe, dark theme › Ask, with an answer (1.6s)
+axe ask denied (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓   9 [chromium] › e2e/a11y.spec.ts:34:5 › axe, dark theme › Ask, with a denial (1.6s)
+axe decisions denied (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓  10 [chromium] › e2e/a11y.spec.ts:41:5 › axe, dark theme › Decisions, with a denied decision open (2.5s)
+axe decisions (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓  11 [chromium] › e2e/a11y.spec.ts:49:5 › axe, dark theme › Decisions, with a decision open (2.4s)
+
+axe scans with zero violations: 10 of 10. Required: 0 serious or critical. Source: ui/e2e/a11y.spec.ts, run in playwright.txt.

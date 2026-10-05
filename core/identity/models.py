@@ -1,6 +1,6 @@
 """Typed identity models. A Principal is immutable and is built only from a verified credential."""
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Literal
 from uuid import UUID
@@ -16,6 +16,7 @@ class Scope(str, Enum):
     KB_WRITE = "kb:write"
     QUERY = "query"
     AGENT = "agent"
+    AUDIT_READ = "audit:read"
     ADMIN = "admin"
 
 
@@ -33,6 +34,9 @@ class Principal:
     tenant_id: UUID
     kind: PrincipalKind
     scopes: frozenset[str]
+    # The API key this principal was authenticated with, when it was one. A run token minted for the principal ends when
+    # that key is revoked (Sprint 009 QA L6). Not part of identity: two principals are equal by id, tenant, kind and scopes.
+    credential_id: UUID | None = field(default=None, compare=False)
 
     def has_scope(self, scope: Scope | str) -> bool:
         needed = scope.value if isinstance(scope, Scope) else scope

@@ -1,0 +1,16 @@
+dist/assets/gsap-CcIkNsPr.js                   122.93 kB │ gzip:  48.91 kB
+dist/assets/react-CxfcT2zT.js                  171.48 kB │ gzip:  56.23 kB
+dist/assets/ask-page-MKMPtSBh.js               185.87 kB │ gzip:  56.43 kB
+dist/assets/index-DbvmOWjA.js                  247.87 kB │ gzip:  76.23 kB
+dist/assets/webgl-gc836SuQ.js                  878.61 kB │ gzip: 235.14 kB
+✓ built in 32.93s
+     landing-page-BnGaI8DY.js
+     gsap-CcIkNsPr.js
+     webgl-gc836SuQ.js
+
+PASS
+
+5. Nothing from the must-not-claim list on the public pages
+ok   12 landing files scanned for \b(approvals?|approve[sd]?|signed receipts?|hash chains?|uptime|availability|customers?|testimonials?|customer logos?|logo wall|kafka|openshell|sandbox(ed)?|pii|redaction|opa|eval gate|metrics dashboards?|enterprise-grade|trusted by)\b
+
+PASS

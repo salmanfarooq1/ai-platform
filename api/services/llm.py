@@ -1,9 +1,9 @@
 import logging
 
-import litellm
 from pydantic import BaseModel, Field
 
-from config import LLM_CONFIG, MODEL_PRICING
+from config import LLM_CONFIG
+from ports import LLMPort
 
 logger = logging.getLogger("api.services.llm")
 
@@ -30,6 +30,7 @@ Question: {question}
 """
 
 async def generate_with_citations(
+    llm: LLMPort,
     query: str,
     chunks: list[dict],
     model: str | None = None,
@@ -41,20 +42,20 @@ async def generate_with_citations(
 
     model_to_use = model or LLM_CONFIG["model"]
 
-    response = None
+    completion = None
     for attempt in range(3):
         try:
-            response = await litellm.acompletion(
-                model=model_to_use,
-                messages=[{
+            completion = await llm.complete(
+                [{
                     "role": "user",
                     "content": GENERATION_PROMPT.format(
                         context_with_ids=context_with_ids,
                         question=query
                     )
                 }],
+                model=model_to_use,
+                max_tokens=GENERATION_MAX_TOKENS,
                 response_format=GeneratedAnswer,
-                max_tokens=GENERATION_MAX_TOKENS
             )
             break
         except Exception as e:
@@ -65,15 +66,13 @@ async def generate_with_citations(
             else:
                 raise
 
-    if response is None:  # unreachable: the loop either breaks with a response or raises
+    if completion is None:  # unreachable: the loop either breaks with a completion or raises
         raise RuntimeError("LLM call returned no response")
-    finish_reason = response.choices[0].finish_reason
-    if finish_reason == "length":
+    if completion.finish_reason == "length":
         logger.warning(f"[llm] Response truncated at max_tokens limit. model={model_to_use} query='{query[:60]}'")
         raise ValueError("LLM response was truncated (finish_reason=length).")
 
-    raw_content = response.choices[0].message.content
-    answer_obj = GeneratedAnswer.model_validate_json(raw_content)
+    answer_obj = GeneratedAnswer.model_validate_json(completion.text)
 
     hydrated_citations = []
     for cit in answer_obj.citations:
@@ -93,17 +92,10 @@ async def generate_with_citations(
 
     answer_obj.citations = hydrated_citations
 
-    usage = getattr(response, "usage", None)
-    prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
-    completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
-
-    rates = MODEL_PRICING.get(model_to_use, {"input": 0.0, "output": 0.0})
-    llm_cost = (prompt_tokens / 1_000_000) * rates["input"] + (completion_tokens / 1_000_000) * rates["output"]
-
     usage_dict = {
-        "prompt_tokens": prompt_tokens,
-        "completion_tokens": completion_tokens,
-        "total_cost": llm_cost,
+        "prompt_tokens": completion.tokens_in,
+        "completion_tokens": completion.tokens_out,
+        "total_cost": completion.cost_usd,
         "routed_model": model_to_use,
         "model": model_to_use,  # FinOps reads this key to price and log the request
     }
@@ -111,8 +103,9 @@ async def generate_with_citations(
     return answer_obj, usage_dict
 
 async def generate_with_routing(
+    llm: LLMPort,
     query: str,
     chunks: list[dict],
     model: str | None = None,
 ) -> tuple[GeneratedAnswer, dict]:
-    return await generate_with_citations(query, chunks, model=model)
+    return await generate_with_citations(llm, query, chunks, model=model)

@@ -8,11 +8,13 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from uuid import UUID
 
-from asyncpg import Connection, Pool
+from asyncpg import Connection, Pool, Record
 
-# The pool type, for callers that must not import asyncpg directly (api/agent/tools.py, api/mcp/*: see the
-# import-lint test). Data access goes through `tenant_connection`.
+# The pool and row types, for callers that must not import asyncpg directly (routes, services, the gateway,
+# the agent and MCP: see the import-lint test). Data access goes through `tenant_connection` or a port.
 DbPool = Pool
+DbRecord = Record
+DbConnection = Connection
 
 
 @asynccontextmanager

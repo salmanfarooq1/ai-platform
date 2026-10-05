@@ -4,7 +4,7 @@ The stage list in `gateway/enforce.py` is data, so a new stage (PII, approvals) 
 entry. A stage that raises is turned into a deny by `enforce()`.
 """
 from gateway.guardrails import check_input_text
-from gateway.limits import check_budget, check_rate
+from gateway.limits import check_budget, check_cost, check_rate
 from gateway.policy import PolicyEngine, PythonPolicyEngine
 from gateway.types import Action, ActionKind, Decision, DependencyUnavailable, EnforcementContext
 
@@ -79,4 +79,18 @@ async def token_budget(ctx: EnforcementContext, action: Action) -> Decision | No
         return _deny(ctx, "budget", "dependency_unavailable", "A required service is unavailable. Try again shortly.")
     if result.exceeded:
         return _deny(ctx, "budget", "daily_token_budget_exceeded", result.message, result.headers)
+    return None
+
+
+async def cost_cap(ctx: EnforcementContext, action: Action) -> Decision | None:
+    """The daily cost circuit breaker: over the cap the call is denied (429), and with Redis down it is denied too."""
+    if not action.budget:
+        return None
+    assert ctx.principal is not None
+    try:
+        result = await check_cost(ctx.runtime, ctx.principal.tenant_id, ctx.boundary.daily_cost_cap_usd)
+    except DependencyUnavailable:
+        return _deny(ctx, "cost", "dependency_unavailable", "A required service is unavailable. Try again shortly.")
+    if result.exceeded:
+        return _deny(ctx, "cost", "cost_cap_exceeded", result.message, result.headers)
     return None

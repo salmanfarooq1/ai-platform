@@ -1,0 +1,16 @@
+# Revert checks (mutations): each guard below was removed in turn, the tests named were run, and the file was restored.
+# A passing guard test that stays green with its guard removed would be worth nothing. All seven failed as they should.
+M1 the auth middleware accepts a run token on a route outside its run (api/middleware/auth.py)
+   -> FAILED tests/e2e/test_sandbox_runs.py::test_a_run_token_is_refused_on_every_route_outside_its_run_and_each_refusal_leaves_a_deny_row
+M2 the policy stage stops checking tool arguments (gateway/policy.py)
+   -> FAILED tests/unit/test_tool_arguments.py::test_arguments_that_do_not_fit_are_denied_with_the_new_reason[arguments0]
+M3 sandbox event details are no longer redacted (adapters/sandbox_events.py)
+   -> FAILED tests/unit/test_sandbox_units.py::test_credentials_are_replaced_in_every_value_and_the_runs_own_token_always
+M4 the run token is not revoked when the run ends (adapters/openshell_runtime.py)
+   -> FAILED tests/e2e/test_sandbox_runs.py::test_a2_the_run_writes_a_start_and_an_exit_event_and_its_token_is_revoked
+M5 token expiry is not checked (core/identity/run_tokens.py)
+   -> FAILED tests/integration/test_run_tokens.py::test_an_expired_token_is_rejected
+M6 the per-run tool call count is lost (gateway/context.py)
+   -> FAILED tests/e2e/test_sandbox_runs.py::test_the_tool_call_limit_counts_across_the_http_calls_of_one_run
+M7 the run uses the tenant's current policy instead of the boundary in its token (api/routers/sandbox.py)
+   -> FAILED tests/e2e/test_sandbox_runs.py::test_the_boundary_in_the_token_is_the_one_the_run_gets_a_narrower_policy_later_is_not_applied_and_a_wider_one_neither

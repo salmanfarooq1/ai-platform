@@ -1,0 +1,46 @@
+$ npm run lint
+
+> ai-platform-ui@2.0.0 lint
+> eslint . --max-warnings 0
+
+exit=0
+
+$ npx tsc --noEmit
+exit=0
+
+$ npm test -- --run
+> ai-platform-ui@2.0.0 test
+> vitest --run
+ RUN  v2.1.9 /home/user/ai-platform/ui
+ ✓ src/components/governance/governance.test.tsx (15 tests) 862ms
+ ✓ src/features/walkthrough/walkthrough.test.tsx (5 tests) 674ms
+   ✓ WalkthroughPage > runs one allowed and one blocked request and shows both side by side, the blocked one at the guardrails stage 447ms
+ ✓ src/features/requests/requests.test.tsx (10 tests) 1137ms
+   ✓ RequestsTable > lists one row per request with outcome, checks, the stage that stopped it and the policy 332ms
+ ✓ src/features/overview/overview.test.tsx (9 tests) 517ms
+ ✓ src/app/command-palette.test.tsx (8 tests) 1021ms
+   ✓ CommandPalette > is a combobox over a listbox, named for what it does 431ms
+ ✓ src/components/ui/ui.test.tsx (10 tests) 555ms
+ ✓ src/lib/reasons.test.tsx (7 tests) 140ms
+ ✓ src/styles/tokens.test.ts (7 tests) 30ms
+ ✓ src/api/client.test.ts (9 tests) 23ms
+ ✓ src/components/governance/deny-callout.test.tsx (6 tests) 133ms
+ ✓ src/features/auth/signin-page.test.tsx (3 tests) 551ms
+   ✓ SignInPage destination > opens the walkthrough the first time, and remembers it 344ms
+ ✓ src/app/session-menu.test.tsx (4 tests) 923ms
+   ✓ SessionMenu > shows who you are, the tenant and the scopes 401ms
+ ✓ src/features/ask/ask.test.tsx (5 tests) 336ms
+ ✓ src/features/auth/signin-form.test.tsx (4 tests) 625ms
+   ✓ SignInForm > keeps the submit button disabled until a key is typed, and masks the key 385ms
+ ✓ src/features/ask/governance-line.test.tsx (6 tests) 597ms
+   ✓ GovernanceLine > says the record is not available, with the error code, when the lookup fails 325ms
+ ✓ src/styles/contrast.test.ts (3 tests) 14ms
+ ✓ src/app/session.test.tsx (1 test) 32ms
+ ✓ src/components/governance/trace-deny.test.tsx (4 tests) 364ms
+ ✓ src/styles/color-guard.test.ts (2 tests) 8ms
+ ✓ src/features/ask/ask-page.test.tsx (2 tests) 424ms
+   ✓ AskPage knowledge base field > starts on the first knowledge base the policy allows 306ms
+ Test Files  20 passed (20)
+      Tests  120 passed (120)
+   Start at  10:39:11
+   Duration  24.87s (transform 1.33s, setup 3.46s, collect 30.50s, tests 8.97s, environment 19.72s, prepare 1.92s)

@@ -1,0 +1,7 @@
+lighthouse desktop performance: 99 (lighthouse 12.8.2)
+  first-contentful-paint: 0.7 s
+  largest-contentful-paint: 0.9 s
+  total-blocking-time: 0 ms
+  cumulative-layout-shift: 0.023
+  speed-index: 0.7 s
+  interactive: 0.9 s

@@ -79,10 +79,10 @@ async def test_rate_limit_is_429_in_standard_format(client, monkeypatch, fake_ll
     assert HEX32.match(third.headers["X-Trace-ID"])  # even rejected requests are traceable
 
 
-async def test_token_budget_is_429_in_standard_format(client, app, tenant_a, fake_llm, fake_embeddings):
+async def test_token_budget_is_429_in_standard_format(client, app, tenant_a, fake_llm, fake_embeddings, redis_raw):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     # The budget is per tenant now: the key carries the tenant id, not a namespace.
-    await app.state.redis.set(f"budget:{tenant_a.id}:{today}", config.DEFAULT_DAILY_TOKEN_BUDGET)
+    await redis_raw.set(f"budget:{tenant_a.id}:{today}", config.DEFAULT_DAILY_TOKEN_BUDGET)
 
     resp = await client.post("/v1/search", json={"query": "anything about retention", "namespace": "legal"})
 
@@ -167,7 +167,7 @@ async def test_request_log_line_is_json_with_both_ids(client, json_logs):
 async def test_logs_written_inside_the_request_carry_its_ids(client, json_logs, fake_embeddings):
     resp = await client.post("/v1/ingest", params={"namespace": "legal"},
                              files={"file": ("a.md", b"# A\n\nsome text\n", "text/markdown")})
-    assert resp.status_code == 200
+    assert resp.status_code == 202
 
     inner = [line for line in json_logs() if line["logger"] == "api.finops"]
     assert inner, "FinOps logs while the request is still being processed"
@@ -215,7 +215,7 @@ async def test_unversioned_health_and_root_stay_and_match_v1_health(client, fake
 
 async def test_openapi_lists_only_versioned_product_routes(client):
     paths = (await client.get("/openapi.json")).json()["paths"]
-    product = {p for p in paths if p != "/"}
+    product = {p for p in paths if p not in ("/", "/metrics")}  # /metrics is unversioned like /health: Prometheus expects it
     assert product and all(p.startswith("/v1/") for p in product)
     assert {"/v1/search", "/v1/ingest", "/v1/agent/query", "/v1/documents", "/v1/feedback",
             "/v1/analytics/summary", "/v1/health"} <= product

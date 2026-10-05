@@ -1,0 +1,7 @@
+No drift: src/styles/tokens.css is exactly what tokens/tokens.json generates.
+> eslint . --max-warnings 0
+
+> tsc --noEmit
+
+
+PASS

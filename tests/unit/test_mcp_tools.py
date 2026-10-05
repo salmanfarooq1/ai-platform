@@ -1,13 +1,23 @@
 """Unit tests for MCP server tools."""
 import json
+from types import SimpleNamespace
 from uuid import UUID, uuid4
 
 import pytest
 
+from adapters.pg_knowledge import PgKnowledgeStore
 from api.mcp.context import current_principal
 from api.mcp.server import mcp
 from core.identity.models import Principal
-from tests.fakes import FakePool
+from tests.fakes import FakeCache, FakeEmbeddings, FakePool
+
+
+def app_context(pool):
+    """What `init_mcp_context` puts in the MCP server: the pool and the ports. The knowledge store is the real
+    Postgres adapter over the fake pool, so the SQL it sends is still recorded."""
+    knowledge = PgKnowledgeStore(pool) if pool is not None else None
+    return {"pool": pool, "adapters": SimpleNamespace(
+        knowledge=knowledge, cache=FakeCache(), events=None, embeddings=FakeEmbeddings())}
 
 
 @pytest.fixture(autouse=True)
@@ -38,7 +48,7 @@ async def test_list_namespaces_tool(principal):
     from api.mcp.tools import list_namespaces
     pool = FakePool(rows=[{"slug": "default", "description": "d"}, {"slug": "kyc_aml", "description": "k"},
                           {"slug": "legal", "description": "l"}])
-    mcp._dependency_overrides["app_context"] = {"pool": pool}
+    mcp._dependency_overrides["app_context"] = app_context(pool)
     result = await list_namespaces()
     data = json.loads(result)
     assert data == {"default": "d", "kyc_aml": "k", "legal": "l"}
@@ -55,7 +65,7 @@ async def test_every_tool_refuses_without_a_principal():
         multi_namespace_search,
         search_documents,
     )
-    mcp._dependency_overrides["app_context"] = {"pool": FakePool()}
+    mcp._dependency_overrides["app_context"] = app_context(FakePool())
     for call in (list_namespaces(), search_documents(query="q", namespace="legal"), multi_namespace_search(query="q"),
                  get_ingestion_status(namespace="legal"), get_cost_summary(days=1)):
         assert json.loads(await call)["error"] == "unauthenticated"
@@ -75,7 +85,7 @@ async def test_search_documents_missing_pool(principal):
 async def test_search_documents_blocked_query(principal):
     """Input guardrails apply to MCP tools, not just HTTP routes (now a gateway stage, so a principal is needed)."""
     from api.mcp.tools import search_documents
-    mcp._dependency_overrides["app_context"] = {"pool": FakePool()}
+    mcp._dependency_overrides["app_context"] = app_context(FakePool())
     long_query = "x" * 2000
     result = await search_documents(query=long_query, namespace="default")
     data = json.loads(result)
@@ -94,7 +104,7 @@ async def test_get_ingestion_status_missing_pool(principal):
 @pytest.mark.asyncio
 async def test_get_cost_summary_clamps_days(principal):
     from api.mcp.tools import get_cost_summary
-    mcp._dependency_overrides["app_context"] = {"pool": None}
+    mcp._dependency_overrides["app_context"] = app_context(None)
     result = await get_cost_summary(days=100)
     data = json.loads(result)
     assert "error" in data
@@ -106,9 +116,9 @@ async def test_multi_namespace_defaults_to_all_of_the_tenants_knowledge_bases(pr
     import json
     from unittest.mock import AsyncMock, patch
 
-    mcp._dependency_overrides["app_context"] = {"pool": FakePool(rows=[
+    mcp._dependency_overrides["app_context"] = app_context(FakePool(rows=[
         {"slug": "legal", "description": "l"}, {"slug": "acme_policies", "description": "p"},
-    ])}
+    ]))
 
     with patch("api.mcp.tools.search_documents", new_callable=AsyncMock) as mock_search:
         mock_search.return_value = json.dumps({"count": 0, "chunks": []})
@@ -138,7 +148,7 @@ async def test_each_mcp_tool_demands_the_scope_of_its_rest_twin():
         search_documents,
     )
 
-    mcp._dependency_overrides["app_context"] = {"pool": FakePool()}
+    mcp._dependency_overrides["app_context"] = app_context(FakePool())
     calls = {
         "query": [search_documents(query="q", namespace="legal"), multi_namespace_search(query="q", namespaces=["legal"])],
         "kb:read": [list_namespaces(), get_ingestion_status(namespace="legal"), get_cost_summary(days=1)],
@@ -158,7 +168,7 @@ async def test_each_mcp_tool_demands_the_scope_of_its_rest_twin():
 async def test_mcp_tools_pass_the_scope_check_with_the_right_scope_or_admin():
     from api.mcp.tools import get_cost_summary, list_namespaces
 
-    mcp._dependency_overrides["app_context"] = {"pool": FakePool(rows=[])}
+    mcp._dependency_overrides["app_context"] = app_context(FakePool(rows=[]))
     for scopes in (("kb:read",), ("admin",)):
         token = _bind(*scopes)
         try:
@@ -172,7 +182,7 @@ async def test_mcp_tools_pass_the_scope_check_with_the_right_scope_or_admin():
 async def test_mcp_resources_demand_kb_read():
     from api.mcp.resources import resource_document, resource_namespaces
 
-    mcp._dependency_overrides["app_context"] = {"pool": FakePool()}
+    mcp._dependency_overrides["app_context"] = app_context(FakePool())
     token = _bind("query")
     try:
         for coro in (resource_namespaces(), resource_document("legal", "gdpr.md")):

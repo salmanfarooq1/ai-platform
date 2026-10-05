@@ -172,7 +172,7 @@ STAGE_NAMES = [name for name, _ in STAGES]
 
 
 def test_the_stage_list_is_in_the_documented_order():
-    assert STAGE_NAMES == ["principal", "boundary", "policy", "guardrails", "rate", "budget"]
+    assert STAGE_NAMES == ["principal", "boundary", "policy", "guardrails", "rate", "budget", "cost"]
 
 
 @pytest.mark.parametrize("broken", STAGE_NAMES)
@@ -262,10 +262,14 @@ async def test_redis_errors_deny_with_dependency_unavailable(flags, stage):
 async def test_a_redis_client_that_cannot_be_created_also_denies():
     ctx = make_ctx()
 
-    async def no_redis():
-        raise ConnectionRefusedError("cannot connect")
+    class NoCache:
+        async def get(self, key):
+            raise ConnectionRefusedError("cannot connect")
 
-    ctx.runtime.get_redis = no_redis
+        async def incr(self, key, amount=1, *, ttl=None):
+            raise ConnectionRefusedError("cannot connect")
+
+    ctx.runtime.cache = NoCache()
     for flags in ({"rate": True}, {"budget": True}):
         decision = await enforce(ctx, Action(K.KB_READ, "legal", **flags))
         assert decision.reason == "dependency_unavailable"

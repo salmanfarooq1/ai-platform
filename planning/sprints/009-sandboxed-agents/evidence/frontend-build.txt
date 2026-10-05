@@ -1,0 +1,7 @@
+dist/assets/ask-page-BMgEViMW.js               186.86 kB │ gzip:  56.83 kB
+dist/assets/index-BwceccnQ.js                  248.39 kB │ gzip:  76.38 kB
+dist/assets/webgl-gc836SuQ.js                  878.61 kB │ gzip: 235.14 kB
+✓ built in 30.28s
+     webgl-gc836SuQ.js
+
+PASS

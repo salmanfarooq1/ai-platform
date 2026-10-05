@@ -4,8 +4,10 @@ from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 from core.identity.models import Principal
+from ports import CachePort, EventBus
 
 if TYPE_CHECKING:
     from gateway.boundary import ExecutionBoundary
@@ -19,6 +21,7 @@ class ActionKind(str, Enum):
     AGENT_RUN = "agent.run"
     FEEDBACK_WRITE = "feedback.write"
     ANALYTICS_READ = "analytics.read"
+    AUDIT_READ = "audit.read"
 
 
 @dataclass(frozen=True)
@@ -38,6 +41,9 @@ class Action:
     input_text: str | None = field(default=None, repr=False, compare=False)
     rate: bool = False
     budget: bool = False
+    # What a tool call passes to the tool. Checked against the policy's `tool_arguments` schema. Like `input_text`
+    # it is never stored, logged or shown in `repr`: a deny records the reason code only.
+    arguments: Mapping[str, Any] | None = field(default=None, repr=False, compare=False)
 
     @property
     def input_hash(self) -> str | None:
@@ -78,10 +84,12 @@ Recorder = Callable[["EnforcementContext", Action, Decision], Awaitable[None]]
 
 @dataclass
 class GatewayRuntime:
-    """Process-wide handles the gateway needs: the (app-role) pool and a Redis getter."""
+    """Process-wide handles the gateway needs: the (app-role) pool, the cache port (rate limit and budget
+    counters) and the event bus that gets one `platform.gateway.decision.v1` event per recorded decision."""
 
     pool: Any
-    get_redis: Callable[[], Awaitable[Any]]
+    cache: CachePort
+    events: EventBus | None = None
 
 
 @dataclass
@@ -98,3 +106,5 @@ class EnforcementContext:
     tool_calls: int = 0
     denials: list[Decision] = field(default_factory=list)
     halted: str | None = None  # set by the agent when a denial ends its loop
+    # The run this request belongs to (ADR-0009). Written into every decision the run causes.
+    execution_id: UUID | None = None

@@ -1,0 +1,125 @@
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Will assume transactional DDL.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Will assume transactional DDL.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+[2m[WebServer] [22mINFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+
+Running 72 tests using 1 worker
+
+  ✓   1 [setup] › e2e/auth.setup.ts:8:1 › sign in once and keep the session cookie (599ms)
+axe landing (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=22
+  ✓   2 [chromium] › e2e/a11y.spec.ts:22:5 › axe, light theme › landing page (7.0s)
+axe how it works (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=21
+  ✓   3 [chromium] › e2e/a11y.spec.ts:28:5 › axe, light theme › How it works (2.0s)
+axe overview (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓   4 [chromium] › e2e/a11y.spec.ts:33:5 › axe, light theme › Overview (2.3s)
+axe requests drawer (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=25
+  ✓   5 [chromium] › e2e/a11y.spec.ts:42:5 › axe, light theme › Requests, with the drawer open on a denied request (2.9s)
+axe requests list (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=27
+  ✓   6 [chromium] › e2e/a11y.spec.ts:50:5 › axe, light theme › Requests, the list (2.2s)
+axe walkthrough (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=20
+  ✓   7 [chromium] › e2e/a11y.spec.ts:55:5 › axe, light theme › the walkthrough, after both requests ran (2.2s)
+axe command palette (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=25
+  ✓   8 [chromium] › e2e/a11y.spec.ts:62:5 › axe, light theme › the command palette, open (1.7s)
+axe session menu (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓   9 [chromium] › e2e/a11y.spec.ts:68:5 › axe, light theme › the session menu, open (1.7s)
+axe ask (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓  10 [chromium] › e2e/a11y.spec.ts:74:5 › axe, light theme › Ask, with an answer (2.1s)
+axe ask denied (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=28
+  ✓  11 [chromium] › e2e/a11y.spec.ts:81:5 › axe, light theme › Ask, with a denial (2.1s)
+axe decisions denied (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓  12 [chromium] › e2e/a11y.spec.ts:88:5 › axe, light theme › Decisions, with a denied decision open (2.7s)
+axe decisions (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓  13 [chromium] › e2e/a11y.spec.ts:96:5 › axe, light theme › Decisions, with a decision open (2.7s)
+axe landing (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=22
+  ✓  14 [chromium] › e2e/a11y.spec.ts:22:5 › axe, dark theme › landing page (6.9s)
+axe how it works (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=21
+  ✓  15 [chromium] › e2e/a11y.spec.ts:28:5 › axe, dark theme › How it works (2.0s)
+axe overview (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓  16 [chromium] › e2e/a11y.spec.ts:33:5 › axe, dark theme › Overview (2.5s)
+axe requests drawer (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=25
+  ✓  17 [chromium] › e2e/a11y.spec.ts:42:5 › axe, dark theme › Requests, with the drawer open on a denied request (2.9s)
+axe requests list (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=27
+  ✓  18 [chromium] › e2e/a11y.spec.ts:50:5 › axe, dark theme › Requests, the list (2.7s)
+axe walkthrough (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=20
+  ✓  19 [chromium] › e2e/a11y.spec.ts:55:5 › axe, dark theme › the walkthrough, after both requests ran (2.3s)
+axe command palette (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=25
+  ✓  20 [chromium] › e2e/a11y.spec.ts:62:5 › axe, dark theme › the command palette, open (1.7s)
+axe session menu (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓  21 [chromium] › e2e/a11y.spec.ts:68:5 › axe, dark theme › the session menu, open (1.9s)
+axe ask (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+  ✓  22 [chromium] › e2e/a11y.spec.ts:74:5 › axe, dark theme › Ask, with an answer (2.2s)
+axe ask denied (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=28
+  ✓  23 [chromium] › e2e/a11y.spec.ts:81:5 › axe, dark theme › Ask, with a denial (2.2s)
+axe decisions denied (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓  24 [chromium] › e2e/a11y.spec.ts:88:5 › axe, dark theme › Decisions, with a denied decision open (2.7s)
+axe decisions (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+  ✓  25 [chromium] › e2e/a11y.spec.ts:96:5 › axe, dark theme › Decisions, with a decision open (2.9s)
+  ✓  26 [chromium] › e2e/governance.spec.ts:11:5 › A6 governed ask, across the real API › signed out › allow: sign in, ask, open the call in Decisions, see Allowed and the policy version (1.8s)
+  ✓  27 [chromium] › e2e/governance.spec.ts:34:5 › A6 governed ask, across the real API › signed out › an unauthenticated visit to /app is sent to sign-in, and a bad key shows the error code (563ms)
+  ✓  28 [chromium] › e2e/governance.spec.ts:42:5 › A6 governed ask, across the real API › signed out › sign out ends the session (853ms)
+  ✓  29 [chromium] › e2e/governance.spec.ts:51:3 › A6 governed ask, across the real API › deny: a knowledge base the policy does not allow shows Denied and its reason code (1.6s)
+  ✓  30 [chromium] › e2e/governance.spec.ts:65:3 › A6 governed ask, across the real API › decisions filters narrow the table and the empty state explains itself (1.4s)
+  ✓  31 [chromium] › e2e/governance.spec.ts:78:3 › A10 parity: Ask, Library and System work in the new UI › Ask in agent mode returns an answer with a verdict and evidence (2.9s)
+  ✓  32 [chromium] › e2e/governance.spec.ts:87:3 › A10 parity: Ask, Library and System work in the new UI › Agent runs shows the execution id and the status the runtime reports for a run just made (3.2s)
+  ✓  33 [chromium] › e2e/governance.spec.ts:103:3 › A10 parity: Ask, Library and System work in the new UI › Library lists the ingested document (926ms)
+  ✓  34 [chromium] › e2e/governance.spec.ts:109:3 › A10 parity: Ask, Library and System work in the new UI › System shows healthy services and the mode (705ms)
+  ✓  35 [chromium] › e2e/governance.spec.ts:116:3 › A10 parity: Ask, Library and System work in the new UI › History links an ask to its decision trace (1.8s)
+  ✓  36 [chromium] › e2e/governance.spec.ts:125:3 › A10 parity: Ask, Library and System work in the new UI › Policies, Keys, Usage and Agent runs render real data (1.4s)
+  ✓  37 [chromium] › e2e/jobs.spec.ts:12:3 › A6 a document goes from upload to a cited answer › upload, watch the Library reach Ready, then ask a question that cites it (5.2s)
+chunks: X.es-DRNleXIz.js, ask-page-DphYy34z.js, copy-value-D4qeU4vs.js, decisions-page-BNOHyASA.js, density-D1tfL_P2.js, deny-callout-sPyvtNgt.js, governance-text-BFDU-hqm.js, gsap-CcIkNsPr.js, hero-scene-DlO9yN3w.js, history-page-rIzuJdKs.js, how-it-works-page-CruyyTP1.js, index-L6L7UleK.js, input-qvjcWWhf.js, keys-page-fVT179Xn.js, landing-page-CV1JaqL8.js, library-page-BpxMAGzA.js, marketing-shell-DWR0so5T.js, overview-page-CRa3XaCY.js, policies-page-PUyWQe86.js, react-CxfcT2zT.js, reasons-Fam7loDE.js, receipt-DQbYS3r4.js, requests-page-CBxQied0.js, runs-page-DAqjtFMY.js, segmented-D3Qe4fZQ.js, select-CAypHzcS.js, signin-page-CepJ3X5N.js, stages-UorP1m-x.js, states-JVSZO6W1.js, system-page-D5f98BDk.js, time-range-BpH6G2fq.js, trace-timeline-DIACCbCO.js, trust-page-DMXLadIQ.js, usage-page-Zka4xpPY.js, useInfiniteQuery-ClnWjQXL.js, useMutation-9rRBenNy.js, verdict-badge-hM7pwt6g.js, walkthrough-page-CO9EInsT.js, walkthrough-store-CMuV9Tm6.js, webgl-gc836SuQ.js
+chunks containing WebGL code: landing-page-CV1JaqL8.js, webgl-gc836SuQ.js
+app chunks checked: X.es-DRNleXIz.js, ask-page-DphYy34z.js, copy-value-D4qeU4vs.js, decisions-page-BNOHyASA.js, density-D1tfL_P2.js, deny-callout-sPyvtNgt.js, governance-text-BFDU-hqm.js, history-page-rIzuJdKs.js, how-it-works-page-CruyyTP1.js, index-L6L7UleK.js, input-qvjcWWhf.js, keys-page-fVT179Xn.js, library-page-BpxMAGzA.js, marketing-shell-DWR0so5T.js, overview-page-CRa3XaCY.js, policies-page-PUyWQe86.js, react-CxfcT2zT.js, reasons-Fam7loDE.js, receipt-DQbYS3r4.js, requests-page-CBxQied0.js, runs-page-DAqjtFMY.js, segmented-D3Qe4fZQ.js, select-CAypHzcS.js, signin-page-CepJ3X5N.js, stages-UorP1m-x.js, states-JVSZO6W1.js, system-page-D5f98BDk.js, time-range-BpH6G2fq.js, trace-timeline-DIACCbCO.js, trust-page-DMXLadIQ.js, usage-page-Zka4xpPY.js, useInfiniteQuery-ClnWjQXL.js, useMutation-9rRBenNy.js, verdict-badge-hM7pwt6g.js, walkthrough-page-CO9EInsT.js, walkthrough-store-CMuV9Tm6.js
+  ✓  38 [chromium] › e2e/landing.spec.ts:9:3 › A7 landing page: build output › the WebGL code is its own chunk and no /app chunk contains it (113ms)
+first-contentful-paint ms: [33m264[39m webgl requests: [{"name":"hero-scene-DlO9yN3w.js","start":3722.0999999996275},{"name":"webgl-gc836SuQ.js","start":3722.4000000003725}]
+  ✓  39 [chromium] › e2e/landing.spec.ts:33:3 › A7 landing page: motion on › the WebGL chunk loads after first paint, and the scroll story pins (4.6s)
+  ✓  40 [chromium] › e2e/landing.spec.ts:60:3 › A7 landing page: motion on › scrolling moves the story from the first panel to the last (1.4s)
+  ✓  41 [chromium] › e2e/landing.spec.ts:77:3 › A7 landing page: reduced motion › no GSAP, no WebGL, the poster is shown and every story step is visible (2.7s)
+  ✓  42 [chromium] › e2e/landing.spec.ts:101:3 › 005b landing page: copy and sections › the headline and subline are exact, and the hero is built from real components labelled as examples (611ms)
+  ✓  43 [chromium] › e2e/landing.spec.ts:111:3 › 005b landing page: copy and sections › has the use cases, the one reason the gateway sits outside the agent, and no problem section (824ms)
+  ✓  44 [chromium] › e2e/landing.spec.ts:124:3 › 005b landing page: copy and sections › How it works is a public page without GSAP or WebGL (1.2s)
+  ✓  45 [chromium] › e2e/polish.spec.ts:23:3 › A4 (a) the walkthrough › shows an allowed and a blocked request side by side, the blocked one at the guardrails stage (1.2s)
+  ✓  46 [chromium] › e2e/polish.spec.ts:54:3 › A4 (a) the first run › a new browser opens the walkthrough first, and the Overview after that (1.3s)
+  ✓  47 [chromium] › e2e/polish.spec.ts:69:3 › A4 (b) the governance line in Ask › shows "Checked by policy v1 ..." and the line opens the request drawer (1.8s)
+  ✓  48 [chromium] › e2e/polish.spec.ts:87:3 › A4 (b) the governance line in Ask › a denied ask shows the governance line too (1.2s)
+  ✓  49 [chromium] › e2e/polish.spec.ts:96:3 › A4 (c) Overview › the blocked number opens the request list filtered to deny (1.8s)
+  ✓  50 [chromium] › e2e/polish.spec.ts:121:3 › A4 (c) Overview › shows the numbers and the top deny reasons with plain titles (1.5s)
+  ✓  51 [chromium] › e2e/polish.spec.ts:132:3 › A4 (d) the command palette › Cmd or Ctrl plus K jumps to a request id (1.6s)
+  ✓  52 [chromium] › e2e/polish.spec.ts:146:3 › A4 (d) the command palette › goes to a screen by name, and Escape closes it (951ms)
+  ✓  53 [chromium] › e2e/polish.spec.ts:160:3 › A4 (e) a deny shows its plain sentence and the policy field › in Ask, in the request drawer and in the decision detail (2.1s)
+  ✓  54 [chromium] › e2e/polish.spec.ts:184:3 › Requests page and the session menu › console reads are left out unless "Include console views" is on (1.6s)
+  ✓  55 [chromium] › e2e/polish.spec.ts:199:3 › Requests page and the session menu › the session menu shows who you are, the tenant and the scopes, and switches the theme (1.3s)
+  ✓  56 [chromium] › e2e/polish.spec.ts:213:3 › Requests page and the session menu › an unknown request id says so in the drawer (1.4s)
+  ✓  57 [chromium] › e2e/polish.spec.ts:224:3 › signed out › /how-it-works is public and /app/requests asks for sign-in (707ms)
+  ✓  58 [chromium] › e2e/preview.spec.ts:6:1 › read-only preview: continue without a key, see the mode chip, cannot add documents (1.1s)
+  ✓  59 [chromium] › e2e/responsive.spec.ts:12:1 › landing page fits a phone (662ms)
+  ✓  60 [chromium] › e2e/responsive.spec.ts:19:1 › how it works fits a phone (600ms)
+  ✓  61 [chromium] › e2e/responsive.spec.ts:26:3 › /app fits a phone (1.0s)
+  ✓  62 [chromium] › e2e/responsive.spec.ts:26:3 › /app/walkthrough fits a phone (949ms)
+  ✓  63 [chromium] › e2e/responsive.spec.ts:26:3 › /app/requests fits a phone (962ms)
+  ✓  64 [chromium] › e2e/responsive.spec.ts:26:3 › /app/ask fits a phone (972ms)
+  ✓  65 [chromium] › e2e/responsive.spec.ts:26:3 › /app/decisions fits a phone (939ms)
+  ✓  66 [chromium] › e2e/responsive.spec.ts:26:3 › /app/library fits a phone (994ms)
+  ✓  67 [chromium] › e2e/responsive.spec.ts:26:3 › /app/policies fits a phone (870ms)
+  ✓  68 [chromium] › e2e/responsive.spec.ts:26:3 › /app/keys fits a phone (916ms)
+  ✓  69 [chromium] › e2e/responsive.spec.ts:26:3 › /app/usage fits a phone (863ms)
+  ✓  70 [chromium] › e2e/responsive.spec.ts:26:3 › /app/runs fits a phone (920ms)
+  ✓  71 [chromium] › e2e/responsive.spec.ts:26:3 › /app/system fits a phone (901ms)
+  ✓  72 [chromium] › e2e/responsive.spec.ts:26:3 › /app/history fits a phone (858ms)
+
+  72 passed (2.6m)

@@ -16,7 +16,7 @@ TABLE = "TA" + "BLE"  # built at runtime so this file does not trip the DDL chec
 
 def test_snapshot_matches_the_app():
     assert SNAPSHOT_PATH.read_text() == render_openapi(), (
-        "docs/openapi.json is out of date. If the API change is intended, run: "
+        "docs/api/openapi.json is out of date. If the API change is intended, run: "
         "poetry run python scripts/update_openapi.py"
     )
 
@@ -28,7 +28,8 @@ def test_rendering_is_deterministic():
 def test_every_public_route_is_versioned():
     paths = json.loads(SNAPSHOT_PATH.read_text())["paths"]
     assert paths
-    assert all(p.startswith("/v1/") or p in UNVERSIONED_PATHS for p in paths)
+    # /metrics is the one documented unversioned route besides / and /health: Prometheus expects it at that path (Sprint 008)
+    assert all(p.startswith("/v1/") or p in UNVERSIONED_PATHS or p == "/metrics" for p in paths)
 
 
 def test_update_script_rewrites_the_snapshot(tmp_path):

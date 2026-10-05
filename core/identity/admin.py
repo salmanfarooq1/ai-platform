@@ -67,6 +67,15 @@ def create_tenant(conn: PgConnection, slug: str, name: str | None = None, defaul
     return tenant_id
 
 
+def set_retention(conn: PgConnection, tenant_slug: str, days: int | None) -> None:
+    """Set a tenant's own decision retention in days, or None to go back to the platform default."""
+    if days is not None and days < 30:
+        raise AdminError("retention must be at least 30 days")
+    with conn.cursor() as cur:
+        tenant_id = _tenant_id(cur, tenant_slug)
+        cur.execute("UPDATE tenants SET retention_days = %s WHERE id = %s", (days, str(tenant_id)))
+
+
 def create_kb(conn: PgConnection, tenant_slug: str, slug: str, description: str = "") -> UUID:
     with conn.cursor() as cur:
         tenant_id = _tenant_id(cur, tenant_slug)

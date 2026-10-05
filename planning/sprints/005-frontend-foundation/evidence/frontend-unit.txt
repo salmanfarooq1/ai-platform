@@ -1,0 +1,20 @@
+$ npm run lint
+
+> ai-platform-ui@2.0.0 lint
+> eslint . --max-warnings 0
+
+eslint exit code: 0
+
+$ npm test -- --run
+> ai-platform-ui@2.0.0 test
+> vitest --run
+ RUN  v2.1.9 /home/user/ai-platform/ui
+ ✓ src/api/client.test.ts (9 tests) 17ms
+ ✓ src/features/auth/signin-form.test.tsx (4 tests) 597ms
+   ✓ SignInForm > keeps the submit button disabled until a key is typed, and masks the key 359ms
+ ✓ src/features/ask/ask.test.tsx (5 tests) 303ms
+ ✓ src/components/governance/governance.test.tsx (15 tests) 653ms
+ Test Files  4 passed (4)
+      Tests  33 passed (33)
+   Start at  07:36:08
+   Duration  4.79s (transform 404ms, setup 731ms, collect 4.93s, tests 1.57s, environment 4.01s, prepare 348ms)

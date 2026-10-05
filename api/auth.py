@@ -7,13 +7,13 @@ scope. The tenant is only ever read from the principal (strict rule 1), never fr
 """
 import logging
 from collections.abc import Awaitable, Callable
+from typing import Any
 
-from asyncpg import Pool
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from core.database.tenant import tenant_connection
 from core.identity.models import Principal, Scope
+from ports import KnowledgeStore
 
 # Declares the bearer scheme in the OpenAPI document. The credential itself is verified by AuthMiddleware.
 _bearer_scheme = HTTPBearer(auto_error=False, description="API key (gap_<prefix>_<secret>) or JWT")
@@ -47,7 +47,7 @@ async def record_scope_denial(request: Request, principal: Principal, scope: Sco
         stage: Stage = missing_scope
         kind = {
             Scope.KB_READ: ActionKind.KB_READ, Scope.KB_WRITE: ActionKind.KB_WRITE, Scope.QUERY: ActionKind.KB_READ,
-            Scope.AGENT: ActionKind.AGENT_RUN, Scope.ADMIN: ActionKind.AGENT_RUN,
+            Scope.AGENT: ActionKind.AGENT_RUN, Scope.AUDIT_READ: ActionKind.AUDIT_READ, Scope.ADMIN: ActionKind.AGENT_RUN,
         }[scope]
         ctx = await build_context(
             request.app.state.gateway_runtime, principal,
@@ -56,6 +56,36 @@ async def record_scope_denial(request: Request, principal: Principal, scope: Sco
         await enforce(ctx, Action(kind), [("boundary", stage)])
     except Exception:
         logging.getLogger("api.auth").error("scope denial not recorded", exc_info=True)
+
+
+async def record_run_token_denial(request: Request, grant: Any) -> None:
+    """A run token was used on a route outside its run: leave a decision row (stage `boundary`, reason
+    `run_token_scope`) under the run's `execution_id`. The caller still answers 403; a failure here changes nothing."""
+    try:
+        # At most one deny row per token and path per minute (Sprint 009 QA L1): a leaked token cannot fill the table. The
+        # use is still refused. If the counter cannot be read, no row is written.
+        import hashlib
+
+        key = f"rtd:{grant.token_id}:{hashlib.sha256(request.url.path.encode()).hexdigest()[:16]}"
+        if await request.app.state.gateway_runtime.cache.incr(key, ttl=60) > 1:
+            return
+        from gateway import Action, ActionKind, enforce
+        from gateway.boundary import ExecutionBoundary
+        from gateway.enforce import Stage
+        from gateway.types import Decision, EnforcementContext
+
+        async def outside_run(ctx, action):
+            return Decision(allowed=False, stage="boundary", reason="run_token_scope", policy_version=ctx.boundary.policy_version)
+
+        stage: Stage = outside_run
+        ctx = EnforcementContext(
+            principal=grant.principal, request_id=str(getattr(request.state, "request_id", "-")),
+            trace_id=str(getattr(request.state, "trace_id", "-")), boundary=ExecutionBoundary.from_payload(grant.boundary),
+            runtime=request.app.state.gateway_runtime, execution_id=grant.execution_id,
+        )
+        await enforce(ctx, Action(ActionKind.TOOL_CALL), [("boundary", stage)])
+    except Exception:
+        logging.getLogger("api.auth").error("run token denial not recorded", exc_info=True)
 
 
 def require_scope(scope: Scope) -> Callable[[Request], Awaitable[Principal]]:
@@ -75,15 +105,31 @@ def require_scope(scope: Scope) -> Callable[[Request], Awaitable[Principal]]:
     return dependency
 
 
-async def require_kb(pool: Pool, principal: Principal, slug: str) -> None:
+def require_any_scope(*scopes: Scope) -> Callable[[Request], Awaitable[Principal]]:
+    """Route dependency: an authenticated principal that holds at least one of `scopes` (`admin` holds all). A
+    refusal is recorded as a missing-scope decision for the first scope listed."""
+
+    async def dependency(
+        request: Request,
+        _credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
+    ) -> Principal:
+        principal = await authenticate(request)
+        if not any(principal.has_scope(scope) for scope in scopes):
+            await record_scope_denial(request, principal, scopes[0])
+            raise HTTPException(status_code=403, detail=f"Missing required scope: {' or '.join(s.value for s in scopes)}")
+        return principal
+
+    dependency.__name__ = "require_any_" + "_".join(s.value.replace(":", "_") for s in scopes)
+    return dependency
+
+
+async def require_kb(store: KnowledgeStore, principal: Principal, slug: str) -> None:
     """404 `kb_not_found` unless `slug` is one of the caller's own knowledge bases.
 
     A foreign KB and a missing KB give the identical response (no existence leak). Row-level security
     already hides other tenants' rows, so the lookup needs no extra tenant filter.
     """
-    async with tenant_connection(pool, principal.tenant_id) as conn:
-        found = await conn.fetchval("SELECT 1 FROM knowledge_bases WHERE slug = $1", slug)
-    if not found:
+    if not await store.kb_exists(principal.tenant_id, slug):
         raise kb_not_found()
 
 

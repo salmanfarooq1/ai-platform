@@ -1,0 +1,1 @@
+OK: no CREATE TABLE or ALTER TABLE outside migrations/

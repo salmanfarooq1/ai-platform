@@ -1,16 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Ask questions about your documents and get answers with citations, confidence and verification." />
-  <meta name="theme-color" content="#0E0F12" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <title>Governed Agent Platform — Ask</title>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Governed agents on business data. Every request is checked by policy and leaves a receipt." />
+    <meta name="theme-color" content="#131312" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Governed Agent Platform</title>
+    <script>
+      // Apply the saved theme before first paint so there is no flash.
+      try { var t = localStorage.getItem('theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t) } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

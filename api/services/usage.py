@@ -9,15 +9,13 @@ a user-facing response.
 import logging
 from uuid import UUID
 
-from asyncpg import Pool
-
-from core.database.tenant import tenant_connection
+from core.database.tenant import DbPool, tenant_connection
 
 logger = logging.getLogger("api.usage")
 
 
 async def record_usage(
-    pool: Pool,
+    pool: DbPool,
     tenant_id: UUID,
     request_id: str,
     endpoint: str,

@@ -1,0 +1,30 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0 -- /root/.cache/pypoetry/virtualenvs/ai-platform-OrHxThiT-py3.11/bin/python
+hypothesis profile 'default'
+rootdir: /home/user/ai-platform
+configfile: pyproject.toml
+plugins: rerunfailures-16.4, xdist-3.8.0, repeat-0.9.4, asyncio-1.4.0, hypothesis-6.168.3, langsmith-0.10.15, cov-7.1.0, anyio-4.13.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 19 items
+
+tests/integration/test_jobs.py::test_two_claims_at_once_never_return_the_same_job PASSED [  5%]
+tests/integration/test_jobs.py::test_two_workers_running_together_run_every_job_exactly_once PASSED [ 10%]
+tests/integration/test_jobs.py::test_a_failed_attempt_is_retried_and_then_succeeds PASSED [ 15%]
+tests/integration/test_jobs.py::test_a_retry_waits_for_its_backoff PASSED [ 21%]
+tests/integration/test_jobs.py::test_a_job_that_keeps_failing_is_dead_after_max_attempts PASSED [ 26%]
+tests/integration/test_jobs.py::test_a_permanent_error_fails_at_once_without_a_retry PASSED [ 31%]
+tests/integration/test_jobs.py::test_the_same_idempotency_key_returns_the_same_job PASSED [ 36%]
+tests/integration/test_jobs.py::test_rls_as_the_app_role_hides_other_tenants_jobs PASSED [ 42%]
+tests/integration/test_jobs.py::test_the_claim_function_returns_only_an_id_and_a_tenant PASSED [ 47%]
+tests/integration/test_jobs.py::test_the_app_role_may_not_delete_jobs_and_a_payload_text_is_bounded PASSED [ 52%]
+tests/integration/test_jobs.py::test_a_killed_worker_leaves_its_job_to_be_claimed_again_after_the_lease PASSED [ 57%]
+tests/integration/test_jobs.py::test_a_job_that_loses_its_last_attempt_to_a_crash_is_dead_not_rerun PASSED [ 63%]
+tests/integration/test_jobs.py::test_a_worker_that_lost_its_lease_stops_and_writes_nothing PASSED [ 68%]
+tests/integration/test_jobs.py::test_shutdown_lets_a_short_job_finish_and_releases_a_long_one PASSED [ 73%]
+tests/integration/test_jobs.py::test_stop_requests_end_a_queued_job_at_once_and_a_running_job_at_its_next_beat PASSED [ 78%]
+tests/integration/test_jobs.py::test_progress_is_recorded_while_the_job_runs PASSED [ 84%]
+tests/integration/test_jobs.py::test_l5_a_claimed_job_that_cannot_be_read_is_given_back_at_once PASSED [ 89%]
+tests/integration/test_jobs.py::test_l1_the_payload_cap_follows_the_questions_own_limit PASSED [ 94%]
+tests/integration/test_jobs.py::test_m3_usage_is_booked_at_most_once_per_execution_id PASSED [100%]
+
+============================= 19 passed in 10.50s ==============================

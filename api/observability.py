@@ -16,7 +16,6 @@ from contextvars import ContextVar
 from datetime import datetime, timezone
 from typing import Any
 
-import litellm
 from fastapi import FastAPI
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -93,8 +92,7 @@ def setup_logging(level: str | None = None) -> None:
         lg.handlers = []
         lg.propagate = True
 
-    # litellm prints a "Give Feedback / Get Help" banner with print() on every provider error.
-    litellm.suppress_debug_info = True
+    # (litellm's "Give Feedback / Get Help" banner is silenced by the LiteLLM adapter, adapters/litellm_llm.py.)
 
 
 _provider: TracerProvider | None = None

@@ -6,12 +6,12 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
 from api.auth import KB_NOT_FOUND_MESSAGE
-from api.services.cache import embed_query
+from api.services.embedding import embed_query
 from api.services.retriever import RetrieverConfig, retrieve
 from config import FEATURES, LLM_CONFIG
-from core.database.tenant import DbPool, tenant_connection
 from gateway import Action, ActionKind, EnforcementContext, enforce
 from gateway.estimate import estimate_tokens
+from ports import Adapters
 
 logger = logging.getLogger("api.agent.tools")
 
@@ -39,7 +39,7 @@ async def _gate(ctx: EnforcementContext, action: Action, halt: bool) -> str | No
     return json.dumps({"error": "policy_denied", "reason": decision.reason})
 
 
-def make_list_namespaces_tool(pool: DbPool):
+def make_list_namespaces_tool(adapters: Adapters):
     """Build the list_namespaces tool: it reads the calling tenant's knowledge bases."""
 
     @tool
@@ -62,10 +62,9 @@ def make_list_namespaces_tool(pool: DbPool):
         if denied is not None:
             return denied
         try:
-            async with tenant_connection(pool, ctx.boundary.tenant_id) as conn:
-                rows = await conn.fetch("SELECT slug, description FROM knowledge_bases ORDER BY slug")
+            knowledge_bases = await adapters.knowledge.list_knowledge_bases(ctx.boundary.tenant_id)
             visible = ctx.boundary.visible_kbs()
-            return json.dumps({r["slug"]: r["description"] for r in rows if visible is None or r["slug"] in visible})
+            return json.dumps({slug: description for slug, description in knowledge_bases.items() if visible is None or slug in visible})
         except Exception as e:
             logger.error("[agent/list_namespaces] error: %s", e)
             return json.dumps({"error": str(e)})
@@ -73,15 +72,13 @@ def make_list_namespaces_tool(pool: DbPool):
     return list_namespaces
 
 
-def make_retrieve_tool(pool: DbPool):
+def make_retrieve_tool(adapters: Adapters):
     """
-    Build the retrieve_chunks tool bound to a specific DB pool.
+    Build the retrieve_chunks tool bound to the app's ports (knowledge store and embeddings).
 
-    Built as a closure instead of a module-level global flipped by a
-    set_db_pool() call on every request so the tool is constructed once,
-    at app startup, alongside the graph. Avoids mutable module state
-    shared across concurrent requests, and is trivially testable: pass in
-    a fake pool, no monkeypatching a global.
+    Built as a closure instead of a module-level global flipped on every request so the tool is constructed
+    once, at app startup, alongside the graph. Avoids mutable module state shared across concurrent requests,
+    and is trivially testable: pass in fake adapters, no monkeypatching a global.
     """
 
     @tool
@@ -114,7 +111,10 @@ def make_retrieve_tool(pool: DbPool):
         if ctx is None or ctx.boundary.tenant_id is None:
             return _NO_TENANT
         tenant_id = ctx.boundary.tenant_id
-        denied = await _gate(ctx, Action(ActionKind.TOOL_CALL, "retrieve_chunks", input_text=query), halt=True)
+        denied = await _gate(ctx, Action(
+            ActionKind.TOOL_CALL, "retrieve_chunks", input_text=query,
+            arguments={"query": query, "namespace": namespace, "top_k": top_k, "mode": mode},
+        ), halt=True)
         if denied is None:
             denied = await _gate(ctx, Action(ActionKind.KB_READ, namespace, input_text=query), halt=False)
         if denied is None:
@@ -127,12 +127,10 @@ def make_retrieve_tool(pool: DbPool):
         try:
             # Same check and same answer as the REST routes and MCP: a namespace that is not one of the
             # tenant's knowledge bases is "not found", whether it is missing or another tenant's.
-            async with tenant_connection(pool, tenant_id) as conn:
-                known = await conn.fetchval("SELECT 1 FROM knowledge_bases WHERE slug = $1", namespace)
-            if not known:
+            if not await adapters.knowledge.kb_exists(tenant_id, namespace):
                 return json.dumps({"error": "kb_not_found", "reason": KB_NOT_FOUND_MESSAGE})
             k = max(1, min(top_k, 20))
-            query_embedding = await embed_query(query)
+            query_embedding = await embed_query(adapters.embeddings, query)
 
             cfg = RetrieverConfig(
                 top_k=k,
@@ -141,7 +139,7 @@ def make_retrieve_tool(pool: DbPool):
             )
 
             chunks = await retrieve(
-                pool=pool,
+                store=adapters.knowledge,
                 query=query,
                 query_embedding=query_embedding,
                 namespace=namespace,

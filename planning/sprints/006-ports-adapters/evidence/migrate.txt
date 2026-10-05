@@ -1,0 +1,33 @@
+$ poetry run pytest -v tests/integration/test_migration_0007.py tests/integration/test_migrations.py
+tests/integration/test_migration_0007.py::test_0007_keeps_every_row_and_gives_each_chunk_the_configured_model_and_dimension PASSED [  6%]
+tests/integration/test_migration_0007.py::test_0007_makes_the_columns_not_null_adds_the_indexes_and_a_nullable_execution_id PASSED [ 13%]
+tests/integration/test_migration_0007.py::test_0007_does_not_change_the_grants_of_the_app_role_on_the_tables PASSED [ 20%]
+tests/integration/test_migration_0007.py::test_count_stale_vectors_is_a_narrow_definer_function_for_the_app_role PASSED [ 26%]
+tests/integration/test_migration_0007.py::test_count_stale_vectors_counts_across_tenants_and_restores_the_tenant_setting PASSED [ 33%]
+tests/integration/test_migration_0007.py::test_0007_also_works_for_an_owner_role_that_is_subject_to_row_level_security PASSED [ 40%]
+tests/integration/test_migrations.py::test_empty_database_reaches_head PASSED [ 46%]
+tests/integration/test_migrations.py::test_upgrade_is_repeatable PASSED  [ 53%]
+tests/integration/test_migrations.py::test_database_built_from_old_schema_reaches_head_with_no_table_changes PASSED [ 60%]
+tests/integration/test_migrations.py::test_old_schema_and_fresh_migration_produce_identical_schemas PASSED [ 66%]
+tests/integration/test_migrations.py::test_upgrade_from_0001_with_existing_rows_keeps_counts_and_backfills_default_tenant PASSED [ 73%]
+tests/integration/test_migrations.py::test_hosted_database_without_alembic_history_reaches_0002_and_backfills PASSED [ 80%]
+tests/integration/test_migrations.py::test_rls_is_enabled_everywhere_and_forced_where_the_owner_is_not_exempt PASSED [ 86%]
+tests/integration/test_migrations.py::test_0003_adds_the_principal_lookup_function_for_the_app_role_only PASSED [ 93%]
+tests/integration/test_migrations.py::test_downgrade_is_refused PASSED   [100%]
+============================== 15 passed in 8.16s ==============================
+
+$ poetry run python scripts/verify/migration_0007.py
+before (revision 0005):
+  documents: 5 | per tenant: [('tenant-a', 3), ('tenant-b', 2)]
+  gateway_decisions: 2
+  documents has embedding_model: False
+after (revision 0007), configured model 'ollama/nomic-embed-text' dim 768:
+  documents: 5 | per tenant: [('tenant-a', 3), ('tenant-b', 2)]
+  gateway_decisions: 2
+  distinct (embedding_model, embedding_dim): [('ollama/nomic-embed-text', 768)]
+  rows without a model or dimension: 0
+  not null: [('embedding_dim', 'NO'), ('embedding_model', 'NO')]
+  gateway_decisions.execution_id: [('uuid', 'YES')]
+  indexes: ['idx_documents_embedding_provenance', 'idx_gateway_decisions_execution']
+  count_stale_vectors(configured model): 0
+  count_stale_vectors('other/model'): 5

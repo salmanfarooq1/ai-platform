@@ -1,0 +1,32 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0 -- /root/.cache/pypoetry/virtualenvs/ai-platform-OrHxThiT-py3.11/bin/python
+hypothesis profile 'default'
+rootdir: /home/user/ai-platform
+configfile: pyproject.toml
+plugins: rerunfailures-16.4, xdist-3.8.0, repeat-0.9.4, asyncio-1.4.0, hypothesis-6.168.3, langsmith-0.10.15, cov-7.1.0, anyio-4.13.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 15 items
+
+tests/e2e/test_ingest_jobs.py::test_ingest_returns_202_with_a_job_at_once_and_the_job_runs_to_the_end PASSED [  6%]
+tests/e2e/test_ingest_jobs.py::test_the_raw_bytes_are_stored_once_by_sha256_and_a_second_ingest_adds_no_object PASSED [ 13%]
+tests/e2e/test_ingest_jobs.py::test_the_same_bytes_are_stored_before_the_file_is_parsed PASSED [ 20%]
+tests/e2e/test_ingest_jobs.py::test_re_ingesting_an_unchanged_file_changes_nothing_and_an_updated_one_replaces_the_chunks PASSED [ 26%]
+tests/e2e/test_ingest_jobs.py::test_an_idempotency_key_returns_the_same_job_with_200 PASSED [ 33%]
+tests/e2e/test_ingest_jobs.py::test_ingest_is_still_gated_before_a_job_exists PASSED [ 40%]
+tests/e2e/test_ingest_jobs.py::test_a_long_document_id_is_refused_not_stored_in_the_payload PASSED [ 46%]
+tests/e2e/test_ingest_jobs.py::test_jobs_are_tenant_scoped_a_foreign_and_a_missing_job_give_the_same_404 PASSED [ 53%]
+tests/e2e/test_ingest_jobs.py::test_the_job_routes_need_kb_read_and_leave_a_decision_row PASSED [ 60%]
+tests/e2e/test_ingest_jobs.py::test_the_list_filters_by_kind_and_status_and_pages_with_a_cursor PASSED [ 66%]
+tests/e2e/test_ingest_jobs.py::test_a_policy_that_hides_a_knowledge_base_hides_its_jobs PASSED [ 73%]
+tests/e2e/test_ingest_jobs.py::test_a_finished_ingest_writes_its_event_to_the_outbox_in_the_same_transaction PASSED [ 80%]
+tests/e2e/test_ingest_jobs.py::test_a_job_whose_event_cannot_be_written_does_not_succeed_and_is_tried_again PASSED [ 86%]
+tests/e2e/test_ingest_jobs.py::test_every_decision_leaves_one_outbox_event_in_its_own_transaction PASSED [ 93%]
+tests/e2e/test_ingest_jobs.py::test_the_embedded_relay_marks_events_sent PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/e2e/test_ingest_jobs.py::test_ingest_returns_202_with_a_job_at_once_and_the_job_runs_to_the_end
+  /root/.cache/pypoetry/virtualenvs/ai-platform-OrHxThiT-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 15 passed, 1 warning in 12.86s ========================

@@ -10,7 +10,7 @@ from psycopg2.extensions import connection as PgConnection
 from psycopg2.extras import Json
 
 from core.identity.admin import AdminError
-from gateway.policy import PolicyError, parse_policy
+from gateway.policy import KNOWN_TOOLS, PolicyError, parse_policy
 
 
 def _tenant(cur: Any, slug: str) -> UUID:
@@ -31,6 +31,9 @@ def set_policy(conn: PgConnection, tenant_slug: str, document: Any, created_by: 
         parsed = parse_policy(document)
     except PolicyError as exc:
         raise AdminError(str(exc)) from exc
+    unknown = sorted(set(parsed.tool_arguments) - KNOWN_TOOLS)
+    if unknown:
+        raise AdminError(f"tool_arguments names tools the platform does not have: {', '.join(unknown)} (known: {', '.join(sorted(KNOWN_TOOLS))})")
     with conn.cursor() as cur:
         tenant_id = _tenant(cur, tenant_slug)
         _as_tenant(cur, tenant_id)

@@ -1,0 +1,46 @@
+
+> ai-platform-ui@2.0.0 copy-check
+> node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/copy-check.mjs
+
+1. Headline and subline
+ok   headline: "Your agents can only ever do less."
+ok   subline: "Control what your agents can do. See everything they did."
+ok   landing-page.tsx renders HEADLINE and SUBLINE from claims.ts
+
+2. No long dash or en dash
+ok   95 files scanned, none holds U+2014 or U+2013
+
+3. Banned words and "demo" wording
+ok   87 UI files scanned for \b(elevate[sd]?|seamless(ly)?|unleash(es|ed)?|next-gen(eration)?)\b and \bdemo
+
+4. Every landing claim maps to the may-claim list
+ok   may-claim list has 8 items
+ok   [capabilities] "One gateway for every call"
+       -> may-claim 1: One gateway for every model, tool and knowledge-base call. Agent code cannot reach the model client ...
+ok   [capabilities] "Policies that only narrow"
+       -> may-claim 2: Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token lim...
+ok   [capabilities] "A record for every call"
+       -> may-claim 3: A decision record for every call, allow or deny, with a reason, the policy version and an input hash...
+ok   [capabilities] "Tenants kept apart by the database"
+       -> may-claim 4: Tenant isolation enforced by the database.
+ok   [capabilities] "Closed when in doubt"
+       -> may-claim 5: Fail closed: if a check or the decision record cannot be written, the call is denied.
+ok   [capabilities] "Rate limits and budgets"
+       -> may-claim 6: Rate limits and daily token budgets per tenant.
+ok   [capabilities] "Read-only previews"
+       -> may-claim 7: Read-only preview sessions. The API key stays on the server in a secure cookie session.
+ok   [capabilities] "Works with agent clients over MCP"
+       -> may-claim 8: Works over MCP for agent clients.
+ok   [use cases] "An internal knowledge assistant over company documents"
+       -> may-claim 2: Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token lim...
+ok   [use cases] "An agent with tool access"
+       -> may-claim 2: Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token lim...
+ok   [use cases] "A team that must prove what its agents did"
+       -> may-claim 3: A decision record for every call, allow or deny, with a reason, the policy version and an input hash...
+ok   [why outside the agent] "Why the gateway sits outside the agent"
+       -> may-claim 1: One gateway for every model, tool and knowledge-base call. Agent code cannot reach the model client ...
+
+5. Nothing from the must-not-claim list on the public pages
+ok   12 landing files scanned for \b(approvals?|approve[sd]?|signed receipts?|hash chains?|uptime|availability|customers?|testimonials?|customer logos?|logo wall|kafka|openshell|sandbox(ed)?|pii|redaction|opa|eval gate|metrics dashboards?|enterprise-grade|trusted by)\b
+
+PASS

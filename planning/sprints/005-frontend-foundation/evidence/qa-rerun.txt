@@ -1,0 +1,22 @@
+QA re-run (read-only), captured output
+--- pytest web_edge+console_api
+.........................................................                [100%]
+57 passed in 23.92s
+--- full pytest: 791 passed, 0 skipped; ruff clean; mypy clean (88 files); DDL guard OK
+--- eslint
+> ai-platform-ui@2.0.0 lint
+> eslint . --max-warnings 0
+
+--- tsc
+tsc=0
+--- vitest
+ Test Files  4 passed (4)
+      Tests  33 passed (33)
+--- playwright
+
+  36 passed (1.3m)
+--- probes (scratch test, not committed)
+crafted cursors (int id, year 0001+14:00, year 9999-14:00) on GET /v1/decisions: 500 internal_error
+key revoked after sign-in: cookie session still 200
+HEAD /v1/decisions with cookie: 405; POST with X-HTTP-Method-Override and no CSRF: 403
+text/plain body on POST /v1/session: 422

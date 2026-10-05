@@ -2,7 +2,7 @@
 tests/conftest.py
 
 Shared config for the whole suite. Auto-tags every test with a tier
-marker (unit / integration / e2e) based on which directory it lives in,
+marker (unit / integration / e2e) based on which directory it lives in (tests/contracts counts as integration),
 and installs the network guard for every test.
 
 Run subsets with:
@@ -12,13 +12,21 @@ Run subsets with:
     poetry run pytest                 # everything
 """
 import ipaddress
+import os
 import socket
 from typing import Any
 
-import litellm
-import pytest
+# Workers in the tests poll and retry fast. Set before any module reads the settings (setdefault: a caller may override).
+os.environ.setdefault("JOB_POLL_INTERVAL_SECONDS", "0.05")
+os.environ.setdefault("JOB_BEAT_INTERVAL_SECONDS", "0.1")
+os.environ.setdefault("JOB_BACKOFF_BASE_SECONDS", "0.05")
+# The retention scheduler is off in tests: a test that needs it calls `schedule_purges` itself.
+os.environ.setdefault("RETENTION_SCHEDULE_INTERVAL_SECONDS", "0")
 
-from tests.fakes import NetworkBlockedError, blocked
+import litellm  # noqa: E402
+import pytest  # noqa: E402
+
+from tests.fakes import NetworkBlockedError, blocked  # noqa: E402
 
 # Fixtures shared by the integration and e2e tiers.
 pytest_plugins = ["tests.db_fixtures"]
@@ -29,7 +37,8 @@ def pytest_collection_modifyitems(config, items):
         parts = item.path.parts
         if "unit" in parts:
             item.add_marker(pytest.mark.unit)
-        elif "integration" in parts:
+        elif "integration" in parts or "contracts" in parts:
+            # The contract suites run every adapter of a port, the real ones (Postgres, Redis) included.
             item.add_marker(pytest.mark.integration)
         elif "e2e" in parts:
             item.add_marker(pytest.mark.e2e)

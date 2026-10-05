@@ -16,6 +16,7 @@ from core.identity.models import Principal
 from tests.e2e.conftest import eventually
 from tests.e2e.test_mcp import SseProbe
 from tests.e2e.test_search_flow import GDPR, GDPR_V2, QUERY, ingest
+from tests.jobs_helpers import post_ingest
 
 NEAR_QUERY = {**QUERY, "query": QUERY["query"] + " please"}
 WHATEVER = {"query": "anything about retention", "namespace": "legal", "rerank": False}
@@ -104,13 +105,18 @@ async def test_public_paths_need_no_credential(anon_client, path, fake_embedding
     assert (await anon_client.get(path)).status_code == 200
 
 
+SESSION_CREATE_ROUTES = {"/v1/session", "/v1/session/preview"}
+
+
 async def test_every_other_v1_operation_requires_authentication(app, anon_client):
     spec = (await anon_client.get("/openapi.json")).json()
     checked = []
     for path, methods in spec["paths"].items():
-        if path in PUBLIC:
+        if path in PUBLIC or path == "/metrics":  # /metrics is open in local mode; the closed mode is tested in test_metrics.py
             continue
         for method in methods:
+            if method == "post" and path in SESSION_CREATE_ROUTES:
+                continue  # sign-in and preview create the session, so they take no credential (blueprint 2, ADR-0007)
             resp = await anon_client.request(method.upper(), path)
             error_of(resp, 401, "unauthorized")
             checked.append((method, path))
@@ -122,11 +128,11 @@ async def test_every_other_v1_operation_requires_authentication(app, anon_client
     error_of(await anon_client.get("/v1/nope"), 401, "unauthorized")
 
 
-async def test_401_comes_before_any_limiter_or_route(anon_client, app, monkeypatch, fake_llm, fake_embeddings):
+async def test_401_comes_before_any_limiter_or_route(anon_client, app, monkeypatch, fake_llm, fake_embeddings, redis_raw):
     monkeypatch.setattr(config, "RATE_LIMIT_REQUESTS", 1)
     for _ in range(3):
         error_of(await anon_client.post("/v1/search", json=WHATEVER), 401, "unauthorized")
-    assert [k async for k in app.state.redis.scan_iter(match="rl:*")] == []
+    assert [k async for k in redis_raw.scan_iter(match="rl:*")] == []
     assert fake_llm.calls == [] and fake_embeddings.calls == []
 
 
@@ -249,7 +255,7 @@ async def test_spoofing_the_tenant_in_the_header_or_query_changes_nothing(client
     # B writes while claiming to be A: the rows land under B.
     kwargs = spoof(tenant_a.id)
     kwargs["params"] = {**kwargs.get("params", {}), "namespace": "legal"}
-    assert (await client_b.post("/v1/ingest", files={"file": ("b.md", GDPR_V2, "text/markdown")}, **kwargs)).status_code == 200
+    assert (await post_ingest(client_b, files={"file": ("b.md", GDPR_V2, "text/markdown")}, **kwargs)).status_code == 200
     owners = {str(r["tenant_id"]) for r in await pool.fetch("SELECT tenant_id FROM documents WHERE document_id = 'b.md'")}
     assert owners == {tenant_b.id}
     # and A is unharmed
@@ -263,7 +269,7 @@ async def test_spoofing_the_tenant_in_a_json_body_or_form_field_changes_nothing(
     error_of(resp, 404, "not_found")
     assert "72 hours" not in resp.text
     # extra multipart field on ingest
-    resp = await client_b.post("/v1/ingest", params={"namespace": "legal"},
+    resp = await post_ingest(client_b, params={"namespace": "legal"},
                                files={"file": ("sneaky.md", GDPR_V2, "text/markdown")}, data={"tenant_id": tenant_a.id})
     assert resp.status_code == 200
     owners = {str(r["tenant_id"]) for r in await pool.fetch("SELECT tenant_id FROM documents WHERE document_id = 'sneaky.md'")}
@@ -330,20 +336,20 @@ def config_description(slug):
 
 # ---------------------------------------------------------------- caches
 
-async def _wait_for_both_cache_writes(app):
+async def _wait_for_both_cache_writes(app, redis_raw):
     async def written():
-        exact = [k async for k in app.state.redis.scan_iter(match="cache:v*")]
-        semantic = [k async for k in app.state.redis.scan_iter(match="semcache:*")]
+        exact = [k async for k in redis_raw.scan_iter(match="cache:v*")]
+        semantic = [k async for k in redis_raw.scan_iter(match="semcache:*")]
         return bool(exact) and bool(semantic)
 
     await eventually(written)
 
 
-async def test_cache_never_serves_one_tenants_answer_to_another(client, client_b, app, fake_llm, fake_embeddings):
+async def test_cache_never_serves_one_tenants_answer_to_another(client, client_b, app, fake_llm, fake_embeddings, redis_raw):
     await ingest(client, GDPR)
     first = await client.post("/v1/search", json=QUERY)
     assert first.headers["X-Cache"] == "MISS"
-    await _wait_for_both_cache_writes(app)
+    await _wait_for_both_cache_writes(app, redis_raw)
     again = await client.post("/v1/search", json=QUERY)
     assert (again.headers["X-Cache"], again.headers["X-Cache-Type"]) == ("HIT", "exact")
     near = await client.post("/v1/search", json=NEAR_QUERY)  # sanity: A itself gets a semantic hit for this
@@ -359,10 +365,10 @@ async def test_cache_never_serves_one_tenants_answer_to_another(client, client_b
     assert len(fake_llm.calls) == calls_before
 
 
-async def test_cache_miss_for_b_then_b_gets_its_own_answer_and_its_own_cache(client, client_b, app, fake_llm, fake_embeddings):
+async def test_cache_miss_for_b_then_b_gets_its_own_answer_and_its_own_cache(client, client_b, app, fake_llm, fake_embeddings, redis_raw):
     await ingest(client, GDPR)
     await client.post("/v1/search", json=QUERY)
-    await _wait_for_both_cache_writes(app)
+    await _wait_for_both_cache_writes(app, redis_raw)
     await ingest(client_b, GDPR_V2)
 
     b_first = await client_b.post("/v1/search", json=QUERY)
@@ -372,15 +378,15 @@ async def test_cache_miss_for_b_then_b_gets_its_own_answer_and_its_own_cache(cli
     assert b_near.status_code == 200
     assert "72 hours" not in b_near.json()["answer"] and "48 hours" in b_near.json()["answer"]
     assert "72 hours" not in json.dumps(b_near.json()["results"])  # (the echoed query text itself contains "72 hours")
-    await eventually(lambda: _exact_entries(app, 2))
+    await eventually(lambda: _exact_entries(app, 2, redis_raw))
     b_again = await client_b.post("/v1/search", json=QUERY)
     assert (b_again.headers["X-Cache"], b_again.json()["answer"]) == ("HIT", b_first.json()["answer"])
     a_again = await client.post("/v1/search", json=QUERY)
     assert "72 hours" in a_again.json()["answer"]
 
 
-async def _exact_entries(app, n):
-    return len([k async for k in app.state.redis.scan_iter(match="cache:v*")]) >= n
+async def _exact_entries(app, n, redis_raw):
+    return len([k async for k in redis_raw.scan_iter(match="cache:v*")]) >= n
 
 
 # ---------------------------------------------------------------- rate limit and budget
@@ -400,15 +406,15 @@ async def test_rate_limit_counts_per_principal_not_per_tenant_or_namespace(clien
         assert (await client.post("/v1/search", json=body)).status_code == 429
 
 
-async def test_rate_limit_keys_are_the_principal_id(client, app, tenant_a, fake_llm, fake_embeddings):
+async def test_rate_limit_keys_are_the_principal_id(client, app, tenant_a, fake_llm, fake_embeddings, redis_raw):
     await client.post("/v1/search", json=WHATEVER)
-    keys = [k async for k in app.state.redis.scan_iter(match="rl:*")]
+    keys = [k async for k in redis_raw.scan_iter(match="rl:*")]
     assert len(keys) == 1 and keys[0].startswith(f"rl:{tenant_a.principal_id}:")
 
 
-async def test_token_budget_is_per_tenant_shared_by_its_principals(client, client_b, key_with, tenant_a, app, fake_llm, fake_embeddings):
+async def test_token_budget_is_per_tenant_shared_by_its_principals(client, client_b, key_with, tenant_a, app, fake_llm, fake_embeddings, redis_raw):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    await app.state.redis.set(f"budget:{tenant_a.id}:{today}", config.DEFAULT_DAILY_TOKEN_BUDGET)
+    await redis_raw.set(f"budget:{tenant_a.id}:{today}", config.DEFAULT_DAILY_TOKEN_BUDGET)
 
     error_of(await client.post("/v1/search", json=WHATEVER), 429, "daily_token_budget_exceeded")
     error_of(await key_with(["query"]).post("/v1/search", json=WHATEVER), 429, "daily_token_budget_exceeded")  # same tenant
@@ -417,13 +423,13 @@ async def test_token_budget_is_per_tenant_shared_by_its_principals(client, clien
     error_of(await client.post("/v1/search", json={**WHATEVER, "namespace": "kyc_aml"}), 429, "daily_token_budget_exceeded")
 
 
-async def test_tokens_used_are_booked_against_the_tenant(client, app, tenant_a, fake_llm, fake_embeddings):
+async def test_tokens_used_are_booked_against_the_tenant(client, app, tenant_a, fake_llm, fake_embeddings, redis_raw):
     await ingest(client)
     resp = await client.post("/v1/search", json=QUERY)
     used = int(resp.headers["X-Tokens-In"]) + int(resp.headers["X-Tokens-Out"])
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    assert int(await app.state.redis.get(f"budget:{tenant_a.id}:{today}")) == used
-    assert [k async for k in app.state.redis.scan_iter(match="budget:legal:*")] == []
+    assert int(await redis_raw.get(f"budget:{tenant_a.id}:{today}")) == used
+    assert [k async for k in redis_raw.scan_iter(match="budget:legal:*")] == []
 
 
 # ---------------------------------------------------------------- usage, analytics, feedback per tenant
@@ -449,7 +455,7 @@ async def test_the_agent_retrieve_tool_of_tenant_b_cannot_see_tenant_a_documents
     from api.agent.tools import make_retrieve_tool
 
     await ingest(client)
-    tool = make_retrieve_tool(app.state.db_pool)
+    tool = make_retrieve_tool(app.state.adapters)
     args = {"query": "breach notification supervisory authority 72 hours", "namespace": "legal"}
 
     as_b = json.loads(await tool.ainvoke(args, config=await agent_config(app, tenant_b)))
@@ -474,7 +480,7 @@ async def test_the_agent_list_namespaces_tool_shows_only_the_tenants_kbs(app, te
 
     with admin_connection(database_url) as conn:
         create_kb(conn, "tenant-b", "b-only", "B private")
-    tool = make_list_namespaces_tool(app.state.db_pool)
+    tool = make_list_namespaces_tool(app.state.adapters)
     as_a = json.loads(await tool.ainvoke({}, config=await agent_config(app, tenant_a)))
     as_b = json.loads(await tool.ainvoke({}, config=await agent_config(app, tenant_b)))
     assert "b-only" not in as_a and set(as_a) == {"default", "kyc_aml", "legal"}
@@ -698,7 +704,9 @@ async def test_an_mcp_session_enforces_tool_scopes_end_to_end(app, make_client, 
 
 
 async def test_ingest_failures_do_not_leak_exception_text(client, app, monkeypatch, json_logs, fake_embeddings):
-    import api.routers.ingest as ingest_module
+    """Ingestion runs in a worker now (Sprint 007): a failure is a job with a stable error code. The exception text
+    never reaches the job, its API or the answers the caller sees; it stays in the log."""
+    import workers.handlers.ingest as ingest_module
 
     async def unsupported(**kwargs):
         raise ValueError("cannot parse /tmp/secret-path/tmpab12cd.pdf: internal parser detail")
@@ -706,14 +714,18 @@ async def test_ingest_failures_do_not_leak_exception_text(client, app, monkeypat
     async def crash(**kwargs):
         raise RuntimeError("password=hunter2 host=db.internal")
 
-    for failing, status, code, message in ((unsupported, 415, "unsupported_media_type", "Unsupported or unreadable file"),
-                                           (crash, 500, "http_500", "Ingestion failed")):
+    # (failing pipeline, the job's final status, its error code, the code the old route answered)
+    for failing, final_status, code, http in ((unsupported, "failed", "unsupported_file", 415), (crash, "dead", "internal_error", 500)):
         monkeypatch.setattr(ingest_module, "ingestion_pipeline", failing)
-        resp = await ingest(client, name=f"{status}.md")
-        assert resp.status_code == status
-        err = resp.json()["error"]
-        assert err["message"] == message and err["request_id"] == resp.headers["X-Request-ID"]
-        assert "secret-path" not in resp.text and "hunter2" not in resp.text and "parser detail" not in resp.text
+        resp = await ingest(client, name=f"{http}.md")
+        assert resp.accepted.status_code == 202  # the route itself accepts the file; the failure is the job's
+        assert resp.status_code == http  # the helper's mapping of the job's outcome to the old answer
+        assert resp.headers["X-Request-ID"] == resp.json()["error"]["request_id"]
+        job = (await client.get(f"/v1/jobs/{resp.accepted.json()['job_id']}")).json()
+        assert (job["status"], job["error_code"]) == (final_status, code)  # what the route's API says, not the helper
+        assert {"failed": 415, "dead": 500}[job["status"]] == http
+        for surface in (resp.text, json.dumps(job)):
+            assert "secret-path" not in surface and "hunter2" not in surface and "parser detail" not in surface
     logged = json.dumps(json_logs())  # the detail is in the log instead
     assert "secret-path" in logged and "hunter2" in logged
 
@@ -723,7 +735,7 @@ async def test_agent_retrieve_tool_checks_the_namespace_against_the_tenants_know
 
     with admin_connection(database_url) as conn:
         create_kb(conn, "tenant-b", "b-secret-kb", "only B")
-    tool = make_retrieve_tool(app.state.db_pool)
+    tool = make_retrieve_tool(app.state.adapters)
     cfg = await agent_config(app, tenant_a)
     foreign = json.loads(await tool.ainvoke({"query": "retention", "namespace": "b-secret-kb"}, config=cfg))
     missing = json.loads(await tool.ainvoke({"query": "retention", "namespace": "no-such-kb"}, config=cfg))

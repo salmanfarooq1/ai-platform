@@ -1,179 +1,232 @@
+import asyncio
+import json
 import logging
 import time
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from langchain_core.messages import HumanMessage, ToolMessage
-from langgraph.errors import GraphRecursionError
-from pydantic import BaseModel, Field
+from fastapi.responses import JSONResponse
 
 from api.agent.models import AGENT_MAX_TOKENS
-from api.auth import require_kb, require_scope
+from api.agent.response import build_agent_result, combine_usage
+from api.agent.runner import AGENT_RUN_KIND, AgentRunOutput
+from api.agent.schemas import (
+    AgentAccepted,
+    AgentCitation,  # noqa: F401 - part of this module's public surface
+    AgentQueryResponse,
+    AgentRequest,
+    AgentResponse,
+    AgentRun,
+    AgentRunDetail,
+    AgentRunPage,
+    RunDecisionOut,
+    RunTimelineItem,
+    SandboxEventOut,
+)
+from api.auth import require_any_scope, require_kb, require_scope
+from api.dependencies import adapters_of
 from api.gateway_deps import entry_action, gateway_context
-from config import LLM_CONFIG, MODEL_PRICING
+from api.services.cursor import InvalidCursor, decode_cursor, encode_cursor
+from api.services.run_status import run_status_word
+from config import LLM_CONFIG
+from core.database import jobs as job_store
+from core.database.jobs import JobRow
+from core.database.tenant import DbConnection, tenant_connection
 from core.identity.models import Principal, Scope
+from core.settings import get_settings
 from gateway import Action, ActionKind, EnforcementContext, require
 from gateway.estimate import estimate_tokens
+from ports import RunSpec, RunState
 
 logger = logging.getLogger("api.agent")
+TIMELINE_CAP = 500
 router = APIRouter(prefix="/agent", tags=["agent"])
 
-
-class AgentRequest(BaseModel):
-    question: str = Field(description="The compliance question to research")
-    namespace: str = Field(default="default", description="Document scope hint for the agent")
-    max_iterations: int = Field(default=6, ge=1, le=10, description="Max retrieve_chunks calls before forcing synthesis")
-    enable_verifier: bool = Field(default=True, description="Whether to verify the drafted answer against retrieved chunks before returning it")
-    max_verify_retries: int = Field(default=1, ge=0, le=3, description="How many times verification can send the query back for more retrieval")
+# Kept for the code that imported it from here before the move.
+_combine_usage = combine_usage
 
 
-class AgentCitation(BaseModel):
-    """Mirrors schemas.py Citation exactly."""
-    document_id: str
-    source_filename: str
-    chunk_index: int
-    relevance_score: float
-    excerpt: str
-
-
-class AgentResponse(BaseModel):
-    question: str
-    answer: str
-    confidence: float = 0.0
-    citations: list[AgentCitation] = []
-    model_used: str = ""
-    verified: bool | None = None  # None means the verifier did not run for this query
-    verification_notes: str = ""
-    reasoning_steps: list[str]
-    tool_calls_made: int
-    total_time_seconds: float
-    total_cost_usd: float = 0.0
-    flagged: bool = False  # True when a gateway denial cut the run short: the answer is partial
-    flag_reason: str | None = None
-
-
-def _combine_usage(result: dict) -> dict:
-    """Sum every reasoning role and verifier role LLM call usage with
-    synthesize_node own cost, so FinOps sees an agent query full cost,
-    not just its final step."""
-    all_calls = (
-        result.get("reasoning_usage", [])
-        + result.get("verifier_usage", [])
-        + result.get("synthesis_usage", [])
-    )
-
-    prompt_tokens = sum(u.get("prompt_tokens", 0) for u in all_calls)
-    completion_tokens = sum(u.get("completion_tokens", 0) for u in all_calls)
-
-    model = result.get("model_used", "")
-    llm_cost = 0.0
-    if model and not model.startswith("ollama/"):
-        rates = MODEL_PRICING.get(model, {"input": 0.0, "output": 0.0})
-        llm_cost = (prompt_tokens / 1_000_000) * rates["input"] + (completion_tokens / 1_000_000) * rates["output"]
-
-    return {
-        "prompt_tokens": prompt_tokens,
-        "completion_tokens": completion_tokens,
-        "total_cost": llm_cost,
-        "routing_decision": "agent",
-        "routed_model": result.get("model_used", ""),
-        "model": result.get("model_used", ""),
-    }
-
-
-@router.post("/query", response_model=AgentResponse)
+@router.post(
+    "/query",
+    response_model=AgentResponse,
+    responses={202: {"model": AgentAccepted, "description": "The run is still going after the sync wait: poll /v1/agent/runs/{execution_id}"}},
+)
 async def agent_query(
     request: Request,
     response: Response,
     payload: AgentRequest,
     principal: Principal = Depends(require_scope(Scope.AGENT)),
     ctx: EnforcementContext = Depends(gateway_context),
-) -> AgentResponse:
+) -> AgentResponse | JSONResponse:
     start = time.perf_counter()
+    adapters = adapters_of(request)
+    # The run's id is fixed before the first check, so every decision this request causes carries it.
+    execution_id = uuid4()
+    ctx.execution_id = execution_id
     # The gateway decides first: scope, input guardrails, rate limit and daily token budget.
     await require(ctx, entry_action(request.url.path, ActionKind.AGENT_RUN, input_text=payload.question))
-    await require_kb(request.app.state.db_pool, principal, payload.namespace)
+    await require_kb(adapters.knowledge, principal, payload.namespace)
     # The model must be allowed before the run starts (each LLM call inside the run is checked again).
     await require(ctx, Action(
         ActionKind.MODEL_INVOKE, LLM_CONFIG["model"], estimated_tokens=estimate_tokens(payload.question, AGENT_MAX_TOKENS),
         input_text=payload.question,
     ))
 
-    graph = request.app.state.agent_graph  # compiled once at startup (see main.py)
-
-    # Generous upper bound, not a tight derivation.
-    base_round = payload.max_iterations * 2 + 2
-    recursion_limit = base_round * (1 + payload.max_verify_retries) + payload.max_verify_retries + 5
-
+    # The run goes through the AgentRuntime port (ADR-0009): with the queued runtime it is a job a worker runs.
     try:
-        result = await graph.ainvoke(
-            {
-                "messages": [HumanMessage(content=payload.question)],
-                # Both reducer typed lists MUST be initialized here.
-                # Omitting them raises InvalidUpdateError the first time
-                # agent_node tries to append.
-                "reasoning_usage": [],
-                "verifier_usage": [],
-                "synthesis_usage": [],
-                "enable_verifier": payload.enable_verifier,
-                "verify_retries_left": payload.max_verify_retries,
-            },
-            # The enforcement context (boundary, never the raw principal) reaches the nodes and tools through
-            # `configurable`, never through model-controlled arguments.
-            config={"recursion_limit": recursion_limit, "configurable": {"gateway": ctx}},
+        handle = await adapters.runtime.start(RunSpec(
+            kind=AGENT_RUN_KIND, input=payload.model_dump(), tenant_id=principal.tenant_id, context=ctx,
+            execution_id=execution_id,
+        ))
+    except job_store.PayloadTooLarge:
+        raise HTTPException(status_code=413, detail="The question is too long") from None
+    wait_seconds = get_settings().agent_sync_wait_seconds
+    try:
+        outcome = await asyncio.wait_for(adapters.runtime.wait(handle.run_id), timeout=wait_seconds)
+    except asyncio.TimeoutError:
+        # Still running after the sync wait. The run is not stopped: the caller polls it by execution id.
+        async with tenant_connection(request.app.state.db_pool, principal.tenant_id) as conn:
+            job = await job_store.get_by_execution(conn, handle.execution_id)
+        if job is None:
+            raise HTTPException(status_code=500, detail="Agent execution failed: the run was lost") from None
+        return JSONResponse(
+            status_code=202, content=AgentAccepted(execution_id=handle.execution_id, job_id=job.id).model_dump(mode="json"),
         )
-    except GraphRecursionError:
-        logger.warning(
-            "[agent] hit recursion_limit=%d before converging, question=%r",
-            recursion_limit, payload.question,
-        )
-        return AgentResponse(
-            question=payload.question,
-            answer=(
-                "I was not able to reach a confident answer within the allotted "
-                "reasoning steps. Try a narrower question or a higher max_iterations."
-            ),
-            confidence=0.0,
-            reasoning_steps=["Reached max_iterations without producing a final answer."],
-            tool_calls_made=0,
-            total_time_seconds=round(time.perf_counter() - start, 3),
-        )
-    except Exception as e:
-        logger.error("[agent] graph execution failed: %s", e)
-        raise HTTPException(status_code=500, detail=f"Agent execution failed: {str(e)}")
+    except asyncio.CancelledError:
+        # A client disconnect cancels this handler: stop the run, including the model call it is inside.
+        await asyncio.shield(adapters.runtime.cleanup(handle.run_id))
+        raise
 
-    reasoning_steps = []
-    tool_call_count = 0
-    for msg in result["messages"]:
-        if getattr(msg, "tool_calls", None):
-            tool_call_count += len(msg.tool_calls)
-            for tc in msg.tool_calls:
-                reasoning_steps.append(f"Called tool: {tc['name']}({tc['args']})")
-        elif isinstance(msg, ToolMessage):
-            content = msg.content or ""
-            suffix = "..." if len(content) > 200 else ""
-            reasoning_steps.append(f"Tool result: {content[:200]}{suffix}")
+    if outcome.status.state is not RunState.SUCCEEDED:
+        await adapters.runtime.cleanup(handle.run_id)
+        logger.error("[agent] run %s ended %s: %s", handle.run_id, outcome.status.state.value, outcome.status.error)
+        # No exception text for the caller: the cause is in the worker's log, the code is in the run.
+        raise HTTPException(status_code=500, detail="Agent execution failed")
 
-    usage_dict = _combine_usage(result)
-    usage_dict["namespace"] = payload.namespace
-    request.state.usage = usage_dict
-    response.headers["X-Cost-USD"] = f"{usage_dict['total_cost']:.6f}"
+    output = outcome.output
+    if isinstance(output, AgentRunOutput):  # the in-process runtime hands back the raw graph state
+        result = build_agent_result(output, payload.question, payload.namespace, ctx, time.perf_counter() - start)
+        await adapters.runtime.cleanup(handle.run_id)
+    else:  # a worker already built and stored the result, and booked the usage
+        result = output
+    answer = AgentResponse(**{**result["response"], "total_time_seconds": round(time.perf_counter() - start, 3)})
+    usage = result.get("usage")
+    if usage:
+        request.state.usage = usage
+        request.state.usage_booked = bool(usage.get("booked"))
+        response.headers["X-Cost-USD"] = f"{usage['total_cost']:.6f}"
+    return answer
 
-    flag_reason = None
-    if ctx.denials:
-        flag_reason = f"Run cut short by policy (reason: {ctx.denials[0].reason}). The answer is partial."
 
-    return AgentResponse(
-        question=payload.question,
-        flagged=bool(ctx.denials),
-        flag_reason=flag_reason,
-        answer=result.get("final_answer", "No answer generated"),
-        confidence=result.get("confidence", 0.0),
-        citations=[AgentCitation(**c) for c in result.get("citations", [])],
-        model_used=result.get("model_used", ""),
-        verified=result.get("verified"),
-        verification_notes=result.get("verification_notes", ""),
-        reasoning_steps=reasoning_steps,
-        tool_calls_made=tool_call_count,
-        total_time_seconds=round(time.perf_counter() - start, 3),
-        total_cost_usd=usage_dict["total_cost"],
+# ---------------------------------------------------------------------------------------------- runs
+
+def _read_action(request: Request, principal: Principal) -> Action:
+    """Reading a run is a read, never an `agent.run` (those rows are the runs themselves). Audit readers read
+    through `audit.read`; an agent key reads through `kb.read`, which its scope grants."""
+    if principal.has_scope(Scope.AUDIT_READ):
+        return Action(ActionKind.AUDIT_READ, resource="runs")
+    return entry_action(request.url.path, ActionKind.KB_READ)
+
+
+def _only_own(principal: Principal) -> UUID | None:
+    """A caller without `audit:read` sees only the runs it started. An audit reader sees the tenant's runs."""
+    return None if principal.has_scope(Scope.AUDIT_READ) else principal.id
+
+
+def _may_see(ctx: EnforcementContext, principal: Principal, row: JobRow) -> bool:
+    """A run is visible when its knowledge base is one the caller's boundary allows, and (without `audit:read`)
+    when the caller started it. Everything else is a 404, the same as a run that does not exist."""
+    if row.namespace is not None and not ctx.boundary.allows_kb(row.namespace):
+        return False
+    return _only_own(principal) in (None, row.principal_id)
+
+
+def run_view(row: JobRow) -> AgentRun:
+    word = run_status_word(row.status, row.error_code)
+    stored = row.result if row.status == "succeeded" and isinstance(row.result, dict) else None
+    return AgentRun(
+        execution_id=row.execution_id or row.id, job_id=row.id, status=word,  # type: ignore[arg-type]
+        error_code=row.error_code if word in ("failed", "stopped") else None, created_at=row.created_at,
+        started_at=row.started_at, finished_at=row.finished_at,
+        result=AgentQueryResponse(**stored["response"]) if stored else None,
+        decisions_url=f"/v1/decisions?execution_id={row.execution_id}",
     )
+
+
+@router.get("/runs", response_model=AgentRunPage)
+async def list_runs(
+    request: Request,
+    cursor: str | None = None,
+    limit: int = 50,
+    principal: Principal = Depends(require_any_scope(Scope.AGENT, Scope.AUDIT_READ)),
+    ctx: EnforcementContext = Depends(gateway_context),
+) -> AgentRunPage:
+    """The tenant's agent runs, newest first, with a keyset cursor."""
+    if not 1 <= limit <= 200:
+        raise HTTPException(status_code=422, detail="limit must be between 1 and 200")
+    await require(ctx, _read_action(request, principal))
+    after = None
+    if cursor is not None:
+        try:
+            after = decode_cursor(cursor)
+        except InvalidCursor:
+            raise HTTPException(status_code=400, detail={"error": "invalid_cursor", "reason": "The cursor is not valid"}) from None
+    async with tenant_connection(request.app.state.db_pool, principal.tenant_id) as conn:
+        rows = await job_store.list_jobs(
+            conn, kind=job_store.KIND_AGENT_RUN, kbs=ctx.boundary.visible_kbs(), principal_id=_only_own(principal),
+            cursor=after, limit=limit,
+        )
+    page = rows[:limit]
+    next_cursor = encode_cursor(page[-1].created_at, page[-1].id) if len(rows) > limit else None
+    return AgentRunPage(items=[run_view(r) for r in page], next_cursor=next_cursor)
+
+
+async def run_timeline(
+    conn: DbConnection, execution_id: UUID, only_principal: UUID | None,
+) -> tuple[list[SandboxEventOut], list[RunTimelineItem]]:
+    """The sandbox events of a run and the run's decisions and events merged by time. Both reads are bounded.
+
+    A caller without `audit:read` sees only decisions of its own principal (the same rule as the run list)."""
+    event_rows = await conn.fetch(
+        "SELECT id, kind, detail, at FROM sandbox_events WHERE execution_id = $1 ORDER BY at, seq LIMIT $2",
+        execution_id, TIMELINE_CAP,
+    )
+    decision_rows = await conn.fetch(
+        "SELECT id, created_at, action, resource, outcome, stage, reason FROM gateway_decisions "
+        "WHERE execution_id = $1 AND ($2::uuid IS NULL OR principal_id = $2) ORDER BY created_at, id LIMIT $3",
+        execution_id, only_principal, TIMELINE_CAP,
+    )
+    events = [
+        SandboxEventOut(
+            id=r["id"], kind=r["kind"], at=r["at"],
+            detail=json.loads(r["detail"]) if isinstance(r["detail"], (str, bytes)) else dict(r["detail"]),
+        )
+        for r in event_rows
+    ]
+    merged = [
+        RunTimelineItem(source="decision", at=r["created_at"], decision=RunDecisionOut(
+            id=r["id"], at=r["created_at"], action=r["action"], resource=r["resource"], outcome=r["outcome"],
+            stage=r["stage"], reason=r["reason"],
+        ))
+        for r in decision_rows
+    ] + [RunTimelineItem(source="sandbox", at=e.at, sandbox=e) for e in events]
+    merged.sort(key=lambda item: item.at)  # stable: a decision and an event with the same time keep decisions first
+    return events, merged[:TIMELINE_CAP]
+
+
+@router.get("/runs/{execution_id}", response_model=AgentRunDetail)
+async def get_run(
+    request: Request,
+    execution_id: UUID,
+    principal: Principal = Depends(require_any_scope(Scope.AGENT, Scope.AUDIT_READ)),
+    ctx: EnforcementContext = Depends(gateway_context),
+) -> AgentRunDetail:
+    """One run: its status, its answer once it succeeded, the sandbox events and the run's decisions merged by time.
+    It reads the job, so it also works after a restart."""
+    await require(ctx, _read_action(request, principal))
+    async with tenant_connection(request.app.state.db_pool, principal.tenant_id) as conn:
+        row = await job_store.get_by_execution(conn, execution_id)
+        if row is None or not _may_see(ctx, principal, row):  # a foreign run and an unknown run look the same: row-level security hides the foreign one
+            raise HTTPException(status_code=404, detail="Run not found")
+        events, timeline = await run_timeline(conn, execution_id, _only_own(principal))
+    return AgentRunDetail(**run_view(row).model_dump(), sandbox_events=events, timeline=timeline)

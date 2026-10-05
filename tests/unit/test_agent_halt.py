@@ -1,5 +1,6 @@
 """After a denial ends an agent run (`ctx.halted`), the graph spends no more model calls: not on the agent, not on the verifier."""
 import json
+from types import SimpleNamespace
 
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.tools import tool
@@ -30,15 +31,24 @@ async def fake_retrieve(query: str, namespace: str = "default") -> str:
     return json.dumps({"chunks": [{"document_id": "doc1", "chunk_index": 0, "content": "text"}]})
 
 
-def build(monkeypatch, calls):
-    def chat_model(max_tokens):
-        if max_tokens == AGENT_MAX_TOKENS:
-            return CountingModel("done", calls, "agent")
-        return CountingModel(json.dumps({"supported": True, "notes": "ok"}), calls, "verifier")
+class CountingChat:
+    """A `ChatModelPort` whose models count their calls."""
 
-    monkeypatch.setattr(graph_module, "chat_model", chat_model)
-    monkeypatch.setattr(graph_module, "make_retrieve_tool", lambda pool: fake_retrieve)
-    return graph_module.build_agent_graph(object())
+    def __init__(self, calls: list[str]):
+        self.calls = calls
+
+    def chat_model(self, *, max_tokens, temperature=0.0):
+        if max_tokens == AGENT_MAX_TOKENS:
+            return CountingModel("done", self.calls, "agent")
+        return CountingModel(json.dumps({"supported": True, "notes": "ok"}), self.calls, "verifier")
+
+    def cost(self, model, tokens_in, tokens_out):
+        return 0.0
+
+
+def build(monkeypatch, calls):
+    monkeypatch.setattr(graph_module, "make_retrieve_tool", lambda adapters: fake_retrieve)
+    return graph_module.build_agent_graph(SimpleNamespace(chat=CountingChat(calls), llm=None, knowledge=None, embeddings=None))
 
 
 def state(verifier=True):

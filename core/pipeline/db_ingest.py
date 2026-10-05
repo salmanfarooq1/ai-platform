@@ -1,16 +1,13 @@
 import time
-from collections.abc import Iterable
+from collections.abc import Awaitable, Callable, Iterable
 from itertools import islice
 from pathlib import Path
 from typing import Generator
 from uuid import UUID
 
-from asyncpg import Pool
-
-from core.database import bulk_insert, create_pool
-from core.database.tenant import tenant_connection
 from core.ingestion.chunkers import ChunkRecord, get_chunker
 from core.ingestion.embedders import embed_chunks
+from ports import ChunkRow, EmbeddingPort, KnowledgeStore
 
 
 def batch_generator(iterable: Iterable, batch_size: int = 50) -> Generator[list, None, None]:
@@ -36,16 +33,17 @@ async def ingestion_pipeline(
     document_id: str,
     namespace: str = "default",
     batch_size: int = 50,
-    pool: Pool = None,       # API passes its shared pool; standalone runs create one
     source_filename: str | None = None,  # real upload name; the temp path name is useless for citations
     *,
+    store: KnowledgeStore,
+    embeddings: EmbeddingPort,
     tenant_id: UUID,         # owner of the rows; always the authenticated principal's tenant
+    on_progress: Callable[[int, int], Awaitable[None]] | None = None,  # (chunks stored, chunks in total)
 ) -> dict:
     '''
-    Chunk → embed → bulk insert into PostgreSQL.
+    Chunk → embed → insert through the knowledge store port.
 
-    Accepts an external pool so the API's shared pool is reused across requests.
-    If no pool is passed, creates one locally — preserves standalone script usage.
+    Each row records the embedding model and dimension that produced its vector.
     '''
     start_time = time.perf_counter()
 
@@ -62,19 +60,19 @@ async def ingestion_pipeline(
         chunk.metadata["source_filename"] = source_filename or Path(input_file_path).name
 
     total_chunks = 0
-    owns_pool = pool is None
-
-    if owns_pool:
-        pool = await create_pool()
+    if on_progress is not None:
+        await on_progress(0, len(chunks))
 
     for batch in batch_generator(chunks, batch_size):
-        embedded_batch = await embed_chunks(batch)
-        async with tenant_connection(pool, tenant_id) as conn:
-            await bulk_insert(conn, embedded_batch, document_id=document_id, namespace=namespace, tenant_id=tenant_id)
+        embedded_batch, model, dim = await embed_chunks(embeddings, batch)
+        if any(c.embedding is None for c in embedded_batch):
+            raise RuntimeError("the embedding port returned no vector for a chunk")  # never store a row without one
+        rows = [ChunkRow(content=c.content, embedding=c.embedding, metadata=c.metadata)
+                for c in embedded_batch if c.embedding is not None]
+        await store.insert_chunks(tenant_id, document_id, namespace, rows, embedding_model=model, embedding_dim=dim)
         total_chunks += len(embedded_batch)
-
-    if owns_pool:
-        await pool.close()
+        if on_progress is not None:
+            await on_progress(total_chunks, len(chunks))
 
     elapsed_time = time.perf_counter() - start_time
 

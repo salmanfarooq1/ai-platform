@@ -4,7 +4,8 @@
 agent and its tools receive the boundary (through the enforcement context), never the raw principal.
 `"*"` in a resource set means every resource of that type.
 """
-from dataclasses import dataclass, replace
+from collections.abc import Mapping
+from dataclasses import dataclass, field, replace
 from typing import Any
 from uuid import UUID
 
@@ -26,6 +27,8 @@ SCOPE_ACTIONS: dict[str, frozenset[str]] = {
     Scope.AGENT.value: frozenset({
         ActionKind.AGENT_RUN.value, ActionKind.TOOL_CALL.value, ActionKind.MODEL_INVOKE.value, ActionKind.KB_READ.value,
     }),
+    # The governance console reads decisions, policies, principals and usage. No resource-level narrowing applies.
+    Scope.AUDIT_READ.value: frozenset({ActionKind.AUDIT_READ.value}),
     Scope.ADMIN.value: frozenset(k.value for k in ActionKind),
 }
 
@@ -52,8 +55,36 @@ class ExecutionBoundary:
     max_query_length: int
     blocked_terms: frozenset[str]
     policy_version: int | None = None
+    # The tenant's own daily cost cap, or None for the platform default (`config.DEFAULT_DAILY_COST_CAP_USD`).
+    daily_cost_cap_usd: float | None = None
     # Set when the tenant policy could not be loaded or parsed: every action is then denied.
     unavailable_reason: str | None = None
+    # A JSON Schema per tool name (the policy's `tool_arguments`). Narrowing never changes it.
+    tool_arguments: Mapping[str, Any] = field(default_factory=dict)
+
+    def to_payload(self) -> dict[str, Any]:
+        """A JSON form of the boundary, so a job can carry it to a worker (it holds no secret)."""
+        return {
+            "tenant_id": str(self.tenant_id) if self.tenant_id else None,
+            "actions": sorted(self.actions), "kbs": sorted(self.kbs), "tools": sorted(self.tools),
+            "models": sorted(self.models), "max_tool_calls": self.max_tool_calls, "max_tokens": self.max_tokens,
+            "max_query_length": self.max_query_length, "blocked_terms": sorted(self.blocked_terms),
+            "policy_version": self.policy_version, "unavailable_reason": self.unavailable_reason,
+            "daily_cost_cap_usd": self.daily_cost_cap_usd, "tool_arguments": dict(self.tool_arguments),
+        }
+
+    @classmethod
+    def from_payload(cls, body: dict[str, Any]) -> "ExecutionBoundary":
+        """The inverse of `to_payload`. The worker runs under the boundary the request had, not a newer policy."""
+        return cls(
+            tenant_id=UUID(body["tenant_id"]) if body["tenant_id"] else None,
+            actions=frozenset(body["actions"]), kbs=frozenset(body["kbs"]), tools=frozenset(body["tools"]),
+            models=frozenset(body["models"]), max_tool_calls=int(body["max_tool_calls"]),
+            max_tokens=int(body["max_tokens"]), max_query_length=int(body["max_query_length"]),
+            blocked_terms=frozenset(body["blocked_terms"]), policy_version=body["policy_version"],
+            unavailable_reason=body["unavailable_reason"], daily_cost_cap_usd=body.get("daily_cost_cap_usd"),
+            tool_arguments=dict(body.get("tool_arguments") or {}),
+        )
 
     def visible_kbs(self) -> list[str] | None:
         """The KB slugs this boundary allows, sorted, or None when it allows every KB."""
@@ -120,6 +151,8 @@ def build_boundary(
         max_query_length=min(doc.max_query_length, DEFAULT_POLICY.max_query_length),
         blocked_terms=frozenset(t.casefold() for t in doc.blocked_terms),
         policy_version=policy_version,
+        daily_cost_cap_usd=doc.daily_cost_cap_usd,
+        tool_arguments=dict(doc.tool_arguments),
     )
 
 

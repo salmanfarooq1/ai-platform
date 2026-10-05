@@ -10,8 +10,11 @@ pytestmark = pytest.mark.unit
 
 _ENV_NAMES = [
     "MODE", "DATABASE_URL", "REDIS_URL", "LLM_MODEL", "EMBED_MODEL", "EMBEDDING_DIM",
-    "RATE_LIMIT_REQUESTS", "CONFIDENCE_FLOOR", "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "RATE_LIMIT_REQUESTS", "CONFIDENCE_FLOOR", "OTEL_EXPORTER_OTLP_ENDPOINT", "RECEIPT_SIGNING_KEY",
+    "RECEIPT_PREVIOUS_PUBLIC_KEYS", "METRICS_PUBLIC", "DECISION_RETENTION_DAYS",
 ]
+# A well-formed Ed25519 key text (32 zero bytes, base64). Only the shape matters in these tests.
+KEY_TEXT = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
 
 
 @pytest.fixture(autouse=True)
@@ -56,10 +59,47 @@ def test_hosted_mode_with_both_urls_loads(monkeypatch):
     monkeypatch.setenv("MODE", "prod")
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
     monkeypatch.setenv("REDIS_URL", "rediss://r.example.test:6380")
+    monkeypatch.setenv("RECEIPT_SIGNING_KEY", KEY_TEXT)
     s = get_settings()
     assert s.database_dsn == "postgresql://u:p@db.example.test/app"
     assert s.llm_model == "azure/gpt-4o"
     assert s.embed_model == "azure/text-embedding-3-small"
+
+
+@pytest.mark.parametrize("mode", ["public-preview", "prod"])
+def test_hosted_mode_needs_a_receipt_signing_key(monkeypatch, mode):
+    monkeypatch.setenv("MODE", mode)
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
+    monkeypatch.setenv("REDIS_URL", "rediss://r.example.test:6380")
+    with pytest.raises(SettingsError, match="RECEIPT_SIGNING_KEY must be set"):
+        get_settings()
+
+
+def test_a_malformed_receipt_key_is_refused_without_echoing_it(monkeypatch):
+    monkeypatch.setenv("RECEIPT_SIGNING_KEY", "not-base64-at-all!")
+    with pytest.raises(SettingsError) as exc:
+        get_settings()
+    assert "RECEIPT_SIGNING_KEY is not valid" in str(exc.value)
+    assert "not-base64-at-all" not in str(exc.value)
+    get_settings.cache_clear()
+    monkeypatch.setenv("RECEIPT_SIGNING_KEY", "QUJD")  # valid base64, 3 bytes
+    with pytest.raises(SettingsError, match="32 bytes"):
+        get_settings()
+
+
+def test_trust_defaults(monkeypatch):
+    s = get_settings()
+    assert (s.decision_retention_days, s.metrics_public, s.daily_cost_cap_usd) == (90, True, 10.0)
+    assert s.receipt_signing_key is None  # local mode makes a throwaway key at startup
+    get_settings.cache_clear()
+    monkeypatch.setenv("MODE", "prod")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
+    monkeypatch.setenv("REDIS_URL", "rediss://r.example.test:6380")
+    monkeypatch.setenv("RECEIPT_SIGNING_KEY", KEY_TEXT)
+    assert get_settings().metrics_public is False  # closed by default outside local
+    get_settings.cache_clear()
+    monkeypatch.setenv("METRICS_PUBLIC", "true")
+    assert get_settings().metrics_public is True
 
 
 def test_unknown_mode_fails_with_allowed_values(monkeypatch):

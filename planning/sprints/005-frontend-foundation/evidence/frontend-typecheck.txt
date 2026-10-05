@@ -1,0 +1,9 @@
+$ npm run gen:api
+
+✨ openapi-typescript 7.13.0
+🚀 ../docs/openapi.json → src/api/schema.d.ts [143.7ms]
+schema.d.ts unchanged by regeneration (generated from docs/openapi.json)
+$ npx tsc --noEmit
+tsc exit code: 0
+docs/openapi.json sha256: 9d0ecc7748000090a8417857deb7a84da71965be87c0354ff42df33b68af01da
+schema.d.ts lines: 1504

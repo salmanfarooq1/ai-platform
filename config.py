@@ -58,12 +58,13 @@ LLM_CONFIG: dict[str, Any] = {
     #          talk to, so the embedding provider has to be a hosted API.
     #          Requires GEMINI_API_KEY. Note that text-embedding-004 is retired
     #          and 404s on current keys.
-    # CAVEAT: there is no embedding fallback in any mode. The fallbacks list
-    # below only covers LLM completion, not embeddings.
+    # Embedding fallbacks (Sprint 006): EMBED_FALLBACK_MODELS is an ordered list the embedding adapter
+    # (adapters/litellm_embeddings.py) tries when the primary fails, refusing any model whose width is not
+    # EMBEDDING_DIM. The "fallbacks" list below is only for LLM completion.
     #
     # Every mode ends up at EMBEDDING_DIM (768) to match the VECTOR(768) column
     # in the Alembic baseline (migrations/versions/0001_baseline.py). Where the provider is wider than that,
-    # core/clients/embeddings.py requests the narrower width and renormalizes.
+    # adapters/litellm_embeddings.py requests the narrower width and renormalizes.
     # Switching to a provider that cannot emit 768 means a schema change and a
     # full re-ingest.
     "embedding_model": _settings.embed_model,
@@ -115,6 +116,10 @@ MODEL_PRICING: dict[str, dict[str, float]] = {
     # LiteLLM strips the provider prefix (groq/) from model names in usage
     # data, so finops receives "openai/gpt-oss-120b". Alias maps to same rate.
     "openai/gpt-oss-120b":                                 {"input": 0.11,  "output": 0.34},
+    # Embedding models (Sprint 008: a hosted mode refuses to start for a configured model with no price). The Gemini
+    # embedding free tier is $0, as for the chat model above. The Azure rate is the published list price; confirm it (Q32).
+    "gemini/gemini-embedding-001":                         {"input": 0.0,   "output": 0.0},
+    "azure/text-embedding-3-small":                        {"input": 0.02,  "output": 0.0},
 }
 
 # ==========================================
@@ -130,3 +135,6 @@ RATE_LIMIT_WINDOW_SECONDS = _settings.rate_limit_window_seconds
 # 500K tokens costs roughly $0.11. Generous for development, tight enough
 # to catch runaway loops.
 DEFAULT_DAILY_TOKEN_BUDGET = _settings.daily_token_budget
+
+# Daily cost cap per tenant in USD (the platform default; a tenant policy may set a lower one).
+DEFAULT_DAILY_COST_CAP_USD = _settings.daily_cost_cap_usd

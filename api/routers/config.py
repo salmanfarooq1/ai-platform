@@ -8,10 +8,10 @@ GET /config call at app startup is enough.
 
 One small DB read (the caller's knowledge bases). No Redis or LLM calls.
 """
-from asyncpg import Pool
 from fastapi import APIRouter, Depends, Request
 
 from api.auth import require_scope
+from api.dependencies import adapters_of
 from api.gateway_deps import entry_action, gateway_context
 from config import (
     DEFAULT_DAILY_TOKEN_BUDGET,
@@ -20,7 +20,6 @@ from config import (
     RATE_LIMIT_REQUESTS,
     RATE_LIMIT_WINDOW_SECONDS,
 )
-from core.database.tenant import tenant_connection
 from core.identity.models import Principal, Scope
 from gateway import ActionKind, EnforcementContext, require
 
@@ -41,11 +40,9 @@ async def get_config(
     """
     await require(ctx, entry_action(request.url.path, ActionKind.KB_READ))
     visible = ctx.boundary.visible_kbs()  # only the knowledge bases the tenant policy allows
-    pool: Pool = request.app.state.db_pool
-    async with tenant_connection(pool, principal.tenant_id) as conn:
-        rows = await conn.fetch("SELECT slug, description FROM knowledge_bases ORDER BY slug")
+    knowledge_bases = await adapters_of(request).knowledge.list_knowledge_bases(principal.tenant_id)
     return {
-        "namespaces": {r["slug"]: r["description"] for r in rows if visible is None or r["slug"] in visible},
+        "namespaces": {slug: description for slug, description in knowledge_bases.items() if visible is None or slug in visible},
         "confidence_floor": GUARDRAIL_CONFIG["confidence_floor"],
         "max_query_length": GUARDRAIL_CONFIG["max_query_length"],
         "daily_token_budget": DEFAULT_DAILY_TOKEN_BUDGET,

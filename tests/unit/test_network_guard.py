@@ -69,22 +69,46 @@ def test_fake_embedding_shared_words_score_higher():
     assert cosine(base, base) == pytest.approx(1.0)
 
 
-async def test_fake_embeddings_records_calls_through_litellm(monkeypatch):
-    fake = FakeEmbeddings()
-    monkeypatch.setattr(litellm, "aembedding", fake.aembedding)
-    resp = await litellm.aembedding(model="m", input=["a b", "c"])
+async def test_fake_embeddings_records_calls_through_the_port():
+    fake = FakeEmbeddings(model="m")
+    resp = await fake.embed(["a b", "c"])
     assert fake.calls == [["a b", "c"]]
-    assert resp.data[0]["embedding"] == fake_embedding("a b")
+    assert resp.vectors[0] == fake_embedding("a b")
+    assert (resp.model, resp.dim) == ("m", 768)
 
 
-async def test_fake_llm_answers_from_context_and_records_calls(monkeypatch):
+async def test_fake_llm_answers_from_context_and_records_calls():
     from api.services.llm import generate_with_citations
 
     fake = FakeLLM()
-    monkeypatch.setattr(litellm, "acompletion", fake.acompletion)
     chunks = [{"document_id": "d1", "source_filename": "a.md", "text": "Alpha beta gamma.", "score": 0.5}]
-    answer, usage = await generate_with_citations("what is alpha?", chunks)
+    answer, usage = await generate_with_citations(fake, "what is alpha?", chunks)
     assert answer.answer.startswith("According to a.md: Alpha beta gamma.")
     assert [c.document_id for c in answer.citations] == ["d1"]
     assert fake.kinds == ["synthesis"]
     assert usage["completion_tokens"] == 7
+
+
+# --- the real provider call path: the LiteLLM adapters, with litellm itself patched or guarded ---
+
+async def test_guard_catches_the_real_litellm_adapters_when_no_fake_is_installed():
+    from adapters.litellm_embeddings import LitellmEmbeddings
+    from adapters.litellm_llm import LitellmLLM
+
+    with pytest.raises(NetworkBlockedError, match="litellm.acompletion"):
+        await LitellmLLM({}).complete([{"role": "user", "content": "hi"}], model="gemini/x", max_tokens=5)
+    with pytest.raises(NetworkBlockedError, match="litellm.aembedding"):
+        await LitellmEmbeddings("gemini/x", 768).embed(["hi"])
+
+
+async def test_patching_litellm_itself_replaces_the_guard_and_the_adapter_uses_the_patch(monkeypatch):
+    from adapters.litellm_llm import LitellmLLM
+
+    fake = FakeLLM()
+    monkeypatch.setattr(litellm, "acompletion", fake.acompletion)  # litellm itself, not a port fake
+    chunks = [{"document_id": "d1", "source_filename": "a.md", "text": "Alpha beta.", "score": 0.5}]
+    from api.services.llm import generate_with_citations
+
+    answer, _ = await generate_with_citations(LitellmLLM({}), "what is alpha?", chunks)
+    assert answer.answer.startswith("According to a.md: Alpha beta.")
+    assert fake.kinds == ["synthesis"]  # the call went through litellm.acompletion

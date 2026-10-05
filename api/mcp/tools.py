@@ -8,16 +8,15 @@ arguments, so the caller never has to know about connection management.
 """
 import json
 import logging
-from uuid import UUID
 
 from api.auth import KB_NOT_FOUND_MESSAGE
-from api.mcp.context import blocked_query_json, gate, scope_denied, session_pool, session_tenant
+from api.mcp.context import blocked_query_json, gate, scope_denied, session_adapters, session_pool, session_tenant
 from api.mcp.server import mcp
 from api.models.schemas import IngestionStatusResponse, LatestDocumentInfo
-from api.services.cache import embed_query
+from api.services.embedding import embed_query
 from api.services.retriever import RetrieverConfig, retrieve
 from config import FEATURES, LLM_CONFIG
-from core.database.tenant import DbPool, tenant_connection
+from core.database.tenant import tenant_connection
 from core.identity.models import Scope
 from gateway import Action, ActionKind, GatewayDenied
 from gateway.estimate import estimate_tokens
@@ -29,17 +28,6 @@ MAX_CHUNK_PREVIEW_LENGTH = 800
 
 _UNAUTHENTICATED = json.dumps({"error": "unauthenticated", "reason": "No authenticated principal in this MCP session"})
 _NO_POOL = json.dumps({"error": "Database pool not available"})
-
-
-async def _kb_slugs(pool: DbPool, tenant_id: UUID) -> dict[str, str]:
-    async with tenant_connection(pool, tenant_id) as conn:
-        rows = await conn.fetch("SELECT slug, description FROM knowledge_bases ORDER BY slug")
-    return {r["slug"]: r["description"] for r in rows}
-
-
-async def _kb_exists(pool: DbPool, tenant_id: UUID, slug: str) -> bool:
-    async with tenant_connection(pool, tenant_id) as conn:
-        return bool(await conn.fetchval("SELECT 1 FROM knowledge_bases WHERE slug = $1", slug))
 
 
 def _kb_not_found() -> str:
@@ -54,17 +42,17 @@ async def list_namespaces() -> str:
     holds the regulation you need. The response is a JSON object
     mapping each namespace name to a description of its contents.
     """
-    tenant_id, pool = session_tenant(), session_pool()
+    tenant_id, pool, adapters = session_tenant(), session_pool(), session_adapters()
     if tenant_id is None:
         return _UNAUTHENTICATED
     if (denied := scope_denied(Scope.KB_READ)) is not None:
         return denied
-    if pool is None:
+    if pool is None or adapters is None:
         return _NO_POOL
     ctx = await gate(Action(ActionKind.TOOL_CALL, "list_namespaces"), Action(ActionKind.KB_READ))
     visible = ctx.boundary.visible_kbs()
     try:
-        return json.dumps({k: v for k, v in (await _kb_slugs(pool, tenant_id)).items() if visible is None or k in visible}, indent=2)
+        return json.dumps({k: v for k, v in (await adapters.knowledge.list_knowledge_bases(tenant_id)).items() if visible is None or k in visible}, indent=2)
     except Exception as e:
         logger.error("[mcp/list_namespaces] %s", e)
         return json.dumps({"error": str(e)})
@@ -88,18 +76,21 @@ async def search_documents(
     Returns:
         JSON with matched chunks including content, scores, and metadata.
     """
-    tenant_id, pool = session_tenant(), session_pool()
+    tenant_id, pool, adapters = session_tenant(), session_pool(), session_adapters()
     if tenant_id is None:
         return _UNAUTHENTICATED
     if (denied := scope_denied(Scope.QUERY)) is not None:
         return denied
-    if pool is None:
+    if pool is None or adapters is None:
         return _NO_POOL
 
     # Policy, input guardrails and the token cap on the model that will be used, before any data is read.
     try:
         await gate(
-            Action(ActionKind.TOOL_CALL, "search_documents", input_text=query),
+            Action(
+                ActionKind.TOOL_CALL, "search_documents", input_text=query,
+                arguments={"query": query, "namespace": namespace, "top_k": top_k, "mode": mode},
+            ),
             Action(ActionKind.KB_READ, namespace, input_text=query),
             Action(ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens(query), input_text=query),
         )
@@ -109,17 +100,17 @@ async def search_documents(
         raise
 
     try:
-        if not await _kb_exists(pool, tenant_id, namespace):
+        if not await adapters.knowledge.kb_exists(tenant_id, namespace):
             return _kb_not_found()
         k = max(1, min(top_k, 20))
-        query_embedding = await embed_query(query)
+        query_embedding = await embed_query(adapters.embeddings, query)
         cfg = RetrieverConfig(
             top_k=k,
             mode=mode,
             rerank=FEATURES.get("reranker_enabled", False),
         )
         chunks = await retrieve(
-            pool=pool,
+            store=adapters.knowledge,
             query=query,
             query_embedding=query_embedding,
             namespace=namespace,
@@ -174,19 +165,19 @@ async def multi_namespace_search(
         top_k: Results per namespace (1-10).
     """
     top_k = max(1, min(top_k, 10))
-    tenant_id, pool = session_tenant(), session_pool()
+    tenant_id, pool, adapters = session_tenant(), session_pool(), session_adapters()
     if tenant_id is None:
         return _UNAUTHENTICATED
     if (denied := scope_denied(Scope.QUERY)) is not None:
         return denied
-    if pool is None:
+    if pool is None or adapters is None:
         return _NO_POOL
     ctx = await gate(Action(ActionKind.TOOL_CALL, "multi_namespace_search"), Action(ActionKind.KB_READ))
     if namespaces:
         targets = namespaces
     else:
         visible = ctx.boundary.visible_kbs()
-        targets = [k for k in await _kb_slugs(pool, tenant_id) if visible is None or k in visible]
+        targets = [k for k in await adapters.knowledge.list_knowledge_bases(tenant_id) if visible is None or k in visible]
     all_results = []
 
     for ns in targets:
@@ -212,12 +203,12 @@ async def get_ingestion_status(
     ingested document. Useful for verifying that a corpus has been
     loaded before running searches against it.
     """
-    tenant_id, pool = session_tenant(), session_pool()
+    tenant_id, pool, adapters = session_tenant(), session_pool(), session_adapters()
     if tenant_id is None:
         return _UNAUTHENTICATED
     if (denied := scope_denied(Scope.KB_READ)) is not None:
         return denied
-    if pool is None:
+    if pool is None or adapters is None:
         return _NO_POOL
     await gate(Action(ActionKind.TOOL_CALL, "get_ingestion_status"), Action(ActionKind.KB_READ, namespace))
 
@@ -279,12 +270,12 @@ async def get_cost_summary(
     Args:
         days: Number of days to look back (1-30, default 7).
     """
-    tenant_id, pool = session_tenant(), session_pool()
+    tenant_id, pool, adapters = session_tenant(), session_pool(), session_adapters()
     if tenant_id is None:
         return _UNAUTHENTICATED
     if (denied := scope_denied(Scope.KB_READ)) is not None:
         return denied
-    if pool is None:
+    if pool is None or adapters is None:
         return _NO_POOL
     await gate(Action(ActionKind.TOOL_CALL, "get_cost_summary"), Action(ActionKind.KB_READ))
 

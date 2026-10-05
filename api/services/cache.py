@@ -1,15 +1,9 @@
 import hashlib
 import json
 import logging
-import time
-from uuid import UUID, uuid4
+from uuid import UUID
 
-import numpy as np
-import redis.asyncio as redis
-from redis.exceptions import ResponseError
-
-from config import CACHE_CONFIG, EMBEDDING_DIM
-from core.clients.embeddings import aembed_texts
+from ports import CachePort, CacheUnavailable
 
 logger = logging.getLogger("api.cache")
 
@@ -20,34 +14,11 @@ CACHE_TTL_SECONDS = 3600  # 1 hour
 # This prevents Pydantic validation errors when deserializing stale cached responses.
 CACHE_SCHEMA_VERSION = 2  # 2: keys carry tenant_id (Sprint 003)
 
-# --- Connection management ---
 
-_redis_pool: redis.Redis | None = None
-
-async def get_redis() -> redis.Redis:
-    """Return shared Redis connection. Created once at startup."""
-    global _redis_pool
-    if _redis_pool is None:
-        _redis_pool = redis.from_url(
-            CACHE_CONFIG["url"],
-            decode_responses=True,  # returns str not bytes so we don't need .decode()
-            max_connections=10,
-        )
-    return _redis_pool
-
-
-async def close_redis() -> None:
-    global _redis_pool
-    if _redis_pool:
-        await _redis_pool.aclose()
-        _redis_pool = None
-
-
-async def redis_health() -> str:
+async def cache_health(cache: CachePort) -> str:
     """Returns 'ok' or error string."""
     try:
-        r = await get_redis()
-        await r.ping()
+        await cache.ping()
         return "ok"
     except Exception as e:
         return f"error: {e}"
@@ -55,7 +26,15 @@ async def redis_health() -> str:
 
 # --- Cache key ---
 
-def cache_key(tenant_id: UUID | str, query: str, namespace: str, top_k: int, retrieval_mode: str = "hybrid", rerank: bool = True) -> str:
+def cache_key(
+    tenant_id: UUID | str,
+    query: str,
+    namespace: str,
+    top_k: int,
+    retrieval_mode: str = "hybrid",
+    rerank: bool = True,
+    embedding_model: str = "",
+) -> str:
     """
     Deterministic cache key from query parameters.
 
@@ -69,40 +48,55 @@ def cache_key(tenant_id: UUID | str, query: str, namespace: str, top_k: int, ret
     tenant_id is part of the hashed key, so one tenant can never read another's cached answer
     (row-level security cannot protect Redis).
 
+    embedding_model is part of the hashed key when given (Sprint 006): an answer retrieved with one embedding
+    model is never served after the active model changes.
+
     CACHE_SCHEMA_VERSION prefix:
     - Bumping the version makes all old entries unreachable without a FLUSHALL.
     - Old entries expire naturally via TTL (1 hour). Zero-downtime schema migration.
     """
     normalized = query.lower().strip()
     raw = f"{tenant_id}:{normalized}:{namespace}:{top_k}:{retrieval_mode}:{rerank}"
+    if embedding_model:
+        raw += f":{embedding_model}"
     hash_hex = hashlib.sha256(raw.encode()).hexdigest()
     return f"cache:v{CACHE_SCHEMA_VERSION}:{hash_hex[:16]}"
 
 
 # --- Cache-aside operations ---
 
-async def get_cached_response(tenant_id: UUID | str, query: str, namespace: str, top_k: int, retrieval_mode: str = "hybrid", rerank: bool = True) -> dict | None:
+async def get_cached_response(
+    cache: CachePort,
+    tenant_id: UUID | str,
+    query: str,
+    namespace: str,
+    top_k: int,
+    retrieval_mode: str = "hybrid",
+    rerank: bool = True,
+    embedding_model: str = "",
+) -> dict | None:
     """
     Cache-aside read.
 
-    Returns parsed dict on HIT, None on MISS or any Redis failure.
+    Returns parsed dict on HIT, None on MISS or any cache failure.
     """
     try:
-        r = await get_redis()
-        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, rerank)
-        value = await r.get(key)
+        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, rerank, embedding_model)
+        value = await cache.get(key)
 
         if value is None:
             return None  # explicit miss
 
-        return json.loads(value)  # already str because decode_responses=True
+        parsed: dict = json.loads(value)
+        return parsed
 
-    except redis.RedisError as e:
+    except CacheUnavailable as e:
         logger.warning(f"[cache] Redis unavailable on exact lookup: {e}. Degrading gracefully.")
         return None  # degrade gracefully — cache miss, not a crash
 
 
 async def set_cached_response(
+    cache: CachePort,
     tenant_id: UUID | str,
     query: str,
     namespace: str,
@@ -110,21 +104,18 @@ async def set_cached_response(
     response: dict,
     retrieval_mode: str = "hybrid",
     rerank: bool = True,
+    embedding_model: str = "",
 ) -> None:
     """
     Cache-aside write. Fire-and-forget.
 
-    SET with ex= is one atomic operation.
-
-    setting and expiring the key in different commands is not atomic and it can cause a redis
-    memory leak if the process crashes between the two calls.
+    One atomic SET with a TTL (see `RedisCache.set`).
     """
     try:
-        r = await get_redis()
-        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, rerank)
-        await r.set(key, json.dumps(response), ex=CACHE_TTL_SECONDS)
+        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, rerank, embedding_model)
+        await cache.set(key, json.dumps(response), ttl=CACHE_TTL_SECONDS)
 
-    except redis.RedisError as e:
+    except CacheUnavailable as e:
         logger.warning(f"[cache] Redis unavailable on exact cache write: {e}. Response already returned.")
 
 # --- Semantic Cache ---
@@ -132,72 +123,9 @@ async def set_cached_response(
 SEMANTIC_CACHE_THRESHOLD = 0.65
 SEMANTIC_CACHE_TTL = 3600
 
-SEMANTIC_INDEX = "idx:semantic_cache"
-
-
-async def _ft_create(r: redis.Redis) -> None:
-    await r.execute_command(
-        "FT.CREATE", SEMANTIC_INDEX,
-        "ON", "HASH",
-        "PREFIX", "1", "semcache:",
-        "SCHEMA",
-        "embedding", "VECTOR", "HNSW", "6",
-            "TYPE", "FLOAT32",
-            "DIM", str(EMBEDDING_DIM),
-            "DISTANCE_METRIC", "COSINE",
-        "response", "TEXT",
-        "query", "TEXT",
-        "tenant_id", "TAG",
-        "namespace", "TAG",
-        "retrieval_mode", "TAG",
-        "rerank", "TAG",
-        "top_k", "NUMERIC",
-        "created_at", "NUMERIC",
-    )
-
-
-async def create_semantic_cache_index() -> None:
-    """
-    Create RediSearch HNSW vector index for semantic cache.
-    Idempotent — safe to call on every restart (including multi-worker).
-    Only catches the specific 'Index already exists' ResponseError.
-    All other errors are re-raised so startup fails loudly on real problems.
-
-    An index created before Sprint 003 has no tenant_id field, and a query that filters on it would
-    error. Such an index is dropped (without deleting the cached hashes, which have no tenant_id and
-    so never match a tenant filter) and created again.
-    """
-    try:
-        r = await get_redis()
-        await _ft_create(r)
-        logger.info("[cache] Semantic cache index created")
-    except ResponseError as e:
-        if "Index already exists" in str(e):
-            info = await r.execute_command("FT.INFO", SEMANTIC_INDEX)
-            if "tenant_id" in str(info):
-                logger.debug("[cache] Semantic cache index already exists — skipping (idempotent)")
-            else:
-                logger.warning("[cache] Semantic cache index has no tenant_id field; recreating it")
-                await r.execute_command("FT.DROPINDEX", SEMANTIC_INDEX)
-                await _ft_create(r)
-        else:
-            # Real Redis misconfiguration — wrong DIM, unsupported Redis version, etc.
-            logger.error(f"[cache] Unexpected error creating semantic cache index: {e}")
-            raise
-    except Exception as e:
-        logger.error(f"[cache] Failed to create semantic cache index: {e}")
-        raise
-
-async def embed_query(query: str) -> list[float]:
-    """Embed a single query string."""
-    vectors = await aembed_texts([query])
-    return vectors[0]
-
-def _to_bytes(embedding: list[float]) -> bytes:
-    """Convert list[float] to FLOAT32 bytes for Redis vector storage."""
-    return np.array(embedding, dtype=np.float32).tobytes()
 
 async def semantic_cache_lookup(
+    cache: CachePort,
     tenant_id: UUID | str,
     query: str,
     namespace: str,
@@ -205,78 +133,28 @@ async def semantic_cache_lookup(
     retrieval_mode: str = "hybrid",
     rerank: bool = True,
     top_k: int = 5,
+    embedding_model: str = "",
 ) -> dict | None:
-    """KNN search in Redis vector index for semantically similar cached response."""
+    """KNN search for a semantically similar cached response."""
     try:
-        r = await get_redis()
-        vec_bytes = _to_bytes(query_embedding)
-
-        # Build the KNN pre-filter covering all retrieval config dimensions.
-        # This prevents cross-contamination between different retrieval configs
-        # (e.g. hybrid vs bm25, rerank=True vs False).
-        #
-        # Tag fields (namespace, retrieval_mode, rerank): escape chars that
-        # RediSearch tag syntax treats as delimiters — comma, dot, colon, etc.
-        # The safe chars for a tag value are [a-zA-Z0-9_-].
-        # Numeric range for top_k: @top_k:[n n] selects the exact value.
-        #
-        # All pre-filters are inside ONE paren group so RediSearch parses them
-        # as AND-ed conditions before the =>[KNN ...] combinator.
-        # (Separate groups like (...) (...) are implicit OR in Dialect 2.)
-        # Characters that RediSearch tag syntax treats as delimiters;
-        # escape each with a backslash so tag filter values are literal.
-        _TAG_SPECIAL = (',', '.', '<', '>', '{', '}', '[', ']', '(', ')',
-                        '|', '!', '@', '#', '$', '%', '^', '&', '*', '-',
-                        '+', '=', ' ', '/', ':', ';')
-        _TAG_ESCAPE = str.maketrans({c: '\\' + c for c in _TAG_SPECIAL})
-        tenant_tag = str(tenant_id).translate(_TAG_ESCAPE)
-        ns_tag = namespace.translate(_TAG_ESCAPE)
-        mode_tag = retrieval_mode.translate(_TAG_ESCAPE)
-        rerank_str = str(int(rerank))
-
-        filter_query = (
-            f"(@tenant_id:{{{tenant_tag}}}"
-            f" @namespace:{{{ns_tag}}}"
-            f" @retrieval_mode:{{{mode_tag}}}"
-            f" @rerank:{{{rerank_str}}}"
-            f" @top_k:[{top_k} {top_k}])"
-            f"=>[KNN 1 @embedding $vec AS score]"
+        hit = await cache.semantic_lookup(
+            tenant_id, namespace, query_embedding,
+            embedding_model=embedding_model, retrieval_mode=retrieval_mode, rerank=rerank, top_k=top_k,
+            min_similarity=SEMANTIC_CACHE_THRESHOLD,
         )
-
-        results = await r.execute_command(
-            "FT.SEARCH", SEMANTIC_INDEX,
-            filter_query,
-            "PARAMS", "2", "vec", vec_bytes,
-            "RETURN", "3", "response", "score", "query",
-            "SORTBY", "score",
-            "DIALECT", "2",
-        )
-
-        # results format varies by Redis protocol (RESP2 = list, RESP3 = dict)
-        if isinstance(results, dict):
-            if results.get("total_results", 0) == 0 or not results.get("results"):
-                return None
-            field_dict = results["results"][0].get("extra_attributes", {})
-        else:
-            if not results or results[0] == 0:
-                return None
-            fields = results[2]
-            field_dict = {fields[i]: fields[i+1] for i in range(0, len(fields), 2)}
-
-        distance = float(field_dict.get("score", 1.0))
-        similarity = 1 - distance
-
-        if similarity < SEMANTIC_CACHE_THRESHOLD:
+        if hit is None:
             return None
+        logger.info(f"[cache] Semantic HIT — similarity={hit.similarity:.4f} query='{hit.query}'")
+        parsed: dict = json.loads(hit.response)
+        return parsed
 
-        logger.info(f"[cache] Semantic HIT — similarity={similarity:.4f} query='{field_dict.get('query', '')}'")
-        return json.loads(field_dict["response"])
-
-    except redis.RedisError as e:
+    except CacheUnavailable as e:
         logger.warning(f"[cache] Redis unavailable on semantic lookup: {e}. Degrading gracefully.")
         return None
 
+
 async def semantic_cache_store(
+    cache: CachePort,
     tenant_id: UUID | str,
     query: str,
     namespace: str,
@@ -285,32 +163,15 @@ async def semantic_cache_store(
     retrieval_mode: str = "hybrid",
     rerank: bool = True,
     top_k: int = 5,
+    embedding_model: str = "",
 ) -> None:
-    """
-    Store query embedding + response in Redis HASH for semantic indexing.
-
-    Uses a pipeline (MULTI/EXEC transaction) to make HSET + EXPIRE atomic.
-    Without this, a crash between the two commands leaves a permanent entry
-    with no TTL — a Redis memory leak.
-    """
+    """Store the query embedding and response for semantic indexing (best effort)."""
     try:
-        r = await get_redis()
-        key = f"semcache:{uuid4().hex}"
+        await cache.semantic_store(
+            tenant_id, namespace, query_embedding, json.dumps(response),
+            query=query, embedding_model=embedding_model, retrieval_mode=retrieval_mode, rerank=rerank,
+            top_k=top_k, ttl=SEMANTIC_CACHE_TTL,
+        )
 
-        async with r.pipeline(transaction=True) as pipe:
-            await pipe.hset(key, mapping={
-                "embedding": _to_bytes(query_embedding),
-                "response": json.dumps(response),
-                "query": query,
-                "tenant_id": str(tenant_id),
-                "namespace": namespace,
-                "retrieval_mode": retrieval_mode,
-                "rerank": str(int(rerank)),    # Redis TAG fields must be strings
-                "top_k": str(top_k),           # Redis NUMERIC as string
-                "created_at": int(time.time()),
-            })
-            await pipe.expire(key, SEMANTIC_CACHE_TTL)
-            await pipe.execute()
-
-    except redis.RedisError as e:
+    except CacheUnavailable as e:
         logger.warning(f"[cache] Redis unavailable on semantic cache store: {e}.")

@@ -1,0 +1,9 @@
+Source: https://github.com/Leonxlnx/taste-skill
+Commit: ce26fc25c0e5e8cab638f883de62d9a86ee5e45b
+License: MIT (see LICENSE in this folder)
+Files copied unchanged:
+- skills/taste-skill/SKILL.md      -> design-taste-frontend.md
+- skills/soft-skill/SKILL.md       -> soft.md
+- skills/minimalist-skill/SKILL.md -> minimalist.md
+Not copied: brutalist-skill and the other variants (they don't fit this product).
+These files are reference material. The project skill in ../../SKILL.md decides what applies.

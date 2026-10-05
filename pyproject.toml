@@ -33,6 +33,10 @@ dependencies = [
     "opentelemetry-exporter-otlp-proto-http (>=1.45.0,<2.0.0)",
     "pyjwt (>=2.15.1,<3.0.0)",
     "cryptography (>=50.0.2,<51.0.0)",
+    "boto3 (>=1.43.108,<2.0.0)",
+    "opentelemetry-exporter-prometheus (>=0.66b0,<0.67)",
+    "jsonschema (>=4.26.0,<5.0.0)",
+    "aiokafka (==0.14.0)",
 ]
 
 
@@ -66,7 +70,9 @@ dev = [
     "asgi-lifespan (>=2.1.0,<3.0.0)",
     "types-psycopg2 (>=2.9.21.20260911,<3.0.0.0)",
     "types-requests (>=2.33.0.20260906,<3.0.0.0)",
-    "hypothesis (>=6.168.3,<7.0.0)"
+    "hypothesis (>=6.168.3,<7.0.0)",
+    # The eval regression gate (scripts/eval/, Sprint 008) runs in CI, so DeepEval is a dev dependency as well as a labs one.
+    "deepeval (>=4.0.8,<5.0.0)",
 ]
 
 [tool.pytest.ini_options]
@@ -83,7 +89,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["api", "core", "gateway"]
+source = ["api", "core", "gateway", "ports", "adapters", "workers"]
 omit = ["*/tests/*"]
 
 [tool.ruff]
@@ -97,7 +103,7 @@ ignore = ["E501"]  # line length handled by formatter, not linter
 
 [tool.mypy]
 python_version = "3.11"
-files = ["api", "core", "gateway", "config.py"]
+files = ["api", "core", "gateway", "ports", "adapters", "workers", "sandbox_agent", "config.py"]
 ignore_missing_imports = true
 warn_unused_ignores = true
 check_untyped_defs = true
@@ -109,9 +115,10 @@ disallow_untyped_calls = false
 warn_return_any = false
 exclude = ["^migrations/"]
 
-# Strict for the new modules (Sprint 002). Everything else is non-strict for now.
+# Strict for the new modules (Sprint 002), and for the ports and adapters (Sprint 006: they are the contracts).
+# Everything else is non-strict for now.
 [[tool.mypy.overrides]]
-module = ["core.settings", "api.errors", "api.observability", "api.versioning"]
+module = ["core.settings", "api.errors", "api.observability", "api.versioning", "ports", "ports.*", "adapters", "adapters.*", "sandbox_agent", "sandbox_agent.*"]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 disallow_any_generics = true
@@ -119,3 +126,7 @@ disallow_untyped_calls = true
 disallow_untyped_decorators = true
 warn_return_any = true
 no_implicit_reexport = true
+
+[tool.poetry]
+# An application, not a library: Poetry manages the dependencies and does not install the project itself.
+package-mode = false

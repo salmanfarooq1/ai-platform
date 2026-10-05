@@ -1,0 +1,130 @@
+
+> ai-platform-ui@2.0.0 build
+> tsc --noEmit && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 5627 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                  0.99 kB │ gzip:   0.56 kB
+dist/assets/Geist-Variable-Bj2R_7yk.woff2       69.65 kB
+dist/assets/GeistMono-Variable-Dispecij.woff2   71.37 kB
+dist/assets/index-BfWvWh5F.css                  32.15 kB │ gzip:   7.59 kB
+dist/assets/time-range-BpH6G2fq.js               0.21 kB │ gzip:   0.19 kB
+dist/assets/walkthrough-store-CMuV9Tm6.js        0.22 kB │ gzip:   0.16 kB
+dist/assets/stages-UorP1m-x.js                   0.27 kB │ gzip:   0.21 kB
+dist/assets/density-D1tfL_P2.js                  0.30 kB │ gzip:   0.22 kB
+dist/assets/select-BryGocfx.js                   0.40 kB │ gzip:   0.28 kB
+dist/assets/input-EmrhqXCl.js                    0.66 kB │ gzip:   0.39 kB
+dist/assets/governance-text-DKzQ_KxR.js          0.73 kB │ gzip:   0.45 kB
+dist/assets/reasons-Dt-pk4IK.js                  0.96 kB │ gzip:   0.52 kB
+dist/assets/useInfiniteQuery-DrlVqq75.js         1.16 kB │ gzip:   0.49 kB
+dist/assets/receipt-CRRUZyFX.js                  1.27 kB │ gzip:   0.66 kB
+dist/assets/history-page-CRe7OzWI.js             1.57 kB │ gzip:   0.81 kB
+dist/assets/X.es-Dy8ZN6re.js                     1.95 kB │ gzip:   0.66 kB
+dist/assets/keys-page-BAHh9xXf.js                1.95 kB │ gzip:   0.90 kB
+dist/assets/hero-scene-DlO9yN3w.js               1.99 kB │ gzip:   1.06 kB
+dist/assets/deny-callout-BBYFwcCR.js             2.11 kB │ gzip:   0.82 kB
+dist/assets/trace-timeline-aNVtflzg.js           2.22 kB │ gzip:   1.02 kB
+dist/assets/copy-value-DEly03XV.js               2.44 kB │ gzip:   0.99 kB
+dist/assets/signin-page-OefkRHZm.js              2.49 kB │ gzip:   1.27 kB
+dist/assets/policies-page-Cy3Pc7gP.js            2.64 kB │ gzip:   1.21 kB
+dist/assets/system-page-DT9swTyR.js              2.81 kB │ gzip:   1.08 kB
+dist/assets/useMutation-Bo34wDwU.js              3.24 kB │ gzip:   1.32 kB
+dist/assets/segmented-gBIm8Vv_.js                3.40 kB │ gzip:   1.38 kB
+dist/assets/marketing-shell-CvfTYyio.js          3.89 kB │ gzip:   1.58 kB
+dist/assets/runs-page--69GqhU0.js                5.36 kB │ gzip:   2.14 kB
+dist/assets/usage-page-R3wKYw0l.js               5.64 kB │ gzip:   1.88 kB
+dist/assets/how-it-works-page-B_-ZnsiA.js        5.83 kB │ gzip:   2.29 kB
+dist/assets/walkthrough-page-nc0RemAq.js         5.86 kB │ gzip:   2.33 kB
+dist/assets/overview-page-BSEQeK7e.js            6.93 kB │ gzip:   2.47 kB
+dist/assets/decisions-page-Cvu1kCaC.js           7.82 kB │ gzip:   3.01 kB
+dist/assets/states-BZPWDT1l.js                   8.79 kB │ gzip:   2.59 kB
+dist/assets/verdict-badge-YQwgnTkP.js           10.32 kB │ gzip:   2.84 kB
+dist/assets/requests-page-Dywcop1C.js           10.38 kB │ gzip:   3.79 kB
+dist/assets/library-page-BQs2TunE.js            11.88 kB │ gzip:   4.42 kB
+dist/assets/trust-page-DjO2z1qe.js              16.29 kB │ gzip:   5.04 kB
+dist/assets/landing-page-B7PsDLrG.js            17.99 kB │ gzip:   6.08 kB
+dist/assets/gsap-CcIkNsPr.js                   122.93 kB │ gzip:  48.91 kB
+dist/assets/react-CxfcT2zT.js                  171.48 kB │ gzip:  56.23 kB
+dist/assets/ask-page-CIvTazOA.js               186.86 kB │ gzip:  56.83 kB
+dist/assets/index-UTxcg_bI.js                  248.32 kB │ gzip:  76.36 kB
+dist/assets/webgl-gc836SuQ.js                  878.61 kB │ gzip: 235.14 kB
+✓ built in 24.27s
+
+> ai-platform-ui@2.0.0 chunk-report
+> node scripts/chunk-report.mjs
+
+Chunks (raw and gzip), largest last
+app/shared  time-range-BpH6G2fq.js                           0.2 kB     0.2 kB
+app/shared  walkthrough-store-CMuV9Tm6.js                    0.2 kB     0.2 kB
+app/shared  stages-UorP1m-x.js                               0.3 kB     0.2 kB
+app/shared  density-D1tfL_P2.js                              0.3 kB     0.2 kB
+app/shared  select-BryGocfx.js                               0.4 kB     0.3 kB
+app/shared  input-EmrhqXCl.js                                0.6 kB     0.4 kB
+app/shared  governance-text-DKzQ_KxR.js                      0.7 kB     0.4 kB
+app/shared  reasons-Dt-pk4IK.js                              0.9 kB     0.5 kB
+app/shared  useInfiniteQuery-DrlVqq75.js                     1.1 kB     0.5 kB
+app/shared  receipt-CRRUZyFX.js                              1.2 kB     0.6 kB
+app/shared  history-page-CRe7OzWI.js                         1.5 kB     0.8 kB
+app/shared  X.es-Dy8ZN6re.js                                 1.9 kB     0.6 kB
+app/shared  keys-page-BAHh9xXf.js                            1.9 kB     0.9 kB
+marketing   hero-scene-DlO9yN3w.js                           1.9 kB     1.0 kB
+app/shared  deny-callout-BBYFwcCR.js                         2.1 kB     0.8 kB
+app/shared  trace-timeline-aNVtflzg.js                       2.2 kB     1.0 kB
+app/shared  copy-value-DEly03XV.js                           2.4 kB     1.0 kB
+app/shared  signin-page-OefkRHZm.js                          2.4 kB     1.2 kB
+app/shared  policies-page-Cy3Pc7gP.js                        2.6 kB     1.2 kB
+app/shared  system-page-DT9swTyR.js                          2.7 kB     1.1 kB
+app/shared  useMutation-Bo34wDwU.js                          3.2 kB     1.3 kB
+app/shared  segmented-gBIm8Vv_.js                            3.3 kB     1.4 kB
+marketing   marketing-shell-CvfTYyio.js                      3.8 kB     1.5 kB
+app/shared  runs-page--69GqhU0.js                            5.2 kB     2.1 kB
+app/shared  usage-page-R3wKYw0l.js                           5.5 kB     1.8 kB
+marketing   how-it-works-page-B_-ZnsiA.js                    5.7 kB     2.2 kB
+app/shared  walkthrough-page-nc0RemAq.js                     5.7 kB     2.3 kB
+app/shared  overview-page-BSEQeK7e.js                        6.8 kB     2.4 kB
+app/shared  decisions-page-Cvu1kCaC.js                       7.6 kB     2.9 kB
+app/shared  states-BZPWDT1l.js                               8.6 kB     2.5 kB
+app/shared  verdict-badge-YQwgnTkP.js                       10.1 kB     2.8 kB
+app/shared  requests-page-Dywcop1C.js                       10.1 kB     3.7 kB
+app/shared  library-page-BQs2TunE.js                        11.6 kB     4.3 kB
+app/shared  trust-page-DjO2z1qe.js                          15.9 kB     4.9 kB
+marketing   landing-page-B7PsDLrG.js                        17.6 kB     5.9 kB
+marketing   gsap-CcIkNsPr.js                               120.1 kB    47.8 kB
+app/shared  react-CxfcT2zT.js                              167.5 kB    54.9 kB
+app/shared  ask-page-CIvTazOA.js                           182.5 kB    55.5 kB
+app/shared  index-UTxcg_bI.js                              242.5 kB    74.6 kB
+marketing   webgl-gc836SuQ.js                              858.0 kB   229.6 kB
+
+total app/shared 711.9 kB, total marketing 1007.1 kB, 40 chunks
+
+Each route is its own chunk
+ok   /                  landing-page-B7PsDLrG.js (17.6 kB)
+ok   /how-it-works      how-it-works-page-B_-ZnsiA.js (5.7 kB)
+ok   /signin            signin-page-OefkRHZm.js (2.4 kB)
+ok   /app               overview-page-BSEQeK7e.js (6.8 kB)
+ok   /app/walkthrough   walkthrough-page-nc0RemAq.js (5.7 kB)
+ok   /app/ask           ask-page-CIvTazOA.js (182.5 kB)
+ok   /app/library       library-page-BQs2TunE.js (11.6 kB)
+ok   /app/history       history-page-CRe7OzWI.js (1.5 kB)
+ok   /app/requests      requests-page-Dywcop1C.js (10.1 kB)
+ok   /app/decisions     decisions-page-Cvu1kCaC.js (7.6 kB)
+ok   /app/policies      policies-page-Cy3Pc7gP.js (2.6 kB)
+ok   /app/keys          keys-page-BAHh9xXf.js (1.9 kB)
+ok   /app/usage         usage-page-R3wKYw0l.js (5.5 kB)
+ok   /app/runs          runs-page--69GqhU0.js (5.2 kB)
+ok   /app/trust         trust-page-DjO2z1qe.js (15.9 kB)
+ok   /app/system        system-page-DT9swTyR.js (2.7 kB)
+
+No GSAP or WebGL in the chunks that load under /app (every chunk outside the marketing group)
+checked 34 chunks, grep for: WebGLRenderer|@react-three|THREE\.|ScrollTrigger|SplitText|gsap\.registerPlugin|getContext\(["']webgl
+ok   index.html preloads no marketing chunk
+
+Where GSAP and WebGL live
+     landing-page-B7PsDLrG.js
+     gsap-CcIkNsPr.js
+     webgl-gc836SuQ.js
+
+PASS

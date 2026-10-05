@@ -10,7 +10,6 @@ the app and the operations under test use, so row-level security really applies 
 """
 from dataclasses import dataclass, field
 
-import litellm
 import pytest
 
 from core.identity.admin import admin_connection, create_kb, create_key, create_principal, create_tenant
@@ -108,14 +107,12 @@ def tenant_b(tenants) -> TenantFixture:
 
 
 @pytest.fixture
-def fake_embeddings(monkeypatch):
-    fake = FakeEmbeddings()
-    monkeypatch.setattr(litellm, "aembedding", fake.aembedding)
-    return fake
+def fake_embeddings():
+    """A fake `EmbeddingPort`. A test that asks for it gets the app (and ingestion) built with it."""
+    return FakeEmbeddings()
 
 
 @pytest.fixture
-def fake_llm(monkeypatch):
-    fake = FakeLLM()
-    monkeypatch.setattr(litellm, "acompletion", fake.acompletion)
-    return fake
+def fake_llm():
+    """A fake `LLMPort` and `ChatModelPort`. A test that asks for it gets the app built with it."""
+    return FakeLLM()

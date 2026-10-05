@@ -1,0 +1,55 @@
+# axe (WCAG 2 A and AA tags, plus 2.1 A and AA) from the Playwright run in playwright.txt. Blocking = serious or critical.
+axe landing (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=22
+axe how it works (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=21
+axe overview (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+axe requests drawer (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=25
+axe requests list (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=27
+axe walkthrough (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=20
+axe command palette (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=25
+axe session menu (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+axe ask (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+axe ask denied (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=28
+axe decisions denied (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+axe decisions (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+axe landing (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=22
+axe how it works (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=21
+axe overview (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+axe requests drawer (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=25
+axe requests list (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=27
+axe walkthrough (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=20
+axe command palette (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=25
+axe session menu (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+axe ask (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=26
+axe ask denied (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=28
+axe decisions denied (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+axe decisions (dark): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=30
+
+# Playwright results for the axe specs
+  ✓   2 [chromium] › e2e/a11y.spec.ts:22:5 › axe, light theme › landing page (6.6s)
+  ✓   3 [chromium] › e2e/a11y.spec.ts:28:5 › axe, light theme › How it works (2.0s)
+  ✓   4 [chromium] › e2e/a11y.spec.ts:33:5 › axe, light theme › Overview (2.5s)
+  ✓   5 [chromium] › e2e/a11y.spec.ts:42:5 › axe, light theme › Requests, with the drawer open on a denied request (2.6s)
+  ✓   6 [chromium] › e2e/a11y.spec.ts:50:5 › axe, light theme › Requests, the list (1.7s)
+  ✓   7 [chromium] › e2e/a11y.spec.ts:55:5 › axe, light theme › the walkthrough, after both requests ran (1.9s)
+  ✓   8 [chromium] › e2e/a11y.spec.ts:62:5 › axe, light theme › the command palette, open (1.5s)
+  ✓   9 [chromium] › e2e/a11y.spec.ts:68:5 › axe, light theme › the session menu, open (1.8s)
+  ✓  10 [chromium] › e2e/a11y.spec.ts:74:5 › axe, light theme › Ask, with an answer (1.9s)
+  ✓  11 [chromium] › e2e/a11y.spec.ts:81:5 › axe, light theme › Ask, with a denial (2.0s)
+  ✓  12 [chromium] › e2e/a11y.spec.ts:88:5 › axe, light theme › Decisions, with a denied decision open (2.7s)
+  ✓  13 [chromium] › e2e/a11y.spec.ts:96:5 › axe, light theme › Decisions, with a decision open (2.8s)
+  ✓  14 [chromium] › e2e/a11y.spec.ts:22:5 › axe, dark theme › landing page (6.6s)
+  ✓  15 [chromium] › e2e/a11y.spec.ts:28:5 › axe, dark theme › How it works (2.1s)
+  ✓  16 [chromium] › e2e/a11y.spec.ts:33:5 › axe, dark theme › Overview (2.7s)
+  ✓  17 [chromium] › e2e/a11y.spec.ts:42:5 › axe, dark theme › Requests, with the drawer open on a denied request (3.1s)
+  ✓  18 [chromium] › e2e/a11y.spec.ts:50:5 › axe, dark theme › Requests, the list (2.5s)
+  ✓  19 [chromium] › e2e/a11y.spec.ts:55:5 › axe, dark theme › the walkthrough, after both requests ran (2.0s)
+  ✓  20 [chromium] › e2e/a11y.spec.ts:62:5 › axe, dark theme › the command palette, open (1.9s)
+  ✓  21 [chromium] › e2e/a11y.spec.ts:68:5 › axe, dark theme › the session menu, open (1.8s)
+  ✓  22 [chromium] › e2e/a11y.spec.ts:74:5 › axe, dark theme › Ask, with an answer (2.1s)
+  ✓  23 [chromium] › e2e/a11y.spec.ts:81:5 › axe, dark theme › Ask, with a denial (2.2s)
+  ✓  24 [chromium] › e2e/a11y.spec.ts:88:5 › axe, dark theme › Decisions, with a denied decision open (2.9s)
+  ✓  25 [chromium] › e2e/a11y.spec.ts:96:5 › axe, dark theme › Decisions, with a decision open (2.6s)
+
+pages scanned per theme: 12 light, 12 dark
+scans with serious or critical violations: 0
+scans with any violation: 0

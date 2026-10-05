@@ -1,6 +1,6 @@
 """Rate limit and daily token budget, moved from the middleware without changing behaviour.
 
-Same Redis keys (`rl:<principal id>:<window>` and `budget:<tenant id>:<UTC date>`), same limits, same
+Same cache keys (through `CachePort`) (`rl:<principal id>:<window>` and `budget:<tenant id>:<UTC date>`), same limits, same
 messages and error codes. One change, deliberate (Sprint 004, QA finding M2): when Redis fails, the check
 raises `DependencyUnavailable` and the stage denies with 503 `dependency_unavailable`. The middleware used
 to log a warning and let the request through. Booking tokens after the work is done (`record_usage`) stays
@@ -39,10 +39,7 @@ async def check_rate(runtime: GatewayRuntime, principal_id: UUID) -> LimitResult
     window = int(time.time()) // config.RATE_LIMIT_WINDOW_SECONDS
     rate_key = f"rl:{subject}:{window}"
     try:
-        r = await runtime.get_redis()
-        count = await r.incr(rate_key)
-        if count == 1:
-            await r.expire(rate_key, config.RATE_LIMIT_WINDOW_SECONDS + 1)
+        count = await runtime.cache.incr(rate_key, ttl=config.RATE_LIMIT_WINDOW_SECONDS + 1)
     except Exception as exc:
         logger.error("[rate-limit] Redis unavailable: %s", exc)
         raise DependencyUnavailable("rate limit store unavailable") from exc
@@ -67,6 +64,55 @@ async def check_rate(runtime: GatewayRuntime, principal_id: UUID) -> LimitResult
     )
 
 
+MICRO_USD = 1_000_000  # the cost counter holds whole micro-dollars, so Redis INCRBY can add them
+
+
+def _cost_key(tenant_id: UUID) -> str:
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return f"cost:{tenant_id}:{today}"
+
+
+def effective_cost_cap(policy_cap: float | None) -> float:
+    """The cap in force: the tenant's own when it is lower, else the platform default. Never higher than the platform."""
+    platform = config.DEFAULT_DAILY_COST_CAP_USD
+    return platform if policy_cap is None else min(policy_cap, platform)
+
+
+async def check_cost(runtime: GatewayRuntime, tenant_id: UUID, policy_cap: float | None) -> LimitResult:
+    """Has the tenant spent its daily cost cap? The counter resets at UTC midnight (new key). Raises
+    `DependencyUnavailable` when Redis cannot be read: the stage then denies (fail closed)."""
+    cap = effective_cost_cap(policy_cap)
+    try:
+        current = await runtime.cache.get(_cost_key(tenant_id))
+        spent = int(current) if current else 0
+    except Exception as exc:
+        logger.error("[cost] Redis unavailable for cost check: %s", exc)
+        raise DependencyUnavailable("cost store unavailable") from exc
+    if spent >= round(cap * MICRO_USD):
+        logger.warning("[cost] tenant=%s reached its daily cost cap (%.6f of %.2f USD)", tenant_id, spent / MICRO_USD, cap)
+        return LimitResult(
+            exceeded=True,
+            message=(
+                f"Your tenant spent ${spent / MICRO_USD:.2f} of its ${cap:.2f} daily cost cap. "
+                "The cap resets at the next UTC midnight."
+            ),
+            headers={"X-Cost-Cap-Usd": f"{cap:.2f}"},
+        )
+    return LimitResult(exceeded=False)
+
+
+async def record_cost(runtime: GatewayRuntime, tenant_id: UUID, cost_usd: float) -> None:
+    """Book the dollar cost of finished work against the tenant's day. Best effort, like `record_usage`: the work
+    is done, so a Redis error is logged and not raised."""
+    micro = round(cost_usd * MICRO_USD)
+    if micro <= 0:
+        return
+    try:
+        await runtime.cache.incr(_cost_key(tenant_id), micro, ttl=90000)
+    except Exception as exc:
+        logger.warning("[cost] Failed to record cost: %s", exc)
+
+
 def _budget_key(tenant_id: UUID) -> str:
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return f"budget:{tenant_id}:{today}"
@@ -75,8 +121,7 @@ def _budget_key(tenant_id: UUID) -> str:
 async def check_budget(runtime: GatewayRuntime, tenant_id: UUID) -> LimitResult:
     """Has the tenant used up today's token budget? The counter resets at UTC midnight (new key)."""
     try:
-        r = await runtime.get_redis()
-        current = await r.get(_budget_key(tenant_id))
+        current = await runtime.cache.get(_budget_key(tenant_id))
         current_tokens = int(current) if current else 0
     except Exception as exc:
         logger.error("[budget] Redis unavailable for budget check: %s", exc)
@@ -102,13 +147,20 @@ async def record_usage(runtime: GatewayRuntime, tenant_id: UUID, tokens: int) ->
         return {}
     key = _budget_key(tenant_id)
     try:
-        r = await runtime.get_redis()
-        new_total = await r.incrby(key, tokens)
         # 25 hours (not 24) so the key survives timezone edge cases.
-        if new_total == tokens:
-            await r.expire(key, 90000)
+        new_total = await runtime.cache.incr(key, tokens, ttl=90000)
     except Exception as exc:
         logger.warning("[budget] Failed to record token usage: %s", exc)
         return {}
     budget = config.DEFAULT_DAILY_TOKEN_BUDGET
     return {"X-Budget-Remaining": str(max(0, budget - new_total)), "X-Budget-Limit": str(budget)}
+
+
+async def read_budget_used(runtime: GatewayRuntime, tenant_id: UUID) -> int:
+    """Tokens the tenant has used today (UTC). Raises `DependencyUnavailable` when Redis cannot be read."""
+    try:
+        current = await runtime.cache.get(_budget_key(tenant_id))
+        return int(current) if current else 0
+    except Exception as exc:
+        logger.error("[budget] Redis unavailable for budget read: %s", exc)
+        raise DependencyUnavailable("budget store unavailable") from exc

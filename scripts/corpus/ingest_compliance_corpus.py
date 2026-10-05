@@ -9,10 +9,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from core.pipeline.db_ingest import ingestion_pipeline
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _tenant import corpus_tenant_id  # noqa: E402 - the script directory is added to sys.path just above
+from _standalone import standalone_ingest  # noqa: E402 - same reason: the script directory is on sys.path
 
 CORPUS_DIR = Path("data/compliance")
 NAMESPACE = "legal"
@@ -36,7 +36,7 @@ async def main():
             continue
 
         print(f"[ingesting] {filename} (document_id={document_id})")
-        metrics = await ingestion_pipeline(
+        metrics = await standalone_ingest(
             input_file_path=str(path),
             document_id=document_id,
             namespace=NAMESPACE,

@@ -10,10 +10,10 @@ from uuid import UUID
 
 from api.mcp.server import mcp
 from api.observability import current_request_id, current_trace_id
-from api.services.cache import get_redis
 from core.database.tenant import DbPool
 from core.identity.models import Principal, Scope
 from gateway import Action, EnforcementContext, GatewayDenied, GatewayRuntime, build_context, require
+from ports import Adapters
 
 current_principal: ContextVar[Principal | None] = ContextVar("mcp_principal", default=None)
 
@@ -22,6 +22,12 @@ def session_pool() -> DbPool | None:
     ctx: dict[str, Any] = mcp._dependency_overrides.get("app_context", {})
     pool: DbPool | None = ctx.get("pool")
     return pool
+
+
+def session_adapters() -> Adapters | None:
+    ctx: dict[str, Any] = mcp._dependency_overrides.get("app_context", {})
+    adapters: Adapters | None = ctx.get("adapters")
+    return adapters
 
 
 def session_tenant() -> UUID | None:
@@ -47,10 +53,11 @@ async def gate(*actions: Action) -> EnforcementContext:
     Every MCP tool and resource goes through this before it touches data. A deny raises `GatewayDenied`,
     which the MCP server reports to the client as a tool error. The caller must check scope and principal first.
     """
-    principal, pool = current_principal.get(), session_pool()
-    if principal is None or pool is None:
-        raise RuntimeError("gate() needs a session principal and a pool")  # callers check both first
-    ctx = await build_context(GatewayRuntime(pool, get_redis), principal, current_request_id(), current_trace_id())
+    principal, pool, adapters = current_principal.get(), session_pool(), session_adapters()
+    if principal is None or pool is None or adapters is None:
+        raise RuntimeError("gate() needs a session principal, a pool and adapters")  # callers check them first
+    ctx = await build_context(
+        GatewayRuntime(pool, adapters.cache, adapters.events), principal, current_request_id(), current_trace_id())
     for action in actions:
         await require(ctx, action)
     return ctx

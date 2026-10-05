@@ -1,0 +1,8 @@
+ ✓ src/styles/eslint-colour-guard.test.ts (32 tests) 1538ms
+   ✓ eslint colour guard > a real colour fails: const s = { color: '#fff' } 1235ms
+
+ Test Files  22 passed (22)
+      Tests  167 passed (167)
+   Start at  12:20:00
+   Duration  25.41s (transform 1.16s, setup 3.60s, collect 30.97s, tests 11.06s, environment 19.76s, prepare 2.26s)
+

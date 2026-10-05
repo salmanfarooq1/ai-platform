@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-SNAPSHOT_PATH = Path(__file__).resolve().parent.parent / "docs" / "openapi.json"
+SNAPSHOT_PATH = Path(__file__).resolve().parent.parent / "docs" / "api" / "openapi.json"
 
 
 def render_openapi() -> str:

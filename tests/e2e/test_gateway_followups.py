@@ -4,8 +4,6 @@ Each test asserts the fake LLM and embedding call counts and the `gateway_decisi
 """
 from uuid import UUID
 
-import litellm
-
 from tests.e2e.test_gateway_e2e import AGENT, ALL, LoopingLLM, _mcp_call, error_of, publish, rows, summary
 from tests.e2e.test_search_flow import QUERY, ingest
 
@@ -215,9 +213,9 @@ async def test_l3_the_agent_run_counts_its_completion_tokens_too(client, pool, t
 
 # ------------------------------------------------------------------ L4: no verifier call after a halt
 
-async def test_l4_no_verifier_call_after_a_halt(client, pool, tenant_a, database_url, monkeypatch, fake_embeddings):
+async def test_l4_no_verifier_call_after_a_halt(client, pool, tenant_a, database_url, monkeypatch, fake_embeddings, fake_llm):
     looping = LoopingLLM(agent_namespace="legal")
-    monkeypatch.setattr(litellm, "acompletion", looping.acompletion)
+    fake_llm.use(looping)
     await ingest(client)
     publish(database_url, tenant_a, {**ALL, "max_tool_calls": 1})
 
@@ -230,3 +228,39 @@ async def test_l4_no_verifier_call_after_a_halt(client, pool, tenant_a, database
     model_rows = await rows(pool, tenant_a, "AND action = 'model.invoke'")
     generation = [r for r in model_rows if r["resource"] == GEN_MODEL]
     assert len(generation) == len(looping.kinds) + 1  # one per LLM call, plus the route's entry check; none for a verifier
+
+
+# ------------------------------------------------------------------ L1: every recorded reason is in the catalogue
+
+async def test_every_reason_the_gateway_records_is_in_the_catalogue(client, pool, tenant_a, database_url, monkeypatch, fake_llm, fake_embeddings):
+    """Run allowed and denied calls through the real app, then read the reasons back from gateway_decisions.
+
+    The static scan reads string literals only. This one checks what the gateway really wrote.
+    """
+    from gateway.reasons import REASONS
+
+    await ingest(client)
+    assert (await client.post("/v1/search", json=QUERY)).status_code == 200  # allowed
+    error_of(await client.get("/v1/overview"), 403, "forbidden")  # missing scope (the full key has no audit:read)
+
+    publish(database_url, tenant_a, {**ALL, "allowed_kbs": ["legal"], "blocked_terms": ["project zephyr"], "max_tokens_per_request": 5})
+    error_of(await client.post("/v1/search", json={**QUERY, "namespace": "kyc_aml"}), 403, "policy_denied")  # kb_not_allowed
+    error_of(await client.post("/v1/search", json={**QUERY, "query": "tell me about project zephyr"}), 400, "query_blocked")  # guardrail
+    error_of(await client.post("/v1/search", json={**QUERY, "query": "breach " * 10}), 403, "policy_denied")  # token_limit
+
+    publish(database_url, tenant_a, {**ALL, "allowed_models": ["some/other-model"]})
+    error_of(await client.post("/v1/search", json=QUERY), 403, "policy_denied")  # model_not_allowed
+
+    publish(database_url, tenant_a, {**ALL, "allowed_tools": []})
+    resp = await client.post("/v1/agent/query", json=AGENT)  # tool_not_allowed: a flagged partial answer, not an error
+    assert resp.status_code == 200 and "tool_not_allowed" in resp.json()["flag_reason"]
+
+    looping = LoopingLLM(agent_namespace="legal")
+    fake_llm.use(looping)
+    publish(database_url, tenant_a, {**ALL, "max_tool_calls": 1})
+    assert (await client.post("/v1/agent/query", json={**AGENT, "enable_verifier": False})).status_code == 200  # tool_call_limit
+
+    recorded = {r["reason"] for r in await pool.fetch("SELECT DISTINCT reason FROM gateway_decisions WHERE tenant_id = $1", UUID(tenant_a.id))}
+    # Prove the run really covered the paths, so the subset check below is not vacuous.
+    assert {"allowed", "missing_scope", "kb_not_allowed", "query_blocked", "token_limit", "model_not_allowed", "tool_call_limit"} <= recorded
+    assert recorded <= set(REASONS), sorted(recorded - set(REASONS))

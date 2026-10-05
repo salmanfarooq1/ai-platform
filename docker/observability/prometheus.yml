@@ -1,0 +1,21 @@
+# Prometheus for the `observability` compose profile (Sprint 008). It scrapes the API and the worker.
+#
+# The API runs on the host in the local setup (`uvicorn api.main:app` on :8000), so it is reached through
+# host.docker.internal (the compose file maps it to the host gateway). `/metrics` is open in local mode
+# (METRICS_PUBLIC defaults to true there). If you set METRICS_PUBLIC=false, give this job a bearer token of an
+# `admin` key through `authorization.credentials_file`, never inline in this file.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["host.docker.internal:8000"]
+
+  # The worker serves its own series on WORKER_METRICS_PORT (set to 9100 for the compose worker service).
+  - job_name: worker
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["worker:9100"]

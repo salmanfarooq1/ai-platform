@@ -1,0 +1,22 @@
+# Sprint 010: Blueprint
+- **Adapter:** `adapters/kafka_event_bus.py`, built on `aiokafka` (Apache-2.0, pinned). It's selected by `EVENT_BUS=kafka`. `outbox` stays the default.
+- **Producer:**
+  - The outbox relay can target the Kafka adapter.
+  - Topic: `platform.<type-without-version>`. Key: `tenant_id`. CloudEvents binary mode, with `ce_*` headers.
+  - Settings: `acks=all` and idempotent producer enabled.
+- **Consumer:**
+  - The group id comes from settings.
+  - Handlers are idempotent by CloudEvent `id`, using the `processed_events` table from 007.
+  - After `max_attempts`, a message goes to `<topic>.dlq` with an error header.
+- **Settings:** `KAFKA_BOOTSTRAP`, `KAFKA_CLIENT_ID`, `KAFKA_GROUP_ID`, plus optional SASL settings (secrets from the environment only).
+- **Compose profile `kafka`:** a Redpanda single node (pinned image) and a topic-init job. `docker compose --profile kafka config` must be valid.
+- **Tests:**
+  - The shared EventBus contract suite runs against Redpanda when the image is available. Otherwise it runs against an in-memory Kafka fake that models partitions, keys, offsets and redelivery.
+  - Record which one ran.
+  - Ordering test: 1,000 events over 3 tenants keep per-tenant order.
+  - Restart test: kill the relay mid-batch, restart it, and check there are no lost events and no double handling after dedupe.
+- **Docs:**
+  - An ADR-0008 section on Kafka.
+  - `docs/runbooks/kafka.md`.
+  - `scripts/verify/kafka.sh`, which brings up the profile, runs the contract suite and the ordering test against it, and tears it down.
+- **UI:** no change. This is an infrastructure-only sprint.

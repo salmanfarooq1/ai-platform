@@ -1,0 +1,15 @@
+$ npx vitest run src/features/runs --reporter=verbose
+
+ RUN  v2.1.9 /home/user/ai-platform/ui
+
+ ✓ src/features/runs/runs-page.test.tsx > RunsPage > says what each run status means in words
+ ✓ src/features/runs/runs-page.test.tsx > RunsPage > lists each run with its execution id and the status the runtime reports 318ms
+ ✓ src/features/runs/runs-page.test.tsx > RunsPage > shows the full execution id and the status of the selected run next to its steps
+ ✓ src/features/runs/runs-page.test.tsx > RunsPage > a run with no execution id or status still renders honestly
+ ✓ src/features/runs/runs-page.test.tsx > RunsPage > opens a run when its time is clicked
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  12:29:48
+   Duration  4.27s (transform 364ms, setup 166ms, collect 2.18s, tests 541ms, environment 780ms, prepare 94ms)
+

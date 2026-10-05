@@ -19,6 +19,76 @@ services:
     volumes:
       - "redis_data:/data"
 
+  # Runs the jobs (ingestion, agent runs) and relays the outbox. Same image as the API (the Dockerfile), another command.
+  # The API answers 202 for an ingest and waits for a worker for an agent run, so run one when you run the API:
+  #   docker compose up -d postgres redis worker      (or `poetry run python -m workers` on the host)
+  # Needs the migrated database (`scripts/setup_db.sh`). Model keys come from the environment, as for the API.
+  worker:
+    build: .
+    image: gap-platform
+    container_name: worker
+    command: ["python", "-m", "workers", "--concurrency", "2"]
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      MODE: "local"
+      DATABASE_URL: "postgresql://gap_app:${APP_DB_PASSWORD:-gap_app}@postgres:5432/rag_platform"
+      REDIS_URL: "redis://redis:6379"
+      OBJECT_STORE_DIR: "/data/objects"
+      WORKER_HEALTH_FILE: "/tmp/worker-health"
+      WORKER_METRICS_PORT: "9100"  # the worker's own series, for the `observability` profile (not published to the host)
+    env_file:
+      - path: .env.local
+        required: false
+    volumes:
+      - "objects:/data/objects"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os, sys, time; sys.exit(0 if time.time() - os.path.getmtime('/tmp/worker-health') < 30 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  # Optional metrics, behind a profile (Sprint 008):  docker compose --profile observability up -d
+  # Prometheus scrapes the API (on the host, :8000) and the worker. Grafana has one provisioned dashboard, "Platform
+  # trust", at http://localhost:3000 (set GRAFANA_URL=http://localhost:3000 so the Trust page links to it). Both ports
+  # are bound to localhost only. Set GRAFANA_ADMIN_PASSWORD to change the local admin password.
+  prometheus:
+    profiles: ["observability"]
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - "./docker/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+      - "prometheus_data:/prometheus"
+    restart: unless-stopped
+
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:12.0.2
+    container_name: grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-admin}"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    volumes:
+      - "./docker/observability/grafana/provisioning:/etc/grafana/provisioning:ro"
+      - "./docker/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro"
+      - "grafana_data:/var/lib/grafana"
+    restart: unless-stopped
+
   ollama:
     image: ollama/ollama
     container_name: ollama
@@ -27,7 +97,58 @@ services:
     volumes:
       - "ollama_data:/root/.ollama"
 
+  # Optional Kafka, behind a profile (Sprint 010, ADR-0008):  docker compose --profile kafka up -d redpanda kafka-topics
+  # One Redpanda node, for local work and `scripts/verify/kafka.sh`. It is not a production broker. The host connects at
+  # localhost:19092 (KAFKA_BOOTSTRAP=localhost:19092); other containers use redpanda:9092. Then set EVENT_BUS=kafka.
+  redpanda:
+    profiles: ["kafka"]
+    image: redpandadata/redpanda:v24.2.7
+    container_name: redpanda
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --overprovisioned
+      - --node-id=0
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "127.0.0.1:19092:19092"
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster info -X brokers=localhost:9092 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 10s
+    restart: unless-stopped
+
+  # Creates the topics once and exits: one per event type (key = tenant id, so 3 partitions) and its dead-letter topic.
+  kafka-topics:
+    profiles: ["kafka"]
+    image: redpandadata/redpanda:v24.2.7
+    container_name: kafka-topics
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        for topic in platform.gateway.decision platform.ingest.completed platform.gateway.purge; do
+          for name in "$$topic" "$$topic.dlq"; do
+            rpk topic create "$$name" -p 3 -r 1 -X brokers=redpanda:9092 || true
+          done
+        done
+        rpk topic list -X brokers=redpanda:9092
+
 volumes:
+  objects:
   pgdata:
   redis_data:
   ollama_data:
+  prometheus_data:
+  grafana_data:

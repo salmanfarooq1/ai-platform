@@ -1,0 +1,4405 @@
+{
+  "components": {
+    "schemas": {
+      "AgentAccepted": {
+        "description": "`202` from `/v1/agent/query` when the run takes longer than the sync wait. Poll `decisions_url`'s run.",
+        "properties": {
+          "execution_id": {
+            "format": "uuid",
+            "title": "Execution Id",
+            "type": "string"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "execution_id",
+          "job_id"
+        ],
+        "title": "AgentAccepted",
+        "type": "object"
+      },
+      "AgentCitation": {
+        "description": "Mirrors schemas.py Citation exactly.",
+        "properties": {
+          "chunk_index": {
+            "title": "Chunk Index",
+            "type": "integer"
+          },
+          "document_id": {
+            "title": "Document Id",
+            "type": "string"
+          },
+          "excerpt": {
+            "title": "Excerpt",
+            "type": "string"
+          },
+          "relevance_score": {
+            "title": "Relevance Score",
+            "type": "number"
+          },
+          "source_filename": {
+            "title": "Source Filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "document_id",
+          "source_filename",
+          "chunk_index",
+          "relevance_score",
+          "excerpt"
+        ],
+        "title": "AgentCitation",
+        "type": "object"
+      },
+      "AgentRequest": {
+        "properties": {
+          "enable_verifier": {
+            "default": true,
+            "description": "Whether to verify the drafted answer against retrieved chunks before returning it",
+            "title": "Enable Verifier",
+            "type": "boolean"
+          },
+          "max_iterations": {
+            "default": 6,
+            "description": "Max retrieve_chunks calls before forcing synthesis",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Iterations",
+            "type": "integer"
+          },
+          "max_verify_retries": {
+            "default": 1,
+            "description": "How many times verification can send the query back for more retrieval",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Max Verify Retries",
+            "type": "integer"
+          },
+          "namespace": {
+            "default": "default",
+            "description": "Document scope hint for the agent",
+            "title": "Namespace",
+            "type": "string"
+          },
+          "question": {
+            "description": "The compliance question to research",
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "title": "AgentRequest",
+        "type": "object"
+      },
+      "AgentResponse": {
+        "properties": {
+          "agent_reported": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Agent Reported",
+            "type": "array"
+          },
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "citations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AgentCitation"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "confidence": {
+            "default": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "flag_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flag Reason"
+          },
+          "flagged": {
+            "default": false,
+            "title": "Flagged",
+            "type": "boolean"
+          },
+          "model_used": {
+            "default": "",
+            "title": "Model Used",
+            "type": "string"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "reasoning_steps": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasoning Steps",
+            "type": "array"
+          },
+          "tool_calls_made": {
+            "title": "Tool Calls Made",
+            "type": "integer"
+          },
+          "total_cost_usd": {
+            "default": 0.0,
+            "title": "Total Cost Usd",
+            "type": "number"
+          },
+          "total_time_seconds": {
+            "title": "Total Time Seconds",
+            "type": "number"
+          },
+          "verification_notes": {
+            "default": "",
+            "title": "Verification Notes",
+            "type": "string"
+          },
+          "verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified"
+          }
+        },
+        "required": [
+          "question",
+          "answer",
+          "reasoning_steps",
+          "tool_calls_made",
+          "total_time_seconds"
+        ],
+        "title": "AgentResponse",
+        "type": "object"
+      },
+      "AgentRun": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decisions_url": {
+            "title": "Decisions Url",
+            "type": "string"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "execution_id": {
+            "format": "uuid",
+            "title": "Execution Id",
+            "type": "string"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "stopped"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "execution_id",
+          "job_id",
+          "status",
+          "created_at",
+          "started_at",
+          "finished_at",
+          "result",
+          "decisions_url"
+        ],
+        "title": "AgentRun",
+        "type": "object"
+      },
+      "AgentRunDetail": {
+        "description": "One run with what happened around it: the sandbox events, and the decisions and events merged by time.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decisions_url": {
+            "title": "Decisions Url",
+            "type": "string"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "execution_id": {
+            "format": "uuid",
+            "title": "Execution Id",
+            "type": "string"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sandbox_events": {
+            "items": {
+              "$ref": "#/components/schemas/SandboxEventOut"
+            },
+            "title": "Sandbox Events",
+            "type": "array"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "stopped"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "timeline": {
+            "items": {
+              "$ref": "#/components/schemas/RunTimelineItem"
+            },
+            "title": "Timeline",
+            "type": "array"
+          }
+        },
+        "required": [
+          "execution_id",
+          "job_id",
+          "status",
+          "created_at",
+          "started_at",
+          "finished_at",
+          "result",
+          "decisions_url",
+          "sandbox_events",
+          "timeline"
+        ],
+        "title": "AgentRunDetail",
+        "type": "object"
+      },
+      "AgentRunPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AgentRun"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "AgentRunPage",
+        "type": "object"
+      },
+      "Body_ingest_v1_ingest_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_ingest_v1_ingest_post",
+        "type": "object"
+      },
+      "ChatMessage": {
+        "properties": {
+          "content": {
+            "maxLength": 20000,
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "system",
+              "user",
+              "assistant"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatMessage",
+        "type": "object"
+      },
+      "DecisionDetail": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "input_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Sha256"
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrincipalRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "run_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Status"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/TenantRef"
+          },
+          "trace": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionSummary"
+            },
+            "title": "Trace",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "request_id",
+          "principal",
+          "action",
+          "resource",
+          "outcome",
+          "stage",
+          "reason",
+          "policy_version",
+          "tenant",
+          "input_sha256",
+          "trace"
+        ],
+        "title": "DecisionDetail",
+        "type": "object"
+      },
+      "DecisionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "DecisionPage",
+        "type": "object"
+      },
+      "DecisionSummary": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrincipalRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "run_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Status"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "request_id",
+          "principal",
+          "action",
+          "resource",
+          "outcome",
+          "stage",
+          "reason",
+          "policy_version"
+        ],
+        "title": "DecisionSummary",
+        "type": "object"
+      },
+      "DeniedCounts": {
+        "properties": {
+          "budget": {
+            "title": "Budget",
+            "type": "integer"
+          },
+          "policy": {
+            "title": "Policy",
+            "type": "integer"
+          },
+          "rate": {
+            "title": "Rate",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rate",
+          "budget",
+          "policy"
+        ],
+        "title": "DeniedCounts",
+        "type": "object"
+      },
+      "DenyReasonCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "count"
+        ],
+        "title": "DenyReasonCount",
+        "type": "object"
+      },
+      "EvalGate": {
+        "description": "The latest run of the eval regression gate.",
+        "properties": {
+          "baseline": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Baseline",
+            "type": "object"
+          },
+          "latest": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Latest",
+            "type": "object"
+          },
+          "run_at": {
+            "format": "date-time",
+            "title": "Run At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "baseline",
+          "latest",
+          "run_at"
+        ],
+        "title": "EvalGate",
+        "type": "object"
+      },
+      "FeedbackRequest": {
+        "properties": {
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "endpoint": {
+            "title": "Endpoint",
+            "type": "string"
+          },
+          "rating": {
+            "enum": [
+              "up",
+              "down"
+            ],
+            "title": "Rating",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "endpoint",
+          "rating"
+        ],
+        "title": "FeedbackRequest",
+        "type": "object"
+      },
+      "FirstDeny": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage",
+          "reason",
+          "action",
+          "resource"
+        ],
+        "title": "FirstDeny",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "db": {
+            "title": "Db",
+            "type": "string"
+          },
+          "embedding": {
+            "default": "unknown",
+            "title": "Embedding",
+            "type": "string"
+          },
+          "mode": {
+            "default": "",
+            "title": "Mode",
+            "type": "string"
+          },
+          "redis": {
+            "title": "Redis",
+            "type": "string"
+          },
+          "stale_vectors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stale Vectors"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "uptime_seconds": {
+            "default": 0,
+            "title": "Uptime Seconds",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "db",
+          "redis",
+          "version"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "Job": {
+        "properties": {
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "ingest",
+              "agent_run"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "max_attempts": {
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/JobProgress"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "dead"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "attempts",
+          "max_attempts",
+          "progress",
+          "error_code",
+          "resource",
+          "execution_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Job",
+        "type": "object"
+      },
+      "JobAccepted": {
+        "description": "`202` for a new job, `200` when the idempotency key already named one. `status` is the job's status now:\n`queued` for a new job.",
+        "properties": {
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "status": {
+            "default": "queued",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "dead"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "title": "JobAccepted",
+        "type": "object"
+      },
+      "JobPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "JobPage",
+        "type": "object"
+      },
+      "JobProgress": {
+        "properties": {
+          "done": {
+            "title": "Done",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "done",
+          "total"
+        ],
+        "title": "JobProgress",
+        "type": "object"
+      },
+      "KeySummary": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "prefix": {
+            "title": "Prefix",
+            "type": "string"
+          },
+          "revoked": {
+            "title": "Revoked",
+            "type": "boolean"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "prefix",
+          "scopes",
+          "created_at",
+          "last_used_at",
+          "revoked"
+        ],
+        "title": "KeySummary",
+        "type": "object"
+      },
+      "ModelCall": {
+        "properties": {
+          "max_tokens": {
+            "default": 1024,
+            "maximum": 4000.0,
+            "minimum": 1.0,
+            "title": "Max Tokens",
+            "type": "integer"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Messages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "messages"
+        ],
+        "title": "ModelCall",
+        "type": "object"
+      },
+      "ModelResult": {
+        "properties": {
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/ModelUsage"
+          }
+        },
+        "required": [
+          "text",
+          "model",
+          "usage"
+        ],
+        "title": "ModelResult",
+        "type": "object"
+      },
+      "ModelUsage": {
+        "properties": {
+          "completion_tokens": {
+            "title": "Completion Tokens",
+            "type": "integer"
+          },
+          "prompt_tokens": {
+            "title": "Prompt Tokens",
+            "type": "integer"
+          },
+          "total_cost": {
+            "title": "Total Cost",
+            "type": "number"
+          }
+        },
+        "required": [
+          "prompt_tokens",
+          "completion_tokens",
+          "total_cost"
+        ],
+        "title": "ModelUsage",
+        "type": "object"
+      },
+      "Overview": {
+        "properties": {
+          "blocked": {
+            "title": "Blocked",
+            "type": "integer"
+          },
+          "budget": {
+            "$ref": "#/components/schemas/OverviewBudget"
+          },
+          "by_day": {
+            "items": {
+              "$ref": "#/components/schemas/OverviewDay"
+            },
+            "title": "By Day",
+            "type": "array"
+          },
+          "checked": {
+            "title": "Checked",
+            "type": "integer"
+          },
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "deny_rate": {
+            "title": "Deny Rate",
+            "type": "number"
+          },
+          "top_deny_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/DenyReasonCount"
+            },
+            "title": "Top Deny Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "days",
+          "checked",
+          "blocked",
+          "deny_rate",
+          "budget",
+          "top_deny_reasons",
+          "by_day"
+        ],
+        "title": "Overview",
+        "type": "object"
+      },
+      "OverviewBudget": {
+        "properties": {
+          "limit_tokens": {
+            "title": "Limit Tokens",
+            "type": "integer"
+          },
+          "period": {
+            "const": "day",
+            "title": "Period",
+            "type": "string"
+          },
+          "used_tokens": {
+            "title": "Used Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "used_tokens",
+          "limit_tokens",
+          "period"
+        ],
+        "title": "OverviewBudget",
+        "type": "object"
+      },
+      "OverviewDay": {
+        "properties": {
+          "blocked": {
+            "title": "Blocked",
+            "type": "integer"
+          },
+          "checked": {
+            "title": "Checked",
+            "type": "integer"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "checked",
+          "blocked"
+        ],
+        "title": "OverviewDay",
+        "type": "object"
+      },
+      "PolicyDocumentView": {
+        "properties": {
+          "allowed_kbs": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "const": "*",
+                "type": "string"
+              }
+            ],
+            "title": "Allowed Kbs"
+          },
+          "allowed_models": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "const": "*",
+                "type": "string"
+              }
+            ],
+            "title": "Allowed Models"
+          },
+          "allowed_tools": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "const": "*",
+                "type": "string"
+              }
+            ],
+            "title": "Allowed Tools"
+          },
+          "max_tokens_per_request": {
+            "title": "Max Tokens Per Request",
+            "type": "integer"
+          },
+          "max_tool_calls": {
+            "title": "Max Tool Calls",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "allowed_kbs",
+          "allowed_tools",
+          "allowed_models",
+          "max_tool_calls",
+          "max_tokens_per_request"
+        ],
+        "title": "PolicyDocumentView",
+        "type": "object"
+      },
+      "PolicyList": {
+        "properties": {
+          "default_in_effect": {
+            "title": "Default In Effect",
+            "type": "boolean"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyVersion"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "versions",
+          "default_in_effect"
+        ],
+        "title": "PolicyList",
+        "type": "object"
+      },
+      "PolicyVersion": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "document": {
+            "$ref": "#/components/schemas/PolicyDocumentView"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "active",
+          "created_at",
+          "created_by",
+          "document"
+        ],
+        "title": "PolicyVersion",
+        "type": "object"
+      },
+      "PrincipalInfo": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind"
+        ],
+        "title": "PrincipalInfo",
+        "type": "object"
+      },
+      "PrincipalRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "PrincipalRef",
+        "type": "object"
+      },
+      "PrincipalSummary": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/KeySummary"
+            },
+            "title": "Keys",
+            "type": "array"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "created_at",
+          "keys"
+        ],
+        "title": "PrincipalSummary",
+        "type": "object"
+      },
+      "ReasonCode": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "policy_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Field"
+          },
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "title",
+          "sentence",
+          "policy_field",
+          "stage"
+        ],
+        "title": "ReasonCode",
+        "type": "object"
+      },
+      "Receipt": {
+        "description": "A signed receipt. `canonical` is the exact text that was signed: the canonical JSON of the chain link and the\ndecision record. It holds no input text, only the SHA-256 that is on the decision.",
+        "properties": {
+          "alg": {
+            "const": "Ed25519",
+            "title": "Alg",
+            "type": "string"
+          },
+          "canonical": {
+            "title": "Canonical",
+            "type": "string"
+          },
+          "chain": {
+            "$ref": "#/components/schemas/ReceiptChain"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionDetail"
+          },
+          "key_id": {
+            "title": "Key Id",
+            "type": "string"
+          },
+          "signature": {
+            "description": "Base64 Ed25519 signature over the UTF-8 bytes of `canonical`",
+            "title": "Signature",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "chain",
+          "signature",
+          "key_id",
+          "alg",
+          "canonical"
+        ],
+        "title": "Receipt",
+        "type": "object"
+      },
+      "ReceiptChain": {
+        "description": "Where the decision sits in the tenant's hash chain.",
+        "properties": {
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "prev_hash": {
+            "title": "Prev Hash",
+            "type": "string"
+          },
+          "row_hash": {
+            "title": "Row Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prev_hash",
+          "row_hash",
+          "position"
+        ],
+        "title": "ReceiptChain",
+        "type": "object"
+      },
+      "ReceiptKey": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "alg": {
+            "const": "Ed25519",
+            "title": "Alg",
+            "type": "string"
+          },
+          "key_id": {
+            "title": "Key Id",
+            "type": "string"
+          },
+          "public_key": {
+            "description": "Base64 of the 32 raw public key bytes",
+            "title": "Public Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key_id",
+          "alg",
+          "public_key",
+          "active"
+        ],
+        "title": "ReceiptKey",
+        "type": "object"
+      },
+      "RequestDetail": {
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionSummary"
+            },
+            "title": "Decisions",
+            "type": "array"
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrincipalRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/TenantRef"
+          }
+        },
+        "required": [
+          "request_id",
+          "started_at",
+          "principal",
+          "tenant",
+          "policy_version",
+          "outcome",
+          "decisions"
+        ],
+        "title": "RequestDetail",
+        "type": "object"
+      },
+      "RequestPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RequestSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "RequestPage",
+        "type": "object"
+      },
+      "RequestSummary": {
+        "properties": {
+          "checks": {
+            "title": "Checks",
+            "type": "integer"
+          },
+          "first_deny": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FirstDeny"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrincipalRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "started_at",
+          "principal",
+          "checks",
+          "outcome",
+          "first_deny",
+          "policy_version"
+        ],
+        "title": "RequestSummary",
+        "type": "object"
+      },
+      "RunDecisionOut": {
+        "description": "One gateway decision the run caused (the same facts as a decision row, without the principal).",
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "action",
+          "resource",
+          "outcome",
+          "stage",
+          "reason"
+        ],
+        "title": "RunDecisionOut",
+        "type": "object"
+      },
+      "RunTimelineItem": {
+        "description": "A step of the run: a gateway decision or a sandbox event, in time order. Exactly one of the two is set.",
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunDecisionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sandbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SandboxEventOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "enum": [
+              "decision",
+              "sandbox"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "at"
+        ],
+        "title": "RunTimelineItem",
+        "type": "object"
+      },
+      "SandboxEventOut": {
+        "description": "One thing the sandbox reported for the run (Sprint 009). `detail` holds no secret and no input text.",
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "title": "Detail",
+            "type": "object"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "start",
+              "exit",
+              "network_denied",
+              "file_denied",
+              "limit_hit",
+              "log"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "at",
+          "detail"
+        ],
+        "title": "SandboxEventOut",
+        "type": "object"
+      },
+      "SearchRequest": {
+        "properties": {
+          "namespace": {
+            "default": "default",
+            "description": "Scope to search within",
+            "title": "Namespace",
+            "type": "string"
+          },
+          "query": {
+            "description": "Natural language query to search against stored chunks",
+            "title": "Query",
+            "type": "string"
+          },
+          "rerank": {
+            "default": true,
+            "description": "Whether to apply cross-encoder reranking after retrieval",
+            "title": "Rerank",
+            "type": "boolean"
+          },
+          "retrieval_mode": {
+            "default": "hybrid",
+            "description": "Retrieval strategy: vector_only, bm25_only, or hybrid (default)",
+            "pattern": "^(vector_only|bm25_only|hybrid)$",
+            "title": "Retrieval Mode",
+            "type": "string"
+          },
+          "top_k": {
+            "default": 5,
+            "description": "Number of chunks to retrieve",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "SearchRequest",
+        "type": "object"
+      },
+      "SearchResponse": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "flag_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flag Reason"
+          },
+          "flagged": {
+            "default": false,
+            "title": "Flagged",
+            "type": "boolean"
+          },
+          "needs_clarification": {
+            "title": "Needs Clarification",
+            "type": "boolean"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "rerank_applied": {
+            "default": false,
+            "title": "Rerank Applied",
+            "type": "boolean"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResult"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "total_results": {
+            "title": "Total Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query",
+          "answer",
+          "confidence",
+          "needs_clarification",
+          "results",
+          "total_results"
+        ],
+        "title": "SearchResponse",
+        "type": "object"
+      },
+      "SearchResult": {
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "document_id": {
+            "title": "Document Id",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          }
+        },
+        "required": [
+          "document_id",
+          "namespace",
+          "content",
+          "score",
+          "metadata"
+        ],
+        "title": "SearchResult",
+        "type": "object"
+      },
+      "SessionInfo": {
+        "properties": {
+          "csrf_token": {
+            "title": "Csrf Token",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "preview": {
+            "title": "Preview",
+            "type": "boolean"
+          },
+          "principal": {
+            "$ref": "#/components/schemas/PrincipalInfo"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/TenantInfo"
+          }
+        },
+        "required": [
+          "principal",
+          "tenant",
+          "scopes",
+          "csrf_token",
+          "preview",
+          "expires_at"
+        ],
+        "title": "SessionInfo",
+        "type": "object"
+      },
+      "SignInRequest": {
+        "properties": {
+          "api_key": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Api Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "api_key"
+        ],
+        "title": "SignInRequest",
+        "type": "object"
+      },
+      "TenantInfo": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug"
+        ],
+        "title": "TenantInfo",
+        "type": "object"
+      },
+      "TenantRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug"
+        ],
+        "title": "TenantRef",
+        "type": "object"
+      },
+      "ToolCall": {
+        "properties": {
+          "arguments": {
+            "additionalProperties": true,
+            "description": "The arguments of the tool call. The policy may check them against a schema.",
+            "title": "Arguments",
+            "type": "object"
+          }
+        },
+        "title": "ToolCall",
+        "type": "object"
+      },
+      "ToolResult": {
+        "properties": {
+          "result": {
+            "description": "What the tool returned (JSON text for the retrieval tool)",
+            "title": "Result"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "ToolResult",
+        "type": "object"
+      },
+      "TrustSummary": {
+        "properties": {
+          "eval_gate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EvalGate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "eval_history": {
+            "items": {
+              "$ref": "#/components/schemas/EvalGate"
+            },
+            "title": "Eval History",
+            "type": "array"
+          },
+          "grafana_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grafana Url"
+          },
+          "last_purge_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Purge At"
+          },
+          "metrics_public": {
+            "title": "Metrics Public",
+            "type": "boolean"
+          },
+          "oldest_decision_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldest Decision At"
+          },
+          "retention_days": {
+            "title": "Retention Days",
+            "type": "integer"
+          },
+          "retention_is_default": {
+            "title": "Retention Is Default",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "retention_days",
+          "retention_is_default",
+          "oldest_decision_at",
+          "last_purge_at",
+          "eval_gate",
+          "eval_history",
+          "metrics_public",
+          "grafana_url"
+        ],
+        "title": "TrustSummary",
+        "type": "object"
+      },
+      "UsageByDay": {
+        "properties": {
+          "cost_usd": {
+            "title": "Cost Usd",
+            "type": "number"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "tokens": {
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "requests",
+          "tokens",
+          "cost_usd"
+        ],
+        "title": "UsageByDay",
+        "type": "object"
+      },
+      "UsageByPrincipal": {
+        "properties": {
+          "cost_usd": {
+            "title": "Cost Usd",
+            "type": "number"
+          },
+          "principal": {
+            "$ref": "#/components/schemas/PrincipalRef"
+          },
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "tokens": {
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "principal",
+          "requests",
+          "tokens",
+          "cost_usd"
+        ],
+        "title": "UsageByPrincipal",
+        "type": "object"
+      },
+      "UsageSummary": {
+        "properties": {
+          "by_day": {
+            "items": {
+              "$ref": "#/components/schemas/UsageByDay"
+            },
+            "title": "By Day",
+            "type": "array"
+          },
+          "by_principal": {
+            "items": {
+              "$ref": "#/components/schemas/UsageByPrincipal"
+            },
+            "title": "By Principal",
+            "type": "array"
+          },
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "denied": {
+            "$ref": "#/components/schemas/DeniedCounts"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/UsageTotals"
+          }
+        },
+        "required": [
+          "days",
+          "totals",
+          "by_principal",
+          "by_day",
+          "denied"
+        ],
+        "title": "UsageSummary",
+        "type": "object"
+      },
+      "UsageTotals": {
+        "properties": {
+          "cost_usd": {
+            "title": "Cost Usd",
+            "type": "number"
+          },
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "tokens": {
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "requests",
+          "tokens",
+          "cost_usd"
+        ],
+        "title": "UsageTotals",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VerifyCheck": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "title": "VerifyCheck",
+        "type": "object"
+      },
+      "VerifyResult": {
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/VerifyCheck"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "valid": {
+            "title": "Valid",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "valid",
+          "checks"
+        ],
+        "title": "VerifyResult",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "description": "API key (gap_<prefix>_<secret>) or JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "RAG Platform API",
+    "version": "0.4.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Root"
+      }
+    },
+    "/metrics": {
+      "get": {
+        "description": "Prometheus text format: request counts and latency per route, decisions per outcome, jobs per status and the\noutbox lag. Open when `METRICS_PUBLIC` is true, otherwise it needs the `admin` scope.",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {}
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Metrics",
+        "tags": [
+          "trust"
+        ]
+      }
+    },
+    "/v1/agent/query": {
+      "post": {
+        "operationId": "agent_query_v1_agent_query_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentAccepted"
+                }
+              }
+            },
+            "description": "The run is still going after the sync wait: poll /v1/agent/runs/{execution_id}"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Agent Query",
+        "tags": [
+          "agent"
+        ]
+      }
+    },
+    "/v1/agent/runs": {
+      "get": {
+        "description": "The tenant's agent runs, newest first, with a keyset cursor.",
+        "operationId": "list_runs_v1_agent_runs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRunPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Runs",
+        "tags": [
+          "agent"
+        ]
+      }
+    },
+    "/v1/agent/runs/{execution_id}": {
+      "get": {
+        "description": "One run: its status, its answer once it succeeded, the sandbox events and the run's decisions merged by time.\nIt reads the job, so it also works after a restart.",
+        "operationId": "get_run_v1_agent_runs__execution_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Execution Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRunDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Run",
+        "tags": [
+          "agent"
+        ]
+      }
+    },
+    "/v1/analytics/summary": {
+      "get": {
+        "description": "Return cost and usage breakdown for the last N days.\n\nBreaks down total spend and request volume by day, endpoint,\nnamespace, and model. Used to power the frontend Analytics page.\nAll figures are derived from the usage_log table written by\nFinOpsMiddleware.\n\nPrerequisite: namespace is only accurate after the cache-hit namespace\nfix (bug 1.2) \u2014 rows written before that fix carry namespace='global'.",
+        "operationId": "analytics_summary_v1_analytics_summary_get",
+        "parameters": [
+          {
+            "description": "Number of days to look back",
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "Number of days to look back",
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Analytics Summary",
+        "tags": [
+          "analytics"
+        ]
+      }
+    },
+    "/v1/config": {
+      "get": {
+        "description": "Return all platform constants the frontend needs to render correctly.\n\nNamespaces, budget limits, rate limits, guardrail thresholds, and\nagent defaults are all derived from config.py at request time \u2014\nthere is no caching, so the frontend always gets the live values.",
+        "operationId": "get_config_v1_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Config",
+        "tags": [
+          "config"
+        ]
+      }
+    },
+    "/v1/decisions": {
+      "get": {
+        "description": "Decisions of the caller's tenant, newest first, with filters and a keyset cursor.",
+        "operationId": "list_decisions_v1_decisions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "allow",
+                    "deny"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outcome"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "description": "Only decisions of this principal id",
+            "in": "query",
+            "name": "principal",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only decisions of this principal id",
+              "title": "Principal"
+            }
+          },
+          {
+            "in": "query",
+            "name": "policy_version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Version"
+            }
+          },
+          {
+            "in": "query",
+            "name": "request_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Request Id"
+            }
+          },
+          {
+            "description": "Only decisions caused by this agent run",
+            "in": "query",
+            "name": "execution_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only decisions caused by this agent run",
+              "title": "Execution Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "query",
+            "name": "until",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Decisions",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/decisions/{decision_id}": {
+      "get": {
+        "description": "One decision with its request trace. A foreign id and a missing id give the same 404.",
+        "operationId": "get_decision_v1_decisions__decision_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "decision_id",
+            "required": true,
+            "schema": {
+              "title": "Decision Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Decision",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/documents": {
+      "get": {
+        "description": "List all ingested documents from the document registry.\n\nReturns document metadata including content hash (for deduplication\nvisibility), chunk count, source filename, and last ingested timestamp.\nFilter by namespace to show only documents in a specific scope.",
+        "operationId": "list_documents_v1_documents_get",
+        "parameters": [
+          {
+            "description": "Filter by namespace. Omit to list all.",
+            "in": "query",
+            "name": "namespace",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by namespace. Omit to list all.",
+              "title": "Namespace"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Documents",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/v1/feedback": {
+      "post": {
+        "description": "DbRecord a thumbs up or down rating for a specific response.\n\nrequest_id must be the X-Query-ID header value from the original\n/search or /agent/query response. This ties the feedback row back\nto the exact request in usage_log.",
+        "operationId": "submit_feedback_v1_feedback_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Feedback",
+        "tags": [
+          "feedback"
+        ]
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "operationId": "health_check_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health Check"
+      }
+    },
+    "/v1/ingest": {
+      "post": {
+        "description": "Accept a file for ingestion and return at once with the job that will ingest it (`GET /v1/jobs/{id}`).\n\nThe raw bytes are stored under their SHA-256 before anything is parsed. The same `Idempotency-Key` (per tenant)\nreturns the same job with 200 instead of creating a second one.",
+        "operationId": "ingest_v1_ingest_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "namespace",
+            "required": false,
+            "schema": {
+              "default": "default",
+              "title": "Namespace",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "document_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Document Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_ingest_v1_ingest_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            },
+            "description": "The Idempotency-Key already named a job: it is returned"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ingest"
+      }
+    },
+    "/v1/jobs": {
+      "get": {
+        "description": "The tenant's jobs, newest first, with a keyset cursor. Filter by `kind` and `status`.",
+        "operationId": "list_jobs_v1_jobs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ingest",
+                    "agent_run"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "queued",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "dead"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Jobs",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/v1/jobs/{job_id}": {
+      "get": {
+        "description": "One job of the caller's tenant: its status, attempts and progress.",
+        "operationId": "get_job_v1_jobs__job_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Job",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/v1/overview": {
+      "get": {
+        "description": "Requests checked and blocked in the window, the top deny reasons and today's token budget.\n\nIt counts requests (decisions grouped by request id), so the numbers match the request list. A request is\nblocked when any of its decisions was a deny. Requests made only of allowed console reads (`audit.read`,\n`analytics.read`) are left out unless `include_console_reads` is true. A denied console read is never left out.",
+        "operationId": "overview_v1_overview_get",
+        "parameters": [
+          {
+            "description": "Number of days to look back",
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "Number of days to look back",
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Also count requests made only of console reads",
+            "in": "query",
+            "name": "include_console_reads",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Also count requests made only of console reads",
+              "title": "Include Console Reads",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Overview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Overview",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/policies": {
+      "get": {
+        "description": "Every policy version of the tenant, newest first. `default_in_effect` is true when none is active.",
+        "operationId": "list_policies_v1_policies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Policies",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/policies/{version}": {
+      "get": {
+        "operationId": "get_policy_v1_policies__version__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyVersion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Policy",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/principals": {
+      "get": {
+        "description": "Principals and their keys: prefix, scopes and dates only. Never a hash, a secret or the rest of a key.",
+        "operationId": "list_principals_v1_principals_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PrincipalSummary"
+                  },
+                  "title": "Response List Principals V1 Principals Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Principals",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/quality-report": {
+      "get": {
+        "description": "Return thumbs up/down counts aggregated by endpoint.\n\nUse this to track answer quality trends over time. A rising\nthumbs-down rate indicates a retrieval or generation regression.",
+        "operationId": "quality_report_v1_quality_report_get",
+        "parameters": [
+          {
+            "description": "Number of days to look back",
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "description": "Number of days to look back",
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Quality Report",
+        "tags": [
+          "feedback"
+        ]
+      }
+    },
+    "/v1/reason-codes": {
+      "get": {
+        "description": "The plain-language catalogue of every reason code. It holds no tenant data.",
+        "operationId": "reason_codes_v1_reason_codes_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReasonCode"
+                  },
+                  "title": "Response Reason Codes V1 Reason Codes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reason Codes",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/receipts/keys": {
+      "get": {
+        "description": "The public keys receipts may be signed with. No secret is ever returned.",
+        "operationId": "list_receipt_keys_v1_receipts_keys_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReceiptKey"
+                  },
+                  "title": "Response List Receipt Keys V1 Receipts Keys Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Receipt Keys",
+        "tags": [
+          "receipts"
+        ]
+      }
+    },
+    "/v1/receipts/verify": {
+      "post": {
+        "description": "Run the receipt checks on a receipt the caller holds. It does not matter whose tenant it names: the checks\nuse only the receipt and the public keys.",
+        "operationId": "verify_a_receipt_v1_receipts_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Receipt"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verify A Receipt",
+        "tags": [
+          "receipts"
+        ]
+      }
+    },
+    "/v1/receipts/{decision_id}": {
+      "get": {
+        "description": "The signed receipt of one decision of the caller's tenant.",
+        "operationId": "get_receipt_v1_receipts__decision_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "decision_id",
+            "required": true,
+            "schema": {
+              "title": "Decision Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Receipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Receipt",
+        "tags": [
+          "receipts"
+        ]
+      }
+    },
+    "/v1/requests": {
+      "get": {
+        "description": "Decisions grouped by request id, newest request first, with filters and a keyset cursor.\n\nA request is a deny when any of its decisions was a deny. `since` and `until` apply to the time of the\nfirst decision of the request. Requests made only of allowed console reads (`audit.read`, `analytics.read`)\nare left out unless `include_console_reads` is true. A denied console read is never left out.",
+        "operationId": "list_requests_v1_requests_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "allow",
+                    "deny"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outcome"
+            }
+          },
+          {
+            "description": "Only requests with a decision of this action",
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only requests with a decision of this action",
+              "title": "Action"
+            }
+          },
+          {
+            "description": "Only requests of this principal id",
+            "in": "query",
+            "name": "principal",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only requests of this principal id",
+              "title": "Principal"
+            }
+          },
+          {
+            "in": "query",
+            "name": "policy_version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Version"
+            }
+          },
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "query",
+            "name": "until",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "description": "Also list requests made only of console reads",
+            "in": "query",
+            "name": "include_console_reads",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Also list requests made only of console reads",
+              "title": "Include Console Reads",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Requests",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/requests/{request_id}": {
+      "get": {
+        "description": "One request with its decisions, oldest first. A foreign id and a missing id give the same 404.",
+        "operationId": "get_request_v1_requests__request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Request",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/sandbox/runs/{execution_id}/model": {
+      "post": {
+        "description": "One model call by a sandboxed agent. The gateway checks the model and the token cap, the platform makes the call\n(the sandbox has no provider key) and books the usage against the tenant.",
+        "operationId": "call_model_v1_sandbox_runs__execution_id__model_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Execution Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelCall"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Call Model",
+        "tags": [
+          "sandbox"
+        ]
+      }
+    },
+    "/v1/sandbox/runs/{execution_id}/tools/{name}": {
+      "post": {
+        "description": "One tool call by a sandboxed agent. The gateway checks the tool, its arguments and the data it reads.",
+        "operationId": "call_tool_v1_sandbox_runs__execution_id__tools__name__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Execution Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolCall"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Call Tool",
+        "tags": [
+          "sandbox"
+        ]
+      }
+    },
+    "/v1/search": {
+      "post": {
+        "operationId": "search_v1_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Search"
+      }
+    },
+    "/v1/session": {
+      "delete": {
+        "description": "Delete the session and clear the cookie. The CSRF header is checked by the auth middleware.",
+        "operationId": "sign_out_v1_session_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "csrf_failed"
+          }
+        },
+        "summary": "Sign Out",
+        "tags": [
+          "session"
+        ]
+      },
+      "get": {
+        "description": "The current cookie session. A bearer-only caller has no session and gets 401.",
+        "operationId": "read_session_v1_session_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "no session"
+          }
+        },
+        "summary": "Read Session",
+        "tags": [
+          "session"
+        ]
+      },
+      "post": {
+        "description": "Exchange an API key for a browser session. The key is checked once and never stored.",
+        "operationId": "sign_in_v1_session_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignInRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "invalid_credentials"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "rate limited"
+          }
+        },
+        "summary": "Sign In",
+        "tags": [
+          "session"
+        ]
+      }
+    },
+    "/v1/session/preview": {
+      "post": {
+        "description": "An automatic read-only session for the configured preview principal. 404 unless the mode allows it.",
+        "operationId": "start_preview_v1_session_preview_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "preview is not available"
+          }
+        },
+        "summary": "Start Preview",
+        "tags": [
+          "session"
+        ]
+      }
+    },
+    "/v1/trust/summary": {
+      "get": {
+        "description": "How long decisions are kept, the oldest one and the last purge, the eval gate and where the metrics are.",
+        "operationId": "trust_summary_v1_trust_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Trust Summary",
+        "tags": [
+          "trust"
+        ]
+      }
+    },
+    "/v1/usage/summary": {
+      "get": {
+        "description": "Requests, tokens and cost from `usage_log`, by principal and by day, plus the gateway denials by kind.\n\n`usage_log` has no principal column, so each row is attributed through the `gateway_decisions` rows that\nshare its request id. A request with no such row has no principal and is left out of `by_principal`.",
+        "operationId": "usage_summary_v1_usage_summary_get",
+        "parameters": [
+          {
+            "description": "Number of days to look back",
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "Number of days to look back",
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Usage Summary",
+        "tags": [
+          "console"
+        ]
+      }
+    }
+  }
+}

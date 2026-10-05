@@ -1,0 +1,30 @@
+# scripts/verify/openshell_sdk_surface.py with the pinned openshell==0.1.2 wheel on PYTHONPATH (no gateway needed)
+8c409da4f176d42418d92366fe201f47cceef2c0fa432bfbce2bf938649d59cf  /tmp/claude-0/-home-user-ai-platform/29e4aded-8d1e-5ba8-a7db-bc4a1ccbc948/scratchpad/openshell-0.1.2-py3-none-any.whl
+PASS  openshell version is the pinned one  0.1.2
+PASS  SandboxClient.create_from_template exists
+PASS  SandboxClient.exec_stream exists
+PASS  SandboxClient.exec exists
+PASS  SandboxClient.delete exists
+PASS  SandboxClient.wait_ready exists
+PASS  SandboxClient.sandbox_templates exists
+PASS  SandboxClient.close exists
+PASS  SandboxClient.from_active_cluster exists
+PASS  exec_stream takes workdir, env, stdin, timeout_seconds
+PASS  template create takes image, cpu, memory
+PASS  SandboxPolicy has filesystem, landlock, process, network_policies
+PASS  FilesystemPolicy has include_workdir, read_only, read_write
+PASS  NetworkEndpoint has host, port, protocol, enforcement
+PASS  NetworkPolicyRule has name, endpoints, binaries
+PASS  SandboxSpec has policy, template, environment
+PASS  WatchSandboxRequest has sandbox, follow_logs, follow_events, workspace_scope
+PASS  SandboxLogLine has level, message, fields, event_time
+PASS  PlatformEvent has type, reason, message, metadata, event_time
+PASS  the policy has one network route, to the gateway
+PASS  the policy names the interpreter as the only binary that may use the route
+PASS  the policy has one read-write directory
+PASS  the watch request follows logs and events of this sandbox
+PASS  the sandbox spec survives a protobuf round trip
+PASS  a denied-connection log line is classified (rule check only)
+
+25 of 25 checks passed
+exit=0

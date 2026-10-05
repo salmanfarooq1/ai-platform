@@ -1,0 +1,18 @@
+$ poetry run python scripts/verify/stale_vectors.py
+phase 1: EMBED_MODEL=fake/model-a
+  ingested gdpr.md: 1 chunk(s), status new
+  [ok] search finds the chunk: HTTP 200, cited ['gdpr.md']
+  [ok] health stale_vectors is 0: stale_vectors=0
+  rows in the database (model, dim, count): [('fake/model-a', 768, 1)]
+  [ok] every row records model-a and 768
+phase 2: restart with EMBED_MODEL=fake/model-b
+  [ok] search (hybrid) finds none of the old chunks: HTTP 404: No documents found in namespace 'legal'. Ingest documents first.
+  [ok] search (vector_only) finds none of the old chunks: HTTP 404: No documents found in namespace 'legal'. Ingest documents first.
+  [ok] search (bm25_only) finds none of the old chunks: HTTP 404: No documents found in namespace 'legal'. Ingest documents first.
+  [ok] health stale_vectors > 0: stale_vectors=1
+  [ok] the old rows were not deleted: rows=[(1,)]
+phase 3: back to EMBED_MODEL=fake/model-a
+  [ok] the old chunks are found again: HTTP 200
+  [ok] health stale_vectors is 0 again
+RESULT: all checks passed
+(exit code 0)

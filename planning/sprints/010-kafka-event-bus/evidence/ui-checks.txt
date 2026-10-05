@@ -1,0 +1,36 @@
+## npm run tokens:check
+> node scripts/build-tokens.mjs --check
+
+
+css
+✔︎ /tmp/tokens-jhSQHb/tokens.css
+No drift: src/styles/tokens.css is exactly what tokens/tokens.json generates.
+exit=0
+## npm run lint
+
+> ai-platform-ui@2.0.0 lint
+> eslint . --max-warnings 0
+
+exit=0
+## npm run typecheck
+
+> ai-platform-ui@2.0.0 typecheck
+> tsc --noEmit
+
+exit=0
+## npm test -- --run
+
+ Test Files  27 passed (27)
+      Tests  207 passed (207)
+   Start at  10:44:32
+   Duration  28.73s (transform 1.25s, setup 3.54s, collect 27.93s, tests 23.33s, environment 19.90s, prepare 1.98s)
+
+exit=0
+## npm run build
+dist/assets/gsap-CcIkNsPr.js                   122.93 kB │ gzip:  48.91 kB
+dist/assets/react-CxfcT2zT.js                  171.48 kB │ gzip:  56.23 kB
+dist/assets/ask-page-BMgEViMW.js               186.86 kB │ gzip:  56.83 kB
+dist/assets/index-BwceccnQ.js                  248.39 kB │ gzip:  76.38 kB
+dist/assets/webgl-gc836SuQ.js                  878.61 kB │ gzip: 235.14 kB
+✓ built in 25.91s
+exit=0
