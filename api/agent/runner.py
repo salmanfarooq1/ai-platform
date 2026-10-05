@@ -60,7 +60,9 @@ def make_agent_runner(get_graph: Callable[[], Any]):
                 config={"recursion_limit": limit, "configurable": {"gateway": ctx}},
             )
         except GraphRecursionError:
-            logger.warning("[agent] hit recursion_limit=%d before converging, question=%r", limit, payload["question"])
+            logger.warning(  # never the question text: logs must not hold input text
+                "[agent] hit recursion_limit=%d before converging, execution_id=%s", limit, spec.execution_id,
+            )
             return AgentRunOutput(result=None, recursion_limit=limit)
         return AgentRunOutput(result=result)
 

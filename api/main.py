@@ -24,6 +24,7 @@ from api.routers.docs import router as docs_router
 from api.routers.feedback import router as feedback_router
 from api.routers.health import router as health_router
 from api.routers.ingest import router as ingest_router
+from api.routers.jobs import router as jobs_router
 from api.routers.search import router as search_router
 from api.versioning import API_PREFIX
 from api.web_edge.routes import router as session_router
@@ -31,13 +32,14 @@ from core.database.pool import create_pool
 from core.identity.jwt import JwtVerifier
 from core.settings import get_settings
 from gateway import GatewayRuntime
+from workers.embedded import start_embedded
 
 setup_logging()
 logger = logging.getLogger("api.main")
 settings = get_settings()
 
 
-def _lifespan(adapter_overrides: Mapping[str, Any] | None):
+def _lifespan(adapter_overrides: Mapping[str, Any] | None, embedded_workers: int | None, embedded_relay: bool | None):
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # STARTUP
@@ -54,11 +56,23 @@ def _lifespan(adapter_overrides: Mapping[str, Any] | None):
         app.state.gateway_runtime = GatewayRuntime(pool=app.state.db_pool, cache=adapters.cache, events=adapters.events)
         await adapters.cache.ensure_semantic_index()
         init_mcp_context(app.state.db_pool, adapters)
+        # One-process hosting and tests: workers and the outbox relay inside this process (EMBEDDED_WORKERS).
+        n_workers = settings.embedded_workers if embedded_workers is None else embedded_workers
+        with_relay = settings.embedded_relay if embedded_relay is None else embedded_relay
+        embedded = app.state.embedded = None
+        if n_workers > 0 or with_relay:
+            embedded = start_embedded(
+                settings, app.state.db_pool, adapters, app.state.gateway_runtime, app.state.agent_graph,
+                workers=n_workers, relay=with_relay,
+            )
+            app.state.embedded = embedded
         logger.info("startup complete: DB pool, adapters, agent graph, semantic cache, MCP context ready")
 
         yield
 
         # SHUTDOWN
+        if embedded is not None:
+            await embedded.stop()
         await adapters.cache.close()
         await app.state.db_pool.close()
         logger.info("shutdown complete: DB pool and cache closed")
@@ -66,15 +80,22 @@ def _lifespan(adapter_overrides: Mapping[str, Any] | None):
     return lifespan
 
 
-def create_app(adapter_overrides: Mapping[str, Any] | None = None) -> FastAPI:
+def create_app(
+    adapter_overrides: Mapping[str, Any] | None = None,
+    *,
+    embedded_workers: int | None = None,
+    embedded_relay: bool | None = None,
+) -> FastAPI:
     """Build the application. A factory so tests can get a fresh app with its own lifespan.
 
     `adapter_overrides` puts other adapters behind named ports (tests pass fakes), see `adapters/registry.py`.
+    `embedded_workers` and `embedded_relay` run job workers and the outbox relay inside this process; they
+    default to the EMBEDDED_WORKERS and EMBEDDED_RELAY settings (off). Ingestion and agent runs need a worker.
     """
     app = FastAPI(
         title="RAG Platform API",
         version="0.4.0",
-        lifespan=_lifespan(adapter_overrides),
+        lifespan=_lifespan(adapter_overrides, embedded_workers, embedded_relay),
     )
 
     register_exception_handlers(app)
@@ -123,6 +144,7 @@ def create_app(adapter_overrides: Mapping[str, Any] | None = None) -> FastAPI:
     v1 = APIRouter(prefix=API_PREFIX)
     v1.include_router(health_router)
     v1.include_router(ingest_router)
+    v1.include_router(jobs_router)
     v1.include_router(search_router)
     v1.include_router(agent_router)
     v1.include_router(config_router)

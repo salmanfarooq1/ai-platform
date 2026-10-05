@@ -74,6 +74,24 @@ def require_scope(scope: Scope) -> Callable[[Request], Awaitable[Principal]]:
     return dependency
 
 
+def require_any_scope(*scopes: Scope) -> Callable[[Request], Awaitable[Principal]]:
+    """Route dependency: an authenticated principal that holds at least one of `scopes` (`admin` holds all). A
+    refusal is recorded as a missing-scope decision for the first scope listed."""
+
+    async def dependency(
+        request: Request,
+        _credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
+    ) -> Principal:
+        principal = await authenticate(request)
+        if not any(principal.has_scope(scope) for scope in scopes):
+            await record_scope_denial(request, principal, scopes[0])
+            raise HTTPException(status_code=403, detail=f"Missing required scope: {' or '.join(s.value for s in scopes)}")
+        return principal
+
+    dependency.__name__ = "require_any_" + "_".join(s.value.replace(":", "_") for s in scopes)
+    return dependency
+
+
 async def require_kb(store: KnowledgeStore, principal: Principal, slug: str) -> None:
     """404 `kb_not_found` unless `slug` is one of the caller's own knowledge bases.
 

@@ -1,107 +1,85 @@
 import logging
-import os
-import tempfile
+import re
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Request, Response, UploadFile
 
 from api.auth import require_kb, require_scope
 from api.dependencies import adapters_of
 from api.gateway_deps import entry_action, gateway_context
-from api.models.schemas import IngestResponse
+from api.models.jobs import JobAccepted
 from config import LLM_CONFIG
+from core.database import jobs
+from core.database.tenant import tenant_connection
 from core.identity.models import Principal, Scope
 from core.ingestion.lifecycle import compute_content_hash
-from core.pipeline.db_ingest import ingestion_pipeline
+from core.settings import get_settings
 from gateway import Action, ActionKind, EnforcementContext, require
 from gateway.estimate import estimate_tokens
 
 logger = logging.getLogger("api.ingest")
 router = APIRouter()
 
-@router.post("/ingest", response_model=IngestResponse)
+_KEY = re.compile(r"^[\x21-\x7e]{1,200}$")  # printable ASCII, no spaces, at most 200 characters
+
+
+@router.post(
+    "/ingest",
+    response_model=JobAccepted,
+    status_code=202,
+    responses={200: {"model": JobAccepted, "description": "The Idempotency-Key already named a job: it is returned"}},
+)
 async def ingest(
     request: Request,
+    response: Response,
     file: UploadFile = File(...),
     namespace: str = "default",
     document_id: str | None = None,
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     principal: Principal = Depends(require_scope(Scope.KB_WRITE)),
     ctx: EnforcementContext = Depends(gateway_context),
-):
+) -> JobAccepted:
+    """Accept a file for ingestion and return at once with the job that will ingest it (`GET /v1/jobs/{id}`).
+
+    The raw bytes are stored under their SHA-256 before anything is parsed. The same `Idempotency-Key` (per tenant)
+    returns the same job with 200 instead of creating a second one.
+    """
     tenant_id = principal.tenant_id
     adapters = adapters_of(request)
     await require(ctx, entry_action(request.url.path, ActionKind.KB_WRITE, namespace))
     # Ingest embeds the file's chunks: the embedding model must be allowed too.
     await require(ctx, Action(ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens("")))
     await require_kb(adapters.knowledge, principal, namespace)
+    if idempotency_key is not None and not _KEY.match(idempotency_key):
+        raise HTTPException(status_code=400, detail={"error": "invalid_idempotency_key", "reason": "The Idempotency-Key must be 1 to 200 printable characters"})
+    # Set minimal usage so FinOpsMiddleware stamps X-Query-ID on the response.
+    request.state.usage = {"namespace": namespace}
+    pool = request.app.state.db_pool
+
+    if idempotency_key is not None:  # a repeat: answer before the file is read or stored again
+        async with tenant_connection(pool, tenant_id) as conn:
+            known = await conn.fetchrow("SELECT id, status FROM jobs WHERE tenant_id = $1 AND idempotency_key = $2", tenant_id, idempotency_key)
+        if known is not None:
+            response.status_code = 200
+            return JobAccepted(job_id=known["id"], status=known["status"])
+
     filename = file.filename or ""
     doc_id = document_id or filename
-    # Set minimal usage so FinOpsMiddleware stamps X-Query-ID on the response.
-    # Ingest has no LLM cost, but X-Query-ID lets the frontend tie each ingest
-    # result to a specific server-side request for debugging and MetaBar display.
-    request.state.usage = {"namespace": namespace}
     content = await file.read()
     content_hash = compute_content_hash(content)
-
-    # Check document lifecycle status
-    status = await adapters.knowledge.document_status(tenant_id, doc_id, namespace, content_hash)
-
-    # Case 1: Unchanged file — short-circuit and skip processing
-    if status == "unchanged":
-        return IngestResponse(
-            document_id=doc_id,
-            namespace=namespace,
-            total_chunks=0,
-            total_time_seconds=0.0,
-            throughput_chunks_per_second=0.0,
-            status="unchanged",
-            content_hash=content_hash,
-            chunks_deleted=0,
-        )
-
-    # Case 2: Updated file — delete old chunks before re-ingesting
-    chunks_deleted = 0
-    if status == "updated":
-        chunks_deleted = await adapters.knowledge.delete_document(tenant_id, doc_id, namespace)
-
-    # Case 3 & 2 (New or Updated): Run chunking & embedding pipeline
-    tmp_path = None
+    object_key = await adapters.objects.put(content)  # the same bytes are stored once
+    payload = {
+        "namespace": namespace, "document_id": doc_id, "filename": filename, "content_hash": content_hash,
+        "object_key": object_key,
+    }
     try:
-        suffix = "." + filename.rsplit(".", 1)[-1] if "." in filename else ".txt"
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-            tmp.write(content)
-            tmp_path = tmp.name
-
-        metrics = await ingestion_pipeline(
-            input_file_path=tmp_path,
-            document_id=doc_id,
-            namespace=namespace,
-            source_filename=filename or None,
-            store=adapters.knowledge,
-            embeddings=adapters.embeddings,
-            tenant_id=tenant_id,
-        )
-
-        # Register document in document_registry
-        await adapters.knowledge.register_document(
-            tenant_id, doc_id, namespace, content_hash, metrics.get("total_chunks", 0), filename,
-        )
-
-    except ValueError:
-        # The detail goes to the log only: it can carry file paths or parser internals.
-        logger.warning("ingest rejected %r for tenant %s", filename, tenant_id, exc_info=True)
-        raise HTTPException(status_code=415, detail="Unsupported or unreadable file")
-    except Exception:
-        logger.error("ingest failed for %r, tenant %s", filename, tenant_id, exc_info=True)
-        raise HTTPException(status_code=500, detail="Ingestion failed")
-    finally:
-        if tmp_path and os.path.exists(tmp_path):
-            os.remove(tmp_path)
-
-    return IngestResponse(
-        document_id=doc_id,
-        namespace=namespace,
-        status=status,
-        content_hash=content_hash,
-        chunks_deleted=chunks_deleted,
-        **metrics,
-    )
+        async with tenant_connection(pool, tenant_id) as conn:
+            job, created = await jobs.enqueue(
+                conn, tenant_id, jobs.KIND_INGEST, payload, idempotency_key=idempotency_key,
+                max_attempts=get_settings().job_max_attempts, resource=f"{namespace}/{doc_id}",
+                principal_id=principal.id, namespace=namespace,
+            )
+    except jobs.PayloadTooLarge:
+        raise HTTPException(status_code=413, detail="The document id or file name is too long") from None
+    if not created:
+        response.status_code = 200
+    return JobAccepted(job_id=job.id, status=job.status)  # type: ignore[arg-type]

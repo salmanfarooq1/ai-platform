@@ -66,6 +66,8 @@ class FinOpsMiddleware(BaseHTTPMiddleware):
             request_id = str(getattr(request.state, "request_id", "unknown"))
             response.headers["X-Query-ID"] = request_id
 
+            # An agent run that a worker finished has booked its own tokens and usage row (`usage_booked`).
+            booked = bool(getattr(request.state, "usage_booked", False))
             logger.info(
                 "[finops] %s cost=$%.6f model=%s tokens=%d+%d",
                 request_id,
@@ -79,11 +81,14 @@ class FinOpsMiddleware(BaseHTTPMiddleware):
             principal = getattr(request.state, "principal", None)
             runtime = getattr(request.app.state, "gateway_runtime", None)
             total_tokens = usage.get("prompt_tokens", 0) + usage.get("completion_tokens", 0)
-            if runtime and principal and total_tokens > 0:
+            if booked:
+                for name, value in (usage.get("budget_headers") or {}).items():
+                    response.headers[name] = value
+            if runtime and principal and total_tokens > 0 and not booked:
                 # Book the tokens against the tenant's daily budget (best effort: the work is already done).
                 for name, value in (await book_tokens(runtime, principal.tenant_id, total_tokens)).items():
                     response.headers[name] = value
-            if pool and principal:
+            if pool and principal and not booked:
                 asyncio.create_task(
                     record_usage(
                         pool=pool,

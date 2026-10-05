@@ -1,6 +1,27 @@
 {
   "components": {
     "schemas": {
+      "AgentAccepted": {
+        "description": "`202` from `/v1/agent/query` when the run takes longer than the sync wait. Poll `decisions_url`'s run.",
+        "properties": {
+          "execution_id": {
+            "format": "uuid",
+            "title": "Execution Id",
+            "type": "string"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "execution_id",
+          "job_id"
+        ],
+        "title": "AgentAccepted",
+        "type": "object"
+      },
       "AgentCitation": {
         "description": "Mirrors schemas.py Citation exactly.",
         "properties": {
@@ -166,6 +187,125 @@
           "total_time_seconds"
         ],
         "title": "AgentResponse",
+        "type": "object"
+      },
+      "AgentRun": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decisions_url": {
+            "title": "Decisions Url",
+            "type": "string"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "execution_id": {
+            "format": "uuid",
+            "title": "Execution Id",
+            "type": "string"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "stopped"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "execution_id",
+          "job_id",
+          "status",
+          "created_at",
+          "started_at",
+          "finished_at",
+          "result",
+          "decisions_url"
+        ],
+        "title": "AgentRun",
+        "type": "object"
+      },
+      "AgentRunPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AgentRun"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "AgentRunPage",
         "type": "object"
       },
       "Body_ingest_v1_ingest_post": {
@@ -629,14 +769,18 @@
         "title": "HealthResponse",
         "type": "object"
       },
-      "IngestResponse": {
+      "Job": {
         "properties": {
-          "chunks_deleted": {
-            "default": 0,
-            "title": "Chunks Deleted",
+          "attempts": {
+            "title": "Attempts",
             "type": "integer"
           },
-          "content_hash": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error_code": {
             "anyOf": [
               {
                 "type": "string"
@@ -645,42 +789,155 @@
                 "type": "null"
               }
             ],
-            "title": "Content Hash"
+            "title": "Error Code"
           },
-          "document_id": {
-            "title": "Document Id",
+          "execution_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
             "type": "string"
           },
-          "namespace": {
-            "title": "Namespace",
+          "kind": {
+            "enum": [
+              "ingest",
+              "agent_run"
+            ],
+            "title": "Kind",
             "type": "string"
+          },
+          "max_attempts": {
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/JobProgress"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
           },
           "status": {
-            "default": "new",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "dead"
+            ],
             "title": "Status",
             "type": "string"
           },
-          "throughput_chunks_per_second": {
-            "title": "Throughput Chunks Per Second",
-            "type": "number"
-          },
-          "total_chunks": {
-            "title": "Total Chunks",
-            "type": "integer"
-          },
-          "total_time_seconds": {
-            "title": "Total Time Seconds",
-            "type": "number"
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
           }
         },
         "required": [
-          "document_id",
-          "namespace",
-          "total_chunks",
-          "total_time_seconds",
-          "throughput_chunks_per_second"
+          "id",
+          "kind",
+          "status",
+          "attempts",
+          "max_attempts",
+          "progress",
+          "error_code",
+          "resource",
+          "execution_id",
+          "created_at",
+          "updated_at"
         ],
-        "title": "IngestResponse",
+        "title": "Job",
+        "type": "object"
+      },
+      "JobAccepted": {
+        "description": "`202` for a new job, `200` when the idempotency key already named one. `status` is the job's status now:\n`queued` for a new job.",
+        "properties": {
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "status": {
+            "default": "queued",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "dead"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "title": "JobAccepted",
+        "type": "object"
+      },
+      "JobPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "JobPage",
+        "type": "object"
+      },
+      "JobProgress": {
+        "properties": {
+          "done": {
+            "title": "Done",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "done",
+          "total"
+        ],
+        "title": "JobProgress",
         "type": "object"
       },
       "KeySummary": {
@@ -1677,6 +1934,16 @@
             },
             "description": "Successful Response"
           },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentAccepted"
+                }
+              }
+            },
+            "description": "The run is still going after the sync wait: poll /v1/agent/runs/{execution_id}"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -1694,6 +1961,120 @@
           }
         ],
         "summary": "Agent Query",
+        "tags": [
+          "agent"
+        ]
+      }
+    },
+    "/v1/agent/runs": {
+      "get": {
+        "description": "The tenant's agent runs, newest first, with a keyset cursor.",
+        "operationId": "list_runs_v1_agent_runs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRunPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Runs",
+        "tags": [
+          "agent"
+        ]
+      }
+    },
+    "/v1/agent/runs/{execution_id}": {
+      "get": {
+        "description": "One run: its status, and its answer once it succeeded. It reads the job, so it also works after a restart.",
+        "operationId": "get_run_v1_agent_runs__execution_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Execution Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRun"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Run",
         "tags": [
           "agent"
         ]
@@ -1865,6 +2246,25 @@
                 }
               ],
               "title": "Request Id"
+            }
+          },
+          {
+            "description": "Only decisions caused by this agent run",
+            "in": "query",
+            "name": "execution_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only decisions caused by this agent run",
+              "title": "Execution Id"
             }
           },
           {
@@ -2131,6 +2531,7 @@
     },
     "/v1/ingest": {
       "post": {
+        "description": "Accept a file for ingestion and return at once with the job that will ingest it (`GET /v1/jobs/{id}`).\n\nThe raw bytes are stored under their SHA-256 before anything is parsed. The same `Idempotency-Key` (per tenant)\nreturns the same job with 200 instead of creating a second one.",
         "operationId": "ingest_v1_ingest_post",
         "parameters": [
           {
@@ -2158,6 +2559,22 @@
               ],
               "title": "Document Id"
             }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
           }
         ],
         "requestBody": {
@@ -2175,7 +2592,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IngestResponse"
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            },
+            "description": "The Idempotency-Key already named a job: it is returned"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
                 }
               }
             },
@@ -2198,6 +2625,165 @@
           }
         ],
         "summary": "Ingest"
+      }
+    },
+    "/v1/jobs": {
+      "get": {
+        "description": "The tenant's jobs, newest first, with a keyset cursor. Filter by `kind` and `status`.",
+        "operationId": "list_jobs_v1_jobs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ingest",
+                    "agent_run"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "queued",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "dead"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Jobs",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/v1/jobs/{job_id}": {
+      "get": {
+        "description": "One job of the caller's tenant: its status, attempts and progress.",
+        "operationId": "get_job_v1_jobs__job_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Job",
+        "tags": [
+          "jobs"
+        ]
       }
     },
     "/v1/overview": {

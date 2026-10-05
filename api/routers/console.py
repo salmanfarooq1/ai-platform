@@ -12,7 +12,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 import config
 from api.auth import require_scope
-from api.dependencies import adapters_of
 from api.gateway_deps import gateway_context
 from api.models.console import (
     DecisionDetail,
@@ -92,6 +91,7 @@ async def list_decisions(
     by_principal: UUID | None = Query(default=None, alias="principal", description="Only decisions of this principal id"),
     policy_version: int | None = None,
     request_id: str | None = None,
+    execution_id: UUID | None = Query(default=None, description="Only decisions caused by this agent run"),
     since: datetime | None = None,
     until: datetime | None = None,
     cursor: str | None = None,
@@ -119,6 +119,8 @@ async def list_decisions(
         add("d.policy_version = ${n}", policy_version)
     if request_id is not None:
         add("d.request_id = ${n}", request_id)
+    if execution_id is not None:
+        add("d.execution_id = ${n}", execution_id)
     if since is not None:
         add("d.created_at >= ${n}", since)
     if until is not None:
@@ -140,7 +142,7 @@ async def list_decisions(
         rows = await conn.fetch(sql, *args)
     page = rows[:limit]
     next_cursor = encode_cursor(page[-1]["created_at"], page[-1]["id"]) if len(rows) > limit else None
-    items = await with_run_status(adapters_of(request).runtime, principal.tenant_id, [_summary(r) for r in page])
+    items = await with_run_status(pool, principal.tenant_id, [_summary(r) for r in page])
     return DecisionPage(items=items, next_cursor=next_cursor)
 
 
@@ -172,8 +174,8 @@ async def get_decision(
         tenant = await conn.fetchrow("SELECT id, slug FROM tenants WHERE id = $1", principal.tenant_id)
     if tenant is None:
         raise _not_found("Decision")
-    [base] = await with_run_status(adapters_of(request).runtime, principal.tenant_id, [_summary(row)])
-    trace = await with_run_status(adapters_of(request).runtime, principal.tenant_id, [_summary(r) for r in trace_rows])
+    [base] = await with_run_status(pool, principal.tenant_id, [_summary(row)])
+    trace = await with_run_status(pool, principal.tenant_id, [_summary(r) for r in trace_rows])
     return DecisionDetail(
         **base.model_dump(), tenant=TenantRef(id=tenant["id"], slug=tenant["slug"]),
         input_sha256=row["input_hash"], trace=trace,
@@ -478,7 +480,7 @@ async def get_request(
         principal=PrincipalRef(id=who["id"], name=who["name"]) if who is not None else None,
         tenant=TenantRef(id=tenant["id"], slug=tenant["slug"]), policy_version=head["policy_version"],
         outcome="deny" if head["denied"] else "allow",
-        decisions=await with_run_status(adapters_of(request).runtime, principal.tenant_id, [_summary(r) for r in rows]),
+        decisions=await with_run_status(pool, principal.tenant_id, [_summary(r) for r in rows]),
     )
 
 
