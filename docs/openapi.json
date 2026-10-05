@@ -100,6 +100,14 @@
       },
       "AgentResponse": {
         "properties": {
+          "agent_reported": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Agent Reported",
+            "type": "array"
+          },
           "answer": {
             "title": "Answer",
             "type": "string"
@@ -280,6 +288,114 @@
         "title": "AgentRun",
         "type": "object"
       },
+      "AgentRunDetail": {
+        "description": "One run with what happened around it: the sandbox events, and the decisions and events merged by time.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decisions_url": {
+            "title": "Decisions Url",
+            "type": "string"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "execution_id": {
+            "format": "uuid",
+            "title": "Execution Id",
+            "type": "string"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "job_id": {
+            "format": "uuid",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sandbox_events": {
+            "items": {
+              "$ref": "#/components/schemas/SandboxEventOut"
+            },
+            "title": "Sandbox Events",
+            "type": "array"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "stopped"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "timeline": {
+            "items": {
+              "$ref": "#/components/schemas/RunTimelineItem"
+            },
+            "title": "Timeline",
+            "type": "array"
+          }
+        },
+        "required": [
+          "execution_id",
+          "job_id",
+          "status",
+          "created_at",
+          "started_at",
+          "finished_at",
+          "result",
+          "decisions_url",
+          "sandbox_events",
+          "timeline"
+        ],
+        "title": "AgentRunDetail",
+        "type": "object"
+      },
       "AgentRunPage": {
         "properties": {
           "items": {
@@ -320,6 +436,30 @@
           "file"
         ],
         "title": "Body_ingest_v1_ingest_post",
+        "type": "object"
+      },
+      "ChatMessage": {
+        "properties": {
+          "content": {
+            "maxLength": 20000,
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "system",
+              "user",
+              "assistant"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatMessage",
         "type": "object"
       },
       "DecisionDetail": {
@@ -1025,6 +1165,76 @@
         "title": "KeySummary",
         "type": "object"
       },
+      "ModelCall": {
+        "properties": {
+          "max_tokens": {
+            "default": 1024,
+            "maximum": 4000.0,
+            "minimum": 1.0,
+            "title": "Max Tokens",
+            "type": "integer"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Messages",
+            "type": "array"
+          }
+        },
+        "required": [
+          "messages"
+        ],
+        "title": "ModelCall",
+        "type": "object"
+      },
+      "ModelResult": {
+        "properties": {
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/ModelUsage"
+          }
+        },
+        "required": [
+          "text",
+          "model",
+          "usage"
+        ],
+        "title": "ModelResult",
+        "type": "object"
+      },
+      "ModelUsage": {
+        "properties": {
+          "completion_tokens": {
+            "title": "Completion Tokens",
+            "type": "integer"
+          },
+          "prompt_tokens": {
+            "title": "Prompt Tokens",
+            "type": "integer"
+          },
+          "total_cost": {
+            "title": "Total Cost",
+            "type": "number"
+          }
+        },
+        "required": [
+          "prompt_tokens",
+          "completion_tokens",
+          "total_cost"
+        ],
+        "title": "ModelUsage",
+        "type": "object"
+      },
       "Overview": {
         "properties": {
           "blocked": {
@@ -1626,6 +1836,147 @@
         "title": "RequestSummary",
         "type": "object"
       },
+      "RunDecisionOut": {
+        "description": "One gateway decision the run caused (the same facts as a decision row, without the principal).",
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "action",
+          "resource",
+          "outcome",
+          "stage",
+          "reason"
+        ],
+        "title": "RunDecisionOut",
+        "type": "object"
+      },
+      "RunTimelineItem": {
+        "description": "A step of the run: a gateway decision or a sandbox event, in time order. Exactly one of the two is set.",
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunDecisionOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sandbox": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SandboxEventOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "enum": [
+              "decision",
+              "sandbox"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "at"
+        ],
+        "title": "RunTimelineItem",
+        "type": "object"
+      },
+      "SandboxEventOut": {
+        "description": "One thing the sandbox reported for the run (Sprint 009). `detail` holds no secret and no input text.",
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "title": "Detail",
+            "type": "object"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "start",
+              "exit",
+              "network_denied",
+              "file_denied",
+              "limit_hit",
+              "log"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "at",
+          "detail"
+        ],
+        "title": "SandboxEventOut",
+        "type": "object"
+      },
       "SearchRequest": {
         "properties": {
           "namespace": {
@@ -1854,6 +2205,31 @@
           "slug"
         ],
         "title": "TenantRef",
+        "type": "object"
+      },
+      "ToolCall": {
+        "properties": {
+          "arguments": {
+            "additionalProperties": true,
+            "description": "The arguments of the tool call. The policy may check them against a schema.",
+            "title": "Arguments",
+            "type": "object"
+          }
+        },
+        "title": "ToolCall",
+        "type": "object"
+      },
+      "ToolResult": {
+        "properties": {
+          "result": {
+            "description": "What the tool returned (JSON text for the retrieval tool)",
+            "title": "Result"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "ToolResult",
         "type": "object"
       },
       "TrustSummary": {
@@ -2308,7 +2684,7 @@
     },
     "/v1/agent/runs/{execution_id}": {
       "get": {
-        "description": "One run: its status, and its answer once it succeeded. It reads the job, so it also works after a restart.",
+        "description": "One run: its status, its answer once it succeeded, the sandbox events and the run's decisions merged by time.\nIt reads the job, so it also works after a restart.",
         "operationId": "get_run_v1_agent_runs__execution_id__get",
         "parameters": [
           {
@@ -2327,7 +2703,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AgentRun"
+                  "$ref": "#/components/schemas/AgentRunDetail"
                 }
               }
             },
@@ -3670,6 +4046,123 @@
         "summary": "Get Request",
         "tags": [
           "console"
+        ]
+      }
+    },
+    "/v1/sandbox/runs/{execution_id}/model": {
+      "post": {
+        "description": "One model call by a sandboxed agent. The gateway checks the model and the token cap, the platform makes the call\n(the sandbox has no provider key) and books the usage against the tenant.",
+        "operationId": "call_model_v1_sandbox_runs__execution_id__model_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Execution Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelCall"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Call Model",
+        "tags": [
+          "sandbox"
+        ]
+      }
+    },
+    "/v1/sandbox/runs/{execution_id}/tools/{name}": {
+      "post": {
+        "description": "One tool call by a sandboxed agent. The gateway checks the tool, its arguments and the data it reads.",
+        "operationId": "call_tool_v1_sandbox_runs__execution_id__tools__name__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Execution Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolCall"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Call Tool",
+        "tags": [
+          "sandbox"
         ]
       }
     },

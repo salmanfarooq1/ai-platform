@@ -1,6 +1,6 @@
 """Request and response models of the agent routes (Sprint 007 adds the accepted and run models)."""
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -37,6 +37,8 @@ class AgentResponse(BaseModel):
     total_cost_usd: float = 0.0
     flagged: bool = False  # True when a gateway denial cut the run short: the answer is partial
     flag_reason: str | None = None
+    # Fields a sandboxed agent wrote itself and the platform did not measure (Sprint 009 QA L2). Empty for an in-process run.
+    agent_reported: list[str] = []
 
 
 # The blueprint calls the finished result `AgentQueryResponse`. It is the same model the route always returned.
@@ -70,3 +72,39 @@ class AgentRun(BaseModel):
 class AgentRunPage(BaseModel):
     items: list[AgentRun]
     next_cursor: str | None
+
+
+SandboxEventKindName = Literal["start", "exit", "network_denied", "file_denied", "limit_hit", "log"]
+
+
+class SandboxEventOut(BaseModel):
+    """One thing the sandbox reported for the run (Sprint 009). `detail` holds no secret and no input text."""
+    id: UUID
+    kind: SandboxEventKindName
+    at: datetime
+    detail: dict[str, Any]
+
+
+class RunDecisionOut(BaseModel):
+    """One gateway decision the run caused (the same facts as a decision row, without the principal)."""
+    id: UUID
+    at: datetime
+    action: str
+    resource: str | None
+    outcome: Literal["allow", "deny"]
+    stage: str
+    reason: str
+
+
+class RunTimelineItem(BaseModel):
+    """A step of the run: a gateway decision or a sandbox event, in time order. Exactly one of the two is set."""
+    source: Literal["decision", "sandbox"]
+    at: datetime
+    decision: RunDecisionOut | None = None
+    sandbox: SandboxEventOut | None = None
+
+
+class AgentRunDetail(AgentRun):
+    """One run with what happened around it: the sandbox events, and the decisions and events merged by time."""
+    sandbox_events: list[SandboxEventOut]
+    timeline: list[RunTimelineItem]

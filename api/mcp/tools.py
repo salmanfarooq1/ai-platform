@@ -87,7 +87,10 @@ async def search_documents(
     # Policy, input guardrails and the token cap on the model that will be used, before any data is read.
     try:
         await gate(
-            Action(ActionKind.TOOL_CALL, "search_documents", input_text=query),
+            Action(
+                ActionKind.TOOL_CALL, "search_documents", input_text=query,
+                arguments={"query": query, "namespace": namespace, "top_k": top_k, "mode": mode},
+            ),
             Action(ActionKind.KB_READ, namespace, input_text=query),
             Action(ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens(query), input_text=query),
         )

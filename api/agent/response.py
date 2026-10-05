@@ -5,10 +5,11 @@ waiting can still read it. The route builds it itself only when the runtime hand
 in-process runtime). `usage` carries what FinOps needs: tokens, model and cost.
 """
 import logging
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
 from langchain_core.messages import ToolMessage
+from pydantic import BaseModel, ConfigDict, Field
 
 from api.agent.runner import AgentRunOutput
 from api.agent.schemas import AgentCitation, AgentResponse
@@ -105,6 +106,50 @@ def build_agent_result(
         total_time_seconds=round(elapsed_seconds, 3),
         total_cost_usd=usage["total_cost"],
     )
+    return {"response": response.model_dump(mode="json"), "usage": usage}
+
+
+# What the sandbox's own stdout supplies. It is shown as the agent's word: the citations, the confidence and the cost.
+AGENT_REPORTED = ("citations", "confidence", "usage")
+
+
+class _SandboxUsage(BaseModel):
+    prompt_tokens: int = Field(default=0, ge=0, le=10_000_000)
+    completion_tokens: int = Field(default=0, ge=0, le=10_000_000)
+    total_cost: float = Field(default=0.0, ge=0.0, le=10_000.0)
+
+
+class SandboxAgentOutput(BaseModel):
+    """What the agent in the sandbox printed. The sandbox is not trusted, so every field is bounded; what does not fit fails the run.
+    The cost it reports is shown to the caller only: the gateway booked the real usage as each model call was made."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    answer: str = Field(max_length=20_000)
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    citations: list[AgentCitation] = Field(default_factory=list, max_length=20)
+    steps: list[Annotated[str, Field(max_length=500)]] = Field(default_factory=list, max_length=50)
+    tool_calls: int = Field(default=0, ge=0, le=1000)
+    model: str = Field(default="", max_length=200)
+    usage: _SandboxUsage = Field(default_factory=_SandboxUsage)
+    denied: str | None = Field(default=None, max_length=100)
+
+
+def build_sandbox_result(output: dict[str, Any], question: str, namespace: str, elapsed_seconds: float) -> dict[str, Any]:
+    """`{"response": ..., "usage": ...}` for a run that executed in a sandbox. Raises ValidationError on a malformed output."""
+    parsed = SandboxAgentOutput.model_validate(output)
+    flag = f"Run cut short by policy (reason: {parsed.denied}). The answer is partial." if parsed.denied else None
+    response = AgentResponse(
+        question=question, flagged=parsed.denied is not None, flag_reason=flag, answer=parsed.answer,
+        confidence=parsed.confidence, citations=parsed.citations, model_used=parsed.model, verified=None,
+        reasoning_steps=parsed.steps, tool_calls_made=parsed.tool_calls, total_time_seconds=round(elapsed_seconds, 3),
+        total_cost_usd=parsed.usage.total_cost, agent_reported=list(AGENT_REPORTED),
+    )
+    usage = {
+        "prompt_tokens": parsed.usage.prompt_tokens, "completion_tokens": parsed.usage.completion_tokens,
+        "total_cost": parsed.usage.total_cost, "model": parsed.model, "routing_decision": "agent", "namespace": namespace,
+        "booked": True, "budget_headers": {}, "agent_reported": True,
+    }
     return {"response": response.model_dump(mode="json"), "usage": usage}
 
 

@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import time
 from uuid import UUID, uuid4
@@ -16,7 +17,11 @@ from api.agent.schemas import (
     AgentRequest,
     AgentResponse,
     AgentRun,
+    AgentRunDetail,
     AgentRunPage,
+    RunDecisionOut,
+    RunTimelineItem,
+    SandboxEventOut,
 )
 from api.auth import require_any_scope, require_kb, require_scope
 from api.dependencies import adapters_of
@@ -26,7 +31,7 @@ from api.services.run_status import run_status_word
 from config import LLM_CONFIG
 from core.database import jobs as job_store
 from core.database.jobs import JobRow
-from core.database.tenant import tenant_connection
+from core.database.tenant import DbConnection, tenant_connection
 from core.identity.models import Principal, Scope
 from core.settings import get_settings
 from gateway import Action, ActionKind, EnforcementContext, require
@@ -34,6 +39,7 @@ from gateway.estimate import estimate_tokens
 from ports import RunSpec, RunState
 
 logger = logging.getLogger("api.agent")
+TIMELINE_CAP = 500
 router = APIRouter(prefix="/agent", tags=["agent"])
 
 # Kept for the code that imported it from here before the move.
@@ -175,17 +181,52 @@ async def list_runs(
     return AgentRunPage(items=[run_view(r) for r in page], next_cursor=next_cursor)
 
 
-@router.get("/runs/{execution_id}", response_model=AgentRun)
+async def run_timeline(
+    conn: DbConnection, execution_id: UUID, only_principal: UUID | None,
+) -> tuple[list[SandboxEventOut], list[RunTimelineItem]]:
+    """The sandbox events of a run and the run's decisions and events merged by time. Both reads are bounded.
+
+    A caller without `audit:read` sees only decisions of its own principal (the same rule as the run list)."""
+    event_rows = await conn.fetch(
+        "SELECT id, kind, detail, at FROM sandbox_events WHERE execution_id = $1 ORDER BY at, seq LIMIT $2",
+        execution_id, TIMELINE_CAP,
+    )
+    decision_rows = await conn.fetch(
+        "SELECT id, created_at, action, resource, outcome, stage, reason FROM gateway_decisions "
+        "WHERE execution_id = $1 AND ($2::uuid IS NULL OR principal_id = $2) ORDER BY created_at, id LIMIT $3",
+        execution_id, only_principal, TIMELINE_CAP,
+    )
+    events = [
+        SandboxEventOut(
+            id=r["id"], kind=r["kind"], at=r["at"],
+            detail=json.loads(r["detail"]) if isinstance(r["detail"], (str, bytes)) else dict(r["detail"]),
+        )
+        for r in event_rows
+    ]
+    merged = [
+        RunTimelineItem(source="decision", at=r["created_at"], decision=RunDecisionOut(
+            id=r["id"], at=r["created_at"], action=r["action"], resource=r["resource"], outcome=r["outcome"],
+            stage=r["stage"], reason=r["reason"],
+        ))
+        for r in decision_rows
+    ] + [RunTimelineItem(source="sandbox", at=e.at, sandbox=e) for e in events]
+    merged.sort(key=lambda item: item.at)  # stable: a decision and an event with the same time keep decisions first
+    return events, merged[:TIMELINE_CAP]
+
+
+@router.get("/runs/{execution_id}", response_model=AgentRunDetail)
 async def get_run(
     request: Request,
     execution_id: UUID,
     principal: Principal = Depends(require_any_scope(Scope.AGENT, Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
-) -> AgentRun:
-    """One run: its status, and its answer once it succeeded. It reads the job, so it also works after a restart."""
+) -> AgentRunDetail:
+    """One run: its status, its answer once it succeeded, the sandbox events and the run's decisions merged by time.
+    It reads the job, so it also works after a restart."""
     await require(ctx, _read_action(request, principal))
     async with tenant_connection(request.app.state.db_pool, principal.tenant_id) as conn:
         row = await job_store.get_by_execution(conn, execution_id)
-    if row is None or not _may_see(ctx, principal, row):  # a foreign run and an unknown run look the same: row-level security hides the foreign one
-        raise HTTPException(status_code=404, detail="Run not found")
-    return run_view(row)
+        if row is None or not _may_see(ctx, principal, row):  # a foreign run and an unknown run look the same: row-level security hides the foreign one
+            raise HTTPException(status_code=404, detail="Run not found")
+        events, timeline = await run_timeline(conn, execution_id, _only_own(principal))
+    return AgentRunDetail(**run_view(row).model_dump(), sandbox_events=events, timeline=timeline)

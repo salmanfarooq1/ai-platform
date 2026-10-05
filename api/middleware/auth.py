@@ -1,6 +1,6 @@
 """Authenticate every `/v1` request except the public ones, before the rate limiter and budget run.
 
-A bearer key or JWT is tried first. With no bearer, the `gap_session` cookie of the web edge (api/web_edge/) is
+A bearer key, run token (`grt_`, one sandboxed run, see `core/identity/run_tokens.py`) or JWT is tried first. With no bearer, the `gap_session` cookie of the web edge (api/web_edge/) is
 resolved to the same Principal, and an unsafe method then needs a matching `X-CSRF-Token` (403 `csrf_failed`).
 
 Order in main.py, outermost first: CORS, RequestID, Logging, Latency, Auth, RateLimit, TokenBudget, FinOps.
@@ -16,6 +16,7 @@ from mcp.server.auth.middleware.bearer_auth import AuthenticatedUser
 from mcp.server.auth.provider import AccessToken
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from api.auth import record_run_token_denial
 from api.errors import error_response
 from api.versioning import API_PREFIX
 from api.web_edge.auth import principal_from_session
@@ -23,6 +24,7 @@ from api.web_edge.session import COOKIE_NAME, CSRF_HEADER, SAFE_METHODS, WebSess
 from core.identity.jwt import JwtError, JwtVerifier
 from core.identity.keys import KEY_PREFIX_TAG
 from core.identity.models import Principal, Scope
+from core.identity.run_tokens import RunGrant, authenticate_run_token, is_run_token
 from core.identity.store import authenticate_api_key, confirm_jwt_principal
 from core.settings import get_settings
 
@@ -72,6 +74,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         principal: Principal | None
         web_session: WebSession | None = None
+        run_grant: RunGrant | None = None
         try:
             if token is None:
                 # Order: bearer first, then the web session cookie. A bad bearer is never rescued by a cookie.
@@ -86,6 +89,16 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 principal = await authenticate_api_key(request.app.state.db_pool, token)
                 if principal is None:
                     return deny("api key rejected")
+            elif is_run_token(token):
+                # A run token (Sprint 009) is the credential of one sandboxed run. It opens only that run's routes.
+                run_grant = await authenticate_run_token(request.app.state.db_pool, token)
+                if run_grant is None:
+                    return deny("run token rejected")
+                if not run_grant.covers(path):
+                    logger.info("run token used outside its run", extra={"path": path})
+                    await record_run_token_denial(request, run_grant)
+                    return error_response("forbidden", "This run token does not open this route", 403, request)
+                principal = run_grant.principal
             else:
                 verifier: JwtVerifier | None = getattr(request.app.state, "jwt_verifier", None)
                 if verifier is None:
@@ -108,6 +121,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         request.state.principal = principal
         request.state.web_session = web_session
+        request.state.run_grant = run_grant
         if path.startswith(_MCP_PREFIX):
             # The MCP SSE transport binds a session to the credential that opened it and answers 404 to
             # any other caller of that session. It reads `scope["user"]` for that. The token itself is

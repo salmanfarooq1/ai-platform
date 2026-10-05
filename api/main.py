@@ -27,6 +27,7 @@ from api.routers.health import router as health_router
 from api.routers.ingest import router as ingest_router
 from api.routers.jobs import router as jobs_router
 from api.routers.receipts import router as receipts_router
+from api.routers.sandbox import router as sandbox_router
 from api.routers.search import router as search_router
 from api.routers.trust import metrics_router
 from api.routers.trust import router as trust_router
@@ -39,6 +40,7 @@ from core.pricing import check_priced
 from core.settings import get_settings
 from gateway import GatewayRuntime
 from gateway.receipts import keyring_from_settings
+from ports import SandboxDriver
 from workers.embedded import start_embedded
 
 setup_logging()
@@ -46,7 +48,10 @@ logger = logging.getLogger("api.main")
 settings = get_settings()
 
 
-def _lifespan(adapter_overrides: Mapping[str, Any] | None, embedded_workers: int | None, embedded_relay: bool | None):
+def _lifespan(
+    adapter_overrides: Mapping[str, Any] | None, embedded_workers: int | None, embedded_relay: bool | None,
+    sandbox_driver: SandboxDriver | None = None,
+):
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # STARTUP
@@ -73,7 +78,7 @@ def _lifespan(adapter_overrides: Mapping[str, Any] | None, embedded_workers: int
         if n_workers > 0 or with_relay:
             embedded = start_embedded(
                 settings, app.state.db_pool, adapters, app.state.gateway_runtime, app.state.agent_graph,
-                workers=n_workers, relay=with_relay, keyring=app.state.receipt_keys,
+                workers=n_workers, relay=with_relay, keyring=app.state.receipt_keys, sandbox_driver=sandbox_driver,
             )
             app.state.embedded = embedded
         logger.info("startup complete: DB pool, adapters, agent graph, semantic cache, MCP context ready")
@@ -95,17 +100,18 @@ def create_app(
     *,
     embedded_workers: int | None = None,
     embedded_relay: bool | None = None,
+    sandbox_driver: SandboxDriver | None = None,
 ) -> FastAPI:
     """Build the application. A factory so tests can get a fresh app with its own lifespan.
 
     `adapter_overrides` puts other adapters behind named ports (tests pass fakes), see `adapters/registry.py`.
-    `embedded_workers` and `embedded_relay` run job workers and the outbox relay inside this process; they
+    `sandbox_driver` puts a fake sandbox behind the OpenShell runtime (tests). `embedded_workers` and `embedded_relay` run job workers and the outbox relay inside this process; they
     default to the EMBEDDED_WORKERS and EMBEDDED_RELAY settings (off). Ingestion and agent runs need a worker.
     """
     app = FastAPI(
         title="RAG Platform API",
         version="0.4.0",
-        lifespan=_lifespan(adapter_overrides, embedded_workers, embedded_relay),
+        lifespan=_lifespan(adapter_overrides, embedded_workers, embedded_relay, sandbox_driver),
     )
 
     register_exception_handlers(app)
@@ -166,6 +172,7 @@ def create_app(
     v1.include_router(console_router)
     v1.include_router(receipts_router)
     v1.include_router(trust_router)
+    v1.include_router(sandbox_router)
     app.include_router(v1)
     app.include_router(metrics_router)  # `/metrics`, unversioned like `/health`: Prometheus expects it there
 

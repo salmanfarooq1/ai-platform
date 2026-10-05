@@ -111,7 +111,10 @@ def make_retrieve_tool(adapters: Adapters):
         if ctx is None or ctx.boundary.tenant_id is None:
             return _NO_TENANT
         tenant_id = ctx.boundary.tenant_id
-        denied = await _gate(ctx, Action(ActionKind.TOOL_CALL, "retrieve_chunks", input_text=query), halt=True)
+        denied = await _gate(ctx, Action(
+            ActionKind.TOOL_CALL, "retrieve_chunks", input_text=query,
+            arguments={"query": query, "namespace": namespace, "top_k": top_k, "mode": mode},
+        ), halt=True)
         if denied is None:
             denied = await _gate(ctx, Action(ActionKind.KB_READ, namespace, input_text=query), halt=False)
         if denied is None:
