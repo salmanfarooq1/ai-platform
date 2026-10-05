@@ -13,6 +13,11 @@ This folder is the source of truth for how the web UI in `ui/` looks, reads and 
 
 The design tokens are data, not prose. They live in `ui/tokens/tokens.json` (W3C Design Tokens format). `ui/src/styles/tokens.css` is generated from that file by `npm run tokens`. CI fails if the two differ.
 
+## Three rules that do not bend
+1. **Every answer shows its evidence.** Citations, confidence and the verdict sit next to the answer.
+2. **Every call leaves a receipt.** The UI can open the decision behind any answer. It never shows the input text, because the platform does not store it.
+3. **Nothing waits for no reason.** Feedback starts on press. Motion can be interrupted. There are no artificial delays.
+
 ## Precedence
 When two sources disagree, the higher one wins.
 1. **Accessibility and honesty.** WCAG AA, keyboard use, reduced motion, and no made-up data shown as real.
@@ -25,4 +30,4 @@ When two sources disagree, the higher one wins.
 - A new claim on a public page needs an item on the may-claim list first. See `CONTENT_STYLE.md`.
 - A decision that is hard to reverse gets an ADR in `docs/adr/`. The palette decision is ADR-0010.
 
-`docs/UI_GUIDELINES.md` is an index to this folder and keeps the history of the earlier versions.
+The history of the earlier UI guideline versions is in `planning/history/UI_GUIDELINES.md`.

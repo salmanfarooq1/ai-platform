@@ -19,14 +19,13 @@ The rules live in `docs/design/`. This skill summarizes them for agents and adds
 | `docs/design/COMPONENTS.md` | Every shared component. Add a row for each new one |
 | `docs/design/PATTERNS.md` | Verdict, trace, receipt, deny emphasis, governance line, drawer, states |
 | `docs/adr/0010-design-tokens-and-ink-paper-palette.md` | Why ink and paper, and why tokens are data |
-| `docs/UI_GUIDELINES.md` | An index to the docs above, with the history |
 
 Tokens are data: edit `ui/tokens/tokens.json`, run `npm run tokens` in `ui/`, and commit the generated `ui/src/styles/tokens.css`. CI fails on drift.
 
 ## Sources and precedence
 When rules conflict, the higher item wins.
 1. **Accessibility and honesty.** WCAG AA, keyboard use, `prefers-reduced-motion`, no fake data shown as real.
-2. **`docs/design/`.** The product's tokens, components, patterns, states and copy rules. `docs/UI_GUIDELINES.md` is the index.
+2. **`docs/design/`.** The product's tokens, components, patterns, states and copy rules. `docs/design/README.md` is the index.
 3. **This file.** Dials, surfaces and the governance patterns below.
 4. **`.claude/skills/apple-design/SKILL.md`.** Motion physics, materials, feedback and restraint.
 5. **`references/taste/`** (MIT, vendored unchanged):

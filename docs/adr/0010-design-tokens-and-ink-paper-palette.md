@@ -7,7 +7,7 @@ ADR-0008 and ADR-0009 stay reserved for the event bus and the agent runtime.
 ## Context
 The UI of Sprint 005 used a blue accent (`#2F5BEA` in light, `#6E8BFF` in dark). Blue is the default color of generic software. It said nothing about this product, and it competed with the verdict colors for attention. For a governance product, the most visible thing on screen must be whether a call was allowed or denied, and why.
 
-The design rules were also spread over prose: `docs/UI_GUIDELINES.md` held the token tables by hand, and `ui/src/styles/tokens.css` was edited by hand. Nothing checked that the two agreed, or that a component did not bring its own color.
+The design rules were also spread over prose: the old UI guidelines file held the token tables by hand, and `ui/src/styles/tokens.css` was edited by hand. Nothing checked that the two agreed, or that a component did not bring its own color.
 
 ## Decision
 - **Ink and paper.** Warm paper neutrals and near-black ink for all structure. Light values start at `#F6F4EF` (page) and `#FDFCFA` (surface). Dark values start at `#131312` and `#1C1B19`. Primary buttons are ink.
@@ -15,7 +15,7 @@ The design rules were also spread over prose: `docs/UI_GUIDELINES.md` held the t
 - **Verdicts are the only strong color.** Allow green, deny red and escalate amber keep their tokens. A verdict always shows an icon, a word and a color.
 - **Tokens are data.** `ui/tokens/tokens.json` is the single source of truth, in the W3C Design Tokens Community Group format (`$value`, `$type`, `$description`). Light and dark are two token sets with the same roles. Style Dictionary v4 generates `ui/src/styles/tokens.css` through `npm run tokens`. CI regenerates the file and fails on any difference.
 - **Guard rails in code.** ESLint fails on a hex, rgb or hsl literal in `ui/src` outside the generated file. A Vitest test does the same for stylesheets. A contrast test reads the pairs listed in `docs/design/ACCESSIBILITY.md` and checks each against the tokens in both themes.
-- **Docs.** The design documents live in `docs/design/`. `docs/UI_GUIDELINES.md` is an index that keeps the history.
+- **Docs.** The design documents live in `docs/design/`. `docs/design/README.md` is the index.
 
 ## Consequences
 - Governance is the most visible thing on screen. A calm page has no strong color, and a denial stands out at once.
