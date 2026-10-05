@@ -1,0 +1,74 @@
+$ grep for the old brand blue and the --brand token in the code (src, tokens, tailwind config, public, index.html, e2e)
+src/styles/tokens.test.ts:58:    for (const hex of ['2f5bea', '6e8bff', '2449c4', '5a77ee', '000000', 'ffffff']) expect(colors).not.toContain(`#${hex}`)
+src/styles/tokens.test.ts:81:    expect(css).not.toContain('--brand')
+matches: 0 (the only file that names the old values is src/styles/tokens.test.ts, which asserts they are absent)
+
+$ the same grep over src/styles/tokens.css and tokens/tokens.json only
+src/styles/tokens.css:0
+tokens/tokens.json:0
+
+$ npx vitest run src/styles/contrast.test.ts   (every text pair in docs/design/ACCESSIBILITY.md, both themes)
+ RUN  v2.1.9 /home/user/ai-platform/ui
+stdout | src/styles/contrast.test.ts > ACCESSIBILITY.md contrast pairs > every pair meets its minimum in the light theme
+contrast, light theme
+light text-primary    on bg-canvas      16.12:1  (min 4.5)  Body text on the page
+light text-primary    on bg-surface     17.28:1  (min 4.5)  Text on cards, tables and drawers
+light text-primary    on bg-muted       15.02:1  (min 4.5)  Text in inputs and table heads
+light text-primary    on bg-selected    15.32:1  (min 4.5)  Text in a selected row or active nav item
+light text-secondary  on bg-selected     5.85:1  (min 4.5)  Secondary text in a selected row or the active palette option
+light text-tertiary   on bg-selected     4.87:1  (min 4.5)  Quiet labels in a selected row
+light text-secondary  on bg-canvas       6.16:1  (min 4.5)  Secondary text on the page
+light text-secondary  on bg-surface      6.60:1  (min 4.5)  Secondary text on cards
+light text-secondary  on bg-muted        5.74:1  (min 4.5)  Secondary text in inputs and table heads
+light text-tertiary   on bg-canvas       5.12:1  (min 4.5)  Placeholders and hints on the page
+light text-tertiary   on bg-surface      5.49:1  (min 4.5)  Placeholders and hints on cards
+light text-tertiary   on bg-muted        4.77:1  (min 4.5)  Placeholders in inputs
+light text-on-ink     on ink            17.28:1  (min 4.5)  Label on a primary button
+light text-on-ink     on ink-hover      12.06:1  (min 4.5)  Label on a hovered primary button
+light seal            on bg-canvas       6.81:1  (min 4.5)  Links on the page
+light seal            on bg-surface      7.30:1  (min 4.5)  Links on cards, and the focus ring
+light seal            on bg-muted        6.35:1  (min 4.5)  Links on quiet fills
+light seal            on bg-selected     6.48:1  (min 4.5)  Links in a selected row
+light allow           on bg-surface      6.38:1  (min 4.5)  Allowed verdict text
+light deny            on bg-surface      5.74:1  (min 4.5)  Denied verdict text
+light escalate        on bg-surface      5.85:1  (min 4.5)  Needs-approval verdict text
+light allow           on allow-tint      5.51:1  (min 4.5)  Allowed badge
+light deny            on deny-tint       4.90:1  (min 4.5)  Denied badge and the deny callout heading
+light escalate        on escalate-tint   5.08:1  (min 4.5)  Needs-approval badge
+light text-primary    on deny-tint      14.77:1  (min 4.5)  Sentence in the deny callout
+light text-secondary  on deny-tint       5.64:1  (min 4.5)  Labels in the deny callout
+light deny            on bg-muted        4.99:1  (min 4.5)  Deny text on a quiet fill
+stdout | src/styles/contrast.test.ts > ACCESSIBILITY.md contrast pairs > every pair meets its minimum in the dark theme
+contrast, dark theme
+dark  text-primary    on bg-canvas      15.45:1  (min 4.5)  Body text on the page
+dark  text-primary    on bg-surface     14.31:1  (min 4.5)  Text on cards, tables and drawers
+dark  text-primary    on bg-muted       13.06:1  (min 4.5)  Text in inputs and table heads
+dark  text-primary    on bg-selected    11.67:1  (min 4.5)  Text in a selected row or active nav item
+dark  text-secondary  on bg-selected     5.32:1  (min 4.5)  Secondary text in a selected row or the active palette option
+dark  text-tertiary   on bg-selected     4.76:1  (min 4.5)  Quiet labels in a selected row
+dark  text-secondary  on bg-canvas       7.05:1  (min 4.5)  Secondary text on the page
+dark  text-secondary  on bg-surface      6.53:1  (min 4.5)  Secondary text on cards
+dark  text-secondary  on bg-muted        5.96:1  (min 4.5)  Secondary text in inputs and table heads
+dark  text-tertiary   on bg-canvas       6.31:1  (min 4.5)  Placeholders and hints on the page
+dark  text-tertiary   on bg-surface      5.84:1  (min 4.5)  Placeholders and hints on cards
+dark  text-tertiary   on bg-muted        5.33:1  (min 4.5)  Placeholders in inputs
+dark  text-on-ink     on ink            15.45:1  (min 4.5)  Label on a primary button
+dark  text-on-ink     on ink-hover      17.05:1  (min 4.5)  Label on a hovered primary button
+dark  seal            on bg-canvas       8.00:1  (min 4.5)  Links on the page
+dark  seal            on bg-surface      7.41:1  (min 4.5)  Links on cards, and the focus ring
+dark  seal            on bg-muted        6.76:1  (min 4.5)  Links on quiet fills
+dark  seal            on bg-selected     6.04:1  (min 4.5)  Links in a selected row
+dark  allow           on bg-surface      9.01:1  (min 4.5)  Allowed verdict text
+dark  deny            on bg-surface      6.78:1  (min 4.5)  Denied verdict text
+dark  escalate        on bg-surface      9.08:1  (min 4.5)  Needs-approval verdict text
+dark  allow           on allow-tint      6.84:1  (min 4.5)  Allowed badge
+dark  deny            on deny-tint       5.43:1  (min 4.5)  Denied badge and the deny callout heading
+dark  escalate        on escalate-tint   6.84:1  (min 4.5)  Needs-approval badge
+dark  text-primary    on deny-tint      11.44:1  (min 4.5)  Sentence in the deny callout
+dark  text-secondary  on deny-tint       5.22:1  (min 4.5)  Labels in the deny callout
+dark  deny            on bg-muted        6.20:1  (min 4.5)  Deny text on a quiet fill
+ ✓ src/styles/contrast.test.ts (3 tests) 8ms
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  10:08:41
+   Duration  1.67s (transform 124ms, setup 206ms, collect 55ms, tests 8ms, environment 808ms, prepare 102ms)

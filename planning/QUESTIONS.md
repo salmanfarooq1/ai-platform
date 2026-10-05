@@ -29,6 +29,10 @@ Open items that need a human answer. Work continues around them. When one is ans
 - **Q12.** The web edge sign-in limit (10 a minute per client IP) uses the socket address. Behind a hosting proxy that is the proxy's address, so all visitors would share one budget. Which proxy hops can be trusted to set a forwarded address, so a trusted-proxy setting can read it? Until answered, the limit is correct locally and may be too strict when hosted.
 - **Q13.** `usage_log` has no principal column, so the console usage summary attributes rows to a principal through the `gateway_decisions` rows with the same request id. Should Sprint 007 add a `principal_id` column to `usage_log`?
 
+- **Q14.** Should the UI get a Storybook component catalogue in a later sprint? It's the common standard for visual review and component docs. It isn't added now, because it brings a large toolchain and `docs/design/COMPONENTS.md` with the Vitest tests covers the need. Sprint 005b.
+
+- **Q15.** `GET /v1/policies` doesn't return the tenant's `blocked_terms`. So when the guardrails block a query, the UI can't show which policy field is behind it. Should the console policy view expose `blocked_terms` (read-only, `audit:read`)? The terms may themselves be sensitive. Sprint 005b.
+
 ## Parked: hosting
 Deployment is not a concern for now. These wait until it is.
 - **Q2.** The hosted service on Render reads `MODE` from `render.yaml` when the Blueprint syncs. After this sprint, does the service get `MODE=public-preview` automatically, or must it be set by hand in the dashboard? Either way, it must be set before or with the next deploy.

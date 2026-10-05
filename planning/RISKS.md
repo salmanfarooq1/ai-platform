@@ -27,3 +27,6 @@
 - **N9:** the public health probe calls the embedding provider, so anyone can trigger an embedding call.
 - **S5-1:** `auth_lookup_preview` (migration 0006) lets the app role read any principal's tenant and key scopes, given its UUID. UUIDs can't be guessed, and no secret is returned. Accepted.
 - **S5-2:** a live cookie session keeps the scopes from sign-in until it expires (8 h sliding, 24 h cap). A revoked key or a disabled principal ends it at once; a scope change needs a new sign-in.
+
+## From Sprint 005b QA
+- **S5b-1:** the overview and requests queries group the tenant's whole decision history on each call. This is fine at current volume. Retention (Sprint 008) and a `created_at` pre-filter bound it.

@@ -3,12 +3,13 @@
 Snapshot only. Edit in place and keep it under 60 lines.
 
 ## Now
-- **Sprints 000 to 005:** done, QA signed off (see `ROADMAP.md`, `CHANGELOG.md`). Commits are proposed in each sprint's `report.md` for the branches `sprint/NNN-slug`; a human runs them.
+- **Sprints 000 to 005b:** done, QA signed off (see `ROADMAP.md`, `CHANGELOG.md`). Commits are proposed in each sprint's `report.md` for the branches `sprint/NNN-slug`; a human runs them.
 - **Sprint 004 (gateway core):** `gateway.enforce()` for every model, tool and KB call, the immutable `ExecutionBoundary`, tenant policies (migration `0005`), the `gateway_decisions` record, rate limit and budget as gateway stages, all failing closed. QA follow-ups M1 to M4, L1 to L4 and N1 fixed. 709 tests pass (unit 424, integration and e2e 285, 0 skipped). See `planning/sprints/004-gateway-core/report.md` and ADR-0006.
 - **Sprint 005 (frontend foundation and showcase):** the web-edge cookie session (ADR-0007, migration `0006`), read-only console endpoints under `audit:read`, the new TypeScript UI (workspace, governance console and landing page), and the project design skill. 805 backend tests, 34 Vitest and 36 Playwright tests pass. See `planning/sprints/005-frontend-foundation/report.md`.
 
 ## Next
 - **Direction:** the frontend is first-class and is designed and built together with the backend. Feature sprints are vertical slices (contract first, backend brief, frontend brief, one e2e across both). See the pack rule in `ROADMAP.md`.
+- **Sprint 005b (polish round):** done. Ink-and-paper tokens, the new landing page and How it works page, Overview, Requests with a drawer, plain reasons, a governance line, the walkthrough, Cmd+K, and `docs/design/`. 875 backend tests, 162 Vitest tests and 70 Playwright tests pass.
 - **Sprint 006 (ports and adapters, EventBus, AgentRuntime):** next, with its pack in `planning/sprints/006-ports-adapters/`. Then 007 durable jobs, 008 trust, 009 sandboxed agents, 010 Kafka adapter.
 - **Design:** every frontend builder follows `.claude/skills/governed-design/SKILL.md`.
 - **Deployment is parked.** All hosting items wait in `QUESTIONS.md` under "Parked: hosting".

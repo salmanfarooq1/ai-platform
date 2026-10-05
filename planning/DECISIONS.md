@@ -2,6 +2,15 @@
 
 An index, one line per decision, newest first. The reasoning lives in `docs/ARCHITECTURE.md` (Decision N) and `docs/adr/`. This file only points to it. Log entries may carry the date they were recorded.
 
+## Sprint 005b: polish round
+- **The name stays descriptive.** Brand names belong to use cases later.
+- **The landing page speaks first to the person accountable for the agents.** Engineers come second. Headline: "Your agents can only ever do less." Subline: "Control what your agents can do. See everything they did."
+- **The hero is the real product:** a receipt and a denied call, using console components with example data. The WebGL ring is optional.
+- **Mechanism detail moves to a How it works page.** The landing page keeps one line per capability, and there is no problem section.
+- **Ink and paper.** Warm neutrals and ink, verdicts as the only strong color, one petrol seal color. The brand blue is removed.
+- **005b is its own sprint**, between 005 and 006.
+- **No screenshot review round.** The design rules and QA are the quality gate.
+
 ## Direction after Sprint 004
 - **The frontend is first-class.** It is designed and built with the backend. Feature sprints are vertical slices: the API contract comes first, then backend and frontend briefs and one e2e test across both. `ROADMAP.md`.
 - **New sprint order:** 005 frontend foundation and showcase, 006 ports and adapters with EventBus and AgentRuntime, 007 durable jobs with an outbox, 008 trust with metrics and decision retention, 009 OpenShell sandbox, 010 Kafka adapter. `ROADMAP.md`.

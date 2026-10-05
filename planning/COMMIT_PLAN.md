@@ -1,76 +1,49 @@
-# Commit plan: Sprints 000–004 onto `main`
+# Commit plan
 
-Run these yourself, after review. No model runs `git commit` or `git push`. The branch `deploy/koyeb-demo` is left as it is.
+A human runs these. No model runs `git commit` or `git push`.
 
-State checked before writing this plan:
-- 709 tests passed, 0 skipped (unit 424, int+e2e 285).
-- ruff and mypy are clean (81 files).
-- The DDL guard and the OpenAPI snapshot pass.
+Sprints 000-004 are committed and pushed on `main` (`d193878`).
 
-The sprints touched the same files, so only the last commit is guaranteed to pass the full suite. Commits 1–5 are grouped for reading, not for bisecting.
+## How the per-sprint blocks work
+Sprints 005-010 are built one after another in the same working tree. At the end of each sprint, the Architect saves that sprint's exact file state as a git **tree object**, with `git add -A`, `git write-tree` and `git reset`. That is not a commit, and no ref is created.
 
-## 0. Before committing
+Each block below uses `git restore --source=<tree> --staged -- <paths>`. It sets only the **index** to that sprint's state, and your working files are never touched. So each sprint's commits hold exactly that sprint's state, even though later sprints already changed the files.
+
+The tree ids live only in this container's `.git`. Run the blocks in this cloud session, in order. Each branch starts from the previous sprint's branch.
+
+## Sprint 005: frontend foundation and showcase
+Tree `0e1513ea9a8199b9004d8d8f852b37f22b073635`
+
 ```bash
-cd ai-platform
-git checkout main
-git status                          # expect: on main, renames of ARCHITECTURE.md and BRANDING.md already staged
-git rm --cached ui/dist/index.html  # build output that .gitignore already ignores
-```
-Optional: delete the local caches with `find . -name __pycache__ -type d -prune -exec rm -rf {} +`. They are ignored, so they never get committed.
-
-## 1. Operating structure and naming (Sprint 000)
-```bash
-git add -A -- AGENTS.md CLAUDE.md CODEX.md CONTRIBUTING.md .editorconfig .gitattributes \
-  .github/pull_request_template.md .claude/settings.json .gitignore .dockerignore \
-  docs/UI_GUIDELINES.md planning/DOMAIN.md planning/sprints/000-*
-git commit -m "chore: add operating structure, agent rules and naming"
+git switch sprint/005-frontend-foundation
 ```
 
-## 2. Foundation docs and ADRs (Sprint 001)
 ```bash
-git add -A -- docs/adr docs/architecture planning/sprints/001-*
-git commit -m "docs: add architecture decision records and foundation plan"
+git restore --source=0e1513ea9a8199b9004d8d8f852b37f22b073635 --staged -- .claude/skills/governed-design planning/ROADMAP.md planning/STATE.md planning/DECISIONS.md planning/QUESTIONS.md planning/RISKS.md planning/sprints/005-ports-adapters planning/sprints/006-ports-adapters planning/sprints/007-durable-jobs planning/sprints/008-trust-baseline planning/sprints/009-sandboxed-agents planning/sprints/010-kafka-event-bus
+git commit -m "docs: project design skill and revised roadmap with frontend-first sprints"
 ```
 
-## 3. Platform base (Sprint 002)
 ```bash
-git add -A -- core/settings.py config.py alembic.ini migrations core/database/schema.sql \
-  scripts/check_no_ddl.sh scripts/update_openapi.py api/errors.py api/versioning.py \
-  api/openapi.py api/observability.py docs/openapi.json .github/workflows \
-  pyproject.toml poetry.lock Dockerfile docker-compose.yml docker-compose.prod.yml \
-  render.yaml .env.example core/clients core/ingestion core/pipeline scripts \
-  claude_desktop_config.json planning/sprints/002-*
-git commit -m "feat: platform base with settings, migrations, versioned API and CI"
+git restore --source=0e1513ea9a8199b9004d8d8f852b37f22b073635 --staged -- api core gateway migrations scripts/admin scripts/e2e tests docs/openapi.json docs/adr .env.example .gitignore
+git commit -m "feat: web-edge cookie session and read-only console API under audit:read"
 ```
 
-## 4. Identity and tenancy (Sprint 003)
 ```bash
-git add -A -- core/identity core/database api/auth.py api/middleware api/models \
-  api/routers api/services docker/postgres-init ui planning/sprints/003-*
-git commit -m "feat: identity, tenant isolation with RLS and a least-privilege app role"
-```
-`git add -A -- ui` respects `.gitignore`, so `ui/dist` stays out.
-
-## 5. Gateway core (Sprint 004) and the test suite
-```bash
-git add -A -- gateway api tests planning/sprints/004-*
-git commit -m "feat: governed gateway with policies, decision records and fail-closed checks"
+git restore --source=0e1513ea9a8199b9004d8d8f852b37f22b073635 --staged -- ui scripts/verify .github/workflows/frontend.yml render.yaml
+git commit -m "feat: TypeScript UI with governance console, workspace and showcase landing page"
 ```
 
-## 6. Docs coherence and the next sprint pack
 ```bash
-git add -A -- README.md CHANGELOG.md docs planning
-git status        # must show nothing left to commit; if anything remains, ask before adding it
-git commit -m "docs: make architecture history, runbook and planning files coherent"
+git restore --source=0e1513ea9a8199b9004d8d8f852b37f22b073635 --staged -- .
+git commit -m "docs: Sprint 005 guidelines, report and evidence"
+git diff --quiet 0e1513ea9a8199b9004d8d8f852b37f22b073635 HEAD && echo "branch matches the Sprint 005 snapshot"
 ```
 
-## 7. Check and push
 ```bash
-poetry run pytest -q        # with docker compose up -d postgres redis
-git log --oneline -7
-git push origin main
+poetry run pytest -q && (cd ui && npm run lint && npx tsc --noEmit && npm test -- --run && npx playwright test)
 ```
+This test run checks the working tree, which may already hold later sprints. To test exactly Sprint 005, first check it out alone with `git stash -u && git switch sprint/005-frontend-foundation`, run the tests, then `git stash pop`.
 
-## Known items not fixed in this plan
-- `scripts/labs/lab_6.3_model_routing.py` imports a removed function and no longer runs (Q9). It's kept as lab history.
-- Not verified here: the image builds, the hosted Neon and Render steps, and JWKS.
+```bash
+git push -u origin sprint/005-frontend-foundation
+```

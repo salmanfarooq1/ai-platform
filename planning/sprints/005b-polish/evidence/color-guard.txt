@@ -1,0 +1,39 @@
+$ a file with colour literals outside the tokens file (src/zz-color-guard-check.ts, removed afterwards)
+export const hex = '#ff00aa'
+export const fn = `rgb(1, 2, 3)`
+export const hsl = 'hsl(10 20% 30%)'
+export const cls = 'bg-[#123abc]'
+export const token = 'var(--seal)'
+export const anchor = '#capabilities'
+
+$ npx eslint src/zz-color-guard-check.ts
+
+/home/user/ai-platform/ui/src/zz-color-guard-check.ts
+  1:20  error  No hex colour literals. Use a design token (var(--...)) from tokens/tokens.json                no-restricted-syntax
+  2:19  error  No rgb, hsl or oklch colour literals. Use a design token (var(--...)) from tokens/tokens.json  no-restricted-syntax
+  3:20  error  No rgb, hsl or oklch colour literals. Use a design token (var(--...)) from tokens/tokens.json  no-restricted-syntax
+  4:20  error  No hex colour literals. Use a design token (var(--...)) from tokens/tokens.json                no-restricted-syntax
+
+✖ 4 problems (4 errors, 0 warnings)
+
+exit=1
+
+$ a stylesheet with a colour literal (src/styles/zz-guard.css) against the stylesheet guard test
+   × colour literals > appear in no stylesheet except the generated tokens.css 16ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/styles/color-guard.test.ts > colour literals > appear in no stylesheet except the generated tokens.css
+AssertionError: expected [ Array(1) ] to deeply equal []
++   "/home/user/ai-platform/ui/src/styles/zz-guard.css",
+      Tests  1 failed | 1 passed (2)
+
+$ npm run lint (clean tree)
+> ai-platform-ui@2.0.0 lint
+> eslint . --max-warnings 0
+exit=0
+
+$ npx vitest run src/styles   (colour-literal guard on stylesheets, AA pairs, tokens)
+ ✓ src/styles/contrast.test.ts (3 tests) 8ms
+ ✓ src/styles/tokens.test.ts (7 tests) 32ms
+ ✓ src/styles/color-guard.test.ts (2 tests) 8ms
+ Test Files  3 passed (3)
+      Tests  12 passed (12)

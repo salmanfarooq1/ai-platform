@@ -32,3 +32,12 @@ Implement `blueprint.md` and make every check in `acceptance.md` pass, saving ca
 - This is a refactor: move code, do not change behaviour. Every existing test must pass with unchanged assertions. Only fixtures may change, to build the app from the registry.
 - Fail closed means deny on any exception, including bugs in your own stages. Test it.
 - Run the full suite after each port is moved, and log it in build-log.md.
+
+## Additions after Sprint 005
+- **Migration numbering:** 0006 exists (web edge). This sprint's migration is `0007`. It adds the embedding provenance columns and a nullable `execution_id uuid` on `gateway_decisions`, with an index.
+- **New scope:** requirements 9–11 (EventBus with CloudEvents, AgentRuntime, the small UI touch). Write ADR-0008 (event bus) and ADR-0009 (agent runtime). Update ADR-0005 for the registry. Don't renumber ADR-0007.
+- **The UI touch** follows `.claude/skills/governed-design/SKILL.md`. In `ui/`, run `npm run gen:api`, lint, `tsc`, vitest and `npx playwright test` (Chromium in `/opt/pw-browsers`; never run `playwright install`). All of them must stay green.
+- **Lint scope:** run `poetry run ruff check api core gateway ports adapters tests scripts/e2e`.
+- **Environment:** if Postgres, Redis or dockerd goes down, restart it: `(dockerd > /tmp/dockerd.log 2>&1 &)`, then `docker compose up -d postgres redis`.
+- **MinIO:** image pulls may fail here. If they do, the S3 adapter runs against the contract suite with a fake. Mark the live MinIO run "not verified here" and write `scripts/verify/minio.sh`.
+- **Report:** write `report.md` and the evidence files yourself, and return a summary as text. Don't write commit commands; the Architect writes those.

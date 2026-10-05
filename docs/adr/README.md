@@ -2,7 +2,7 @@
 
 Write an ADR when a decision spans sprints, shapes future work, or rejects a real alternative. Smaller decisions go as one line in `planning/DECISIONS.md`.
 
-Copy `TEMPLATE.md` to `NNNN-slug.md`. Number ADRs in order and never reuse a number. To change a decision, write a new ADR and mark the old one `Superseded`.
+Copy `TEMPLATE.md` to `NNNN-slug.md`. Number ADRs in order and never reuse a number. ADR-0008 (event bus) and ADR-0009 (agent runtime) are reserved. To change a decision, write a new ADR and mark the old one `Superseded`.
 
 | ADR | Title | Status |
 |---|---|---|
@@ -13,3 +13,4 @@ Copy `TEMPLATE.md` to `NNNN-slug.md`. Number ADRs in order and never reuse a num
 | [0005](0005-ports-and-adapters.md) | Ports and adapters for external providers | Accepted |
 | [0006](0006-gateway-enforce-pipeline.md) | The gateway `enforce()` pipeline | Accepted |
 | [0007](0007-web-edge-session.md) | The web edge session | Accepted |
+| [0010](0010-design-tokens-and-ink-paper-palette.md) | Design tokens and the ink-and-paper palette | Accepted |
