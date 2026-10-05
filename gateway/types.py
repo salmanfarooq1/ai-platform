@@ -19,6 +19,7 @@ class ActionKind(str, Enum):
     AGENT_RUN = "agent.run"
     FEEDBACK_WRITE = "feedback.write"
     ANALYTICS_READ = "analytics.read"
+    AUDIT_READ = "audit.read"
 
 
 @dataclass(frozen=True)

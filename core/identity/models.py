@@ -16,6 +16,7 @@ class Scope(str, Enum):
     KB_WRITE = "kb:write"
     QUERY = "query"
     AGENT = "agent"
+    AUDIT_READ = "audit:read"
     ADMIN = "admin"
 
 

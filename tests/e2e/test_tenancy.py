@@ -104,6 +104,9 @@ async def test_public_paths_need_no_credential(anon_client, path, fake_embedding
     assert (await anon_client.get(path)).status_code == 200
 
 
+SESSION_CREATE_ROUTES = {"/v1/session", "/v1/session/preview"}
+
+
 async def test_every_other_v1_operation_requires_authentication(app, anon_client):
     spec = (await anon_client.get("/openapi.json")).json()
     checked = []
@@ -111,6 +114,8 @@ async def test_every_other_v1_operation_requires_authentication(app, anon_client
         if path in PUBLIC:
             continue
         for method in methods:
+            if method == "post" and path in SESSION_CREATE_ROUTES:
+                continue  # sign-in and preview create the session, so they take no credential (blueprint 2, ADR-0007)
             resp = await anon_client.request(method.upper(), path)
             error_of(resp, 401, "unauthorized")
             checked.append((method, path))

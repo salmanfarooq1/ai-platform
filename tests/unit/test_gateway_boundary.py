@@ -112,7 +112,7 @@ def test_a_policy_narrows_resources_but_cannot_grant_actions_the_scopes_lack():
 def test_unknown_scopes_grant_nothing_and_admin_grants_everything():
     assert build_boundary(make_principal(("root",)), None).actions == frozenset()
     assert build_boundary(make_principal(("admin",)), None).actions == {
-        "kb.read", "kb.write", "model.invoke", "tool.call", "agent.run", "feedback.write", "analytics.read"}
+        "kb.read", "kb.write", "model.invoke", "tool.call", "agent.run", "feedback.write", "analytics.read", "audit.read"}
 
 
 def test_the_deny_all_boundary_allows_nothing():

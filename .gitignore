@@ -28,3 +28,6 @@ ui/dist/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+ui/e2e/.state/
+ui/test-results/
+ui/playwright-report/

@@ -26,6 +26,8 @@ SCOPE_ACTIONS: dict[str, frozenset[str]] = {
     Scope.AGENT.value: frozenset({
         ActionKind.AGENT_RUN.value, ActionKind.TOOL_CALL.value, ActionKind.MODEL_INVOKE.value, ActionKind.KB_READ.value,
     }),
+    # The governance console reads decisions, policies, principals and usage. No resource-level narrowing applies.
+    Scope.AUDIT_READ.value: frozenset({ActionKind.AUDIT_READ.value}),
     Scope.ADMIN.value: frozenset(k.value for k in ActionKind),
 }
 

@@ -15,6 +15,7 @@ from api.middleware.logging import LatencyMiddleware, LoggingMiddleware, Request
 from api.observability import setup_logging, setup_tracing
 from api.routers.analytics import router as analytics_router
 from api.routers.config import router as config_router
+from api.routers.console import router as console_router
 from api.routers.docs import router as docs_router
 from api.routers.feedback import router as feedback_router
 from api.routers.health import router as health_router
@@ -22,6 +23,7 @@ from api.routers.ingest import router as ingest_router
 from api.routers.search import router as search_router
 from api.services.cache import close_redis, create_semantic_cache_index, get_redis
 from api.versioning import API_PREFIX
+from api.web_edge.routes import router as session_router
 from core.database.pool import create_pool
 from core.identity.jwt import JwtVerifier
 from core.settings import get_settings
@@ -112,6 +114,8 @@ def create_app() -> FastAPI:
     v1.include_router(analytics_router)
     v1.include_router(docs_router)
     v1.include_router(feedback_router)
+    v1.include_router(session_router)
+    v1.include_router(console_router)
     app.include_router(v1)
 
     # SseServerTransport.handle_post_message is a raw ASGI app, not a FastAPI

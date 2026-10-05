@@ -182,6 +182,249 @@
         "title": "Body_ingest_v1_ingest_post",
         "type": "object"
       },
+      "DecisionDetail": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "input_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Sha256"
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrincipalRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/TenantRef"
+          },
+          "trace": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionSummary"
+            },
+            "title": "Trace",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "request_id",
+          "principal",
+          "action",
+          "resource",
+          "outcome",
+          "stage",
+          "reason",
+          "policy_version",
+          "tenant",
+          "input_sha256",
+          "trace"
+        ],
+        "title": "DecisionDetail",
+        "type": "object"
+      },
+      "DecisionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "DecisionPage",
+        "type": "object"
+      },
+      "DecisionSummary": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrincipalRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "request_id",
+          "principal",
+          "action",
+          "resource",
+          "outcome",
+          "stage",
+          "reason",
+          "policy_version"
+        ],
+        "title": "DecisionSummary",
+        "type": "object"
+      },
+      "DeniedCounts": {
+        "properties": {
+          "budget": {
+            "title": "Budget",
+            "type": "integer"
+          },
+          "policy": {
+            "title": "Policy",
+            "type": "integer"
+          },
+          "rate": {
+            "title": "Rate",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rate",
+          "budget",
+          "policy"
+        ],
+        "title": "DeniedCounts",
+        "type": "object"
+      },
       "FeedbackRequest": {
         "properties": {
           "comment": {
@@ -330,6 +573,265 @@
         "title": "IngestResponse",
         "type": "object"
       },
+      "KeySummary": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "prefix": {
+            "title": "Prefix",
+            "type": "string"
+          },
+          "revoked": {
+            "title": "Revoked",
+            "type": "boolean"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "prefix",
+          "scopes",
+          "created_at",
+          "last_used_at",
+          "revoked"
+        ],
+        "title": "KeySummary",
+        "type": "object"
+      },
+      "PolicyDocumentView": {
+        "properties": {
+          "allowed_kbs": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "const": "*",
+                "type": "string"
+              }
+            ],
+            "title": "Allowed Kbs"
+          },
+          "allowed_models": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "const": "*",
+                "type": "string"
+              }
+            ],
+            "title": "Allowed Models"
+          },
+          "allowed_tools": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "const": "*",
+                "type": "string"
+              }
+            ],
+            "title": "Allowed Tools"
+          },
+          "max_tokens_per_request": {
+            "title": "Max Tokens Per Request",
+            "type": "integer"
+          },
+          "max_tool_calls": {
+            "title": "Max Tool Calls",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "allowed_kbs",
+          "allowed_tools",
+          "allowed_models",
+          "max_tool_calls",
+          "max_tokens_per_request"
+        ],
+        "title": "PolicyDocumentView",
+        "type": "object"
+      },
+      "PolicyList": {
+        "properties": {
+          "default_in_effect": {
+            "title": "Default In Effect",
+            "type": "boolean"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyVersion"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "versions",
+          "default_in_effect"
+        ],
+        "title": "PolicyList",
+        "type": "object"
+      },
+      "PolicyVersion": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "document": {
+            "$ref": "#/components/schemas/PolicyDocumentView"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "active",
+          "created_at",
+          "created_by",
+          "document"
+        ],
+        "title": "PolicyVersion",
+        "type": "object"
+      },
+      "PrincipalInfo": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind"
+        ],
+        "title": "PrincipalInfo",
+        "type": "object"
+      },
+      "PrincipalRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "PrincipalRef",
+        "type": "object"
+      },
+      "PrincipalSummary": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/KeySummary"
+            },
+            "title": "Keys",
+            "type": "array"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "created_at",
+          "keys"
+        ],
+        "title": "PrincipalSummary",
+        "type": "object"
+      },
       "SearchRequest": {
         "properties": {
           "namespace": {
@@ -465,6 +967,215 @@
           "metadata"
         ],
         "title": "SearchResult",
+        "type": "object"
+      },
+      "SessionInfo": {
+        "properties": {
+          "csrf_token": {
+            "title": "Csrf Token",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "preview": {
+            "title": "Preview",
+            "type": "boolean"
+          },
+          "principal": {
+            "$ref": "#/components/schemas/PrincipalInfo"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/TenantInfo"
+          }
+        },
+        "required": [
+          "principal",
+          "tenant",
+          "scopes",
+          "csrf_token",
+          "preview",
+          "expires_at"
+        ],
+        "title": "SessionInfo",
+        "type": "object"
+      },
+      "SignInRequest": {
+        "properties": {
+          "api_key": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Api Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "api_key"
+        ],
+        "title": "SignInRequest",
+        "type": "object"
+      },
+      "TenantInfo": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug"
+        ],
+        "title": "TenantInfo",
+        "type": "object"
+      },
+      "TenantRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug"
+        ],
+        "title": "TenantRef",
+        "type": "object"
+      },
+      "UsageByDay": {
+        "properties": {
+          "cost_usd": {
+            "title": "Cost Usd",
+            "type": "number"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "tokens": {
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "requests",
+          "tokens",
+          "cost_usd"
+        ],
+        "title": "UsageByDay",
+        "type": "object"
+      },
+      "UsageByPrincipal": {
+        "properties": {
+          "cost_usd": {
+            "title": "Cost Usd",
+            "type": "number"
+          },
+          "principal": {
+            "$ref": "#/components/schemas/PrincipalRef"
+          },
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "tokens": {
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "principal",
+          "requests",
+          "tokens",
+          "cost_usd"
+        ],
+        "title": "UsageByPrincipal",
+        "type": "object"
+      },
+      "UsageSummary": {
+        "properties": {
+          "by_day": {
+            "items": {
+              "$ref": "#/components/schemas/UsageByDay"
+            },
+            "title": "By Day",
+            "type": "array"
+          },
+          "by_principal": {
+            "items": {
+              "$ref": "#/components/schemas/UsageByPrincipal"
+            },
+            "title": "By Principal",
+            "type": "array"
+          },
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "denied": {
+            "$ref": "#/components/schemas/DeniedCounts"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/UsageTotals"
+          }
+        },
+        "required": [
+          "days",
+          "totals",
+          "by_principal",
+          "by_day",
+          "denied"
+        ],
+        "title": "UsageSummary",
+        "type": "object"
+      },
+      "UsageTotals": {
+        "properties": {
+          "cost_usd": {
+            "title": "Cost Usd",
+            "type": "number"
+          },
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "tokens": {
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "requests",
+          "tokens",
+          "cost_usd"
+        ],
+        "title": "UsageTotals",
         "type": "object"
       },
       "ValidationError": {
@@ -660,6 +1371,242 @@
         ]
       }
     },
+    "/v1/decisions": {
+      "get": {
+        "description": "Decisions of the caller's tenant, newest first, with filters and a keyset cursor.",
+        "operationId": "list_decisions_v1_decisions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "allow",
+                    "deny"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outcome"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "description": "Only decisions of this principal id",
+            "in": "query",
+            "name": "principal",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only decisions of this principal id",
+              "title": "Principal"
+            }
+          },
+          {
+            "in": "query",
+            "name": "policy_version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Version"
+            }
+          },
+          {
+            "in": "query",
+            "name": "request_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Request Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "query",
+            "name": "until",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Decisions",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/decisions/{decision_id}": {
+      "get": {
+        "description": "One decision with its request trace. A foreign id and a missing id give the same 404.",
+        "operationId": "get_decision_v1_decisions__decision_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "decision_id",
+            "required": true,
+            "schema": {
+              "title": "Decision Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Decision",
+        "tags": [
+          "console"
+        ]
+      }
+    },
     "/v1/documents": {
       "get": {
         "description": "List all ingested documents from the document registry.\n\nReturns document metadata including content hash (for deduplication\nvisibility), chunk count, source filename, and last ingested timestamp.\nFilter by namespace to show only documents in a specific scope.",
@@ -849,6 +1796,111 @@
         "summary": "Ingest"
       }
     },
+    "/v1/policies": {
+      "get": {
+        "description": "Every policy version of the tenant, newest first. `default_in_effect` is true when none is active.",
+        "operationId": "list_policies_v1_policies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Policies",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/policies/{version}": {
+      "get": {
+        "operationId": "get_policy_v1_policies__version__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyVersion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Policy",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/principals": {
+      "get": {
+        "description": "Principals and their keys: prefix, scopes and dates only. Never a hash, a secret or the rest of a key.",
+        "operationId": "list_principals_v1_principals_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PrincipalSummary"
+                  },
+                  "title": "Response List Principals V1 Principals Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Principals",
+        "tags": [
+          "console"
+        ]
+      }
+    },
     "/v1/quality-report": {
       "get": {
         "description": "Return thumbs up/down counts aggregated by endpoint.\n\nUse this to track answer quality trends over time. A rising\nthumbs-down rate indicates a retrieval or generation regression.",
@@ -941,6 +1993,171 @@
           }
         ],
         "summary": "Search"
+      }
+    },
+    "/v1/session": {
+      "delete": {
+        "description": "Delete the session and clear the cookie. The CSRF header is checked by the auth middleware.",
+        "operationId": "sign_out_v1_session_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "csrf_failed"
+          }
+        },
+        "summary": "Sign Out",
+        "tags": [
+          "session"
+        ]
+      },
+      "get": {
+        "description": "The current cookie session. A bearer-only caller has no session and gets 401.",
+        "operationId": "read_session_v1_session_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "no session"
+          }
+        },
+        "summary": "Read Session",
+        "tags": [
+          "session"
+        ]
+      },
+      "post": {
+        "description": "Exchange an API key for a browser session. The key is checked once and never stored.",
+        "operationId": "sign_in_v1_session_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignInRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "invalid_credentials"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "rate limited"
+          }
+        },
+        "summary": "Sign In",
+        "tags": [
+          "session"
+        ]
+      }
+    },
+    "/v1/session/preview": {
+      "post": {
+        "description": "An automatic read-only session for the configured preview principal. 404 unless the mode allows it.",
+        "operationId": "start_preview_v1_session_preview_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "preview is not available"
+          }
+        },
+        "summary": "Start Preview",
+        "tags": [
+          "session"
+        ]
+      }
+    },
+    "/v1/usage/summary": {
+      "get": {
+        "description": "Requests, tokens and cost from `usage_log`, by principal and by day, plus the gateway denials by kind.\n\n`usage_log` has no principal column, so each row is attributed through the `gateway_decisions` rows that\nshare its request id. A request with no such row has no principal and is left out of `by_principal`.",
+        "operationId": "usage_summary_v1_usage_summary_get",
+        "parameters": [
+          {
+            "description": "Number of days to look back",
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "Number of days to look back",
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Usage Summary",
+        "tags": [
+          "console"
+        ]
       }
     }
   }

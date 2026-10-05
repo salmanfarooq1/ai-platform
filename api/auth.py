@@ -47,7 +47,7 @@ async def record_scope_denial(request: Request, principal: Principal, scope: Sco
         stage: Stage = missing_scope
         kind = {
             Scope.KB_READ: ActionKind.KB_READ, Scope.KB_WRITE: ActionKind.KB_WRITE, Scope.QUERY: ActionKind.KB_READ,
-            Scope.AGENT: ActionKind.AGENT_RUN, Scope.ADMIN: ActionKind.AGENT_RUN,
+            Scope.AGENT: ActionKind.AGENT_RUN, Scope.AUDIT_READ: ActionKind.AUDIT_READ, Scope.ADMIN: ActionKind.AGENT_RUN,
         }[scope]
         ctx = await build_context(
             request.app.state.gateway_runtime, principal,

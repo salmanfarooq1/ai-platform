@@ -3,7 +3,7 @@
     poetry run python scripts/admin/identity.py create-tenant acme --name "Acme Ltd"
     poetry run python scripts/admin/identity.py create-kb acme legal --description "Data protection law"
     poetry run python scripts/admin/identity.py create-principal acme service ingest-bot
-    poetry run python scripts/admin/identity.py create-key <principal-id> --scopes query kb:read
+    poetry run python scripts/admin/identity.py create-key <principal-id> --scopes query kb:read   (scopes: kb:read kb:write query agent audit:read admin)
     poetry run python scripts/admin/identity.py revoke-key <prefix>
     poetry run python scripts/admin/identity.py list-keys [--tenant acme]
     poetry run python scripts/admin/identity.py set-policy acme policy.json [--by alice]

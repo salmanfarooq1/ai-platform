@@ -7,10 +7,11 @@ env var name only and never appear in error messages.
 """
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
+from uuid import UUID
 
 from dotenv import load_dotenv
-from pydantic import Field, ValidationError, model_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Mode = Literal["local", "public-preview", "prod"]
@@ -72,12 +73,21 @@ class Settings(BaseSettings):
     jwt_audience: str | None = None
 
     frontend_url: str | None = None
+    # Web edge: the principal a public-preview visitor gets a read-only session for. A principal id, never a key.
+    preview_principal_id: UUID | None = None
     web_concurrency: int = Field(default=1, gt=0)
     log_level: str = "INFO"
 
     # OpenTelemetry: an exporter is created only when this is set.
     otel_exporter_otlp_endpoint: str | None = None
     otel_service_name: str = "ai-platform-api"
+
+    @field_validator("preview_principal_id", mode="before")
+    @classmethod
+    def _blank_preview_principal_is_unset(cls, value: Any) -> Any:
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
     @model_validator(mode="after")
     def _require_hosted_values(self) -> "Settings":
@@ -98,6 +108,8 @@ class Settings(BaseSettings):
             raise ValueError("JWT_SECRET must be at least 32 characters")
         if (self.jwt_jwks_url or self.jwt_secret) and not (self.jwt_issuer and self.jwt_audience):
             raise ValueError("JWT_ISSUER and JWT_AUDIENCE must be set when JWT verification is configured")
+        if self.preview_principal_id is not None and self.mode == "prod":
+            raise ValueError("PREVIEW_PRINCIPAL_ID must not be set when MODE=prod (preview sessions are for local and public-preview)")
         self.llm_model = self.llm_model or _LLM_MODEL_DEFAULTS[self.mode]
         self.embed_model = self.embed_model or _EMBED_MODEL_DEFAULTS[self.mode]
         return self

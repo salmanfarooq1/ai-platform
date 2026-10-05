@@ -1,59 +1,57 @@
-"""The UI's nginx template adds the preview key server-side (requirement 10); nothing bakes it into the build."""
-import os
+"""The UI image serves the built app and proxies /v1. It holds no credential (Sprint 005, ADR-0007).
+
+Before Sprint 005 these tests covered an nginx template that injected a preview API key. That mechanism is
+removed (requirement 8), so they now check that it is gone and that the replacement adds no key.
+"""
 import re
-import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TEMPLATE = (ROOT / "ui" / "nginx.conf").read_text()
+NGINX = (ROOT / "ui" / "nginx.conf").read_text()
+DOCKERFILE = (ROOT / "ui" / "Dockerfile.ui").read_text()
 
 
-def envsubst(template: str, env: dict[str, str]) -> str:
-    """What the nginx image's envsubst step does: replace ${VAR} only for variables that are defined."""
-    return re.sub(r"\$\{(\w+)\}", lambda m: env[m.group(1)] if m.group(1) in env else m.group(0), template)
+def test_nginx_proxies_v1_without_adding_any_credential():
+    v1_block = re.search(r"location /v1/ \{(.*?)\n    \}", NGINX, re.S)
+    assert v1_block is not None
+    assert "proxy_pass https://" in v1_block.group(1)
+    assert "Authorization" not in NGINX
+    assert "${" not in NGINX  # a static file, not an envsubst template
+    assert "location /api/" not in NGINX  # the old key-injecting proxy path
 
 
-def test_template_sets_the_authorization_header_from_the_environment_on_api_calls_only():
-    api_block = re.search(r"location /api/ \{(.*?)\n    \}", TEMPLATE, re.S).group(1)
-    assert 'proxy_set_header Authorization "Bearer ${PREVIEW_API_KEY}";' in api_block
-    assert TEMPLATE.count("PREVIEW_API_KEY}") == 1
-    assert "Authorization" not in TEMPLATE.split("location / {")[1]  # not on static files
+def test_the_key_injection_files_and_names_are_gone():
+    assert not (ROOT / "ui" / "docker-require-preview-key.sh").exists()
+    for name in ("nginx.conf", "Dockerfile.ui", "vite.config.ts"):
+        text = (ROOT / "ui" / name).read_text()
+        assert "PREVIEW_API_KEY" not in text, name
+        assert "/etc/nginx/templates" not in text, name
 
 
-def test_rendered_config_carries_the_value_and_leaves_nginx_variables_alone():
-    rendered = envsubst(TEMPLATE, {"PREVIEW_API_KEY": "gap_abcd1234_" + "x" * 43})
-    assert 'proxy_set_header Authorization "Bearer gap_abcd1234_' in rendered
-    assert "${" not in rendered
-    for nginx_var in ("$remote_addr", "$proxy_add_x_forwarded_for", "$scheme", "$uri"):
-        assert nginx_var in rendered
-
-
-def test_no_real_key_is_committed_in_the_template_or_the_dockerfile():
-    for name in ("nginx.conf", "Dockerfile.ui", "vite.config.js"):
+def test_no_real_key_is_committed_in_the_proxy_config_or_the_dockerfile():
+    for name in ("nginx.conf", "Dockerfile.ui", "vite.config.ts"):
         assert not re.search(r"gap_[a-z0-9]{8}_[A-Za-z0-9_-]{32,}", (ROOT / "ui" / name).read_text()), name
 
 
-def test_dockerfile_renders_the_template_at_runtime_not_build_time():
-    dockerfile = (ROOT / "ui" / "Dockerfile.ui").read_text()
-    assert "/etc/nginx/templates/default.conf.template" in dockerfile
-    assert "PREVIEW_API_KEY" not in re.sub(r"#.*", "", dockerfile).replace("docker-require-preview-key.sh", "")
-    assert "ARG PREVIEW_API_KEY" not in dockerfile  # a build arg would end up in image layers
+def test_dockerfile_builds_the_typescript_app_and_serves_the_output():
+    assert "npm ci" in DOCKERFILE
+    assert "npm run build" in DOCKERFILE  # runs tsc --noEmit, then vite build
+    assert "COPY --from=builder /app/dist /usr/share/nginx/html" in DOCKERFILE
+    assert "/etc/nginx/conf.d/default.conf" in DOCKERFILE
+    assert "ARG " not in DOCKERFILE  # no build arg can carry a secret into an image layer
+    assert "npm run build" in (ROOT / "ui" / "package.json").read_text()
 
 
-def run_guard(env: dict[str, str]) -> subprocess.CompletedProcess:
-    return subprocess.run(["sh", str(ROOT / "ui" / "docker-require-preview-key.sh")],
-                          env={"PATH": os.environ["PATH"], **env}, capture_output=True, text=True)
-
-
-def test_container_refuses_to_start_without_the_key_and_never_prints_it():
-    missing = run_guard({})
-    assert missing.returncode == 1 and "PREVIEW_API_KEY is not set" in missing.stderr
-    assert run_guard({"PREVIEW_API_KEY": ""}).returncode == 1
-    ok = run_guard({"PREVIEW_API_KEY": "gap_secretvalue"})
-    assert ok.returncode == 0 and "gap_secretvalue" not in ok.stdout + ok.stderr
-
-
-def test_render_blueprint_declares_the_secrets_as_unsynced():
+def test_render_blueprint_declares_the_secrets_as_unsynced_and_no_ui_key():
     text = (ROOT / "render.yaml").read_text()
-    for key in ("PREVIEW_API_KEY", "MIGRATION_DATABASE_URL", "DATABASE_URL"):
+    for key in ("PREVIEW_PRINCIPAL_ID", "MIGRATION_DATABASE_URL", "DATABASE_URL"):
         assert re.search(rf"key: {key}\n\s+sync: false", text), key
+    assert "PREVIEW_API_KEY" not in text
+
+
+def test_vite_dev_and_preview_proxy_forward_v1_and_add_no_credential():
+    vite = (ROOT / "ui" / "vite.config.ts").read_text()
+    assert "'/v1'" in vite
+    assert "proxy" in vite and "preview:" in vite  # preview serves the e2e tests, so it proxies too
+    assert "Authorization" not in vite and "headers" not in vite
+    assert not (ROOT / "ui" / ".env.local").exists()  # the old dev proxy read the preview key from this file

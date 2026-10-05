@@ -22,7 +22,7 @@ ADMIN_URL = os.getenv("TEST_DATABASE_ADMIN_URL", "postgresql://postgres:postgres
 REDIS_URL = os.getenv("TEST_REDIS_URL", "redis://localhost:6379/0")
 APP_ROLE = "gap_app"
 APP_PASSWORD = os.getenv("APP_DB_PASSWORD", "gap_app")
-PLATFORM_REDIS_PREFIXES = ("rl:", "budget:", "cache:", "semcache:")
+PLATFORM_REDIS_PREFIXES = ("rl:", "budget:", "cache:", "semcache:", "websess:")
 ROOT = Path(__file__).resolve().parent.parent
 
 

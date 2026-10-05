@@ -12,3 +12,4 @@ Copy `TEMPLATE.md` to `NNNN-slug.md`. Number ADRs in order and never reuse a num
 | [0004](0004-governance-outside-the-agent.md) | Governance outside the agent: gateway `enforce()` | Accepted |
 | [0005](0005-ports-and-adapters.md) | Ports and adapters for external providers | Accepted |
 | [0006](0006-gateway-enforce-pipeline.md) | The gateway `enforce()` pipeline | Accepted |
+| [0007](0007-web-edge-session.md) | The web edge session | Accepted |

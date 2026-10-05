@@ -16,7 +16,7 @@ def principal(*scopes):
 
 
 def test_scope_values_are_the_documented_five():
-    assert ALL_SCOPES == {"kb:read", "kb:write", "query", "agent", "admin"}
+    assert ALL_SCOPES == {"kb:read", "kb:write", "query", "agent", "audit:read", "admin"}
 
 
 def test_has_scope_exact_match_only():

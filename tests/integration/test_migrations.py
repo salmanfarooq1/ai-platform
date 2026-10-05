@@ -59,7 +59,7 @@ def test_empty_database_reaches_head(blank_db):
     harness.migrate(blank_db)
     tables = {r[0] for r in _query(blank_db, "SELECT tablename FROM pg_tables WHERE schemaname = 'public'")}
     assert tables == BASELINE_TABLES | IDENTITY_TABLES | GATEWAY_TABLES | {"alembic_version"}
-    assert _query(blank_db, "SELECT version_num FROM alembic_version") == [("0005",)]
+    assert _query(blank_db, "SELECT version_num FROM alembic_version") == [("0006",)]
     assert _query(blank_db, "SELECT extname FROM pg_extension WHERE extname = 'vector'") == [("vector",)]
     index_names = {r[0] for r in _query(blank_db, "SELECT indexname FROM pg_indexes WHERE schemaname = 'public'")}
     # 0002 replaces the namespace-only indexes with indexes that lead with tenant_id.
@@ -140,7 +140,7 @@ def _counts(dsn):
 
 
 def _assert_backfilled(dsn, before):
-    assert _query(dsn, "SELECT version_num FROM alembic_version") == [("0005",)]
+    assert _query(dsn, "SELECT version_num FROM alembic_version") == [("0006",)]
     assert _counts(dsn) == before == {"documents": 6, "document_registry": 3, "usage_log": 3, "feedback": 1}
     for table in TENANT_OWNED:
         assert _query(dsn, f"SELECT DISTINCT tenant_id::text FROM {table}") == [(DEFAULT_TENANT_ID,)]
