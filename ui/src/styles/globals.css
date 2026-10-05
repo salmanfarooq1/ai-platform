@@ -1,0 +1,58 @@
+@import './fonts.css';
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-size: 100%;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    text-size-adjust: 100%;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  h1 { font-size: var(--text-title-1); font-weight: 650; line-height: var(--leading-title-1); letter-spacing: var(--tracking-title-1); }
+  h2 { font-size: var(--text-title-2); font-weight: 600; line-height: var(--leading-title-2); letter-spacing: var(--tracking-title-2); }
+  h3 { font-size: var(--text-headline); font-weight: 600; line-height: var(--leading-headline); letter-spacing: var(--tracking-headline); }
+  code, pre, kbd, samp { font-family: var(--font-mono); font-size: 0.875em; }
+  button, input, select, textarea { font-family: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  ::selection { background: var(--brand-tint); }
+}
+
+@layer components {
+  .tabular { font-variant-numeric: tabular-nums; }
+  .mono { font-family: var(--font-mono); }
+  .eyebrow { font-size: var(--text-caption); letter-spacing: var(--tracking-caption); text-transform: uppercase; color: var(--text-secondary); font-weight: 600; }
+  .skip-link { position: absolute; left: 8px; top: -48px; z-index: 60; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--hairline); border-radius: var(--radius-sm); padding: 8px 12px; }
+  .skip-link:focus { top: 8px; }
+}
+
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-muted) 25%, var(--bg-surface) 50%, var(--bg-muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton { animation: none; }
+}
