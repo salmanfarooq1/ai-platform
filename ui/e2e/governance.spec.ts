@@ -84,6 +84,22 @@ test.describe('A10 parity: Ask, Library and System work in the new UI', () => {
     await expect(answer.getByRole('region', { name: 'Evidence' })).toBeVisible()
   })
 
+  test('Agent runs shows the execution id and the status the runtime reports for a run just made', async ({ page }) => {
+    await openApp(page)
+    await page.getByRole('radio', { name: 'Agent' }).click()
+    await ask(page, state().allowed_kb, 'How long must customer records be kept?')
+    await expect(page.getByRole('region', { name: 'Answer' })).toBeVisible()
+    await page.goto('/app/runs')
+    const row = page.locator('tbody tr').first()
+    await expect(row.getByTestId('run-row-status')).toHaveText('Finished') // the runtime still holds this run's status
+    const shortId = (await row.getByTestId('run-row-execution-id').textContent()) ?? ''
+    expect(shortId).toMatch(/^[0-9a-f]{8}$/)
+    await row.getByRole('button', { name: /Open run from/ }).click()
+    const panel = page.getByRole('complementary', { name: 'Run timeline' })
+    await expect(panel.getByTestId('run-status')).toHaveText('Finished')
+    await expect(panel.getByText(new RegExp(`^${shortId}-[0-9a-f-]{27}$`))).toBeVisible() // the full execution id, uuid shaped
+  })
+
   test('Library lists the ingested document', async ({ page }) => {
     await openApp(page, '/app/library')
     await expect(page.getByRole('table')).toContainText('retention.md')

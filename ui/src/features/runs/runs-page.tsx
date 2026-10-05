@@ -2,14 +2,17 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '@/api/endpoints'
 import { EmptyState, ErrorState, PageHeader, TableSkeleton } from '@/components/governance/states'
+import { CopyValue } from '@/components/governance/copy-value'
 import { TraceTimeline } from '@/components/governance/trace-timeline'
 import { VerdictBadge } from '@/components/governance/verdict-badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useReasonCodes } from '@/lib/reasons'
 import { cn, formatTime } from '@/lib/utils'
+import { runStatusWord } from './run-status'
 
 // Runs are decisions with the action agent.run, one per request id, until a runs API exists (blueprint section 4).
+// Each carries the run's execution id, and its status comes from the agent runtime (see run-status.ts).
 function RunTimeline({ id }: { id: string }) {
   const q = useQuery({ queryKey: ['decision', id], queryFn: () => api.decision(id), retry: false })
   const { byCode } = useReasonCodes()
@@ -19,6 +22,12 @@ function RunTimeline({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-3">
       <VerdictBadge verdict={q.data.outcome === 'deny' ? 'deny' : 'allow'} reason={q.data.reason} />
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-footnote">
+        <dt className="text-fg-secondary">Run status</dt>
+        <dd data-testid="run-status">{runStatusWord(q.data.run_status)}</dd>
+        <dt className="text-fg-secondary">Execution id</dt>
+        <dd>{q.data.execution_id ? <CopyValue value={q.data.execution_id} label="execution id" /> : 'None'}</dd>
+      </dl>
       <h3>Steps</h3>
       <TraceTimeline steps={q.data.trace} currentId={q.data.id} reasons={byCode} />
       <Link to={`/app/decisions/${q.data.id}`} className="text-callout text-seal underline-offset-2 hover:underline">Open receipt in Decisions</Link>
@@ -39,17 +48,17 @@ export default function RunsPage() {
   const items = q.data?.pages.flatMap((p) => p.items) ?? []
   return (
     <div>
-      <PageHeader title="Agent runs">Each run is one agent request. Select a run to see the calls it made.</PageHeader>
+      <PageHeader title="Agent runs">Each run is one agent request, with its execution id and status. Select a run to see the calls it made.</PageHeader>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="min-w-0">
-          {q.isLoading ? <TableSkeleton rows={6} cols={4} /> : null}
+          {q.isLoading ? <TableSkeleton rows={6} cols={6} /> : null}
           {q.error ? <ErrorState error={q.error} onRetry={() => void q.refetch()} title="Could not load runs." /> : null}
           {q.data && items.length === 0 ? <EmptyState title="No agent runs yet.">Ask a question in Agent mode. Each run and every tool call it makes appear here.</EmptyState> : null}
           {items.length > 0 ? (
             <div className="overflow-x-auto rounded-sm border border-hairline bg-surface">
               <table className="w-full border-collapse text-footnote">
                 <caption className="sr-only">Agent runs, newest first</caption>
-                <thead><tr className="bg-muted text-left text-fg-secondary">{['Started', 'Verdict', 'Principal', 'Request id'].map((h) => <th key={h} scope="col" className="px-3 py-2 font-medium">{h}</th>)}</tr></thead>
+                <thead><tr className="bg-muted text-left text-fg-secondary">{['Started', 'Verdict', 'Status', 'Execution id', 'Principal', 'Request id'].map((h) => <th key={h} scope="col" className="px-3 py-2 font-medium">{h}</th>)}</tr></thead>
                 <tbody>
                   {items.map((d) => (
                     <tr key={d.id} className={cn('h-8 border-t border-hairline', d.id === selected ? 'bg-selected' : 'hover:bg-muted')}>
@@ -57,6 +66,8 @@ export default function RunsPage() {
                         <button type="button" className="underline-offset-2 hover:underline" aria-label={`Open run from ${formatTime(d.created_at)}`} onClick={() => setParams({ run: d.id }, { replace: true })}>{formatTime(d.created_at)}</button>
                       </td>
                       <td className="px-3"><VerdictBadge size="sm" verdict={d.outcome === 'deny' ? 'deny' : 'allow'} reason={d.reason} /></td>
+                      <td className="px-3" data-testid="run-row-status">{runStatusWord(d.run_status)}</td>
+                      <td className="mono px-3 text-fg-secondary" data-testid="run-row-execution-id" title={d.execution_id ?? undefined}>{d.execution_id ? d.execution_id.slice(0, 8) : 'None'}</td>
                       <td className="px-3">{d.principal ? (d.principal.name ?? d.principal.id.slice(0, 8)) : 'unknown'}</td>
                       <td className="mono px-3 text-fg-secondary">{d.request_id}</td>
                     </tr>

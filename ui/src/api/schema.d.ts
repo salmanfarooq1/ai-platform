@@ -165,7 +165,7 @@ export interface paths {
         put?: never;
         /**
          * Submit Feedback
-         * @description Record a thumbs up or down rating for a specific response.
+         * @description DbRecord a thumbs up or down rating for a specific response.
          *
          *     request_id must be the X-Query-ID header value from the original
          *     /search or /agent/query response. This ties the feedback row back
@@ -224,8 +224,8 @@ export interface paths {
          * @description Requests checked and blocked in the window, the top deny reasons and today's token budget.
          *
          *     It counts requests (decisions grouped by request id), so the numbers match the request list. A request is
-         *     blocked when any of its decisions was a deny. Requests made only of console reads (`audit.read`,
-         *     `analytics.read`) are left out unless `include_console_reads` is true.
+         *     blocked when any of its decisions was a deny. Requests made only of allowed console reads (`audit.read`,
+         *     `analytics.read`) are left out unless `include_console_reads` is true. A denied console read is never left out.
          */
         get: operations["overview_v1_overview_get"];
         put?: never;
@@ -348,8 +348,8 @@ export interface paths {
          * @description Decisions grouped by request id, newest request first, with filters and a keyset cursor.
          *
          *     A request is a deny when any of its decisions was a deny. `since` and `until` apply to the time of the
-         *     first decision of the request. Requests made only of console reads (`audit.read`, `analytics.read`) are
-         *     left out unless `include_console_reads` is true.
+         *     first decision of the request. Requests made only of allowed console reads (`audit.read`, `analytics.read`)
+         *     are left out unless `include_console_reads` is true. A denied console read is never left out.
          */
         get: operations["list_requests_v1_requests_get"];
         put?: never;
@@ -581,6 +581,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Execution Id */
+            execution_id?: string | null;
             /**
              * Id
              * Format: uuid
@@ -602,6 +604,8 @@ export interface components {
             request_id: string;
             /** Resource */
             resource: string | null;
+            /** Run Status */
+            run_status?: string | null;
             /** Stage */
             stage: string;
             tenant: components["schemas"]["TenantRef"];
@@ -624,6 +628,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Execution Id */
+            execution_id?: string | null;
             /**
              * Id
              * Format: uuid
@@ -643,6 +649,8 @@ export interface components {
             request_id: string;
             /** Resource */
             resource: string | null;
+            /** Run Status */
+            run_status?: string | null;
             /** Stage */
             stage: string;
         };
@@ -708,6 +716,8 @@ export interface components {
             mode: string;
             /** Redis */
             redis: string;
+            /** Stale Vectors */
+            stale_vectors?: number | null;
             /** Status */
             status: string;
             /**
