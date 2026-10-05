@@ -25,7 +25,7 @@ The target design and its strict rules live in `docs/architecture/FOUNDATION.md`
 | `core/` | Ingestion, processing, pipeline, DB pool and tenant-scoped access (`database/tenant.py`), identity (`identity/`), provider clients |
 | `config.py` | All config, selected by `MODE` |
 | `tests/` | `unit/`, `integration/` (pytest markers `unit`, `integration`, `e2e`) |
-| `ui/` | Web UI. Design rules are in `docs/UI_GUIDELINES.md` |
+| `ui/` | Web UI. Design rules are in `docs/design/` (index: `docs/UI_GUIDELINES.md`). Tokens are data: `ui/tokens/tokens.json` |
 | `scripts/` | Labs (`scripts/labs/`), corpus building (`scripts/corpus/`), eval scripts (not shipped). `scripts/admin/` is the identity CLI |
 | `docs/` | `ARCHITECTURE.md` (living system map), `architecture/FOUNDATION.md`, `adr/`, runbooks |
 | `planning/` | `STATE`, `DECISIONS`, `DOMAIN`, `RISKS`, `QUESTIONS`, `ROADMAP`, `sprints/NNN-slug/` |
@@ -48,7 +48,7 @@ poetry run ruff check api/ core/ gateway/ tests/   # lint
 poetry run mypy                           # typecheck (api/ core/ gateway/ config.py)
 poetry run python scripts/update_openapi.py  # refresh docs/openapi.json after an intended API change (unit test fails on drift)
 scripts/check_no_ddl.sh                   # no CREATE/ALTER TABLE outside migrations/
-cd ui && npm run lint && npm run typecheck && npm test -- --run && npm run build   # UI checks
+cd ui && npm run tokens:check && npm run lint && npm run typecheck && npm test -- --run && npm run build && npm run chunk-report && npm run copy-check   # UI checks
 cd ui && npm run e2e                      # Playwright against the real API with fakes (needs postgres and redis)
 ```
 - **Typecheck:** `poetry run mypy`, configured in `pyproject.toml`. Strict for `core/settings.py`, `api/errors.py`, `api/observability.py`, `api/versioning.py`, non-strict elsewhere.

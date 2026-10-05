@@ -2,6 +2,31 @@
 
 One short entry per sprint, newest first. Full detail lives in `planning/sprints/`.
 
+## Sprint 005b: polish round
+- **What was built:**
+  - **Ink-and-paper palette** as DTCG design tokens (`ui/tokens/tokens.json`), built into CSS by Style Dictionary.
+    - CI fails if the generated CSS drifts from the tokens.
+    - Lint fails on hard-coded colors.
+    - The brand blue is gone. ADR-0010 records the decision.
+  - **Landing page:** the new copy ("Your agents can only ever do less."), a hero built from real console components with example data, and use cases. A new How it works page.
+  - **Console:**
+    - An Overview home.
+    - Requests with a drawer.
+    - Deny emphasis, with the failing stage, a plain sentence, and the policy field and version.
+    - Plain-language reasons from `/v1/reason-codes`.
+    - A governance line under each answer in Ask.
+    - A guided walkthrough with one allowed and one blocked real request.
+    - A session menu and a Cmd+K command palette.
+    - Route-level code splitting.
+  - **API:** `/v1/overview`, `/v1/requests`, `/v1/requests/{id}` and `/v1/reason-codes`. The console's own reads are left out of the counts unless they were denied.
+  - **Docs:** a standard design doc set in `docs/design/`. `docs/UI_GUIDELINES.md` is now an index.
+- **Test delta:**
+  - Backend: 805 before, 875 after, 0 skipped.
+  - Frontend: 162 Vitest tests and 70 Playwright tests.
+  - Lighthouse on the landing page: desktop 99, mobile 85.
+  - axe: 0 violations in both themes.
+- **Not verified here:** a human visual review, the UI image build, and CI on GitHub.
+
 ## Sprint 005: frontend foundation and showcase
 - **What was built:**
   - **Web edge (ADR-0007):**
