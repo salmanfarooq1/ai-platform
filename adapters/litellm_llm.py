@@ -4,6 +4,7 @@ from typing import Any
 
 import litellm
 
+from core.pricing import rates_for
 from ports.llm import Completion
 
 # litellm prints a "Give Feedback / Get Help" banner with print() on every provider error. Silenced here, where
@@ -13,7 +14,7 @@ litellm.suppress_debug_info = True
 
 class LitellmLLM:
     def __init__(self, pricing: Mapping[str, Mapping[str, float]]) -> None:
-        """`pricing`: USD per million tokens, `{model: {"input": x, "output": y}}`. An unknown model costs 0.0."""
+        """`pricing`: USD per million tokens, `{model: {"input": x, "output": y}}`. An unpriced model costs the highest known rate."""
         self._pricing = pricing
 
     async def complete(
@@ -36,7 +37,7 @@ class LitellmLLM:
         usage = getattr(response, "usage", None)
         tokens_in = getattr(usage, "prompt_tokens", 0) if usage else 0
         tokens_out = getattr(usage, "completion_tokens", 0) if usage else 0
-        rates = self._pricing.get(model, {"input": 0.0, "output": 0.0})
+        rates = rates_for(self._pricing, model)
         cost = (tokens_in / 1_000_000) * rates["input"] + (tokens_out / 1_000_000) * rates["output"]
         return Completion(
             text=choice.message.content or "",

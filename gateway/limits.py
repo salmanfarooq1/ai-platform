@@ -64,6 +64,55 @@ async def check_rate(runtime: GatewayRuntime, principal_id: UUID) -> LimitResult
     )
 
 
+MICRO_USD = 1_000_000  # the cost counter holds whole micro-dollars, so Redis INCRBY can add them
+
+
+def _cost_key(tenant_id: UUID) -> str:
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return f"cost:{tenant_id}:{today}"
+
+
+def effective_cost_cap(policy_cap: float | None) -> float:
+    """The cap in force: the tenant's own when it is lower, else the platform default. Never higher than the platform."""
+    platform = config.DEFAULT_DAILY_COST_CAP_USD
+    return platform if policy_cap is None else min(policy_cap, platform)
+
+
+async def check_cost(runtime: GatewayRuntime, tenant_id: UUID, policy_cap: float | None) -> LimitResult:
+    """Has the tenant spent its daily cost cap? The counter resets at UTC midnight (new key). Raises
+    `DependencyUnavailable` when Redis cannot be read: the stage then denies (fail closed)."""
+    cap = effective_cost_cap(policy_cap)
+    try:
+        current = await runtime.cache.get(_cost_key(tenant_id))
+        spent = int(current) if current else 0
+    except Exception as exc:
+        logger.error("[cost] Redis unavailable for cost check: %s", exc)
+        raise DependencyUnavailable("cost store unavailable") from exc
+    if spent >= round(cap * MICRO_USD):
+        logger.warning("[cost] tenant=%s reached its daily cost cap (%.6f of %.2f USD)", tenant_id, spent / MICRO_USD, cap)
+        return LimitResult(
+            exceeded=True,
+            message=(
+                f"Your tenant spent ${spent / MICRO_USD:.2f} of its ${cap:.2f} daily cost cap. "
+                "The cap resets at the next UTC midnight."
+            ),
+            headers={"X-Cost-Cap-Usd": f"{cap:.2f}"},
+        )
+    return LimitResult(exceeded=False)
+
+
+async def record_cost(runtime: GatewayRuntime, tenant_id: UUID, cost_usd: float) -> None:
+    """Book the dollar cost of finished work against the tenant's day. Best effort, like `record_usage`: the work
+    is done, so a Redis error is logged and not raised."""
+    micro = round(cost_usd * MICRO_USD)
+    if micro <= 0:
+        return
+    try:
+        await runtime.cache.incr(_cost_key(tenant_id), micro, ttl=90000)
+    except Exception as exc:
+        logger.warning("[cost] Failed to record cost: %s", exc)
+
+
 def _budget_key(tenant_id: UUID) -> str:
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return f"budget:{tenant_id}:{today}"

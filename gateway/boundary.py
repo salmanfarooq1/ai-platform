@@ -54,6 +54,8 @@ class ExecutionBoundary:
     max_query_length: int
     blocked_terms: frozenset[str]
     policy_version: int | None = None
+    # The tenant's own daily cost cap, or None for the platform default (`config.DEFAULT_DAILY_COST_CAP_USD`).
+    daily_cost_cap_usd: float | None = None
     # Set when the tenant policy could not be loaded or parsed: every action is then denied.
     unavailable_reason: str | None = None
 
@@ -65,6 +67,7 @@ class ExecutionBoundary:
             "models": sorted(self.models), "max_tool_calls": self.max_tool_calls, "max_tokens": self.max_tokens,
             "max_query_length": self.max_query_length, "blocked_terms": sorted(self.blocked_terms),
             "policy_version": self.policy_version, "unavailable_reason": self.unavailable_reason,
+            "daily_cost_cap_usd": self.daily_cost_cap_usd,
         }
 
     @classmethod
@@ -76,7 +79,7 @@ class ExecutionBoundary:
             models=frozenset(body["models"]), max_tool_calls=int(body["max_tool_calls"]),
             max_tokens=int(body["max_tokens"]), max_query_length=int(body["max_query_length"]),
             blocked_terms=frozenset(body["blocked_terms"]), policy_version=body["policy_version"],
-            unavailable_reason=body["unavailable_reason"],
+            unavailable_reason=body["unavailable_reason"], daily_cost_cap_usd=body.get("daily_cost_cap_usd"),
         )
 
     def visible_kbs(self) -> list[str] | None:
@@ -144,6 +147,7 @@ def build_boundary(
         max_query_length=min(doc.max_query_length, DEFAULT_POLICY.max_query_length),
         blocked_terms=frozenset(t.casefold() for t in doc.blocked_terms),
         policy_version=policy_version,
+        daily_cost_cap_usd=doc.daily_cost_cap_usd,
     )
 
 

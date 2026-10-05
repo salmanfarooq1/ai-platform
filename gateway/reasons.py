@@ -64,6 +64,10 @@ _ENTRIES = (
         "The tenant used its token budget for today. It resets at the next UTC midnight.", None, "budget",
     ),
     ReasonInfo(
+        "cost_cap_exceeded", "Daily cost cap reached",
+        "The tenant spent its daily cost cap. It resets at the next UTC midnight.", "daily_cost_cap_usd", "cost",
+    ),
+    ReasonInfo(
         "dependency_unavailable", "Service unavailable",
         "A service the check needs was down, so the call was stopped. Try again shortly.", None, "rate",
     ),

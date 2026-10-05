@@ -116,6 +116,10 @@ MODEL_PRICING: dict[str, dict[str, float]] = {
     # LiteLLM strips the provider prefix (groq/) from model names in usage
     # data, so finops receives "openai/gpt-oss-120b". Alias maps to same rate.
     "openai/gpt-oss-120b":                                 {"input": 0.11,  "output": 0.34},
+    # Embedding models (Sprint 008: a hosted mode refuses to start for a configured model with no price). The Gemini
+    # embedding free tier is $0, as for the chat model above. The Azure rate is the published list price; confirm it (Q32).
+    "gemini/gemini-embedding-001":                         {"input": 0.0,   "output": 0.0},
+    "azure/text-embedding-3-small":                        {"input": 0.02,  "output": 0.0},
 }
 
 # ==========================================
@@ -131,3 +135,6 @@ RATE_LIMIT_WINDOW_SECONDS = _settings.rate_limit_window_seconds
 # 500K tokens costs roughly $0.11. Generous for development, tight enough
 # to catch runaway loops.
 DEFAULT_DAILY_TOKEN_BUDGET = _settings.daily_token_budget
+
+# Daily cost cap per tenant in USD (the platform default; a tenant policy may set a lower one).
+DEFAULT_DAILY_COST_CAP_USD = _settings.daily_cost_cap_usd

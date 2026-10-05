@@ -16,13 +16,15 @@ from adapters.pg_outbox_events import OutboxRelay
 from api.agent.graph import build_agent_graph
 from api.agent.response import book_agent_usage, build_agent_result
 from api.agent.runner import AgentRunOutput, make_agent_runner
-from core.database.jobs import KIND_AGENT_RUN, KIND_INGEST
+from core.database.jobs import KIND_AGENT_RUN, KIND_INGEST, KIND_PURGE
 from core.database.tenant import DbPool
-from core.settings import Settings
+from core.settings import Settings, get_settings
 from gateway import EnforcementContext, GatewayRuntime
+from gateway.receipts import Keyring, keyring_from_settings
 from ports import Adapters, EventBus, RunSpec
 from workers.handlers.agent_run import make_agent_run_handler
 from workers.handlers.ingest import make_ingest_handler
+from workers.handlers.purge import make_purge_handler
 from workers.loop import Worker
 from workers.types import Handler, JobContext
 
@@ -53,13 +55,19 @@ async def _finish_agent_run(spec: RunSpec, output: Any, ctx: EnforcementContext 
 
 def build_handlers(
     adapters: Adapters, pool: DbPool, gateway_runtime: GatewayRuntime, agent_graph: Any | None = None,
+    settings: Settings | None = None, keyring: Keyring | None = None,
 ) -> dict[str, Handler]:
     """The handler of every job kind. The agent runs on a runtime of its own inside this process."""
+    active = settings if settings is not None else get_settings()
     graph = agent_graph if agent_graph is not None else build_agent_graph(adapters)
     local = InProcessAgentRuntime(make_agent_runner(lambda: graph))
     return {
         KIND_INGEST: make_ingest_handler(adapters.knowledge, adapters.embeddings, adapters.objects),
         KIND_AGENT_RUN: make_agent_run_handler(local, gateway_runtime, _finish_agent_run),
+        KIND_PURGE: make_purge_handler(
+            adapters.events, active.decision_retention_days, active.purge_batch_size,
+            (keyring if keyring is not None else keyring_from_settings(active)).sign,
+        ),
     }
 
 

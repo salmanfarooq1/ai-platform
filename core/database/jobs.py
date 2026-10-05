@@ -19,6 +19,8 @@ from asyncpg import Connection, Pool, Record
 
 KIND_INGEST = "ingest"
 KIND_AGENT_RUN = "agent_run"
+KIND_PURGE = "purge_decisions"  # platform maintenance (Sprint 008): not a caller's job, so the job routes do not show it
+USER_KINDS = (KIND_INGEST, KIND_AGENT_RUN)
 STATUSES = ("queued", "running", "succeeded", "failed", "dead")
 TERMINAL = ("succeeded", "failed", "dead")
 MAX_TEXT_BYTES = 4096  # no string in a payload is longer: raw bytes go to the object store
@@ -174,6 +176,8 @@ async def list_jobs(
 
     if kind is not None:
         add("kind = ${n}", kind)
+    else:
+        add("kind = ANY(${n}::text[])", list(USER_KINDS))
     if status is not None:
         add("status = ${n}", status)
     if kbs is not None:

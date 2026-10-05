@@ -14,6 +14,7 @@ from asyncpg import Connection, Pool, Record
 # the agent and MCP: see the import-lint test). Data access goes through `tenant_connection` or a port.
 DbPool = Pool
 DbRecord = Record
+DbConnection = Connection
 
 
 @asynccontextmanager

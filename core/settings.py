@@ -11,7 +11,7 @@ from typing import Any, Literal
 from uuid import UUID
 
 from dotenv import load_dotenv
-from pydantic import Field, ValidationError, field_validator, model_validator
+from pydantic import Field, SecretStr, ValidationError, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Mode = Literal["local", "public-preview", "prod"]
@@ -32,6 +32,19 @@ _EMBED_MODEL_DEFAULTS: dict[str, str] = {
     "public-preview": "gemini/gemini-embedding-001",
     "prod": "azure/text-embedding-3-small",
 }
+
+
+def _check_key_text(text: str) -> None:
+    """Base64 text of 32 bytes. Never echoes the text."""
+    import base64
+    import binascii
+
+    try:
+        raw = base64.b64decode(text.strip(), validate=True)
+    except (binascii.Error, ValueError):
+        raise ValueError("not valid base64") from None
+    if len(raw) != 32:
+        raise ValueError("an Ed25519 key is 32 bytes")
 
 
 class SettingsError(ValueError):
@@ -103,6 +116,28 @@ class Settings(BaseSettings):
     rate_limit_requests: int = Field(default=60, gt=0)
     rate_limit_window_seconds: int = Field(default=60, gt=0)
     daily_token_budget: int = Field(default=500_000, gt=0)
+    # Daily cost cap per tenant in USD (Sprint 008). A tenant policy may set a lower cap, never a higher one.
+    daily_cost_cap_usd: float = Field(default=10.0, gt=0)
+
+    # Audit receipts (ADR-0012). RECEIPT_SIGNING_KEY is an Ed25519 private key, base64 of its 32 raw bytes. It is
+    # required in public-preview and prod; local mode makes a throwaway key at startup. The previous public keys
+    # (comma separated, base64) stay listed after a rotation so older receipts still verify.
+    receipt_signing_key: SecretStr | None = None
+    receipt_previous_public_keys: str | None = None
+
+    # Retention (Q7, ADR-0012): how long decision records are kept. A tenant may override it (`set-retention`).
+    decision_retention_days: int = Field(default=90, ge=30)  # the purge function floors at 30 days too
+    purge_batch_size: int = Field(default=1000, gt=0)
+    # How often a worker looks for tenants with expired records and queues a `purge_decisions` job (one a day per
+    # tenant). 0 turns the scheduler off.
+    retention_schedule_interval_seconds: float = Field(default=3600.0, ge=0)
+
+    # Metrics (Sprint 008). `/metrics` is open when this is true and needs the `admin` scope when it is false. The
+    # default is true in local and false elsewhere. WORKER_METRICS_PORT serves the worker's own series (0 is off).
+    metrics_public: bool | None = None
+    worker_metrics_port: int = Field(default=0, ge=0, le=65535)
+    # A link the Trust page shows when the observability profile is running (for example http://localhost:3000).
+    grafana_url: str | None = None
 
     # JWT verification (optional). Set JWT_JWKS_URL (asymmetric keys) or JWT_SECRET (HS256).
     jwt_jwks_url: str | None = None
@@ -156,6 +191,18 @@ class Settings(BaseSettings):
             ]
             if missing_s3:
                 raise ValueError(f"{', '.join(missing_s3)} must be set when OBJECT_STORE=s3")
+        if self.mode != "local" and not self.signing_key_text:
+            raise ValueError(f"RECEIPT_SIGNING_KEY must be set when MODE={self.mode}")
+        for name in ("receipt_signing_key", "receipt_previous_public_keys"):
+            value = getattr(self, name)
+            for part in (value.get_secret_value() if isinstance(value, SecretStr) else str(value or "")).split(","):
+                if part.strip():
+                    try:
+                        _check_key_text(part)
+                    except ValueError as exc:
+                        raise ValueError(f"{name.upper()} is not valid: {exc}") from None
+        if self.metrics_public is None:
+            self.metrics_public = self.mode == "local"
         self.llm_model = self.llm_model or _LLM_MODEL_DEFAULTS[self.mode]
         self.embed_model = self.embed_model or _EMBED_MODEL_DEFAULTS[self.mode]
         return self
@@ -180,6 +227,16 @@ class Settings(BaseSettings):
     def embed_fallbacks(self) -> list[str]:
         """The ordered fallback embedding models (blank entries dropped)."""
         return [m.strip() for m in (self.embed_fallback_models or "").split(",") if m.strip()]
+
+    @property
+    def signing_key_text(self) -> str:
+        """The signing key text, or an empty string. Read it here and nowhere else, so it is never printed by accident."""
+        return self.receipt_signing_key.get_secret_value().strip() if self.receipt_signing_key else ""
+
+    @property
+    def previous_receipt_keys(self) -> list[str]:
+        """The earlier public keys (base64), blank entries dropped."""
+        return [k.strip() for k in (self.receipt_previous_public_keys or "").split(",") if k.strip()]
 
     @property
     def jwt_enabled(self) -> bool:

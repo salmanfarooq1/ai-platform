@@ -7,7 +7,15 @@ import logging
 from collections.abc import Awaitable, Callable, Sequence
 
 from gateway import record
-from gateway.stages import boundary_check, guardrails_input, policy, principal_present, rate_limit, token_budget
+from gateway.stages import (
+    boundary_check,
+    cost_cap,
+    guardrails_input,
+    policy,
+    principal_present,
+    rate_limit,
+    token_budget,
+)
 from gateway.types import Action, ActionKind, Decision, EnforcementContext, GatewayDenied
 
 logger = logging.getLogger("gateway.enforce")
@@ -21,6 +29,7 @@ STAGES: Sequence[tuple[str, Stage]] = (
     ("guardrails", guardrails_input),
     ("rate", rate_limit),
     ("budget", token_budget),
+    ("cost", cost_cap),
 )
 
 

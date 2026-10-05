@@ -48,6 +48,8 @@ class PolicyDocument(BaseModel):
     max_tokens_per_request: int = Field(default=PLATFORM_MAX_TOKENS, ge=1, le=PLATFORM_MAX_TOKENS)
     max_query_length: int = Field(default=_PLATFORM_QUERY_LENGTH, ge=1, le=_PLATFORM_QUERY_LENGTH)
     blocked_terms: list[str] = Field(default_factory=list)
+    # A tenant's own daily cost cap in USD. It can only lower the platform cap (`DAILY_COST_CAP_USD`), never raise it.
+    daily_cost_cap_usd: float | None = Field(default=None, gt=0)
 
     @field_validator("allowed_models", "allowed_tools", "allowed_kbs")
     @classmethod

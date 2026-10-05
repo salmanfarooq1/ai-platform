@@ -10,6 +10,7 @@ WILDCARD = "*"
 
 DECISION_RECORDED = "platform.gateway.decision.v1"
 INGEST_COMPLETED = "platform.ingest.completed.v1"
+DECISIONS_PURGED = "platform.gateway.purge.v1"
 
 
 @dataclass(frozen=True)
