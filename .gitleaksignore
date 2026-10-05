@@ -1,0 +1,5 @@
+# Reviewed false positives. Each line is a gitleaks fingerprint: commit:file:rule:line.
+# A SHA-256 checksum of docs/openapi.json recorded as test evidence, not a credential.
+38480b326bf05b6de05bdbb041d7b57f8b19a146:planning/sprints/005-frontend-foundation/evidence/frontend-typecheck.txt:generic-api-key:8
+# A Kafka record from a test run (tenant UUID and event id), recorded as test evidence, not a credential.
+3c9b55da447ad561c5d9198cf7e6e6125b32846f:planning/sprints/010-kafka-event-bus/evidence/runbook-commands.txt:generic-api-key:7
