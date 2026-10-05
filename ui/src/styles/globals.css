@@ -11,7 +11,7 @@
     font-optical-sizing: auto;
     -webkit-font-smoothing: antialiased;
     text-size-adjust: 100%;
-    transition: background-color 200ms ease, color 200ms ease;
+    transition: background-color var(--motion-duration-base) var(--motion-ease-out), color var(--motion-duration-base) var(--motion-ease-out);
   }
   body {
     font-family: var(--font-sans);
@@ -27,8 +27,8 @@
   h3 { font-size: var(--text-headline); font-weight: 600; line-height: var(--leading-headline); letter-spacing: var(--tracking-headline); }
   code, pre, kbd, samp { font-family: var(--font-mono); font-size: 0.875em; }
   button, input, select, textarea { font-family: inherit; color: inherit; }
-  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-  ::selection { background: var(--brand-tint); }
+  :focus-visible { outline: 2px solid var(--seal); outline-offset: 2px; }
+  ::selection { background: var(--seal-tint); }
 }
 
 @layer components {
@@ -39,6 +39,25 @@
   .skip-link:focus { top: 8px; }
 }
 
+/* prefers-reduced-transparency: materials become solid */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --material-thin: var(--bg-surface);
+    --material-blur: 0px;
+  }
+}
+
+/* prefers-contrast: hairlines strengthen, materials solid */
+@media (prefers-contrast: more) {
+  :root {
+    --hairline: var(--text-tertiary);
+    --material-thin: var(--bg-surface);
+    --material-blur: 0px;
+  }
+}
+
+@keyframes sheet-in { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 .skeleton {
   background: linear-gradient(90deg, var(--bg-muted) 25%, var(--bg-surface) 50%, var(--bg-muted) 75%);
