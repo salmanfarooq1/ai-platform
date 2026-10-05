@@ -47,6 +47,7 @@ async def main(concurrency: int | None, relay_enabled: bool) -> int:
         ))
     metrics_server = await start_metrics_server(pool, settings.worker_metrics_port) if settings.worker_metrics_port else None
     relay_task = None
+    relay = None
     if relay_enabled:
         relay, cfg = make_relay(settings, pool)
 
@@ -70,6 +71,8 @@ async def main(concurrency: int | None, relay_enabled: bool) -> int:
         if relay_task is not None:
             relay_task.cancel()
             await asyncio.gather(relay_task, return_exceptions=True)
+        if relay is not None:
+            await relay.aclose()
         await adapters.cache.close()
         await pool.close()
     return 0

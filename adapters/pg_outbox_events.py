@@ -7,7 +7,7 @@ They are for work that must commit with the change. A rolled-back transaction le
 leaves the system for a change that never happened.
 
 `OutboxRelay` is the other half. It lists the rows not yet published, publishes each one to a target `EventBus`
-(the in-process bus today, the Kafka adapter in Sprint 010), and marks it sent in the same transaction. The
+(the in-process bus, or the Kafka adapter with EVENT_BUS=kafka), and marks it sent in the same transaction. The
 guarantee is at least once: a crash after the target got the event and before the mark commits sends it again.
 `IdempotentConsumer` is how a consumer makes that safe: it skips an event id it has already handled.
 """
@@ -61,7 +61,8 @@ class OutboxEventBus:
 
 
 class OutboxRelay:
-    """Publishes outbox rows to `target`, oldest first, at least once. Safe to run in several processes: a row is
+    """Publishes outbox rows to `target`, oldest first, at least once. For one tenant it stops at the first row that
+    fails or is locked, so a later row never overtakes an earlier one (another tenant is not held up). Safe to run in several processes: a row is
     locked while it is sent, and a locked row is skipped."""
 
     def __init__(self, pool: DbPool, target: EventBus, *, batch_size: int = 50, max_attempts: int = 10) -> None:
@@ -70,13 +71,25 @@ class OutboxRelay:
         self._batch = batch_size
         self._max_attempts = max_attempts
 
+    async def aclose(self) -> None:
+        """Release the target's connections (the Kafka producer) when it has any. Safe to call twice."""
+        close = getattr(self._target, "close", None)
+        if close is not None:
+            await close()
+
     async def run_once(self) -> int:
         """One pass. Returns how many events were published."""
         pending = await self._pool.fetch("SELECT outbox_id, outbox_tenant FROM outbox_pending($1, $2)", self._batch, self._max_attempts)
         sent = 0
+        blocked: set[UUID] = set()
         for row in pending:
-            if await self._send(row["outbox_id"], row["outbox_tenant"]):
+            tenant = row["outbox_tenant"]
+            if tenant in blocked:
+                continue  # an earlier row of this tenant did not go: later ones wait, so the tenant's order holds
+            if await self._send(row["outbox_id"], tenant):
                 sent += 1
+            else:
+                blocked.add(tenant)  # failed, locked by another relay, or already sent
         return sent
 
     async def _send(self, outbox_id: UUID, tenant_id: UUID) -> bool:

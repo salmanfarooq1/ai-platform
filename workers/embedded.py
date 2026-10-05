@@ -62,6 +62,9 @@ class EmbeddedWorkers:
             self._relay_task.cancel()
             with contextlib.suppress(asyncio.CancelledError, Exception):
                 await self._relay_task
+        if self._relay is not None:
+            with contextlib.suppress(Exception):
+                await self._relay.aclose()
         if self._worker is not None and self._worker_task is not None:
             self._worker.stop()
             with contextlib.suppress(asyncio.CancelledError, Exception):

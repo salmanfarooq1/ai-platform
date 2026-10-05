@@ -97,6 +97,54 @@ services:
     volumes:
       - "ollama_data:/root/.ollama"
 
+  # Optional Kafka, behind a profile (Sprint 010, ADR-0008):  docker compose --profile kafka up -d redpanda kafka-topics
+  # One Redpanda node, for local work and `scripts/verify/kafka.sh`. It is not a production broker. The host connects at
+  # localhost:19092 (KAFKA_BOOTSTRAP=localhost:19092); other containers use redpanda:9092. Then set EVENT_BUS=kafka.
+  redpanda:
+    profiles: ["kafka"]
+    image: redpandadata/redpanda:v24.2.7
+    container_name: redpanda
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --overprovisioned
+      - --node-id=0
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "127.0.0.1:19092:19092"
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster info -X brokers=localhost:9092 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 10s
+    restart: unless-stopped
+
+  # Creates the topics once and exits: one per event type (key = tenant id, so 3 partitions) and its dead-letter topic.
+  kafka-topics:
+    profiles: ["kafka"]
+    image: redpandadata/redpanda:v24.2.7
+    container_name: kafka-topics
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        for topic in platform.gateway.decision platform.ingest.completed platform.gateway.purge; do
+          for name in "$$topic" "$$topic.dlq"; do
+            rpk topic create "$$name" -p 3 -r 1 -X brokers=redpanda:9092 || true
+          done
+        done
+        rpk topic list -X brokers=redpanda:9092
+
 volumes:
   objects:
   pgdata:

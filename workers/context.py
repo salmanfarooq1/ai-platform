@@ -13,6 +13,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from adapters.inprocess_events import InProcessEventBus
+from adapters.kafka_event_bus import build_kafka_bus
 from adapters.pg_outbox_events import OutboxRelay
 from adapters.registry import build_local_runtime
 from api.agent.graph import build_agent_graph
@@ -103,9 +104,11 @@ class RelaySettings:
 
 
 def make_relay(settings: Settings, pool: DbPool, target: EventBus | None = None) -> tuple[OutboxRelay, RelaySettings]:
-    """The relay publishes to `target`, the in-process bus by default (the Kafka adapter takes its place in 010)."""
+    """The relay publishes to `target`: Kafka when EVENT_BUS=kafka, the in-process bus otherwise."""
+    if target is None:
+        target = build_kafka_bus(settings, pool) if settings.event_bus == "kafka" else InProcessEventBus()
     relay = OutboxRelay(
-        pool, target if target is not None else InProcessEventBus(), batch_size=settings.outbox_batch_size,
+        pool, target, batch_size=settings.outbox_batch_size,
         max_attempts=settings.outbox_max_attempts,
     )
     return relay, RelaySettings(settings.outbox_poll_interval_seconds, settings.outbox_batch_size, settings.outbox_max_attempts)

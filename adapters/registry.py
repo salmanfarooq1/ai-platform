@@ -85,7 +85,9 @@ def build_adapters(
         return PgKnowledgeStore(pool)
 
     def events() -> EventBus:
-        if settings.event_bus == "outbox":
+        # `kafka` also writes the outbox here: Kafka is reached only by the relay (workers/context.py), never inside a
+        # request, so a decision row is never lost because of the bus (ADR-0008).
+        if settings.event_bus in ("outbox", "kafka"):
             if pool is None:
                 raise ValueError("the Postgres outbox event bus needs a pool")
             return OutboxEventBus(pool)

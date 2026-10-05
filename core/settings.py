@@ -83,7 +83,23 @@ class Settings(BaseSettings):
     # Events and agent runs (Sprint 007, ADR-0008 and ADR-0009). The defaults are the durable adapters: the outbox
     # (decision and ingest events are written in the transaction that made them) and the queued runtime (an agent
     # run is a job that a worker executes). `inprocess` keeps both in the API process, for tests and tools.
-    event_bus: Literal["inprocess", "outbox"] = "outbox"
+    # `kafka` (Sprint 010, ADR-0008): the API still writes the outbox in the decision's transaction. The relay publishes the
+    # rows to Kafka instead of the in-process bus. Kafka is never reached inside a request.
+    event_bus: Literal["inprocess", "outbox", "kafka"] = "outbox"
+    # Kafka (EVENT_BUS=kafka). SASL values come from the environment only and the password is never logged.
+    kafka_bootstrap: str | None = None
+    kafka_client_id: str = "gap-platform"
+    kafka_group_id: str = "gap-platform"
+    kafka_security_protocol: Literal["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] = "PLAINTEXT"
+    kafka_sasl_mechanism: Literal["PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"] | None = None
+    kafka_sasl_username: str | None = None
+    kafka_sasl_password: SecretStr | None = None
+    # A consumer tries a message this many times, then sends it to `<topic>.dlq` and moves on.
+    kafka_max_attempts: int = Field(default=5, gt=0)
+    kafka_retry_backoff_seconds: float = Field(default=0.5, ge=0)
+    # Short producer limits: the relay holds a row lock while it waits for the broker's acknowledgement.
+    kafka_request_timeout_seconds: float = Field(default=10.0, gt=0)
+    kafka_send_timeout_seconds: float = Field(default=15.0, gt=0)
     # `openshell` (Sprint 009): the worker runs each agent run inside an OpenShell sandbox. The API still queues the run
     # as a job, so status and the runs API are unchanged (ADR-0009).
     agent_runtime: Literal["inprocess", "queued", "openshell"] = "queued"
@@ -213,6 +229,15 @@ class Settings(BaseSettings):
             raise ValueError("SANDBOX_NETWORK_BINARIES must list at least one absolute path or glob")
         if any(not p.startswith("/") or p.rstrip("/") == "" for p in self.sandbox_read_only):
             raise ValueError("SANDBOX_READ_ONLY_PATHS must be absolute paths other than /")
+        if self.event_bus == "kafka" and not (self.kafka_bootstrap or "").strip():
+            raise ValueError("KAFKA_BOOTSTRAP must be set when EVENT_BUS=kafka")
+        if self.kafka_security_protocol.startswith("SASL"):
+            missing_sasl = [
+                name.upper() for name in ("kafka_sasl_mechanism", "kafka_sasl_username", "kafka_sasl_password")
+                if not getattr(self, name)
+            ]
+            if missing_sasl:
+                raise ValueError(f"{', '.join(missing_sasl)} must be set when KAFKA_SECURITY_PROTOCOL={self.kafka_security_protocol}")
         if self.object_store == "s3":
             missing_s3 = [
                 name.upper()
