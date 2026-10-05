@@ -11,6 +11,7 @@ from uuid import UUID
 from asyncpg import Pool, Record
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
+import config
 from api.auth import require_scope
 from api.gateway_deps import gateway_context
 from api.models.console import (
@@ -18,23 +19,34 @@ from api.models.console import (
     DecisionPage,
     DecisionSummary,
     DeniedCounts,
+    DenyReasonCount,
+    FirstDeny,
     KeySummary,
+    Overview,
+    OverviewBudget,
+    OverviewDay,
     PolicyDocumentView,
     PolicyList,
     PolicyVersion,
     PrincipalRef,
     PrincipalSummary,
+    ReasonCode,
+    RequestDetail,
+    RequestPage,
+    RequestSummary,
     TenantRef,
     UsageByDay,
     UsageByPrincipal,
     UsageSummary,
     UsageTotals,
 )
-from api.services.cursor import InvalidCursor, decode_cursor, encode_cursor
+from api.services.cursor import InvalidCursor, decode_cursor, decode_key_cursor, encode_cursor, encode_key_cursor
 from core.database.tenant import tenant_connection
 from core.identity.models import Principal, Scope
-from gateway import Action, ActionKind, EnforcementContext, require
+from gateway import Action, ActionKind, DependencyUnavailable, EnforcementContext, require
+from gateway.limits import read_budget_used
 from gateway.policy import parse_policy
+from gateway.reasons import all_reasons
 
 router = APIRouter(tags=["console"])
 
@@ -285,3 +297,192 @@ async def usage_summary(
         ],
         denied=DeniedCounts(rate=denied["rate"], budget=denied["budget"], policy=denied["policy"]),
     )
+
+
+# ------------------------------------------------------------------ requests: decisions grouped by request id
+
+_GROUPED = """
+    SELECT d.request_id,
+           min(d.created_at) AS started_at,
+           count(*) AS checks,
+           bool_or(d.outcome = 'deny') AS denied,
+           (bool_and(d.action IN ('audit.read', 'analytics.read')) AND NOT bool_or(d.outcome = 'deny')) AS console_only,
+           (array_agg(d.principal_id ORDER BY d.created_at, d.id) FILTER (WHERE d.principal_id IS NOT NULL))[1] AS principal_id,
+           max(d.policy_version) AS policy_version,
+           (array_agg(d.stage ORDER BY d.created_at, d.id) FILTER (WHERE d.outcome = 'deny'))[1] AS deny_stage,
+           (array_agg(d.reason ORDER BY d.created_at, d.id) FILTER (WHERE d.outcome = 'deny'))[1] AS deny_reason,
+           (array_agg(d.action ORDER BY d.created_at, d.id) FILTER (WHERE d.outcome = 'deny'))[1] AS deny_action,
+           (array_agg(d.resource ORDER BY d.created_at, d.id) FILTER (WHERE d.outcome = 'deny'))[1] AS deny_resource
+    FROM gateway_decisions d
+    GROUP BY d.request_id
+"""
+
+
+def _request_summary(row: Record, name: str | None) -> RequestSummary:
+    principal = PrincipalRef(id=row["principal_id"], name=name) if row["principal_id"] is not None else None
+    first_deny = None
+    if row["denied"]:
+        first_deny = FirstDeny(
+            stage=row["deny_stage"], reason=row["deny_reason"], action=row["deny_action"], resource=row["deny_resource"],
+        )
+    return RequestSummary(
+        request_id=row["request_id"], started_at=row["started_at"], principal=principal, checks=row["checks"],
+        outcome="deny" if row["denied"] else "allow", first_deny=first_deny, policy_version=row["policy_version"],
+    )
+
+
+@router.get("/overview", response_model=Overview)
+async def overview(
+    days: int = Query(default=7, ge=1, le=90, description="Number of days to look back"),
+    include_console_reads: bool = Query(default=False, description="Also count requests made only of console reads"),
+    pool: Pool = Depends(get_db_pool),
+    principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
+    ctx: EnforcementContext = Depends(gateway_context),
+) -> Overview:
+    """Requests checked and blocked in the window, the top deny reasons and today's token budget.
+
+    It counts requests (decisions grouped by request id), so the numbers match the request list. A request is
+    blocked when any of its decisions was a deny. Requests made only of allowed console reads (`audit.read`,
+    `analytics.read`) are left out unless `include_console_reads` is true. A denied console read is never left out.
+    """
+    await _read(ctx, "overview")
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    keep = "" if include_console_reads else " AND NOT console_only"
+    async with tenant_connection(pool, principal.tenant_id) as conn:
+        rows = await conn.fetch(
+            f"SELECT (started_at AT TIME ZONE 'UTC')::date AS day, count(*) AS checked, "
+            f"count(*) FILTER (WHERE denied) AS blocked FROM ({_GROUPED}) g WHERE started_at >= $1{keep} GROUP BY 1 ORDER BY 1",
+            since,
+        )
+        reasons = await conn.fetch(
+            f"SELECT deny_reason AS reason, count(*) AS count FROM ({_GROUPED}) g WHERE denied AND started_at >= $1{keep} "
+            f"GROUP BY deny_reason ORDER BY count DESC, deny_reason LIMIT 5",
+            since,
+        )
+    try:
+        used = await read_budget_used(ctx.runtime, principal.tenant_id)
+    except DependencyUnavailable:
+        raise HTTPException(
+            status_code=503,
+            detail={"error": "dependency_unavailable", "reason": "A required service is unavailable. Try again shortly."},
+        ) from None
+    checked = sum(r["checked"] for r in rows)
+    blocked = sum(r["blocked"] for r in rows)
+    return Overview(
+        days=days, checked=checked, blocked=blocked, deny_rate=(blocked / checked) if checked else 0.0,
+        budget=OverviewBudget(used_tokens=used, limit_tokens=config.DEFAULT_DAILY_TOKEN_BUDGET, period="day"),
+        top_deny_reasons=[DenyReasonCount(reason=r["reason"], count=r["count"]) for r in reasons],
+        by_day=[OverviewDay(date=r["day"], checked=r["checked"], blocked=r["blocked"]) for r in rows],
+    )
+
+
+@router.get("/requests", response_model=RequestPage)
+async def list_requests(
+    outcome: Literal["allow", "deny"] | None = None,
+    action: str | None = Query(default=None, description="Only requests with a decision of this action"),
+    by_principal: UUID | None = Query(default=None, alias="principal", description="Only requests of this principal id"),
+    policy_version: int | None = None,
+    since: datetime | None = None,
+    until: datetime | None = None,
+    include_console_reads: bool = Query(default=False, description="Also list requests made only of console reads"),
+    cursor: str | None = None,
+    limit: int = Query(default=50, ge=1, le=200),
+    pool: Pool = Depends(get_db_pool),
+    principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
+    ctx: EnforcementContext = Depends(gateway_context),
+) -> RequestPage:
+    """Decisions grouped by request id, newest request first, with filters and a keyset cursor.
+
+    A request is a deny when any of its decisions was a deny. `since` and `until` apply to the time of the
+    first decision of the request. Requests made only of allowed console reads (`audit.read`, `analytics.read`)
+    are left out unless `include_console_reads` is true. A denied console read is never left out.
+    """
+    await _read(ctx, "requests")
+    conditions: list[str] = [] if include_console_reads else ["NOT g.console_only"]
+    args: list[Any] = []
+
+    def add(sql: str, value: Any) -> None:
+        args.append(value)
+        conditions.append(sql.format(n=len(args)))
+
+    if outcome == "deny":
+        conditions.append("g.denied")
+    elif outcome == "allow":
+        conditions.append("NOT g.denied")
+    if action is not None:
+        add("g.request_id IN (SELECT request_id FROM gateway_decisions WHERE action = ${n})", action)
+    if by_principal is not None:
+        add("g.request_id IN (SELECT request_id FROM gateway_decisions WHERE principal_id = ${n})", by_principal)
+    if policy_version is not None:
+        add("g.policy_version = ${n}", policy_version)
+    if since is not None:
+        add("g.started_at >= ${n}", since)
+    if until is not None:
+        add("g.started_at <= ${n}", until)
+    if cursor is not None:
+        try:
+            stamp, key = decode_key_cursor(cursor)
+        except InvalidCursor:
+            raise HTTPException(status_code=400, detail={"error": "invalid_cursor", "reason": "The cursor is not valid"}) from None
+        args.extend([stamp, key])
+        conditions.append(f"(g.started_at, g.request_id) < (${len(args) - 1}, ${len(args)})")
+    args.append(limit + 1)
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+    sql = (
+        f"SELECT g.*, p.name AS principal_name FROM ({_GROUPED}) g LEFT JOIN principals p ON p.id = g.principal_id "
+        f"{where} ORDER BY g.started_at DESC, g.request_id DESC LIMIT ${len(args)}"
+    )
+    async with tenant_connection(pool, principal.tenant_id) as conn:
+        rows = await conn.fetch(sql, *args)
+    page = rows[:limit]
+    next_cursor = encode_key_cursor(page[-1]["started_at"], page[-1]["request_id"]) if len(rows) > limit else None
+    return RequestPage(items=[_request_summary(r, r["principal_name"]) for r in page], next_cursor=next_cursor)
+
+
+@router.get("/requests/{request_id}", response_model=RequestDetail)
+async def get_request(
+    request_id: str,
+    pool: Pool = Depends(get_db_pool),
+    principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
+    ctx: EnforcementContext = Depends(gateway_context),
+) -> RequestDetail:
+    """One request with its decisions, oldest first. A foreign id and a missing id give the same 404."""
+    await _read(ctx, "requests")
+    async with tenant_connection(pool, principal.tenant_id) as conn:
+        rows = await conn.fetch(
+            f"SELECT {_DECISION_COLUMNS} {_DECISION_FROM} WHERE d.request_id = $1 "
+            f"ORDER BY d.created_at ASC, d.id ASC LIMIT {TRACE_CAP}",
+            request_id,
+        )
+        if not rows:
+            raise _not_found("Request")
+        head = await conn.fetchrow(
+            "SELECT min(created_at) AS started_at, bool_or(outcome = 'deny') AS denied, max(policy_version) AS policy_version, "
+            "(array_agg(principal_id ORDER BY created_at, id) FILTER (WHERE principal_id IS NOT NULL))[1] AS principal_id "
+            "FROM gateway_decisions WHERE request_id = $1", request_id,
+        )
+        tenant = await conn.fetchrow("SELECT id, slug FROM tenants WHERE id = $1", principal.tenant_id)
+        who = None
+        if head is not None and head["principal_id"] is not None:
+            who = await conn.fetchrow("SELECT id, name FROM principals WHERE id = $1", head["principal_id"])
+    if head is None or tenant is None:
+        raise _not_found("Request")
+    return RequestDetail(
+        request_id=request_id, started_at=head["started_at"],
+        principal=PrincipalRef(id=who["id"], name=who["name"]) if who is not None else None,
+        tenant=TenantRef(id=tenant["id"], slug=tenant["slug"]), policy_version=head["policy_version"],
+        outcome="deny" if head["denied"] else "allow", decisions=[_summary(r) for r in rows],
+    )
+
+
+@router.get("/reason-codes", response_model=list[ReasonCode])
+async def reason_codes(
+    principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
+    ctx: EnforcementContext = Depends(gateway_context),
+) -> list[ReasonCode]:
+    """The plain-language catalogue of every reason code. It holds no tenant data."""
+    await _read(ctx, "reason-codes")
+    return [
+        ReasonCode(code=r.code, title=r.title, sentence=r.sentence, policy_field=r.policy_field, stage=r.stage)
+        for r in all_reasons()
+    ]

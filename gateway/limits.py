@@ -112,3 +112,14 @@ async def record_usage(runtime: GatewayRuntime, tenant_id: UUID, tokens: int) ->
         return {}
     budget = config.DEFAULT_DAILY_TOKEN_BUDGET
     return {"X-Budget-Remaining": str(max(0, budget - new_total)), "X-Budget-Limit": str(budget)}
+
+
+async def read_budget_used(runtime: GatewayRuntime, tenant_id: UUID) -> int:
+    """Tokens the tenant has used today (UTC). Raises `DependencyUnavailable` when Redis cannot be read."""
+    try:
+        r = await runtime.get_redis()
+        current = await r.get(_budget_key(tenant_id))
+        return int(current) if current else 0
+    except Exception as exc:
+        logger.error("[budget] Redis unavailable for budget read: %s", exc)
+        raise DependencyUnavailable("budget store unavailable") from exc

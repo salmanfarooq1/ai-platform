@@ -114,3 +114,71 @@ class UsageSummary(BaseModel):
     by_principal: list[UsageByPrincipal]
     by_day: list[UsageByDay]
     denied: DeniedCounts
+
+
+class FirstDeny(BaseModel):
+    stage: str
+    reason: str
+    action: str
+    resource: str | None
+
+
+class RequestSummary(BaseModel):
+    request_id: str
+    started_at: datetime
+    principal: PrincipalRef | None
+    checks: int
+    outcome: Outcome
+    first_deny: FirstDeny | None
+    policy_version: int | None
+
+
+class RequestPage(BaseModel):
+    items: list[RequestSummary]
+    next_cursor: str | None
+
+
+class RequestDetail(BaseModel):
+    request_id: str
+    started_at: datetime
+    principal: PrincipalRef | None
+    tenant: TenantRef
+    policy_version: int | None
+    outcome: Outcome
+    # Oldest first, at most 200.
+    decisions: list[DecisionSummary]
+
+
+class ReasonCode(BaseModel):
+    code: str
+    title: str
+    sentence: str
+    policy_field: str | None
+    stage: str
+
+
+class OverviewBudget(BaseModel):
+    used_tokens: int
+    limit_tokens: int
+    period: Literal["day"]
+
+
+class DenyReasonCount(BaseModel):
+    reason: str
+    count: int
+
+
+class OverviewDay(BaseModel):
+    date: date
+    checked: int
+    blocked: int
+
+
+class Overview(BaseModel):
+    days: int
+    checked: int
+    blocked: int
+    deny_rate: float
+    budget: OverviewBudget
+    top_deny_reasons: list[DenyReasonCount]
+    by_day: list[OverviewDay]

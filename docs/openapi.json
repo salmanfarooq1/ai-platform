@@ -425,6 +425,24 @@
         "title": "DeniedCounts",
         "type": "object"
       },
+      "DenyReasonCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "count"
+        ],
+        "title": "DenyReasonCount",
+        "type": "object"
+      },
       "FeedbackRequest": {
         "properties": {
           "comment": {
@@ -461,6 +479,41 @@
           "rating"
         ],
         "title": "FeedbackRequest",
+        "type": "object"
+      },
+      "FirstDeny": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage",
+          "reason",
+          "action",
+          "resource"
+        ],
+        "title": "FirstDeny",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -616,6 +669,102 @@
           "revoked"
         ],
         "title": "KeySummary",
+        "type": "object"
+      },
+      "Overview": {
+        "properties": {
+          "blocked": {
+            "title": "Blocked",
+            "type": "integer"
+          },
+          "budget": {
+            "$ref": "#/components/schemas/OverviewBudget"
+          },
+          "by_day": {
+            "items": {
+              "$ref": "#/components/schemas/OverviewDay"
+            },
+            "title": "By Day",
+            "type": "array"
+          },
+          "checked": {
+            "title": "Checked",
+            "type": "integer"
+          },
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "deny_rate": {
+            "title": "Deny Rate",
+            "type": "number"
+          },
+          "top_deny_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/DenyReasonCount"
+            },
+            "title": "Top Deny Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "days",
+          "checked",
+          "blocked",
+          "deny_rate",
+          "budget",
+          "top_deny_reasons",
+          "by_day"
+        ],
+        "title": "Overview",
+        "type": "object"
+      },
+      "OverviewBudget": {
+        "properties": {
+          "limit_tokens": {
+            "title": "Limit Tokens",
+            "type": "integer"
+          },
+          "period": {
+            "const": "day",
+            "title": "Period",
+            "type": "string"
+          },
+          "used_tokens": {
+            "title": "Used Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "used_tokens",
+          "limit_tokens",
+          "period"
+        ],
+        "title": "OverviewBudget",
+        "type": "object"
+      },
+      "OverviewDay": {
+        "properties": {
+          "blocked": {
+            "title": "Blocked",
+            "type": "integer"
+          },
+          "checked": {
+            "title": "Checked",
+            "type": "integer"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "checked",
+          "blocked"
+        ],
+        "title": "OverviewDay",
         "type": "object"
       },
       "PolicyDocumentView": {
@@ -830,6 +979,204 @@
           "keys"
         ],
         "title": "PrincipalSummary",
+        "type": "object"
+      },
+      "ReasonCode": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "policy_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Field"
+          },
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "title",
+          "sentence",
+          "policy_field",
+          "stage"
+        ],
+        "title": "ReasonCode",
+        "type": "object"
+      },
+      "RequestDetail": {
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/DecisionSummary"
+            },
+            "title": "Decisions",
+            "type": "array"
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrincipalRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/TenantRef"
+          }
+        },
+        "required": [
+          "request_id",
+          "started_at",
+          "principal",
+          "tenant",
+          "policy_version",
+          "outcome",
+          "decisions"
+        ],
+        "title": "RequestDetail",
+        "type": "object"
+      },
+      "RequestPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RequestSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "RequestPage",
+        "type": "object"
+      },
+      "RequestSummary": {
+        "properties": {
+          "checks": {
+            "title": "Checks",
+            "type": "integer"
+          },
+          "first_deny": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FirstDeny"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "principal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrincipalRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "started_at",
+          "principal",
+          "checks",
+          "outcome",
+          "first_deny",
+          "policy_version"
+        ],
+        "title": "RequestSummary",
         "type": "object"
       },
       "SearchRequest": {
@@ -1796,6 +2143,71 @@
         "summary": "Ingest"
       }
     },
+    "/v1/overview": {
+      "get": {
+        "description": "Requests checked and blocked in the window, the top deny reasons and today's token budget.\n\nIt counts requests (decisions grouped by request id), so the numbers match the request list. A request is\nblocked when any of its decisions was a deny. Requests made only of allowed console reads (`audit.read`,\n`analytics.read`) are left out unless `include_console_reads` is true. A denied console read is never left out.",
+        "operationId": "overview_v1_overview_get",
+        "parameters": [
+          {
+            "description": "Number of days to look back",
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "Number of days to look back",
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Also count requests made only of console reads",
+            "in": "query",
+            "name": "include_console_reads",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Also count requests made only of console reads",
+              "title": "Include Console Reads",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Overview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Overview",
+        "tags": [
+          "console"
+        ]
+      }
+    },
     "/v1/policies": {
       "get": {
         "description": "Every policy version of the tenant, newest first. `default_in_effect` is true when none is active.",
@@ -1949,6 +2361,271 @@
         "summary": "Quality Report",
         "tags": [
           "feedback"
+        ]
+      }
+    },
+    "/v1/reason-codes": {
+      "get": {
+        "description": "The plain-language catalogue of every reason code. It holds no tenant data.",
+        "operationId": "reason_codes_v1_reason_codes_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReasonCode"
+                  },
+                  "title": "Response Reason Codes V1 Reason Codes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reason Codes",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/requests": {
+      "get": {
+        "description": "Decisions grouped by request id, newest request first, with filters and a keyset cursor.\n\nA request is a deny when any of its decisions was a deny. `since` and `until` apply to the time of the\nfirst decision of the request. Requests made only of allowed console reads (`audit.read`, `analytics.read`)\nare left out unless `include_console_reads` is true. A denied console read is never left out.",
+        "operationId": "list_requests_v1_requests_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "outcome",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "allow",
+                    "deny"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outcome"
+            }
+          },
+          {
+            "description": "Only requests with a decision of this action",
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only requests with a decision of this action",
+              "title": "Action"
+            }
+          },
+          {
+            "description": "Only requests of this principal id",
+            "in": "query",
+            "name": "principal",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only requests of this principal id",
+              "title": "Principal"
+            }
+          },
+          {
+            "in": "query",
+            "name": "policy_version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy Version"
+            }
+          },
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          },
+          {
+            "in": "query",
+            "name": "until",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Until"
+            }
+          },
+          {
+            "description": "Also list requests made only of console reads",
+            "in": "query",
+            "name": "include_console_reads",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Also list requests made only of console reads",
+              "title": "Include Console Reads",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Requests",
+        "tags": [
+          "console"
+        ]
+      }
+    },
+    "/v1/requests/{request_id}": {
+      "get": {
+        "description": "One request with its decisions, oldest first. A foreign id and a missing id give the same 404.",
+        "operationId": "get_request_v1_requests__request_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Request",
+        "tags": [
+          "console"
         ]
       }
     },

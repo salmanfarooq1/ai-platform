@@ -18,12 +18,25 @@ class InvalidCursor(ValueError):
     """The cursor is not one `encode_cursor` made."""
 
 
-def encode_cursor(created_at: datetime, row_id: UUID) -> str:
-    raw = json.dumps([created_at.isoformat(), str(row_id)], separators=(",", ":")).encode("utf-8")
+def encode_key_cursor(created_at: datetime, key: str) -> str:
+    """A cursor over `(created_at, key)` where the key is any text, such as a request id."""
+    raw = json.dumps([created_at.isoformat(), key], separators=(",", ":")).encode("utf-8")
     return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
 
 
+def encode_cursor(created_at: datetime, row_id: UUID) -> str:
+    return encode_key_cursor(created_at, str(row_id))
+
+
 def decode_cursor(cursor: str) -> tuple[datetime, UUID]:
+    created_at, row_id = decode_key_cursor(cursor)
+    try:
+        return created_at, UUID(row_id)
+    except ValueError as exc:
+        raise InvalidCursor("invalid cursor") from exc
+
+
+def decode_key_cursor(cursor: str) -> tuple[datetime, str]:
     try:
         raw = base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4))
         stamp, row_id = json.loads(raw)
@@ -34,6 +47,6 @@ def decode_cursor(cursor: str) -> tuple[datetime, UUID]:
             raise ValueError("naive timestamp")
         if not MIN_YEAR <= created_at.year <= MAX_YEAR:
             raise ValueError("timestamp out of range")
-        return created_at, UUID(row_id)
+        return created_at, row_id
     except (binascii.Error, ValueError, TypeError, AttributeError, OverflowError, UnicodeDecodeError) as exc:
         raise InvalidCursor("invalid cursor") from exc
