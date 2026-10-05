@@ -1,6 +1,6 @@
 # Decisions
 
-An index, one line per decision, newest first. The reasoning lives in `docs/ARCHITECTURE.md` (Decision N) and `docs/adr/`. This file only points to it. Log entries may carry the date they were recorded.
+An index, one line per decision, newest first. The reasoning lives in `docs/adr/` and, for Decisions 1 to 30, in `planning/history/ARCHITECTURE_LOG.md`. This file only points to it. Log entries may carry the date they were recorded.
 
 ## Sprint 010: Kafka event bus (ADR-0008)
 - **The Postgres outbox stays the default.** `EVENT_BUS=kafka` only changes where the relay publishes. Kafka is never inside a decision transaction.
@@ -85,4 +85,4 @@ An index, one line per decision, newest first. The reasoning lives in `docs/ARCH
 - **Sprint 000:** Cost stays at free tiers. Any paid dependency is a stop condition.
 
 ## Before Sprint 000
-- **Decisions 1–23:** labs, retrieval, caching, the agent, MCP, cost tracking and the free-tier deploy. See `docs/ARCHITECTURE.md`.
+- **Decisions 1–23:** labs, retrieval, caching, the agent, MCP, cost tracking and the free-tier deploy. See `planning/history/ARCHITECTURE_LOG.md`.

@@ -38,7 +38,7 @@ Deployment is not a concern for now. These wait until it is.
 - **Q4.** For the hosted Neon database: is there a backup or branch to restore from before the first migration (Sprint 002)?
 - **Q6.** The hosted Neon database user: is it the owner role (`neondb_owner`)? Sprint 003 needs a second, non-owner login role for the app so row-level security applies. Creating it on Neon is free; it needs a password set as a Render secret.
 - **B9.** Hosted rollout needs a human: create the `gap_app` role on Neon, set `MIGRATION_DATABASE_URL`, `DATABASE_URL` and `PREVIEW_API_KEY` on Render, create the preview key (steps in `docs/render-deployment.md`). Nothing was run against Neon.
-- **Q10.** The top of `docs/render-deployment.md` says the first deploy was prepared and not yet done, while `README.md` lists live preview URLs. Which is current? Confirm that the hosted services are live and which migration the hosted database is at.
+- **Q10.** The old deployment runbook (`planning/history/render-deployment.md`) said the first deploy was prepared and not yet done, while `README.md` lists live preview URLs. Which is current? Confirm that the hosted services are live and which migration the hosted database is at.
 
 ## Sprint 006
 - **Q16.** Which embedding providers should `EMBED_FALLBACK_MODELS` hold per mode? The setting and the adapter's ordered fallback are built and tested, but the default list is empty in every mode, because no fallback provider has been chosen (and none can be tested without a key). A fallback must emit `EMBEDDING_DIM` (768) wide vectors, or it is refused.

@@ -257,26 +257,26 @@ git push -u origin sprint/009-sandboxed-agents
 ```
 
 ## Sprint 010: Kafka event bus adapter
-Tree `1a5fde8b2e199583eb7c16708b3f6fed54032c72`. This branch starts from `sprint/009-sandboxed-agents`. There are no UI or API changes.
+Tree `9f48d1081335636798ef5e5fd003a498062e9645`. This branch starts from `sprint/009-sandboxed-agents`. There are no UI or API changes.
 
 ```bash
 git switch -c sprint/010-kafka-event-bus sprint/009-sandboxed-agents
 ```
 
 ```bash
-git restore --source=1a5fde8b2e199583eb7c16708b3f6fed54032c72 --staged -- adapters core workers docker-compose.yml pyproject.toml poetry.lock .env.example
+git restore --source=9f48d1081335636798ef5e5fd003a498062e9645 --staged -- adapters core workers docker-compose.yml pyproject.toml poetry.lock .env.example
 git commit -m "feat(events): Kafka event bus adapter with consumer groups and a dead-letter topic"
 ```
 
 ```bash
-git restore --source=1a5fde8b2e199583eb7c16708b3f6fed54032c72 --staged -- tests scripts
+git restore --source=9f48d1081335636798ef5e5fd003a498062e9645 --staged -- tests scripts
 git commit -m "test(events): Kafka contract, ordering, relay restart and dead-letter tests, and the live verify script"
 ```
 
 ```bash
-git restore --source=1a5fde8b2e199583eb7c16708b3f6fed54032c72 --staged -- .
+git restore --source=9f48d1081335636798ef5e5fd003a498062e9645 --staged -- .
 git commit -m "docs(adr): ADR-0008 Kafka section, Kafka runbook and the event bus report"
-git diff --quiet 1a5fde8b2e199583eb7c16708b3f6fed54032c72 HEAD && echo "branch matches the Sprint 010 snapshot"
+git diff --quiet 9f48d1081335636798ef5e5fd003a498062e9645 HEAD && echo "branch matches the Sprint 010 snapshot"
 ```
 
 ```bash

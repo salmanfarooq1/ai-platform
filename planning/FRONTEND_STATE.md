@@ -2,7 +2,7 @@
 
 This is a snapshot for design and content work. It is checked against the code in `ui/` as of Sprint 009. It says plainly what is built, what is a placeholder and what has not been reviewed.
 
-The design rules live in `docs/design/` (index: `docs/UI_GUIDELINES.md`). The may-claim and must-not-claim lists moved to `docs/design/CONTENT_STYLE.md`.
+The design rules live in `docs/design/` (index: `docs/design/README.md`). The may-claim and must-not-claim lists moved to `docs/design/CONTENT_STYLE.md`.
 
 ## 1. The product in one paragraph
 The Governed Agent Platform sits between AI agents (or people) and the things they use: models, tools and document collections called knowledge bases. Every call goes through one gateway. The gateway checks:
