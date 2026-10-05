@@ -4,6 +4,7 @@ from typing import Any, cast
 
 from fastapi import Request
 
+from api.dependencies import adapters_of
 from api.web_edge.session import PREVIEW_REMOVED_SCOPES, WebSession, delete_session, load_session
 from core.identity.models import Principal, PrincipalKind
 
@@ -18,7 +19,8 @@ async def principal_from_session(request: Request, cookie: str) -> tuple[Princip
     needs the principal to still have an unrevoked key. The scopes come from the session (a scope change needs
     a new sign-in). Raises on a Redis or database error: the middleware answers 503.
     """
-    session = await load_session(cast(Any, request.app.state.redis), cookie)
+    cache = adapters_of(request).cache
+    session = await load_session(cache, cookie)
     if session is None:
         return None
     row = await request.app.state.db_pool.fetchrow(
@@ -27,10 +29,9 @@ async def principal_from_session(request: Request, cookie: str) -> tuple[Princip
     if row is None or row["tenant_id"] != session.tenant_id or row["principal_disabled_at"] is not None:
         logger.info("session principal is gone or disabled")
         return None
-    redis = cast(Any, request.app.state.redis)
     if not await _key_is_live(request, session, row["principal_id"]):
         logger.info("session key is revoked or gone")
-        await delete_session(redis, cookie)
+        await delete_session(cache, cookie)
         return None
     principal = Principal(
         id=row["principal_id"], tenant_id=row["tenant_id"],

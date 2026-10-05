@@ -9,19 +9,18 @@ FinOpsMiddleware after every /search and /agent/query response.
 """
 from datetime import datetime, timedelta, timezone
 
-from asyncpg import Pool
 from fastapi import APIRouter, Depends, Query, Request
 
 from api.auth import require_scope
 from api.gateway_deps import entry_action, gateway_context
-from core.database.tenant import tenant_connection
+from core.database.tenant import DbPool, tenant_connection
 from core.identity.models import Principal, Scope
 from gateway import ActionKind, EnforcementContext, require
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
-async def get_db_pool(request: Request) -> Pool:
+async def get_db_pool(request: Request) -> DbPool:
     return request.app.state.db_pool
 
 
@@ -29,7 +28,7 @@ async def get_db_pool(request: Request) -> Pool:
 async def analytics_summary(
     request: Request,
     days: int = Query(default=7, ge=1, le=90, description="Number of days to look back"),
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.KB_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ):

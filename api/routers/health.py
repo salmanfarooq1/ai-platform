@@ -4,9 +4,11 @@ from typing import Any
 
 from fastapi import APIRouter, Request
 
+from api.dependencies import adapters_of
 from api.models.schemas import HealthResponse
-from api.services.cache import redis_health
+from api.services.cache import cache_health
 from config import MODE
+from ports import EmbeddingPort
 
 router = APIRouter()
 _start_time = time.time()
@@ -26,16 +28,15 @@ _EMBED_PROBE_TIMEOUT = 8.0
 _EMBED_COLD_START_RETRY_DELAY = 1.0
 
 
-async def _probe_once() -> str:
-    from core.clients.embeddings import aembed_texts
-    vectors = await asyncio.wait_for(
-        aembed_texts(["health check"]),
+async def _probe_once(embeddings: EmbeddingPort) -> str:
+    result = await asyncio.wait_for(
+        embeddings.embed(["health check"]),
         timeout=_EMBED_PROBE_TIMEOUT,
     )
-    return "ok" if vectors else "error: empty response"
+    return "ok" if result.vectors else "error: empty response"
 
 
-async def _check_embedding() -> str:
+async def _check_embedding(embeddings: EmbeddingPort) -> str:
     """Probe the embedding API, with a lock so concurrent /health requests
     arriving during the stale window do not all fire duplicate probes."""
     def _fresh(now: float) -> bool:
@@ -50,11 +51,11 @@ async def _check_embedding() -> str:
             return _embed_cache["status"]
 
         try:
-            status = await _probe_once()
+            status = await _probe_once(embeddings)
         except Exception:
             await asyncio.sleep(_EMBED_COLD_START_RETRY_DELAY)
             try:
-                status = await _probe_once()
+                status = await _probe_once(embeddings)
             except Exception as e:
                 status = f"error: {str(e)}"
 
@@ -62,6 +63,15 @@ async def _check_embedding() -> str:
         _embed_cache["checked_at"] = time.time()
 
     return _embed_cache["status"]
+
+
+async def _stale_vectors(request: Request) -> int | None:
+    """Chunks embedded with another model or dimension than the active one: search ignores them. None if unknown."""
+    adapters = adapters_of(request)
+    try:
+        return await adapters.knowledge.count_stale_vectors(adapters.embeddings.active_model, adapters.embeddings.active_dim)
+    except Exception:
+        return None
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -73,8 +83,10 @@ async def health_check(request: Request) -> HealthResponse:
     except Exception as e:
         db_status = f"error: {str(e)}"
 
-    redis_status = await redis_health()
-    embed_status = await _check_embedding()
+    adapters = adapters_of(request)
+    redis_status = await cache_health(adapters.cache)
+    embed_status = await _check_embedding(adapters.embeddings)
+    stale_vectors = await _stale_vectors(request)
     all_ok = all(s == "ok" for s in [db_status, redis_status, embed_status])
 
     return HealthResponse(
@@ -85,4 +97,5 @@ async def health_check(request: Request) -> HealthResponse:
         version=request.app.version,
         mode=MODE,
         uptime_seconds=int(time.time() - _start_time),
+        stale_vectors=stale_vectors,
     )

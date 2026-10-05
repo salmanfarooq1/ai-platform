@@ -1,18 +1,21 @@
 import logging
 import time
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from langchain_core.messages import HumanMessage, ToolMessage
-from langgraph.errors import GraphRecursionError
+from langchain_core.messages import ToolMessage
 from pydantic import BaseModel, Field
 
 from api.agent.models import AGENT_MAX_TOKENS
+from api.agent.runner import AGENT_RUN_KIND, AgentRunOutput
 from api.auth import require_kb, require_scope
+from api.dependencies import adapters_of
 from api.gateway_deps import entry_action, gateway_context
 from config import LLM_CONFIG, MODEL_PRICING
 from core.identity.models import Principal, Scope
 from gateway import Action, ActionKind, EnforcementContext, require
 from gateway.estimate import estimate_tokens
+from ports import RunSpec, RunState
 
 logger = logging.getLogger("api.agent")
 router = APIRouter(prefix="/agent", tags=["agent"])
@@ -89,43 +92,35 @@ async def agent_query(
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> AgentResponse:
     start = time.perf_counter()
+    adapters = adapters_of(request)
+    # The run's id is fixed before the first check, so every decision this request causes carries it.
+    execution_id = uuid4()
+    ctx.execution_id = execution_id
     # The gateway decides first: scope, input guardrails, rate limit and daily token budget.
     await require(ctx, entry_action(request.url.path, ActionKind.AGENT_RUN, input_text=payload.question))
-    await require_kb(request.app.state.db_pool, principal, payload.namespace)
+    await require_kb(adapters.knowledge, principal, payload.namespace)
     # The model must be allowed before the run starts (each LLM call inside the run is checked again).
     await require(ctx, Action(
         ActionKind.MODEL_INVOKE, LLM_CONFIG["model"], estimated_tokens=estimate_tokens(payload.question, AGENT_MAX_TOKENS),
         input_text=payload.question,
     ))
 
-    graph = request.app.state.agent_graph  # compiled once at startup (see main.py)
-
-    # Generous upper bound, not a tight derivation.
-    base_round = payload.max_iterations * 2 + 2
-    recursion_limit = base_round * (1 + payload.max_verify_retries) + payload.max_verify_retries + 5
-
+    # The run goes through the AgentRuntime port (ADR-0009). The graph was compiled once at startup (main.py).
+    handle = await adapters.runtime.start(RunSpec(
+        kind=AGENT_RUN_KIND, input=payload.model_dump(), tenant_id=principal.tenant_id, context=ctx,
+        execution_id=execution_id,
+    ))
     try:
-        result = await graph.ainvoke(
-            {
-                "messages": [HumanMessage(content=payload.question)],
-                # Both reducer typed lists MUST be initialized here.
-                # Omitting them raises InvalidUpdateError the first time
-                # agent_node tries to append.
-                "reasoning_usage": [],
-                "verifier_usage": [],
-                "synthesis_usage": [],
-                "enable_verifier": payload.enable_verifier,
-                "verify_retries_left": payload.max_verify_retries,
-            },
-            # The enforcement context (boundary, never the raw principal) reaches the nodes and tools through
-            # `configurable`, never through model-controlled arguments.
-            config={"recursion_limit": recursion_limit, "configurable": {"gateway": ctx}},
-        )
-    except GraphRecursionError:
-        logger.warning(
-            "[agent] hit recursion_limit=%d before converging, question=%r",
-            recursion_limit, payload.question,
-        )
+        outcome = await adapters.runtime.wait(handle.run_id)
+    finally:
+        # Also on a client disconnect (the handler is cancelled): cleanup stops a run that is still going.
+        await adapters.runtime.cleanup(handle.run_id)
+
+    if outcome.status.state is not RunState.SUCCEEDED:
+        logger.error("[agent] run %s ended %s: %s", handle.run_id, outcome.status.state.value, outcome.status.error)
+        raise HTTPException(status_code=500, detail=f"Agent execution failed: {outcome.status.error}")
+    output: AgentRunOutput = outcome.output
+    if output.result is None:
         return AgentResponse(
             question=payload.question,
             answer=(
@@ -137,9 +132,7 @@ async def agent_query(
             tool_calls_made=0,
             total_time_seconds=round(time.perf_counter() - start, 3),
         )
-    except Exception as e:
-        logger.error("[agent] graph execution failed: %s", e)
-        raise HTTPException(status_code=500, detail=f"Agent execution failed: {str(e)}")
+    result = output.result
 
     reasoning_steps = []
     tool_call_count = 0

@@ -62,6 +62,8 @@ class HealthResponse(BaseModel):
     version: str
     mode: str = ""               # "local", "public-preview", or "prod"
     uptime_seconds: int = 0
+    # Chunks embedded with another model or dimension than the active one. Search ignores them. None: unknown.
+    stale_vectors: int | None = None
 
 class Citation(BaseModel):
     """A reference to the specific chunk from the DB that supported the answer."""

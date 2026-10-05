@@ -1,12 +1,16 @@
 import logging
+from collections.abc import Mapping
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.routing import Route
 
+from adapters.registry import build_adapters
 from api.agent.graph import build_agent_graph
 from api.agent.router import router as agent_router
+from api.agent.runner import make_agent_runner
 from api.errors import register_exception_handlers
 from api.mcp.transport import handle_messages, handle_sse, init_mcp_context
 from api.middleware.auth import AuthMiddleware
@@ -21,7 +25,6 @@ from api.routers.feedback import router as feedback_router
 from api.routers.health import router as health_router
 from api.routers.ingest import router as ingest_router
 from api.routers.search import router as search_router
-from api.services.cache import close_redis, create_semantic_cache_index, get_redis
 from api.versioning import API_PREFIX
 from api.web_edge.routes import router as session_router
 from core.database.pool import create_pool
@@ -34,32 +37,44 @@ logger = logging.getLogger("api.main")
 settings = get_settings()
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # STARTUP
-    app.state.db_pool = await create_pool()
-    app.state.jwt_verifier = JwtVerifier.from_settings(settings)
-    app.state.agent_graph = build_agent_graph(app.state.db_pool)
-    app.state.redis = await get_redis()
-    app.state.gateway_runtime = GatewayRuntime(pool=app.state.db_pool, get_redis=get_redis)
-    await create_semantic_cache_index()
-    init_mcp_context(app.state.db_pool)
-    logger.info("startup complete: DB pool, agent graph, Redis, semantic cache, MCP context ready")
+def _lifespan(adapter_overrides: Mapping[str, Any] | None):
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # STARTUP
+        app.state.db_pool = await create_pool()
+        app.state.jwt_verifier = JwtVerifier.from_settings(settings)
+        # The composition root: one adapter per port, built from Settings (adapters/registry.py). The runtime's
+        # runner reads the agent graph from app.state, because the graph itself is built from these adapters.
+        app.state.adapters = build_adapters(
+            settings, pool=app.state.db_pool, agent_runner=make_agent_runner(lambda: app.state.agent_graph),
+            overrides=adapter_overrides,
+        )
+        adapters = app.state.adapters
+        app.state.agent_graph = build_agent_graph(adapters)
+        app.state.gateway_runtime = GatewayRuntime(pool=app.state.db_pool, cache=adapters.cache, events=adapters.events)
+        await adapters.cache.ensure_semantic_index()
+        init_mcp_context(app.state.db_pool, adapters)
+        logger.info("startup complete: DB pool, adapters, agent graph, semantic cache, MCP context ready")
 
-    yield
+        yield
 
-    # SHUTDOWN
-    await close_redis()
-    await app.state.db_pool.close()
-    logger.info("shutdown complete: DB pool and Redis pool closed")
+        # SHUTDOWN
+        await adapters.cache.close()
+        await app.state.db_pool.close()
+        logger.info("shutdown complete: DB pool and cache closed")
+
+    return lifespan
 
 
-def create_app() -> FastAPI:
-    """Build the application. A factory so tests can get a fresh app with its own lifespan."""
+def create_app(adapter_overrides: Mapping[str, Any] | None = None) -> FastAPI:
+    """Build the application. A factory so tests can get a fresh app with its own lifespan.
+
+    `adapter_overrides` puts other adapters behind named ports (tests pass fakes), see `adapters/registry.py`.
+    """
     app = FastAPI(
         title="RAG Platform API",
         version="0.4.0",
-        lifespan=lifespan,
+        lifespan=_lifespan(adapter_overrides),
     )
 
     register_exception_handlers(app)

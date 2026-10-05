@@ -30,6 +30,12 @@ class DecisionSummary(BaseModel):
     stage: str
     reason: str
     policy_version: int | None
+    # The agent run (ADR-0009) this decision belongs to; None for a decision outside any run.
+    execution_id: UUID | None = None
+    # The run's status from the AgentRuntime, on the `agent.run` decision of a run it still tracks: `running`,
+    # `succeeded`, `failed` or `stopped`. None when the run is not tracked (denied before it started, or the
+    # in-process runtime restarted).
+    run_status: str | None = None
 
 
 class DecisionDetail(DecisionSummary):

@@ -8,7 +8,7 @@ rather than invoking them like a function.
 import json
 import logging
 
-from api.mcp.context import gate, scope_denied, session_pool, session_tenant
+from api.mcp.context import gate, scope_denied, session_adapters, session_pool, session_tenant
 from api.mcp.server import mcp
 from config import FEATURES
 from core.database.tenant import tenant_connection
@@ -21,19 +21,18 @@ logger = logging.getLogger("api.mcp.resources")
 @mcp.resource("rag://config/namespaces")
 async def resource_namespaces() -> str:
     """The caller's knowledge bases with descriptions."""
-    tenant_id, pool = session_tenant(), session_pool()
+    tenant_id, pool, adapters = session_tenant(), session_pool(), session_adapters()
     if tenant_id is None:
         return json.dumps({"error": "unauthenticated"})
     if (denied := scope_denied(Scope.KB_READ)) is not None:
         return denied
-    if pool is None:
+    if pool is None or adapters is None:
         return json.dumps({"error": "Database pool not available"})
     ctx = await gate(Action(ActionKind.TOOL_CALL, "resource_namespaces"), Action(ActionKind.KB_READ))
     visible = ctx.boundary.visible_kbs()
     try:
-        async with tenant_connection(pool, tenant_id) as conn:
-            rows = await conn.fetch("SELECT slug, description FROM knowledge_bases ORDER BY slug")
-        return json.dumps({r["slug"]: r["description"] for r in rows if visible is None or r["slug"] in visible}, indent=2)
+        knowledge_bases = await adapters.knowledge.list_knowledge_bases(tenant_id)
+        return json.dumps({slug: description for slug, description in knowledge_bases.items() if visible is None or slug in visible}, indent=2)
     except Exception as e:
         logger.error("[mcp/resource_namespaces] %s", e)
         return json.dumps({"error": str(e)})

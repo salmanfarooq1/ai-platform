@@ -1,19 +1,19 @@
 import asyncio
 
-from asyncpg import Pool
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 
 from api.auth import require_kb, require_scope
+from api.dependencies import adapters_of
 from api.gateway_deps import entry_action, gateway_context
 from api.models.schemas import SearchRequest, SearchResponse, SearchResult
 from api.services.cache import (
-    embed_query,
     get_cached_response,
     semantic_cache_lookup,
     semantic_cache_store,
     set_cached_response,
 )
+from api.services.embedding import embed_query
 from api.services.llm import GENERATION_MAX_TOKENS, generate_with_routing
 from api.services.retriever import RetrieverConfig, retrieve
 from config import FEATURES, LLM_CONFIG
@@ -24,26 +24,23 @@ from gateway.estimate import estimate_tokens
 router = APIRouter()
 
 
-async def get_db_pool(request: Request) -> Pool:
-    return request.app.state.db_pool
-
-
 @router.post("/search", response_model=SearchResponse)
 async def search(
     request: Request,
     payload: SearchRequest,
-    pool: Pool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.QUERY)),
     ctx: EnforcementContext = Depends(gateway_context),
 ):
     tenant_id = principal.tenant_id
+    adapters = adapters_of(request)
+    embed_model = adapters.embeddings.active_model
 
     # Step -1: the gateway decides first: scope and policy for this KB, input guardrails, rate limit and
     # daily token budget. A denial is a 403 (policy), 400 (guardrail), 429 (limits) or 503 (Redis down).
     await require(ctx, entry_action(request.url.path, ActionKind.KB_READ, payload.namespace, input_text=payload.query))
 
     # Step -0.5: the knowledge base must be one of the caller's own (404 otherwise, no existence leak)
-    await require_kb(pool, principal, payload.namespace)
+    await require_kb(adapters.knowledge, principal, payload.namespace)
 
     # Step 0: the model that will answer must be allowed, checked before any cache, embedding or LLM I/O.
     await require(ctx, Action(
@@ -66,8 +63,8 @@ async def search(
     # Cheapest possible check with pure Redis GET, no embedding, no DB, no LLM.
     # If this hits, we're done in ~1ms.
     exact_hit = await get_cached_response(
-        tenant_id, payload.query, payload.namespace, payload.top_k,
-        payload.retrieval_mode, effective_rerank,
+        adapters.cache, tenant_id, payload.query, payload.namespace, payload.top_k,
+        payload.retrieval_mode, effective_rerank, embed_model,
     )
     if exact_hit:
         request.state.usage = {"cache": "exact_hit", "total_cost": 0.0, "namespace": payload.namespace}
@@ -81,7 +78,7 @@ async def search(
     # Embedding is needed for both semantic cache lookup AND vector search.
     # Compute once, use twice but don't embed twice.
     try:
-        query_embedding = await embed_query(payload.query)
+        query_embedding = await embed_query(adapters.embeddings, payload.query)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Embedding provider failed: {str(e)}")
 
@@ -89,8 +86,8 @@ async def search(
     # Slightly more expensive than exact (vector search in Redis) but still
     # orders of magnitude cheaper than a DB + LLM round trip.
     semantic_hit = await semantic_cache_lookup(
-        tenant_id, payload.query, payload.namespace, query_embedding,
-        payload.retrieval_mode, effective_rerank, payload.top_k,
+        adapters.cache, tenant_id, payload.query, payload.namespace, query_embedding.vectors[0],
+        payload.retrieval_mode, effective_rerank, payload.top_k, query_embedding.model,
     )
     if semantic_hit:
         request.state.usage = {"cache": "semantic_hit", "total_cost": 0.0, "namespace": payload.namespace}
@@ -108,7 +105,7 @@ async def search(
     )
 
     raw_chunks = await retrieve(
-        pool=pool,
+        store=adapters.knowledge,
         query=payload.query,
         query_embedding=query_embedding,
         namespace=payload.namespace,
@@ -150,7 +147,7 @@ async def search(
 
     try:
         # generate_with_routing classifies complexity, picks model, generates
-        answer_obj, usage_dict = await generate_with_routing(payload.query, db_chunks)
+        answer_obj, usage_dict = await generate_with_routing(adapters.llm, payload.query, db_chunks)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"LLM provider failed: {str(e)}")
 
@@ -190,12 +187,12 @@ async def search(
     # without blocking the response. If Redis is down, the functions log
     # a warning internally and swallow the error.
     asyncio.create_task(set_cached_response(
-        tenant_id, payload.query, payload.namespace, payload.top_k, response_data,
-        payload.retrieval_mode, effective_rerank,
+        adapters.cache, tenant_id, payload.query, payload.namespace, payload.top_k, response_data,
+        payload.retrieval_mode, effective_rerank, embed_model,
     ))
     asyncio.create_task(semantic_cache_store(
-        tenant_id, payload.query, payload.namespace, query_embedding, response_data,
-        payload.retrieval_mode, effective_rerank, payload.top_k,
+        adapters.cache, tenant_id, payload.query, payload.namespace, query_embedding.vectors[0], response_data,
+        payload.retrieval_mode, effective_rerank, payload.top_k, query_embedding.model,
     ))
 
     response = JSONResponse(content=response_data)

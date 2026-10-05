@@ -58,12 +58,13 @@ LLM_CONFIG: dict[str, Any] = {
     #          talk to, so the embedding provider has to be a hosted API.
     #          Requires GEMINI_API_KEY. Note that text-embedding-004 is retired
     #          and 404s on current keys.
-    # CAVEAT: there is no embedding fallback in any mode. The fallbacks list
-    # below only covers LLM completion, not embeddings.
+    # Embedding fallbacks (Sprint 006): EMBED_FALLBACK_MODELS is an ordered list the embedding adapter
+    # (adapters/litellm_embeddings.py) tries when the primary fails, refusing any model whose width is not
+    # EMBEDDING_DIM. The "fallbacks" list below is only for LLM completion.
     #
     # Every mode ends up at EMBEDDING_DIM (768) to match the VECTOR(768) column
     # in the Alembic baseline (migrations/versions/0001_baseline.py). Where the provider is wider than that,
-    # core/clients/embeddings.py requests the narrower width and renormalizes.
+    # adapters/litellm_embeddings.py requests the narrower width and renormalizes.
     # Switching to a provider that cannot emit 768 means a schema change and a
     # full re-ingest.
     "embedding_model": _settings.embed_model,

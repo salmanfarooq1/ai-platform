@@ -8,12 +8,11 @@ scope. The tenant is only ever read from the principal (strict rule 1), never fr
 import logging
 from collections.abc import Awaitable, Callable
 
-from asyncpg import Pool
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from core.database.tenant import tenant_connection
 from core.identity.models import Principal, Scope
+from ports import KnowledgeStore
 
 # Declares the bearer scheme in the OpenAPI document. The credential itself is verified by AuthMiddleware.
 _bearer_scheme = HTTPBearer(auto_error=False, description="API key (gap_<prefix>_<secret>) or JWT")
@@ -75,15 +74,13 @@ def require_scope(scope: Scope) -> Callable[[Request], Awaitable[Principal]]:
     return dependency
 
 
-async def require_kb(pool: Pool, principal: Principal, slug: str) -> None:
+async def require_kb(store: KnowledgeStore, principal: Principal, slug: str) -> None:
     """404 `kb_not_found` unless `slug` is one of the caller's own knowledge bases.
 
     A foreign KB and a missing KB give the identical response (no existence leak). Row-level security
     already hides other tenants' rows, so the lookup needs no extra tenant filter.
     """
-    async with tenant_connection(pool, principal.tenant_id) as conn:
-        found = await conn.fetchval("SELECT 1 FROM knowledge_bases WHERE slug = $1", slug)
-    if not found:
+    if not await store.kb_exists(principal.tenant_id, slug):
         raise kb_not_found()
 
 

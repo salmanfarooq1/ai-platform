@@ -9,10 +9,10 @@ import time
 from datetime import datetime, timezone
 from uuid import UUID
 
-from asyncpg import Pool
 from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, Field
 
+from api.dependencies import adapters_of
 from api.errors import error_response
 from api.web_edge.session import (
     COOKIE_NAME,
@@ -25,7 +25,7 @@ from api.web_edge.session import (
     delete_session,
     load_session,
 )
-from core.database.tenant import tenant_connection
+from core.database.tenant import DbPool, tenant_connection
 from core.identity.keys import parse_key
 from core.identity.models import Principal
 from core.identity.store import authenticate_api_key
@@ -77,10 +77,7 @@ async def _sign_in_allowed(request: Request) -> tuple[bool, int]:
     """Fixed window per client IP in Redis. Raises when Redis fails (the caller answers 503)."""
     window = int(time.time()) // SIGN_IN_WINDOW_SECONDS
     key = f"rl:ip:signin:{_client_ip(request)}:{window}"
-    redis = request.app.state.redis
-    count = await redis.incr(key)
-    if count == 1:
-        await redis.expire(key, SIGN_IN_WINDOW_SECONDS + 1)
+    count = await adapters_of(request).cache.incr(key, ttl=SIGN_IN_WINDOW_SECONDS + 1)
     retry_after = SIGN_IN_WINDOW_SECONDS - (int(time.time()) % SIGN_IN_WINDOW_SECONDS)
     return count <= SIGN_IN_LIMIT, retry_after
 
@@ -92,7 +89,7 @@ def _set_cookie(response: Response, session_id: str, settings: Settings) -> None
     )
 
 
-async def _info(pool: Pool, session: WebSession, principal_kind: str) -> SessionInfo:
+async def _info(pool: DbPool, session: WebSession, principal_kind: str) -> SessionInfo:
     async with tenant_connection(pool, session.tenant_id) as conn:
         who = await conn.fetchrow("SELECT name FROM principals WHERE id = $1", session.principal_id)
         tenant = await conn.fetchrow("SELECT slug FROM tenants WHERE id = $1", session.tenant_id)
@@ -123,7 +120,7 @@ async def sign_in(
             "rate_limit_exceeded", f"Too many sign-in attempts. Retry in {retry_after}s.", 429, request,
             headers={"Retry-After": str(retry_after)},
         )
-    pool: Pool = request.app.state.db_pool
+    pool: DbPool = request.app.state.db_pool
     try:
         principal = await authenticate_api_key(pool, body.api_key)
     except Exception:
@@ -143,7 +140,7 @@ async def start_preview(request: Request, response: Response, settings: Settings
     unavailable = error_response("not_found", "Not found", 404, request)
     if settings.mode != "public-preview" or settings.preview_principal_id is None:
         return unavailable
-    pool: Pool = request.app.state.db_pool
+    pool: DbPool = request.app.state.db_pool
     try:
         row = await pool.fetchrow("SELECT * FROM auth_lookup_preview($1)", settings.preview_principal_id)
     except Exception:
@@ -162,7 +159,7 @@ async def start_preview(request: Request, response: Response, settings: Settings
 
 async def _start(request: Request, response: Response, principal: Principal, scopes: frozenset[str], preview: bool, settings: Settings, key_prefix: str | None = None):
     try:
-        session_id, session = await create_session(request.app.state.redis, principal.id, principal.tenant_id, scopes, preview, key_prefix)
+        session_id, session = await create_session(adapters_of(request).cache, principal.id, principal.tenant_id, scopes, preview, key_prefix)
     except Exception:
         logger.error("session store unavailable", exc_info=True)
         return error_response("service_unavailable", "A required service is unavailable. Try again shortly.", 503, request)
@@ -171,7 +168,7 @@ async def _start(request: Request, response: Response, principal: Principal, sco
     except Exception:
         logger.error("could not build the session info, dropping the new session", exc_info=True)
         try:
-            await delete_session(request.app.state.redis, session_id)
+            await delete_session(adapters_of(request).cache, session_id)
         except Exception:
             logger.error("could not delete the new session", exc_info=True)
         return error_response("service_unavailable", "A required service is unavailable. Try again shortly.", 503, request)
@@ -196,10 +193,10 @@ async def sign_out(request: Request, settings: Settings = Depends(edge_settings)
     if cookie:
         try:
             # With a bearer header the middleware skips CSRF, but a cookie here is still a session to protect.
-            live = await load_session(request.app.state.redis, cookie)
+            live = await load_session(adapters_of(request).cache, cookie)
             if live is not None and not csrf_matches(live, request.headers.get(CSRF_HEADER)):
                 return error_response("csrf_failed", "Missing or invalid CSRF token", 403, request)
-            await delete_session(request.app.state.redis, cookie)
+            await delete_session(adapters_of(request).cache, cookie)
         except Exception:
             logger.error("session store unavailable on sign-out", exc_info=True)
             return error_response("service_unavailable", "A required service is unavailable. Try again shortly.", 503, request)

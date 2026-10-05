@@ -13,20 +13,19 @@ joined with usage_log for deeper analysis if needed.
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
-from asyncpg import Pool
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 
 from api.auth import require_scope
 from api.gateway_deps import entry_action, gateway_context
-from core.database.tenant import tenant_connection
+from core.database.tenant import DbPool, tenant_connection
 from core.identity.models import Principal, Scope
 from gateway import ActionKind, EnforcementContext, require
 
 router = APIRouter(tags=["feedback"])
 
 
-async def get_db_pool(request: Request) -> Pool:
+async def get_db_pool(request: Request) -> DbPool:
     return request.app.state.db_pool
 
 
@@ -41,11 +40,11 @@ class FeedbackRequest(BaseModel):
 async def submit_feedback(
     payload: FeedbackRequest,
     request: Request,
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.QUERY)),
     ctx: EnforcementContext = Depends(gateway_context),
 ):
-    """Record a thumbs up or down rating for a specific response.
+    """DbRecord a thumbs up or down rating for a specific response.
 
     request_id must be the X-Query-ID header value from the original
     /search or /agent/query response. This ties the feedback row back
@@ -75,7 +74,7 @@ async def submit_feedback(
 async def quality_report(
     request: Request,
     days: int = Query(default=30, ge=1, le=365, description="Number of days to look back"),
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.KB_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ):

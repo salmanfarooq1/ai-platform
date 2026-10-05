@@ -54,6 +54,18 @@ class Settings(BaseSettings):
     llm_model: str | None = None
     embed_model: str | None = None
     embedding_dim: int = Field(default=768, gt=0)
+    # Ordered, comma separated fallbacks tried when the primary embedding model fails (Sprint 006). A fallback
+    # whose vectors have another width than EMBEDDING_DIM is refused. Empty by default: no provider is invented.
+    embed_fallback_models: str | None = None
+
+    # Object store adapter (ports/objects.py): `local` writes under OBJECT_STORE_DIR, `s3` talks to an S3 API (R2, MinIO).
+    object_store: Literal["local", "s3"] = "local"
+    object_store_dir: str = "data/objects"
+    s3_endpoint_url: str | None = None
+    s3_bucket: str | None = None
+    s3_region: str = "auto"
+    s3_access_key_id: str | None = None
+    s3_secret_access_key: str | None = None
 
     azure_oai_base: str | None = None
     azure_oai_key: str | None = None
@@ -110,6 +122,14 @@ class Settings(BaseSettings):
             raise ValueError("JWT_ISSUER and JWT_AUDIENCE must be set when JWT verification is configured")
         if self.preview_principal_id is not None and self.mode == "prod":
             raise ValueError("PREVIEW_PRINCIPAL_ID must not be set when MODE=prod (preview sessions are for local and public-preview)")
+        if self.object_store == "s3":
+            missing_s3 = [
+                name.upper()
+                for name in ("s3_endpoint_url", "s3_bucket", "s3_access_key_id", "s3_secret_access_key")
+                if not getattr(self, name)
+            ]
+            if missing_s3:
+                raise ValueError(f"{', '.join(missing_s3)} must be set when OBJECT_STORE=s3")
         self.llm_model = self.llm_model or _LLM_MODEL_DEFAULTS[self.mode]
         self.embed_model = self.embed_model or _EMBED_MODEL_DEFAULTS[self.mode]
         return self
@@ -129,6 +149,11 @@ class Settings(BaseSettings):
         if self.mode == "local" and self.database_url == LOCAL_DATABASE_URL:
             return LOCAL_MIGRATION_DATABASE_URL
         return self.database_dsn
+
+    @property
+    def embed_fallbacks(self) -> list[str]:
+        """The ordered fallback embedding models (blank entries dropped)."""
+        return [m.strip() for m in (self.embed_fallback_models or "").split(",") if m.strip()]
 
     @property
     def jwt_enabled(self) -> bool:

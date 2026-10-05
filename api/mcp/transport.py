@@ -26,27 +26,26 @@ from api.errors import decision_response, error_response
 from api.mcp.context import current_principal
 from api.mcp.server import mcp
 from api.observability import current_request_id, current_trace_id
-from api.services.cache import get_redis
 from api.versioning import API_PREFIX
 from core.database.tenant import DbPool
 from core.identity.models import Principal
 from gateway import Action, ActionKind, Decision, GatewayRuntime, build_context, enforce
 from gateway.limits import LIMITED_PATHS
+from ports import Adapters
 
 logger = logging.getLogger("api.mcp.transport")
 
 sse_transport = SseServerTransport(f"{API_PREFIX}/mcp/messages/")
 
 
-def init_mcp_context(pool: DbPool) -> None:
+def init_mcp_context(pool: DbPool, adapters: Adapters) -> None:
     """Inject shared app resources into MCP server context.
 
-    Called once during FastAPI lifespan startup, after the DB pool
-    is created. Tools read from this dict via
-    mcp._dependency_overrides["app_context"].
+    Called once during FastAPI lifespan startup, after the DB pool and the ports are created. Tools read
+    from this dict via mcp._dependency_overrides["app_context"].
     """
-    mcp._dependency_overrides["app_context"] = {"pool": pool}
-    logger.info("[mcp] Context initialized with DB pool")
+    mcp._dependency_overrides["app_context"] = {"pool": pool, "adapters": adapters}
+    logger.info("[mcp] Context initialized with DB pool and adapters")
 
 
 async def _deny_response(scope: Scope, receive: Receive, send: Send, decision: Decision | None) -> None:
@@ -74,13 +73,14 @@ class SseApp:
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         principal = scope.get("state", {}).get("principal")
-        pool = mcp._dependency_overrides.get("app_context", {}).get("pool")
-        if not isinstance(principal, Principal) or pool is None:
+        app_context = mcp._dependency_overrides.get("app_context", {})
+        pool, adapters = app_context.get("pool"), app_context.get("adapters")
+        if not isinstance(principal, Principal) or pool is None or adapters is None:
             await _deny_response(scope, receive, send, None)  # no verified principal: never open a session
             return
         # Opening a session counts against the principal's rate limit, as it did in the middleware.
         ctx = await build_context(
-            GatewayRuntime(pool, get_redis), principal, current_request_id(), current_trace_id(),
+            GatewayRuntime(pool, adapters.cache, adapters.events), principal, current_request_id(), current_trace_id(),
         )
         decision = await enforce(ctx, Action(ActionKind.KB_READ, rate=scope.get("path") in LIMITED_PATHS))
         if not decision.allowed:

@@ -14,6 +14,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import UUID
 
+from ports import CachePort
+
 COOKIE_NAME = "gap_session"
 CSRF_HEADER = "X-CSRF-Token"
 KEY_PREFIX = "websess:"
@@ -78,7 +80,7 @@ def _seconds(delta: timedelta) -> int:
     return max(1, int(delta.total_seconds()))
 
 
-async def create_session(redis: Any, principal_id: UUID, tenant_id: UUID, scopes: frozenset[str], preview: bool, key_prefix: str | None = None) -> tuple[str, WebSession]:
+async def create_session(cache: CachePort, principal_id: UUID, tenant_id: UUID, scopes: frozenset[str], preview: bool, key_prefix: str | None = None) -> tuple[str, WebSession]:
     """Store a new session. Returns the cookie value (the only time it exists in the clear) and the session."""
     session = WebSession(
         principal_id=principal_id, tenant_id=tenant_id, scopes=scopes,
@@ -86,30 +88,30 @@ async def create_session(redis: Any, principal_id: UUID, tenant_id: UUID, scopes
         key_prefix=key_prefix,
     )
     session_id = secrets.token_urlsafe(32)
-    await redis.set(redis_key(session_id), _encode(session), ex=_seconds(SLIDING_TTL))
+    await cache.set(redis_key(session_id), _encode(session), ttl=_seconds(SLIDING_TTL))
     return session_id, session
 
 
-async def load_session(redis: Any, session_id: str) -> WebSession | None:
+async def load_session(cache: CachePort, session_id: str) -> WebSession | None:
     """The live session for a cookie value, or None. A hit slides the TTL, never past the 24 hour cap.
 
-    Raises on a Redis error: the caller answers 503 (fail closed).
+    Raises `CacheUnavailable` on a cache error: the caller answers 503 (fail closed).
     """
     key = redis_key(session_id)
-    raw = await redis.get(key)
+    raw = await cache.get(key)
     if raw is None:
         return None
     session = _decode(raw)
     now = datetime.now(timezone.utc)
     if session is None or now >= session.absolute_expiry:
-        await redis.delete(key)
+        await cache.delete(key)
         return None
-    await redis.expire(key, _seconds(min(SLIDING_TTL, session.absolute_expiry - now)))
+    await cache.expire(key, _seconds(min(SLIDING_TTL, session.absolute_expiry - now)))
     return session
 
 
-async def delete_session(redis: Any, session_id: str) -> None:
-    await redis.delete(redis_key(session_id))
+async def delete_session(cache: CachePort, session_id: str) -> None:
+    await cache.delete(redis_key(session_id))
 
 
 def csrf_matches(session: WebSession, supplied: str | None) -> bool:

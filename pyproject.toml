@@ -33,6 +33,7 @@ dependencies = [
     "opentelemetry-exporter-otlp-proto-http (>=1.45.0,<2.0.0)",
     "pyjwt (>=2.15.1,<3.0.0)",
     "cryptography (>=50.0.2,<51.0.0)",
+    "boto3 (>=1.43.108,<2.0.0)",
 ]
 
 
@@ -83,7 +84,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["api", "core", "gateway"]
+source = ["api", "core", "gateway", "ports", "adapters"]
 omit = ["*/tests/*"]
 
 [tool.ruff]
@@ -97,7 +98,7 @@ ignore = ["E501"]  # line length handled by formatter, not linter
 
 [tool.mypy]
 python_version = "3.11"
-files = ["api", "core", "gateway", "config.py"]
+files = ["api", "core", "gateway", "ports", "adapters", "config.py"]
 ignore_missing_imports = true
 warn_unused_ignores = true
 check_untyped_defs = true
@@ -109,9 +110,10 @@ disallow_untyped_calls = false
 warn_return_any = false
 exclude = ["^migrations/"]
 
-# Strict for the new modules (Sprint 002). Everything else is non-strict for now.
+# Strict for the new modules (Sprint 002), and for the ports and adapters (Sprint 006: they are the contracts).
+# Everything else is non-strict for now.
 [[tool.mypy.overrides]]
-module = ["core.settings", "api.errors", "api.observability", "api.versioning"]
+module = ["core.settings", "api.errors", "api.observability", "api.versioning", "ports", "ports.*", "adapters", "adapters.*"]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 disallow_any_generics = true

@@ -4,8 +4,10 @@ from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 from core.identity.models import Principal
+from ports import CachePort, EventBus
 
 if TYPE_CHECKING:
     from gateway.boundary import ExecutionBoundary
@@ -79,10 +81,12 @@ Recorder = Callable[["EnforcementContext", Action, Decision], Awaitable[None]]
 
 @dataclass
 class GatewayRuntime:
-    """Process-wide handles the gateway needs: the (app-role) pool and a Redis getter."""
+    """Process-wide handles the gateway needs: the (app-role) pool, the cache port (rate limit and budget
+    counters) and the event bus that gets one `platform.gateway.decision.v1` event per recorded decision."""
 
     pool: Any
-    get_redis: Callable[[], Awaitable[Any]]
+    cache: CachePort
+    events: EventBus | None = None
 
 
 @dataclass
@@ -99,3 +103,5 @@ class EnforcementContext:
     tool_calls: int = 0
     denials: list[Decision] = field(default_factory=list)
     halted: str | None = None  # set by the agent when a denial ends its loop
+    # The run this request belongs to (ADR-0009). Written into every decision the run causes.
+    execution_id: UUID | None = None

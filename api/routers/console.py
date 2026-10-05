@@ -8,11 +8,11 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Literal
 from uuid import UUID
 
-from asyncpg import Pool, Record
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 import config
 from api.auth import require_scope
+from api.dependencies import adapters_of
 from api.gateway_deps import gateway_context
 from api.models.console import (
     DecisionDetail,
@@ -41,7 +41,8 @@ from api.models.console import (
     UsageTotals,
 )
 from api.services.cursor import InvalidCursor, decode_cursor, decode_key_cursor, encode_cursor, encode_key_cursor
-from core.database.tenant import tenant_connection
+from api.services.run_status import with_run_status
+from core.database.tenant import DbPool, DbRecord, tenant_connection
 from core.identity.models import Principal, Scope
 from gateway import Action, ActionKind, DependencyUnavailable, EnforcementContext, require
 from gateway.limits import read_budget_used
@@ -54,12 +55,12 @@ TRACE_CAP = 200
 
 _DECISION_COLUMNS = """
     d.id, d.created_at, d.request_id, d.principal_id, p.name AS principal_name,
-    d.action, d.resource, d.outcome, d.stage, d.reason, d.policy_version
+    d.action, d.resource, d.outcome, d.stage, d.reason, d.policy_version, d.execution_id
 """
 _DECISION_FROM = "FROM gateway_decisions d LEFT JOIN principals p ON p.id = d.principal_id"
 
 
-async def get_db_pool(request: Request) -> Pool:
+async def get_db_pool(request: Request) -> DbPool:
     return request.app.state.db_pool
 
 
@@ -68,14 +69,14 @@ async def _read(ctx: EnforcementContext, resource: str) -> None:
     await require(ctx, Action(ActionKind.AUDIT_READ, resource=resource))
 
 
-def _summary(row: Record) -> DecisionSummary:
+def _summary(row: DbRecord) -> DecisionSummary:
     principal = None
     if row["principal_id"] is not None:
         principal = PrincipalRef(id=row["principal_id"], name=row["principal_name"])
     return DecisionSummary(
         id=row["id"], created_at=row["created_at"], request_id=row["request_id"], principal=principal,
         action=row["action"], resource=row["resource"], outcome=row["outcome"], stage=row["stage"],
-        reason=row["reason"], policy_version=row["policy_version"],
+        reason=row["reason"], policy_version=row["policy_version"], execution_id=row["execution_id"],
     )
 
 
@@ -85,6 +86,7 @@ def _not_found(what: str) -> HTTPException:
 
 @router.get("/decisions", response_model=DecisionPage)
 async def list_decisions(
+    request: Request,
     outcome: Literal["allow", "deny"] | None = None,
     action: str | None = None,
     by_principal: UUID | None = Query(default=None, alias="principal", description="Only decisions of this principal id"),
@@ -94,7 +96,7 @@ async def list_decisions(
     until: datetime | None = None,
     cursor: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> DecisionPage:
@@ -138,13 +140,15 @@ async def list_decisions(
         rows = await conn.fetch(sql, *args)
     page = rows[:limit]
     next_cursor = encode_cursor(page[-1]["created_at"], page[-1]["id"]) if len(rows) > limit else None
-    return DecisionPage(items=[_summary(r) for r in page], next_cursor=next_cursor)
+    items = await with_run_status(adapters_of(request).runtime, principal.tenant_id, [_summary(r) for r in page])
+    return DecisionPage(items=items, next_cursor=next_cursor)
 
 
 @router.get("/decisions/{decision_id}", response_model=DecisionDetail)
 async def get_decision(
+    request: Request,
     decision_id: str,
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> DecisionDetail:
@@ -168,14 +172,15 @@ async def get_decision(
         tenant = await conn.fetchrow("SELECT id, slug FROM tenants WHERE id = $1", principal.tenant_id)
     if tenant is None:
         raise _not_found("Decision")
-    base = _summary(row)
+    [base] = await with_run_status(adapters_of(request).runtime, principal.tenant_id, [_summary(row)])
+    trace = await with_run_status(adapters_of(request).runtime, principal.tenant_id, [_summary(r) for r in trace_rows])
     return DecisionDetail(
         **base.model_dump(), tenant=TenantRef(id=tenant["id"], slug=tenant["slug"]),
-        input_sha256=row["input_hash"], trace=[_summary(r) for r in trace_rows],
+        input_sha256=row["input_hash"], trace=trace,
     )
 
 
-def _policy_version(row: Record) -> PolicyVersion:
+def _policy_version(row: DbRecord) -> PolicyVersion:
     doc = parse_policy(row["document"])
     return PolicyVersion(
         version=row["version"], active=row["active"], created_at=row["created_at"], created_by=row["created_by"],
@@ -188,7 +193,7 @@ def _policy_version(row: Record) -> PolicyVersion:
 
 @router.get("/policies", response_model=PolicyList)
 async def list_policies(
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> PolicyList:
@@ -203,7 +208,7 @@ async def list_policies(
 @router.get("/policies/{version}", response_model=PolicyVersion)
 async def get_policy(
     version: int,
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> PolicyVersion:
@@ -219,7 +224,7 @@ async def get_policy(
 
 @router.get("/principals", response_model=list[PrincipalSummary])
 async def list_principals(
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> list[PrincipalSummary]:
@@ -245,7 +250,7 @@ async def list_principals(
 @router.get("/usage/summary", response_model=UsageSummary)
 async def usage_summary(
     days: int = Query(default=7, ge=1, le=90, description="Number of days to look back"),
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> UsageSummary:
@@ -318,7 +323,7 @@ _GROUPED = """
 """
 
 
-def _request_summary(row: Record, name: str | None) -> RequestSummary:
+def _request_summary(row: DbRecord, name: str | None) -> RequestSummary:
     principal = PrincipalRef(id=row["principal_id"], name=name) if row["principal_id"] is not None else None
     first_deny = None
     if row["denied"]:
@@ -335,7 +340,7 @@ def _request_summary(row: Record, name: str | None) -> RequestSummary:
 async def overview(
     days: int = Query(default=7, ge=1, le=90, description="Number of days to look back"),
     include_console_reads: bool = Query(default=False, description="Also count requests made only of console reads"),
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> Overview:
@@ -387,7 +392,7 @@ async def list_requests(
     include_console_reads: bool = Query(default=False, description="Also list requests made only of console reads"),
     cursor: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> RequestPage:
@@ -441,8 +446,9 @@ async def list_requests(
 
 @router.get("/requests/{request_id}", response_model=RequestDetail)
 async def get_request(
+    request: Request,
     request_id: str,
-    pool: Pool = Depends(get_db_pool),
+    pool: DbPool = Depends(get_db_pool),
     principal: Principal = Depends(require_scope(Scope.AUDIT_READ)),
     ctx: EnforcementContext = Depends(gateway_context),
 ) -> RequestDetail:
@@ -471,7 +477,8 @@ async def get_request(
         request_id=request_id, started_at=head["started_at"],
         principal=PrincipalRef(id=who["id"], name=who["name"]) if who is not None else None,
         tenant=TenantRef(id=tenant["id"], slug=tenant["slug"]), policy_version=head["policy_version"],
-        outcome="deny" if head["denied"] else "allow", decisions=[_summary(r) for r in rows],
+        outcome="deny" if head["denied"] else "allow",
+        decisions=await with_run_status(adapters_of(request).runtime, principal.tenant_id, [_summary(r) for r in rows]),
     )
 
 

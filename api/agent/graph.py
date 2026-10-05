@@ -1,5 +1,6 @@
 import json
 import logging
+from collections.abc import Callable
 from operator import add
 from typing import Annotated, TypedDict
 
@@ -15,12 +16,12 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
-from api.agent.models import AGENT_MAX_TOKENS, VERIFIER_MAX_TOKENS, chat_model, completion_cost
+from api.agent.models import AGENT_MAX_TOKENS, VERIFIER_MAX_TOKENS
 from api.agent.tools import gateway_from_config, make_list_namespaces_tool, make_retrieve_tool
 from config import FEATURES, LLM_CONFIG
-from core.database.tenant import DbPool
 from gateway import Action, ActionKind, EnforcementContext, enforce
 from gateway.estimate import estimate_tokens
+from ports import Adapters
 
 logger = logging.getLogger("api.agent.graph")
 
@@ -102,7 +103,7 @@ def _extract_chunks(messages: list[BaseMessage]) -> list[dict]:
     return chunks
 
 
-def _extract_llm_usage(response: BaseMessage) -> dict:
+def _extract_llm_usage(response: BaseMessage, cost_of: Callable[[str, int, int], float] | None = None) -> dict:
     """
     Pull token counts (and cost, if computable) off a single ChatLiteLLM
     response, used for both the reasoning role and the verifier role, so
@@ -115,10 +116,11 @@ def _extract_llm_usage(response: BaseMessage) -> dict:
     completion_tokens = usage.get("completion_tokens", 0)
 
     cost = 0.0
-    try:
-        cost = completion_cost(meta.get("model", LLM_CONFIG["model"]), prompt_tokens, completion_tokens)
-    except Exception:
-        pass  # cost is best effort; token counts are the part we rely on
+    if cost_of is not None:
+        try:
+            cost = cost_of(meta.get("model", LLM_CONFIG["model"]), prompt_tokens, completion_tokens)
+        except Exception:
+            pass  # cost is best effort; token counts are the part we rely on
 
     return {"prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens, "cost": cost}
 
@@ -141,13 +143,20 @@ async def _model_allowed(config: RunnableConfig | None, texts: str, estimated_to
     return decision.allowed
 
 
-async def synthesize_node(state: AgentState, config: RunnableConfig | None = None) -> dict:
+def make_synthesize_node(adapters: Adapters):
+    async def node(state: AgentState, config: RunnableConfig | None = None) -> dict:
+        return await synthesize_node(state, config, adapters)
+
+    return node
+
+
+async def synthesize_node(state: AgentState, config: RunnableConfig | None, adapters: Adapters) -> dict:
     """
     Deterministic finalizer. Always runs once the agent stops requesting
     tools. Not an LLM tool call, so there is no path where a query returns
     an answer without citations, a confidence score, and usage tracking.
     """
-    from api.services.llm import generate_with_routing
+    from api.services.llm import generate_with_routing  # imported here so tests can replace the module attribute
 
     question = str(next(
         (m.content for m in state["messages"] if isinstance(m, HumanMessage)),
@@ -183,7 +192,7 @@ async def synthesize_node(state: AgentState, config: RunnableConfig | None = Non
             "synthesis_usage": [{"prompt_tokens": 0, "completion_tokens": 0, "cost": 0.0}],
         }
 
-    answer_obj, usage_dict = await generate_with_routing(question, db_chunks)
+    answer_obj, usage_dict = await generate_with_routing(adapters.llm, question, db_chunks)
 
     return {
         "final_answer": answer_obj.answer,
@@ -233,10 +242,11 @@ def verify_router(state: AgentState) -> str:
     return "end"
 
 
-def build_agent_graph(pool: DbPool):
-    tools = [make_retrieve_tool(pool), make_list_namespaces_tool(pool)]
-    reasoning_model = chat_model(AGENT_MAX_TOKENS).bind_tools(tools)
-    verifier_model = chat_model(VERIFIER_MAX_TOKENS)
+def build_agent_graph(adapters: Adapters):
+    tools = [make_retrieve_tool(adapters), make_list_namespaces_tool(adapters)]
+    reasoning_model = adapters.chat.chat_model(max_tokens=AGENT_MAX_TOKENS).bind_tools(tools)
+    verifier_model = adapters.chat.chat_model(max_tokens=VERIFIER_MAX_TOKENS)
+    cost_of = adapters.chat.cost
 
     async def agent_node(state: AgentState, config: RunnableConfig) -> dict:
         messages = [SystemMessage(content=AGENT_SYSTEM_PROMPT), *state["messages"]]
@@ -263,7 +273,7 @@ def build_agent_graph(pool: DbPool):
             raise RuntimeError("Reasoning model returned no response")
         return {
             "messages": [response],
-            "reasoning_usage": [_extract_llm_usage(response)],
+            "reasoning_usage": [_extract_llm_usage(response, cost_of)],
         }
 
     async def verify_node_inner(state: AgentState, config: RunnableConfig) -> dict:
@@ -298,7 +308,7 @@ def build_agent_graph(pool: DbPool):
         update = {
             "verified": supported,
             "verification_notes": notes,
-            "verifier_usage": [_extract_llm_usage(response)],
+            "verifier_usage": [_extract_llm_usage(response, cost_of)],
         }
 
         retries_left = state.get("verify_retries_left", 0)
@@ -313,7 +323,7 @@ def build_agent_graph(pool: DbPool):
     graph = StateGraph(AgentState)
     graph.add_node("agent", agent_node)
     graph.add_node("tools", ToolNode(tools))
-    graph.add_node("synthesize", synthesize_node)
+    graph.add_node("synthesize", make_synthesize_node(adapters))
     graph.add_node("verify", verify_node_inner)
 
     graph.set_entry_point("agent")
