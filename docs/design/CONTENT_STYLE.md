@@ -25,6 +25,8 @@ Use these words with these meanings, everywhere.
 | Decision | One check by the gateway and its result, allow or deny. Stored as a row with an id, action, resource, stage, reason, policy version and a hash of the input. |
 | Receipt | The readable view of one decision: ids, policy version, tenant, principal, action, resource, stage, reason and the input hash. It is not a signed document. |
 | Request | One call to the platform. It can cause several decisions, for example a search checks a knowledge base read and a model call. A request id groups them. |
+| Run | One agent request handled by the agent runtime. It has an execution id, and every decision the run causes carries it. Its status is Running, Finished, Failed or Stopped. The runtime keeps status in memory, so an older run says "Not tracked". |
+| Execution id | The id of one run. It groups all the decisions of that run. It is shown in mono and can be copied. |
 | Policy | A tenant's document that narrows what its callers may do: knowledge bases, tools, models, tool calls and tokens. |
 | Policy version | The number of the policy that applied. Each change adds a version. "default" means the tenant had no policy and the platform defaults applied. |
 | Tenant | One organization's isolated space. The database keeps tenants apart. |

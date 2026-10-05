@@ -2,6 +2,50 @@
 
 One short entry per sprint, newest first. Full detail lives in `planning/sprints/`.
 
+## Sprint 006: ports and adapters, event bus, agent runtime
+- **What was built:**
+  - **Ports and adapters (ADR-0005 updated).**
+    - `ports/` holds typed Protocols for the LLM, the agent's chat model, embeddings, the knowledge store, the cache, the object store, the event bus and the agent runtime.
+    - `adapters/` implements them: LiteLLM, Postgres with pgvector, Redis, local disk and S3, and the in-process bus and runtime.
+    - `adapters/registry.py` builds one bundle from settings in the lifespan. Routes, the gateway, the agent and MCP get ports, never SDKs.
+    - Only `adapters/` imports `litellm`, `langchain_litellm`, `boto3` or `redis`. `asyncpg` is allowed only in `adapters/`, `core/database/` and `core/identity/store.py`. Import-lint tests fail on an injected violation of each.
+    - mypy is strict on `ports/` and `adapters/`.
+  - **Embedding provenance (migration `0007`).** Chunks record `embedding_model` and `embedding_dim` (backfilled from the configured model, then not null). Search, text and vector, reads only the active model. Other chunks are ignored and counted in `/v1/health` as `stale_vectors`. The response caches carry the model too.
+  - **Embedding fallback.** `EMBED_FALLBACK_MODELS` is an ordered list. A provider with another vector width is refused and logged.
+  - **Event bus (ADR-0008).** CloudEvents 1.0. The gateway publishes `platform.gateway.decision.v1` for every recorded decision, inside the decision's transaction, with no input text.
+  - **Agent runtime (ADR-0009).** `/v1/agent/query` runs through `start`, `wait` and `cleanup`. Every decision a run causes carries its `execution_id` (nullable column in `0007`). A stop also cancels a tool call in flight.
+  - **UI.** The Agent runs page shows the execution id and the run status from the runtime.
+  - **Tests:** contract suites for every port in `tests/contracts/`. The fakes are adapters behind the same ports, and the test app is built by the registry.
+- **API change:** `/v1/health` gains `stale_vectors`. Console decisions gain `execution_id` and `run_status`. Nothing else visible to clients changed.
+- **Test delta:**
+  - Backend: 875 before, 1084 after, 10 skipped (the live MinIO run only). Unit 543, integration, e2e and contracts 541.
+  - Frontend: 167 Vitest tests (162 before) and 71 Playwright tests (70 before).
+- **Not verified here:** the live MinIO run (image not pullable; `scripts/verify/minio.sh`), the hosted migration, CI on GitHub, and any real provider (the live stale-vector run used fakes behind the ports).
+
+## Sprint 006: ports and adapters, event bus, agent runtime
+- **What was built:**
+  - **Ports and adapters.** Typed ports in `ports/` for the LLM, chat model, embeddings, knowledge store, cache, object store, event bus and agent runtime. Adapters in `adapters/`, with one composition root (`adapters/registry.py`).
+    - `api/`, `core/` and `gateway/` import no provider SDK, and the import-lint tests enforce it.
+    - Each port has a shared contract suite, which the fakes and the real adapters both pass.
+  - **Embedding provenance (migration 0007).** Every vector records its model and dimension.
+    - Search ignores vectors from another model.
+    - `/v1/health` reports `stale_vectors`.
+    - An embedding fallback list refuses a provider whose dimension differs.
+  - **EventBus (ADR-0008).** CloudEvents 1.0 events, with an in-process adapter. Every recorded decision publishes `platform.gateway.decision.v1`, which holds no input text.
+    - An allow whose publish fails is denied with 503.
+    - A deny keeps its record even if the publish fails.
+  - **AgentRuntime (ADR-0009).** It has start, status, wait, stop and cleanup, with an in-process adapter. `/v1/agent/query` runs through it, and every decision of a run carries its `execution_id`. The Agent runs page shows the execution id and status.
+- **Test delta:**
+  - Backend: 875 before, 1097 after. The 10 skips are the live MinIO run, which isn't available here; run `scripts/verify/minio.sh`.
+  - UI: 167 Vitest tests and 71 Playwright tests.
+- **Found and fixed:** the API Docker image didn't copy `ports/` and `adapters/`.
+- **Open:**
+  - Q16: embedding fallback providers.
+  - Q17: deploy 0007 with the new image.
+  - Q18: the agent cost call always fails.
+  - Q19: run status lives in memory until Sprint 007.
+  - Q20: the stale-vector count runs on every health check.
+
 ## Sprint 005b: polish round
 - **What was built:**
   - **Ink-and-paper palette** as DTCG design tokens (`ui/tokens/tokens.json`), built into CSS by Style Dictionary.

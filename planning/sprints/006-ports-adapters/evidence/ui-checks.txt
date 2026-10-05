@@ -1,0 +1,9 @@
+✔︎ /tmp/tokens-srfxtq/tokens.css
+No drift: src/styles/tokens.css is exactly what tokens/tokens.json generates.
+
+> ai-platform-ui@2.0.0 lint
+> eslint . --max-warnings 0
+
+> ai-platform-ui@2.0.0 typecheck
+> tsc --noEmit
+

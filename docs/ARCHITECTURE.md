@@ -112,6 +112,7 @@ Superseded by Decision 26 (Sprint 004): the budget check is the `budget` stage i
 **Trade-off:** Two image variants instead of one. `MODE=prod` deployments must remember to set `INCLUDE_RERANK=true` at build time or reranking silently has no chance to run (the code checks `FEATURES["reranker_enabled"]` first, so it fails at the `get_cross_encoder()` import, not at boot). Measured result: public-preview image dropped from ~600MB to 119MB, steady-state container RSS 240MB against a 512MB budget.
 
 ## Decision 21: Gemini embeddings for public-preview mode, one embeddings client for all call sites
+*(Since Sprint 006 the client is the `EmbeddingPort` adapter `adapters/litellm_embeddings.py`, with an ordered fallback list: Decision 27.)*
 **Context:** Public-preview mode's embedding model defaulted to `ollama/nomic-embed-text`, which resolves to `localhost:11434`. No cloud host runs an Ollama sidecar, so every embed call in a cloud public-preview deployment would have failed, and three call sites (ingestion, semantic cache, health probe) each picked their own model independently.
 **Decision:** Public-preview mode now defaults to `gemini/gemini-embedding-001`. `core/clients/embeddings.py` is the single entry point all three call sites use. The model emits 3072 dims natively; the client requests and renormalizes to 768 to match the existing `VECTOR(768)` schema column, so no migration was needed.
 **Trade-off:** `text-embedding-004` is retired and returns 404 on current API keys, ruling it out as a fallback. Truncating a 3072-dim embedding to 768 and renormalizing is not the same as a model trained natively at 768 dims; retrieval quality at the truncated size has not been benchmarked against the untruncated one.
@@ -152,9 +153,15 @@ Superseded in part by Decision 25 (Sprint 003): `render.yaml` also holds the sec
 **Data:** migration `0005` adds `policies` (append-only versions, one active per tenant, written by the admin CLI) and `gateway_decisions` (insert-only for the app role, SHA-256 of the input, no text). Both have forced row-level security, and the grants to `gap_app` are explicit (SELECT, and SELECT plus INSERT).
 **Trade-off:** decision writes fail closed. If the insert fails on an allow, `enforce()` returns a deny with reason `decision_unrecorded` (503) and the work is not done. A deny stays the deny it was, even if its row cannot be written (ADR-0006). Booking tokens after the work stays best effort, because the tokens are already spent. Every governed call costs one insert, and a request reads the tenant's policy once. The default policy (no row) allows what scopes grant, so a tenant must be given a policy to be restricted. Retention of decision rows is open. OPA, PII redaction, approvals and A2A are deferred behind the `PolicyEngine` seam and the stage list.
 
+## Decision 27: Ports and adapters, an event bus and an agent runtime (Sprint 006, ADRs 0005, 0008, 0009)
+**Context:** `litellm`, `redis` and `asyncpg` were imported across routes, services, the gateway and the agent. Changing a provider touched many files, there was no embedding fallback, nothing said which model made a vector (gaps 5 and 6), and an agent run had no identity of its own.
+**Decision:** The top-level `ports/` package holds typed `Protocol`s (LLM, chat model, embeddings, knowledge store, cache, object store, event bus, agent runtime). `adapters/` implements them (LiteLLM, Postgres with pgvector, Redis, local disk and S3, in-process bus and runtime). `adapters/registry.py` builds one `Adapters` bundle from `Settings` in the lifespan and puts it on `app.state.adapters`. Providers are imported only in `adapters/`, and an import-lint test enforces it. `documents` rows record `embedding_model` and `embedding_dim`; search reads only the active model, and `/v1/health` counts the stale rest. An ordered embedding fallback refuses a different width. The gateway publishes a CloudEvent per recorded decision. `/v1/agent/query` runs through the `AgentRuntime`, and every decision a run causes carries its `execution_id`.
+**Data:** migration `0007` adds the two provenance columns (backfilled from the configured model, then not null), a nullable `gateway_decisions.execution_id`, indexes on both, and the `count_stale_vectors` function (narrow, `SECURITY DEFINER`).
+**Trade-off:** a thin layer of interfaces, and one more hop per call. The usage, feedback, analytics and console queries still use `tenant_connection` directly: they are not knowledge data. Run status and the in-process event bus live in memory; durable versions come with the queue (Sprint 007). A fallback that works can leave rows whose model is not the active one, which health reports as stale.
+
 ## Current state
 
-Where the system stands after Sprint 004. The decisions above hold the reasons; this section holds the shape.
+Where the system stands after Sprint 006. The decisions above hold the reasons; this section holds the shape.
 
 ### Data model (Sprint 003)
 Migration `0002` adds identity and tenancy on top of the `0001` baseline.
@@ -175,6 +182,12 @@ Migration `0002` adds identity and tenancy on top of the `0001` baseline.
 - **Migration chain:** `0001` baseline, `0002` identity and tenancy, `0003` principal lookup, `0004` app-role least privilege, `0005` gateway. All forward-only.
 - **Governance path:** every model, tool and KB call goes through `gateway.enforce()` (Decision 26, ADR-0006). The rate limit and token budget are stages in `gateway/stages.py`, not middleware.
 
+### Ports and adapters (Sprint 006)
+- **Layout:** `ports/` (contracts), `adapters/` (providers), `adapters/registry.py` (composition root), `app.state.adapters` (the bundle), `app.state.gateway_runtime` (`pool`, `cache`, `events`).
+- **Embedding provenance:** `documents.embedding_model` and `embedding_dim` are not null. Search (text and vector) filters on the model and dimension of the query vector. The exact cache key and semantic cache entries carry the model.
+- **Migration chain:** `0001` to `0005` as above, `0006` preview principal lookup, `0007` embedding and run provenance. All forward-only.
+- **Tests:** `tests/contracts/` runs one suite per port against every adapter. The app in the integration and e2e tiers is built by the registry with the fakes the test asks for.
+
 ## Known Open Gaps (Deferred by Design)
 
 - **Real-time citation content validation:** The code validates that a `chunk_id` exists in the database, but does not run an LLM check on the live path to prove the chunk content strictly entails the sentence. Doing this synchronously would add 300ms+ latency and double LLM token cost per request. Offline DeepEval faithfulness scoring measures citation quality in batch. Live citation validation is deferred.
@@ -182,6 +195,8 @@ Migration `0002` adds identity and tenancy on top of the `0001` baseline.
 - **Event-driven CDC cache invalidation:** Cache invalidation uses TTL=3600s. Real-time CDC (Change Data Capture) via Postgres triggers or Redis Pub/Sub would immediately invalidate cached queries when a document changes, but adds background worker complexity. Because compliance documents update quarterly at most, TTL expiry combined with SHA-256 document lifecycle management is an acceptable tradeoff. CDC invalidation is deferred.
 - **`fetch_full_document` tool:** For when a 500-character chunk is not enough surrounding context. Needs to be confirmed against the actual `documents` table schema before building to ensure reassembly by chunk order sorts on how `chunk_index` is actually stored (e.g. inside a metadata JSON column), not row insertion order. Deferred to future work.
 - **Decision record retention:** `gateway_decisions` grows by one row per governed call and has no purge or archive job. Retention is open (`planning/QUESTIONS.md` Q7); Sprint 007 extends the table.
-- **Ingestion runs inside the request:** durable jobs and a worker are Sprint 006.
+- **Ingestion runs inside the request:** durable jobs and a worker are Sprint 007.
+- **Stale vectors are not re-embedded:** after an `EMBED_MODEL` change old chunks are ignored and counted (`stale_vectors`); the re-embedding job needs the queue (Sprint 007).
+- **The object store port has no caller yet:** raw files by hash arrive with the queue (Sprint 007). The live MinIO run is `scripts/verify/minio.sh`.
 - **Old chunks cite `unknown`:** chunks ingested before Sprint 002 have no `source_filename` in metadata until they are re-ingested.
 - **Closed:** the persistent-usage question is answered by Decision 18 (`usage_log`), and the no-identity gap by Decisions 25 and 26.

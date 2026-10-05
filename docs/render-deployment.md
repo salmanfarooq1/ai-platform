@@ -41,7 +41,7 @@ that default could never have worked in the cloud. `/health` would have
 reported the embedding probe down and every search would have failed.
 
 It now defaults to `gemini/gemini-embedding-001`. That model emits 3072 floats
-natively, so `core/clients/embeddings.py` requests 768 and renormalizes the
+natively, so `adapters/litellm_embeddings.py` (formerly `core/clients/embeddings.py`) requests 768 and renormalizes the
 truncated vector, keeping the `VECTOR(768)` column from the Alembic baseline (`migrations/versions/0001_baseline.py`) unchanged.
 
 `text-embedding-004` is retired and returns 404 on current API keys. Do not
@@ -157,7 +157,7 @@ curl -X POST https://<service>.onrender.com/v1/search \
 Note free-tier Render instances spin down after 15 minutes idle and
 cold-start on the next request. Expected on this plan, not a bug.
 
-## Hosted migration checklist (migrations 0001 to 0005)
+## Hosted migration checklist (migrations 0001 to 0007)
 
 One ordered list for moving the hosted stack to the current head. The container start command runs
 `alembic upgrade head`, so migrations that are already applied are skipped. Do the steps in order.
@@ -180,8 +180,13 @@ One ordered list for moving the hosted stack to the current head. The container 
    - `0002` identity and tenancy: backfills every existing row to the tenant `default` (with the knowledge bases `legal`, `kyc_aml`, `default`) and enables row-level security. It drops and recreates indexes on live tables and takes a short lock, so deploy at low traffic.
    - `0003` principal lookup, `0004` least privilege for `gap_app`.
    - `0005` gateway: adds `policies` and `gateway_decisions`, with explicit grants to `gap_app` (SELECT on `policies`; SELECT and INSERT on `gateway_decisions`). No new secret is needed.
+   - `0007` embedding provenance: adds `embedding_model` and `embedding_dim` to `documents` and sets them NOT NULL. See the rule below.
 
-   Existing data stays readable by the `default` tenant. Confirm the head with `poetry run alembic current` (owner URL in `MIGRATION_DATABASE_URL`): it must print `0005`.
+   **Deploy migration `0007` and the new image together.** Old images do not write `embedding_model` or `embedding_dim`. Once `0007` sets the columns NOT NULL, an old image cannot insert a document. So do not run `0007` while an old image is serving, and do not roll back to an old image after it. The start command runs the migration and starts the new image in one deploy, so use that and do not run `alembic upgrade head` by hand ahead of the deploy.
+
+   **Check `EMBED_MODEL` and `EMBEDDING_DIM` before the deploy.** `0007` labels every existing row with the configured `EMBED_MODEL`. The preview corpus was embedded with the public-preview model, so `EMBED_MODEL` on the API service must name that model. A wrong value labels the rows wrongly and retrieval then skips them as stale. `0007` also stops with a clear message if any stored vector is not `EMBEDDING_DIM` wide. It changes nothing in that case. Fix the setting and deploy again.
+
+   Existing data stays readable by the `default` tenant. Confirm the head with `poetry run alembic current` (owner URL in `MIGRATION_DATABASE_URL`): it must print `0007`.
 6. **Create the preview principal and its key** with the admin CLI, from a machine that can reach Neon, using the owner URL. The key is printed once; copy it straight into the Render dashboard:
    ```bash
    export MIGRATION_DATABASE_URL='<owner url>'

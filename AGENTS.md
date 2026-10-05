@@ -21,6 +21,8 @@ The target design and its strict rules live in `docs/architecture/FOUNDATION.md`
 | Path | What |
 |---|---|
 | `api/` | FastAPI app: `routers/`, `middleware/` (auth, then FinOps), `auth.py`, `gateway_deps.py`, `agent/` (LangGraph), `mcp/`, `services/`, `models/` |
+| `ports/` | The contracts for every external provider: typed Protocols and frozen dataclasses. No SDK imports (ADR-0005) |
+| `adapters/` | The only code that imports `litellm`, `langchain_litellm`, `redis`, `boto3`: one adapter per port, and `registry.py`, the composition root that builds them from `Settings` |
 | `gateway/` | The governance path: `enforce()`, `ExecutionBoundary`, policies, stages, rate limit and token budget, decision record (ADR-0006) |
 | `core/` | Ingestion, processing, pipeline, DB pool and tenant-scoped access (`database/tenant.py`), identity (`identity/`), provider clients |
 | `config.py` | All config, selected by `MODE` |
@@ -44,8 +46,8 @@ poetry run uvicorn api.main:app --reload  # run API on :8000 (product routes are
 cd ui && npm ci && npm run dev            # run UI on :5173 (Vite proxies /v1 to :8000)
 poetry run pytest -m unit -q              # unit tests (no external services)
 poetry run pytest -m "integration or e2e" -q -rs  # real Postgres + Redis, fake LLM; skips with a reason if they are down
-poetry run ruff check api/ core/ gateway/ tests/   # lint
-poetry run mypy                           # typecheck (api/ core/ gateway/ config.py)
+poetry run ruff check api core gateway ports adapters tests scripts/e2e   # lint
+poetry run mypy                           # typecheck (api/ core/ gateway/ ports/ adapters/ config.py; strict for ports/ and adapters/)
 poetry run python scripts/update_openapi.py  # refresh docs/openapi.json after an intended API change (unit test fails on drift)
 scripts/check_no_ddl.sh                   # no CREATE/ALTER TABLE outside migrations/
 cd ui && npm run tokens:check && npm run lint && npm run typecheck && npm test -- --run && npm run build && npm run chunk-report && npm run copy-check   # UI checks
@@ -55,8 +57,11 @@ cd ui && npm run e2e                      # Playwright against the real API with
 - **Schema:** Alembic only (`migrations/`, forward-only). Add a migration for any schema change; never edit `0001` or `0002`. Migrations run as the owner role (`MIGRATION_DATABASE_URL`); the app runs as `gap_app` (`DATABASE_URL`).
 - **Identity and tenancy:** every `/v1` route except `/v1/health` needs `Authorization: Bearer <API key or JWT>`. The tenant comes only from the verified credential, never from a header, query or body. Every request-path query goes through `tenant_connection(pool, tenant_id)`; Postgres row-level security does the rest. The app refuses to start as a superuser or `BYPASSRLS` role, so tests and local runs use `gap_app`, never `postgres`. Scopes: `kb:read`, `kb:write`, `query`, `agent`, `audit:read`, `admin`. Browsers sign in at `POST /v1/session` and then use a `gap_session` cookie plus `X-CSRF-Token` (ADR-0007); bearer keys and JWTs work unchanged.
 - **Gateway:** every model, tool and KB call goes through `gateway.enforce()` (routes `require()` it, the agent and MCP tools too); any error is a deny. A tenant narrows what it may do with a policy (`identity.py set-policy <tenant> <file.json>`); with none, scopes grant against the platform defaults. Every call writes a `gateway_decisions` row (SHA-256 of the input, never the text). A failed decision write on an allow is a deny (503 `decision_unrecorded`). Agent tools and MCP code must not import `litellm`, `langchain_litellm` or `asyncpg` (import-lint test). A table added by a migration needs an explicit `GRANT` to `gap_app`.
+- **Ports and adapters:** routes, the gateway, the agent and MCP get their providers as ports from `request.app.state.adapters` (built once in the lifespan by `adapters/registry.py`), never an SDK. Provider SDKs (`litellm`, `langchain_litellm`, `boto3`, `redis`) are imported only in `adapters/`, and `asyncpg` only in `adapters/`, `core/database/` and `core/identity/store.py` (import-lint test, `tests/unit/test_import_lint_ports.py`). Routes that only need a type use `core.database.tenant.DbPool`. Chunks record `embedding_model` and `embedding_dim`; search ignores rows of another model, and `/v1/health` reports them as `stale_vectors`.
+- **How to add a provider:** (1) if the port exists, write `adapters/<name>.py` implementing it, typed strictly (mypy is strict there); (2) choose it in `adapters/registry.py` from a `Settings` value, and validate that value in `core/settings.py`; (3) add the adapter to the port's contract suite in `tests/contracts/` (real and fake must pass the same tests); (4) add a fake to `tests/fakes.py` if tests need one, and give tests the app through `create_app(adapter_overrides={...})`; (5) never import the SDK anywhere else. A new kind of port goes in `ports/` first, with a contract suite, and an ADR if it is a cross-cutting decision.
+- **Events and runs:** the gateway publishes `platform.gateway.decision.v1` (CloudEvents 1.0, no input text) for every recorded decision through the `EventBus` port (ADR-0008). `/v1/agent/query` runs through the `AgentRuntime` port (ADR-0009), and every decision a run causes carries its `execution_id`.
 - **API:** every product route is under `/v1`. Only `/` and `/health` are unversioned. Errors are always `{"error": {"code", "message", "request_id"}}`. 401 = no or bad credential, 403 = missing scope, 404 `kb_not_found` = unknown or foreign knowledge base (same body for both).
-- **Tests:** the integration and e2e tiers need `docker compose up -d postgres redis`. They create a throwaway database, connect as `gap_app`, use fake LLM and embeddings (`tests/fakes.py`), and a guard fixture blocks any real network call. The `tenants` fixture gives two tenants with keys of different scopes.
+- **Tests:** the integration and e2e tiers need `docker compose up -d postgres redis`. They create a throwaway database, connect as `gap_app`, use fake LLM and embeddings (`tests/fakes.py`, fake adapters put behind the ports through the registry), and a guard fixture blocks any real network call. `tests/contracts/` runs one suite per port against every adapter; the live MinIO run is `scripts/verify/minio.sh` (skipped, with a reason, when no MinIO is configured). The `tenants` fixture gives two tenants with keys of different scopes.
 
 ## Read order
 1. `AGENTS.md`

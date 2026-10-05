@@ -193,6 +193,18 @@
             "title": "Created At",
             "type": "string"
           },
+          "execution_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -256,6 +268,17 @@
               }
             ],
             "title": "Resource"
+          },
+          "run_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Status"
           },
           "stage": {
             "title": "Stage",
@@ -329,6 +352,18 @@
             "title": "Created At",
             "type": "string"
           },
+          "execution_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -381,6 +416,17 @@
               }
             ],
             "title": "Resource"
+          },
+          "run_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Status"
           },
           "stage": {
             "title": "Stage",
@@ -548,6 +594,17 @@
           "redis": {
             "title": "Redis",
             "type": "string"
+          },
+          "stale_vectors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stale Vectors"
           },
           "status": {
             "title": "Status",
@@ -2011,7 +2068,7 @@
     },
     "/v1/feedback": {
       "post": {
-        "description": "Record a thumbs up or down rating for a specific response.\n\nrequest_id must be the X-Query-ID header value from the original\n/search or /agent/query response. This ties the feedback row back\nto the exact request in usage_log.",
+        "description": "DbRecord a thumbs up or down rating for a specific response.\n\nrequest_id must be the X-Query-ID header value from the original\n/search or /agent/query response. This ties the feedback row back\nto the exact request in usage_log.",
         "operationId": "submit_feedback_v1_feedback_post",
         "requestBody": {
           "content": {

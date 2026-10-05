@@ -41,3 +41,9 @@ Implement `blueprint.md` and make every check in `acceptance.md` pass, saving ca
 - **Environment:** if Postgres, Redis or dockerd goes down, restart it: `(dockerd > /tmp/dockerd.log 2>&1 &)`, then `docker compose up -d postgres redis`.
 - **MinIO:** image pulls may fail here. If they do, the S3 adapter runs against the contract suite with a fake. Mark the live MinIO run "not verified here" and write `scripts/verify/minio.sh`.
 - **Report:** write `report.md` and the evidence files yourself, and return a summary as text. Don't write commit commands; the Architect writes those.
+
+## Additions after Sprint 005b
+- The UI design sources are now `docs/design/` and the tokens in `ui/tokens/tokens.json`. The UI touch on the Agent runs page follows them. Run `npm run tokens:check`, lint, tsc, vitest, build and Playwright. All must stay green: 162 Vitest tests and 70 Playwright tests today.
+- The backend baseline is 875 tests with 0 skipped.
+- Keep the console-read exclusion in `/v1/overview` and `/v1/requests` working when decisions gain `execution_id`.
+- Add any new reason code to `gateway/reasons.py`. The catalogue tests fail otherwise.

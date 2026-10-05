@@ -47,3 +47,44 @@ This test run checks the working tree, which may already hold later sprints. To 
 ```bash
 git push -u origin sprint/005-frontend-foundation
 ```
+
+## Sprint 005b: polish round
+Tree `1ded4dbfcb89cde2ddcdce1887ecf27bd8c03003`. This branch starts from `sprint/005-frontend-foundation`, so run the Sprint 005 blocks first.
+
+```bash
+git switch -c sprint/005b-polish sprint/005-frontend-foundation
+```
+
+```bash
+git restore --source=1ded4dbfcb89cde2ddcdce1887ecf27bd8c03003 --staged -- planning docs/adr/0010-design-tokens-and-ink-paper-palette.md docs/adr/README.md
+git commit -m "docs: Sprint 005b pack, design decisions and ADR-0010"
+```
+
+```bash
+git restore --source=1ded4dbfcb89cde2ddcdce1887ecf27bd8c03003 --staged -- api gateway tests docs/openapi.json
+git commit -m "feat: overview, grouped requests and plain-language reason codes API"
+```
+
+```bash
+git restore --source=1ded4dbfcb89cde2ddcdce1887ecf27bd8c03003 --staged -- ui/tokens ui/scripts ui/src/styles ui/tailwind.config.ts ui/eslint.config.js ui/package.json ui/package-lock.json
+git commit -m "feat: ink-and-paper design tokens in DTCG format with drift and color guards"
+```
+
+```bash
+git restore --source=1ded4dbfcb89cde2ddcdce1887ecf27bd8c03003 --staged -- ui .github/workflows/frontend.yml scripts/verify
+git commit -m "feat: polish round with overview, request drawer, walkthrough, command palette and new landing page"
+```
+
+```bash
+git restore --source=1ded4dbfcb89cde2ddcdce1887ecf27bd8c03003 --staged -- .
+git commit -m "docs: design doc set, guidelines index and Sprint 005b report"
+git diff --quiet 1ded4dbfcb89cde2ddcdce1887ecf27bd8c03003 HEAD && echo "branch matches the Sprint 005b snapshot"
+```
+
+```bash
+poetry run pytest -q && (cd ui && npm run tokens:check && npm run lint && npx tsc --noEmit && npm test -- --run && npm run build && npx playwright test)
+```
+
+```bash
+git push -u origin sprint/005b-polish
+```

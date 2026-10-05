@@ -1,0 +1,5 @@
+$ poetry run mypy
+Success: no issues found in 110 source files
+
+$ scripts/check_no_ddl.sh
+OK: no CREATE TABLE or ALTER TABLE outside migrations/

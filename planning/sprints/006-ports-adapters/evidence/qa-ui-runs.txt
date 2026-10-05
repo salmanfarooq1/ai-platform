@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 /home/user/ai-platform/ui
+
+ ✓ src/features/runs/runs-page.test.tsx (5 tests) 582ms
+   ✓ RunsPage > lists each run with its execution id and the status the runtime reports 359ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  12:45:34
+   Duration  4.79s (transform 381ms, setup 196ms, collect 2.46s, tests 582ms, environment 912ms, prepare 108ms)
+

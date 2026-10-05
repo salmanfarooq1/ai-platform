@@ -11,3 +11,6 @@
 - [ ] **A9.** EventBus contract suite passes on the in-process adapter. Every recorded decision publishes one `platform.gateway.decision.v1` CloudEvent with no input text. Evidence: `eventbus.txt`
 - [ ] **A10.** AgentRuntime contract suite (start, status, stop, cleanup, stop during a tool call) passes on the in-process adapter. `/v1/agent/query` runs through it. Every decision a run causes carries its `execution_id`. Evidence: `agent-runtime.txt`
 - [ ] **A11.** The Agent runs page shows `execution_id` and the status, with a Vitest test and the Playwright suite still green.
+
+## Sign-off
+Sprint 006 is accepted. The Architect re-ran the checks: 1097 backend tests passed, and the only skips are the 10 live-MinIO runs (not verified here; run `scripts/verify/minio.sh`). 167 Vitest tests and 71 Playwright tests passed. QA findings and their outcomes are in `qa-review.md`.

@@ -1,0 +1,2 @@
+$ poetry run ruff check api core gateway ports adapters tests scripts/e2e
+All checks passed!
