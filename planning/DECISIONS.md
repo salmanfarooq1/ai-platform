@@ -51,3 +51,12 @@ An index, one line per decision, newest first. The reasoning lives in `docs/ARCH
 
 ## Before Sprint 000
 - **Decisions 1–23:** labs, retrieval, caching, the agent, MCP, cost tracking and the free-tier deploy. See `docs/ARCHITECTURE.md`.
+
+## Sprint 008: trust baseline (ADR-0012)
+- **Sprint 008 (2026-10-05):** Decision records are kept 90 days by default (`DECISION_RETENTION_DAYS`), with a per-tenant override (`identity.py set-retention`). This closes Q7. The number is a placeholder, not a legal period: it is recorded here so it can be changed by setting. Rejected: keeping records forever, and a zero-day minimum (the purge function refuses less than one day).
+- **Sprint 008 (QA M2):** Retention has a hard floor of 30 days in the purge function, whatever the caller passes or a tenant stores (`tenants.retention_days` and `DECISION_RETENTION_DAYS` are at least 30; the CLI refuses less). Without the floor a caller could purge its own tenant down to one day. Rejected: trusting the caller's default.
+- **Sprint 008 (QA M1, M3):** Purge checkpoints are written only by the purge function, carry a signature of the receipt key, and verification rejects an unsigned one. An unpriced model is costed at the highest known rate; hosted modes refuse to start for a configured model with no price.
+- **Sprint 008:** The daily cost cap per tenant defaults to 10 USD (`DAILY_COST_CAP_USD`). A tenant policy may lower it, never raise it. The value is a placeholder (Q26).
+- **Sprint 008:** The decision chain is per tenant, takes the next link under an advisory lock, and the receipt signature covers the chain link as well as the decision. Receipts use Ed25519. Rejected: signing each row at write time (a key on the hot path and no way to rotate the signing key without re-signing).
+- **Sprint 008:** `/metrics` is unversioned (Prometheus expects it) and open only when `METRICS_PUBLIC=true` (default true in local, false elsewhere); otherwise it needs `admin`.
+- **Sprint 008:** The eval gate uses the fake LLM and a fixed suite with deterministic DeepEval metrics, and a tolerance of 0.02 on a stored baseline. The real-provider run is a manual script that needs `REAL_EVAL=1`.

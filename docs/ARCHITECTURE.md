@@ -165,6 +165,13 @@ Superseded in part by Decision 25 (Sprint 003): `render.yaml` also holds the sec
 **Data:** migration `0008` adds `jobs`, `outbox` and `processed_events` (forced row-level security; `gap_app` may select, insert and update) and three narrow SECURITY DEFINER functions (`jobs_claim`, `jobs_tenant_of_execution`, `outbox_pending`).
 **Trade-off:** no new service (Postgres is the queue), at the price of polling and a database-sized ceiling. A worker must run, or `EMBEDDED_WORKERS` must be set. Every decision writes an outbox row, and nothing purges the new tables yet (Sprint 008).
 
+## Decision 29: Receipts, retention, the eval gate, a cost cap and metrics (Sprint 008, ADR-0012)
+**Context:** A decision row could be edited or removed without a trace, kept forever, and nothing guarded answer quality, cost or visibility.
+**Decision:** Each decision row joins a per-tenant hash chain (`prev_hash`, `row_hash`, `chain_position`; head in `chain_heads`). `GET /v1/receipts/{id}` signs a decision and its chain link with Ed25519, and `scripts/verify/receipt.py` checks a receipt or a chain offline. Decision records are purged after `DECISION_RETENTION_DAYS` (90) or a tenant's own value, by a `purge_decisions` job through a SECURITY DEFINER function that leaves a chain checkpoint. A `cost` gateway stage (after `budget`) denies with 429 `cost_cap_exceeded` over a per-tenant daily cap, and with Redis down. `scripts/eval/run_gate.py` runs a fixed suite with the fake LLM against a stored baseline in CI. `/metrics` serves Prometheus text from OpenTelemetry instruments; an optional compose profile runs Prometheus and Grafana.
+**Data:** migration `0009` adds the three chain columns, `chain_heads`, `chain_checkpoints`, `eval_runs`, `tenants.retention_days` and four SECURITY DEFINER functions (`decisions_purge_batch`, `retention_due_tenants`, `trust_jobs_by_status`, `trust_outbox_lag`).
+**QA fixes:** purge checkpoints are signed with the receipt key and written only by the purge function; retention has a 30-day floor; an unpriced model is costed at the highest known rate (hosted modes refuse to start for one); the cost cap is checked before and booked after a call, so concurrent calls can overshoot it by one call each.
+**Trade-off:** decision writes of one tenant are serialized by an advisory lock. The chain is tamper evident, not tamper proof (ADR-0012). `jobs`, `outbox`, `processed_events` and raw files still have no purge (Q27).
+
 ## Current state
 
 Where the system stands after Sprint 007. The decisions above hold the reasons; this section holds the shape.
@@ -194,6 +201,11 @@ Migration `0002` adds identity and tenancy on top of the `0001` baseline.
 - **Migration chain:** `0001` to `0005` as above, `0006` preview principal lookup, `0007` embedding and run provenance. All forward-only.
 - **Tests:** `tests/contracts/` runs one suite per port against every adapter. The app in the integration and e2e tiers is built by the registry with the fakes the test asks for.
 
+### Trust (Sprint 008)
+- **Layout:** `gateway/chain.py` (canonical JSON, hashes, chain check), `gateway/receipts.py` (keyring, sign, verify), `gateway/record.py` (chained write), `core/metrics.py`, `api/middleware/metrics.py`, `api/routers/receipts.py`, `api/routers/trust.py`, `workers/handlers/purge.py`, `workers/scheduler.py`, `workers/metrics_server.py`, `scripts/eval/`, `scripts/verify/receipt.py`, `docker/observability/`.
+- **Routes:** `GET /v1/receipts/{id}`, `GET /v1/receipts/keys`, `POST /v1/receipts/verify`, `GET /v1/trust/summary` (all `audit:read`), `GET /metrics` (open when `METRICS_PUBLIC`, else `admin`).
+- **Migration chain:** `0009` trust baseline.
+
 ### Jobs and the outbox (Sprint 007)
 - **Layout:** `core/database/jobs.py` (queue SQL), `workers/` (`loop.py` the worker, `handlers/` ingest and agent run, `embedded.py`, `__main__.py`), `adapters/job_runtime.py` (queued runtime), `adapters/pg_outbox_events.py` (outbox bus, relay, idempotent consumer).
 - **Routes:** `POST /v1/ingest` (202), `GET /v1/jobs`, `GET /v1/jobs/{id}`, `GET /v1/agent/runs`, `GET /v1/agent/runs/{execution_id}`; `POST /v1/agent/query` may answer 202.
@@ -207,7 +219,7 @@ Migration `0002` adds identity and tenancy on top of the `0001` baseline.
 - **Monthly aggregate budget caps:** Daily LLM spend is tracked and capped in Redis to prevent catastrophic runaway costs. Monthly aggregation and billing tier logic require persistent DB rollups and accounting rules, which are deferred because daily caps mitigate 99% of financial risk.
 - **Event-driven CDC cache invalidation:** Cache invalidation uses TTL=3600s. Real-time CDC (Change Data Capture) via Postgres triggers or Redis Pub/Sub would immediately invalidate cached queries when a document changes, but adds background worker complexity. Because compliance documents update quarterly at most, TTL expiry combined with SHA-256 document lifecycle management is an acceptable tradeoff. CDC invalidation is deferred.
 - **`fetch_full_document` tool:** For when a 500-character chunk is not enough surrounding context. Needs to be confirmed against the actual `documents` table schema before building to ensure reassembly by chunk order sorts on how `chunk_index` is actually stored (e.g. inside a metadata JSON column), not row insertion order. Deferred to future work.
-- **Decision record retention:** `gateway_decisions` grows by one row per governed call and has no purge or archive job. Retention is open (`planning/QUESTIONS.md` Q7). `jobs`, `outbox` and `processed_events` have no purge either.
+- **Retention of the other tables:** decision records are purged (Sprint 008, Q7 closed). `jobs`, `outbox`, `processed_events` and raw files have no purge yet (Q27). The chain is not anchored outside Postgres (Q29).
 - **Stale vectors are not re-embedded:** after an `EMBED_MODEL` change old chunks are ignored and counted (`stale_vectors`); the queue now exists, so a re-embedding job can be built on it (not scheduled).
 - **Raw files are stored, never read back by a person:** the object store keeps every upload by SHA-256 and nothing deletes them. The live MinIO run is `scripts/verify/minio.sh`.
 - **Old chunks cite `unknown`:** chunks ingested before Sprint 002 have no `source_filename` in metadata until they are re-ingested.

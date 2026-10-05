@@ -2,6 +2,19 @@
 
 One short entry per sprint, newest first. Full detail lives in `planning/sprints/`.
 
+## Sprint 008: trust baseline
+- **What was built:**
+  - **Receipts and a hash chain (migration `0009`, ADR-0012).** Each decision row links to the one before it per tenant. `GET /v1/receipts/{id}` returns an Ed25519 signed receipt, `GET /v1/receipts/keys` the public keys, `POST /v1/receipts/verify` the same checks as the offline `scripts/verify/receipt.py`. `RECEIPT_SIGNING_KEY` is required outside local mode.
+  - **Retention (Q7).** 90 days by default, per-tenant override, a `purge_decisions` job through a narrow SECURITY DEFINER function, a daily scheduler in the worker, and a chain checkpoint so verification survives a purge.
+  - **Eval gate.** `scripts/eval/run_gate.py` runs a fixed suite with the fake LLM against a stored baseline and fails CI on a regression. `run_real.py` is manual.
+  - **Cost breaker.** A `cost` gateway stage: over the daily cap gives 429 `cost_cap_exceeded`; Redis down denies.
+  - **Metrics.** `/metrics` in Prometheus format, an `observability` compose profile with Prometheus and a provisioned Grafana dashboard.
+  - **UI.** The Trust page verifies receipts, shows retention and the eval gate history. The decision panel has "Verify receipt".
+- **API change:** new `/v1/receipts/*`, `/v1/trust/summary`, `/metrics`. Settings: `RECEIPT_SIGNING_KEY` (required in `public-preview` and `prod`), `DECISION_RETENTION_DAYS`, `DAILY_COST_CAP_USD`, `METRICS_PUBLIC`.
+- **QA fixes:** purge checkpoints are signed and only the purge function writes them (`gap_app` lost INSERT on `chain_checkpoints`); a 30-day floor on retention in the function; an unpriced model costs the highest known rate and hosted modes refuse to start for an unpriced model; unknown HTTP methods share one `OTHER` metric label; `RECEIPT_SIGNING_KEY` is a `SecretStr`; the Trust page shows only signed fields as Verified. Migration `0009` was changed in place (not released).
+- **Test delta:** backend 1188 → 1294 (10 live-MinIO skips), Vitest 182 → 192, Playwright 72 → 77.
+- **Not verified here:** CI on GitHub, the hosted (Neon) migration, a real provider run, a Docker image build.
+
 ## Sprint 007: durable jobs, the outbox and raw storage
 - **What was built:**
   - **Job queue (migration `0008`, ADR-0011).** A `jobs` table with forced row-level security. Workers claim with `FOR UPDATE SKIP LOCKED` through a narrow SECURITY DEFINER function, hold a lease, retry with backoff and end `dead` after the last attempt. An idempotency key is unique per tenant. `python -m workers` handles SIGTERM, writes a health file and logs a line per job. `docker compose` has a `worker` service.

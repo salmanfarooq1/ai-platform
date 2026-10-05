@@ -1,6 +1,6 @@
 # Frontend: current state
 
-This is a snapshot for design and content work. It is checked against the code in `ui/` as of Sprint 007. It says plainly what is built, what is a placeholder and what has not been reviewed.
+This is a snapshot for design and content work. It is checked against the code in `ui/` as of Sprint 008. It says plainly what is built, what is a placeholder and what has not been reviewed.
 
 The design rules live in `docs/design/` (index: `docs/UI_GUIDELINES.md`). The may-claim and must-not-claim lists moved to `docs/design/CONTENT_STYLE.md`.
 
@@ -34,7 +34,7 @@ The stack is React and TypeScript, with Tailwind and hand-built components on Ra
 | Keys and principals | `/app/keys` | Built, read-only. Key prefixes, scopes and dates. Secrets are never shown. |
 | Usage | `/app/usage` | Built. Totals, by principal, by day (chart), and denials by cause. |
 | Agent runs | `/app/runs` | Built. Each run shows its execution id and its status, read from the durable job queue (Sprint 007). A caller sees only runs in knowledge bases its policy allows, and without `audit:read` only its own runs. |
-| Trust | `/app/trust` | **Placeholder.** It says nothing is measured yet. Content arrives in Sprint 008. |
+| Trust | `/app/trust` | Built (Sprint 008). Verify a receipt by decision id or by pasting one: valid or invalid, each check, chain position and key id. The decision panel has a "Verify receipt" link that opens it with the id. Retention settings (read only), the eval gate latest run and history, and a Grafana link when `GRAFANA_URL` is set. Needs `audit:read`. |
 | System | `/app/system` | Built. Health of the API, the database and the cache. |
 
 **Shell.** A grouped sidebar, a top bar with the tenant crumb, a mode chip, a Cmd or Ctrl plus K command palette (go to a screen, find a request id), a theme toggle and a session menu (who you are, tenant, scopes, theme, sign out).
@@ -68,8 +68,8 @@ Browser storage: the allowed `localStorage` keys are `theme`, `density`, `walkth
 
 ## 4. What's measured (and how)
 Evidence files are in `planning/sprints/005b-polish/evidence/`.
-- **Unit tests (Sprint 007):** Vitest and Testing Library, 25 files and 182 tests, all passing. They cover the reason sentence, deny emphasis, the governance line, the overview tiles, the drawer, the command palette, the walkthrough, the session menu, the tokens and the contrast pairs. ESLint and `tsc --noEmit` are clean.
-- **Playwright (Sprint 007):** 72 tests against the real API (fakes for the model and embeddings), all passing. They cover the walkthrough, the governance line and drawer, Overview to the deny-filtered list, the palette, a deny's sentence and policy field, the first-run rule, console views, the session menu, landing, reduced motion, preview, and phone widths.
+- **Unit tests (Sprint 008):** Vitest and Testing Library, 192 tests, all passing. They cover the reason sentence, deny emphasis, the governance line, the overview tiles, the drawer, the command palette, the walkthrough, the session menu, the tokens and the contrast pairs. ESLint and `tsc --noEmit` are clean.
+- **Playwright (Sprint 008):** 77 tests against the real API (fakes for the model and embeddings), all passing. They cover the walkthrough, the governance line and drawer, Overview to the deny-filtered list, the palette, a deny's sentence and policy field, the first-run rule, console views, the session menu, landing, reduced motion, preview, and phone widths.
 - **Accessibility:** axe found 0 violations of any impact on 12 pages and states in each theme (landing, How it works, Overview, Requests list, the drawer, the walkthrough, the palette, the session menu, Ask with an answer, Ask denied, Decisions allowed and denied).
 - **Landing page performance:** Lighthouse 12, run in the build container against `vite preview`. Desktop 99. Mobile 85 (simulated throttling). The ring loads after the load event, so Lighthouse sees little of its cost.
 - **Code splitting:** every route is its own chunk. A grep finds no GSAP or WebGL in any chunk that loads under `/app`.
@@ -82,7 +82,7 @@ Evidence files are in `planning/sprints/005b-polish/evidence/`.
 - **The tenant policy view does not carry `blocked_terms`.** `/v1/policies` returns a document view without that key. So for `query_blocked` the UI never names a policy field. It would name `blocked_terms` if the API returned it.
 - **The walkthrough's normal question can find nothing.** It asks "What topics do these documents cover?" and a knowledge base whose passages share no words with it can answer 404. The walkthrough then says the gateway allowed the call and no passage matched, and still shows the allow decision.
 - **Escalate (needs approval) is designed but not built.** No approval workflow exists in the backend yet. Content must not promise approvals.
-- **Placeholders:** the Trust page is empty. It gets content in Sprint 008.
+- **Trust page:** verification marks only signed fields as verified. Other fields are shown as context.
 - **A worker must run.** Uploads and agent runs stay Queued until a worker process picks them up (`python -m workers` or `EMBEDDED_WORKERS=1`).
 - **No brand name or visual identity beyond the tokens.** The descriptive name is settled. A named identity is still open.
 - **Storybook is not used.** `docs/design/COMPONENTS.md` and the Vitest tests do that job (Q14).

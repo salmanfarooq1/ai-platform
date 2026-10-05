@@ -1,0 +1,8 @@
+...........................                                              [100%]
+=============================== warnings summary ===============================
+tests/e2e/test_trust_summary.py::test_the_eval_gate_history_comes_from_recorded_runs
+  /root/.cache/pypoetry/virtualenvs/ai-platform-OrHxThiT-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+27 passed, 1 warning in 18.38s

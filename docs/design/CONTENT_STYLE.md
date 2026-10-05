@@ -23,7 +23,8 @@ Use these words with these meanings, everywhere.
 | Term | Meaning |
 |---|---|
 | Decision | One check by the gateway and its result, allow or deny. Stored as a row with an id, action, resource, stage, reason, policy version and a hash of the input. |
-| Receipt | The readable view of one decision: ids, policy version, tenant, principal, action, resource, stage, reason and the input hash. It is not a signed document. |
+| Receipt | The readable view of one decision: ids, policy version, tenant, principal, action, resource, stage, reason and the input hash. |
+| Signed receipt | A decision with its place in the tenant's hash chain and an Ed25519 signature. Anyone with the public key can check it offline. The Trust page and `GET /v1/receipts/{id}` give it. |
 | Request | One call to the platform. It can cause several decisions, for example a search checks a knowledge base read and a model call. A request id groups them. |
 | Run | One agent request handled by the agent runtime. It has an execution id, and every decision the run causes carries it. Its status is Running, Finished, Failed or Stopped. The runtime keeps status in memory, so an older run says "Not tracked". |
 | Execution id | The id of one run. It groups all the decisions of that run. It is shown in mono and can be copied. |
@@ -53,12 +54,17 @@ Every reason code has one sentence. The catalogue is `gateway/reasons.py`, serve
 Built and tested. Every claim on a public page maps to one of these items. `ui/src/landing/claims.ts` holds the map, and `npm run copy-check` prints it.
 1. One gateway for every model, tool and knowledge-base call. Agent code does not import the model client, and a test checks this.
 2. Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token limits). They are versioned, and every request is checked against the active version.
-3. A decision record for every call, allow or deny, with a reason, the policy version and an input hash. The input text is not stored.
+3. A decision record for every call, allow or deny, with a reason, the policy version and an input hash. The input text is not stored. (A record can also be signed as a receipt: item 9.)
 4. Tenant isolation enforced by the database.
 5. Fail closed: if a check or the decision record cannot be written, the call is denied.
-6. Rate limits and daily token budgets per tenant.
+6. Rate limits, daily token budgets and a daily cost cap per tenant.
 7. Read-only preview sessions. The API key stays on the server in a secure cookie session.
 8. Works over MCP for agent clients.
+9. Signed receipts: a decision can be signed (Ed25519) together with its place in a per-tenant hash chain, and the receipt can be checked offline with a public key. Say "tamper evident", never "tamper proof".
+10. Retention: decision records are kept for a set period (90 days by default, a tenant may set its own), and a purge leaves a checkpoint so the remaining records still verify.
+11. A daily cost cap per tenant that stops calls when it is reached, and stops them if the check cannot run.
+12. An eval gate in CI: a fixed suite with a stored baseline that fails the build when a score drops. It runs with a fake model, so it guards the code and not a provider.
+13. Metrics in Prometheus format, and an optional Grafana dashboard.
 
 The How it works page also rests on ADR-0006 (the order of the checks, and that the first deny wins).
 
@@ -68,7 +74,7 @@ Planned or not built. Do not write these as if they exist.
 | Planned | Sprint |
 |---|---|
 | Background jobs and live ingestion progress | 007 |
-| Signed receipts, hash chains, retention, metrics dashboards, eval gate | 008 |
+| Anchoring the chain outside the database, signing keys in a managed key service, eval scores from real providers in CI | not scheduled |
 | Sandboxed agent execution (NVIDIA OpenShell) | 009 |
 | Kafka event streaming | 010 |
 | Approvals (escalate), PII redaction, OPA policies | not scheduled |

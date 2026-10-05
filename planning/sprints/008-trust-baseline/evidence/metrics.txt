@@ -1,0 +1,190 @@
+.........                                                                [100%]
+=============================== warnings summary ===============================
+tests/e2e/test_metrics.py::test_metrics_lists_the_series_with_route_templates_and_no_ids
+  /root/.cache/pypoetry/virtualenvs/ai-platform-OrHxThiT-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+9 passed, 1 warning in 5.00s
+name: ai-platform
+services:
+  grafana:
+    profiles:
+      - observability
+    container_name: grafana
+    depends_on:
+      prometheus:
+        condition: service_started
+        required: true
+    environment:
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    image: grafana/grafana:12.0.2
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 3000
+        published: "3000"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/user/ai-platform/docker/observability/grafana/provisioning
+        target: /etc/grafana/provisioning
+        read_only: true
+        bind: {}
+      - type: bind
+        source: /home/user/ai-platform/docker/observability/grafana/dashboards
+        target: /var/lib/grafana/dashboards
+        read_only: true
+        bind: {}
+      - type: volume
+        source: grafana_data
+        target: /var/lib/grafana
+        volume: {}
+  ollama:
+    container_name: ollama
+    image: ollama/ollama
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 11434
+        published: "11434"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: ollama_data
+        target: /root/.ollama
+        volume: {}
+  postgres:
+    container_name: postgres
+    environment:
+      APP_DB_PASSWORD: gap_app
+      POSTGRES_PASSWORD: postgres
+    image: pgvector/pgvector:pg16
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 5432
+        published: "5432"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: pgdata
+        target: /var/lib/postgresql/data
+        volume: {}
+      - type: bind
+        source: /home/user/ai-platform/docker/postgres-init
+        target: /docker-entrypoint-initdb.d
+        read_only: true
+        bind: {}
+  prometheus:
+    profiles:
+      - observability
+    container_name: prometheus
+    extra_hosts:
+      - host.docker.internal=host-gateway
+    image: prom/prometheus:v3.5.0
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 9090
+        published: "9090"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/user/ai-platform/docker/observability/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
+        bind: {}
+      - type: volume
+        source: prometheus_data
+        target: /prometheus
+        volume: {}
+  redis:
+    container_name: redis
+    image: redis/redis-stack-server:latest
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 6379
+        published: "6379"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: redis_data
+        target: /data
+        volume: {}
+  worker:
+    build:
+      context: /home/user/ai-platform
+      dockerfile: Dockerfile
+    command:
+      - python
+      - -m
+      - workers
+      - --concurrency
+      - "2"
+    container_name: worker
+    depends_on:
+      postgres:
+        condition: service_started
+        required: true
+      redis:
+        condition: service_started
+        required: true
+    environment:
+      DATABASE_URL: postgresql://gap_app:gap_app@postgres:5432/rag_platform
+      MODE: local
+      OBJECT_STORE_DIR: /data/objects
+      REDIS_URL: redis://redis:6379
+      WORKER_HEALTH_FILE: /tmp/worker-health
+      WORKER_METRICS_PORT: "9100"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import os, sys, time; sys.exit(0 if time.time() - os.path.getmtime('/tmp/worker-health') < 30 else 1)
+      timeout: 5s
+      interval: 15s
+      retries: 3
+      start_period: 20s
+    image: gap-platform
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: objects
+        target: /data/objects
+        volume: {}
+networks:
+  default:
+    name: ai-platform_default
+volumes:
+  grafana_data:
+    name: ai-platform_grafana_data
+  objects:
+    name: ai-platform_objects
+  ollama_data:
+    name: ai-platform_ollama_data
+  pgdata:
+    name: ai-platform_pgdata
+  prometheus_data:
+    name: ai-platform_prometheus_data
+  redis_data:
+    name: ai-platform_redis_data
+compose config exit=0

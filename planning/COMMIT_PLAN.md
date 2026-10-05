@@ -129,3 +129,44 @@ poetry run pytest -q && (cd ui && npm run tokens:check && npm run lint && npx ts
 ```bash
 git push -u origin sprint/006-ports-adapters
 ```
+
+## Sprint 007: durable jobs, the outbox and raw storage
+Tree `7630b6845d132eb6154e5991893a14ab11739a00`. This branch starts from `sprint/006-ports-adapters`.
+
+```bash
+git switch -c sprint/007-durable-jobs sprint/006-ports-adapters
+```
+
+```bash
+git restore --source=7630b6845d132eb6154e5991893a14ab11739a00 --staged -- migrations core ports adapters workers gateway docker-compose.yml Dockerfile pyproject.toml .env.example .gitignore
+git commit -m "feat: Postgres job queue with workers, transactional outbox and raw files by hash"
+```
+
+```bash
+git restore --source=7630b6845d132eb6154e5991893a14ab11739a00 --staged -- api docs/openapi.json
+git commit -m "feat: ingestion and agent runs as jobs, with job and run routes scoped to the caller"
+```
+
+```bash
+git restore --source=7630b6845d132eb6154e5991893a14ab11739a00 --staged -- tests scripts .github/workflows
+git commit -m "test: job, outbox, worker and agent-run suites, and the QA fix tests"
+```
+
+```bash
+git restore --source=7630b6845d132eb6154e5991893a14ab11739a00 --staged -- ui
+git commit -m "feat(ui): Library job status and durable agent runs"
+```
+
+```bash
+git restore --source=7630b6845d132eb6154e5991893a14ab11739a00 --staged -- .
+git commit -m "docs: ADR-0011, ADR-0008 outbox section and the Sprint 007 report"
+git diff --quiet 7630b6845d132eb6154e5991893a14ab11739a00 HEAD && echo "branch matches the Sprint 007 snapshot"
+```
+
+```bash
+docker compose up -d postgres redis && poetry run pytest -q && (cd ui && npm run tokens:check && npm run lint && npx tsc --noEmit && npm test -- --run && npm run build && npx playwright test)
+```
+
+```bash
+git push -u origin sprint/007-durable-jobs
+```

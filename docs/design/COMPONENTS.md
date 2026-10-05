@@ -57,6 +57,8 @@ These are the only components that may load GSAP or three.js.
 | Component | Purpose | States | Test |
 |---|---|---|---|
 | `LandingPage`, `HowItWorksPage` | The two public pages | Reduced motion: no animation | Playwright (`landing.spec.ts`, `a11y.spec.ts`) |
+| `ReceiptVerifier`, `VerificationResult` | Trust page: decision id (or pasted receipt) to a valid or invalid result with each check, chain position and key id | Idle, checking, valid, invalid, API error. Result is icon, word and color together | Vitest (`trust.test.tsx`), Playwright (`trust.spec.ts`, with axe) |
+| `RetentionCard`, `EvalGateCard` | Trust page: retention settings (read only) and the eval gate latest run and history | Default or tenant retention, no purge yet, no eval run, passed, failed | Vitest (`trust.test.tsx`) |
 | `MarketingShell` | Header and footer for both pages | Narrow screens hide secondary links | Playwright (`responsive.spec.ts`) |
 | `HeroVisual` | The quiet ring behind the hero, with a static poster | `off`, `loading`, `ready`. Paused off-screen | Playwright (`landing.spec.ts`) |
 | `ScrollStory` | The pinned scroll story of one request | Pinned, or a plain list with reduced motion and on narrow screens | Playwright (`landing.spec.ts`) |

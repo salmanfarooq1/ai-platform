@@ -1,0 +1,8 @@
+ok   docker compose --profile observability config
+ok   prometheus and grafana started
+ok   API serves /metrics
+ok   Prometheus scrapes the api target (up)
+ok   Prometheus holds http_requests_total (4 series)
+ok   Grafana serves the provisioned dashboard 'Platform trust'
+ok   Grafana has the Prometheus data source
+PASS
