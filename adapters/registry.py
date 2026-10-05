@@ -10,16 +10,19 @@ from typing import Any
 import config
 from adapters.inprocess_events import InProcessEventBus
 from adapters.inprocess_runtime import InProcessAgentRuntime
+from adapters.job_runtime import JobAgentRuntime
 from adapters.litellm_chat import LitellmChat
 from adapters.litellm_embeddings import LitellmEmbeddings
 from adapters.litellm_llm import LitellmLLM
 from adapters.local_object_store import LocalObjectStore
 from adapters.pg_knowledge import PgKnowledgeStore
+from adapters.pg_outbox_events import OutboxEventBus
 from adapters.redis_cache import RedisCache
 from adapters.s3_object_store import S3ObjectStore
 from core.database.tenant import DbPool
 from core.settings import Settings
-from ports import Adapters, ObjectStore, Runner
+from gateway.context import context_to_payload
+from ports import Adapters, AgentRuntime, EventBus, ObjectStore, Runner
 
 PORT_NAMES = ("llm", "chat", "embeddings", "knowledge", "cache", "objects", "events", "runtime")
 
@@ -56,6 +59,20 @@ def build_adapters(
             raise ValueError("the Postgres knowledge store needs a pool")
         return PgKnowledgeStore(pool)
 
+    def events() -> EventBus:
+        if settings.event_bus == "outbox":
+            if pool is None:
+                raise ValueError("the Postgres outbox event bus needs a pool")
+            return OutboxEventBus(pool)
+        return InProcessEventBus()
+
+    def runtime() -> AgentRuntime:
+        if settings.agent_runtime == "queued":
+            if pool is None:
+                raise ValueError("the queued agent runtime needs a pool")
+            return JobAgentRuntime(pool, serialize_context=context_to_payload)
+        return InProcessAgentRuntime(agent_runner)
+
     return Adapters(
         llm=pick("llm", lambda: LitellmLLM(config.MODEL_PRICING)),
         chat=pick("chat", lambda: LitellmChat(str(settings.llm_model))),
@@ -64,6 +81,6 @@ def build_adapters(
         knowledge=pick("knowledge", knowledge),
         cache=pick("cache", lambda: RedisCache(settings.redis_dsn, settings.embedding_dim)),
         objects=pick("objects", lambda: _object_store(settings)),
-        events=pick("events", InProcessEventBus),
-        runtime=pick("runtime", lambda: InProcessAgentRuntime(agent_runner)),
+        events=pick("events", events),
+        runtime=pick("runtime", runtime),
     )

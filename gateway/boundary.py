@@ -57,6 +57,28 @@ class ExecutionBoundary:
     # Set when the tenant policy could not be loaded or parsed: every action is then denied.
     unavailable_reason: str | None = None
 
+    def to_payload(self) -> dict[str, Any]:
+        """A JSON form of the boundary, so a job can carry it to a worker (it holds no secret)."""
+        return {
+            "tenant_id": str(self.tenant_id) if self.tenant_id else None,
+            "actions": sorted(self.actions), "kbs": sorted(self.kbs), "tools": sorted(self.tools),
+            "models": sorted(self.models), "max_tool_calls": self.max_tool_calls, "max_tokens": self.max_tokens,
+            "max_query_length": self.max_query_length, "blocked_terms": sorted(self.blocked_terms),
+            "policy_version": self.policy_version, "unavailable_reason": self.unavailable_reason,
+        }
+
+    @classmethod
+    def from_payload(cls, body: dict[str, Any]) -> "ExecutionBoundary":
+        """The inverse of `to_payload`. The worker runs under the boundary the request had, not a newer policy."""
+        return cls(
+            tenant_id=UUID(body["tenant_id"]) if body["tenant_id"] else None,
+            actions=frozenset(body["actions"]), kbs=frozenset(body["kbs"]), tools=frozenset(body["tools"]),
+            models=frozenset(body["models"]), max_tool_calls=int(body["max_tool_calls"]),
+            max_tokens=int(body["max_tokens"]), max_query_length=int(body["max_query_length"]),
+            blocked_terms=frozenset(body["blocked_terms"]), policy_version=body["policy_version"],
+            unavailable_reason=body["unavailable_reason"],
+        )
+
     def visible_kbs(self) -> list[str] | None:
         """The KB slugs this boundary allows, sorted, or None when it allows every KB."""
         return None if WILDCARD in self.kbs else sorted(self.kbs)

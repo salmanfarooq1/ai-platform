@@ -67,6 +67,32 @@ class Settings(BaseSettings):
     s3_access_key_id: str | None = None
     s3_secret_access_key: str | None = None
 
+    # Events and agent runs (Sprint 007, ADR-0008 and ADR-0009). The defaults are the durable adapters: the outbox
+    # (decision and ingest events are written in the transaction that made them) and the queued runtime (an agent
+    # run is a job that a worker executes). `inprocess` keeps both in the API process, for tests and tools.
+    event_bus: Literal["inprocess", "outbox"] = "outbox"
+    agent_runtime: Literal["inprocess", "queued"] = "queued"
+    # How long `/v1/agent/query` waits for the worker before it answers 202 with the execution id.
+    agent_sync_wait_seconds: float = Field(default=25.0, gt=0)
+
+    # Job queue and workers (`python -m workers`). A claimed job is held under a lease and renewed while it runs.
+    job_lease_seconds: int = Field(default=60, gt=0)
+    job_poll_interval_seconds: float = Field(default=0.5, gt=0)
+    # How often a running job renews its lease and looks for a stop request.
+    job_beat_interval_seconds: float = Field(default=1.0, gt=0)
+    job_max_attempts: int = Field(default=5, gt=0)
+    job_backoff_base_seconds: float = Field(default=2.0, ge=0)
+    worker_concurrency: int = Field(default=1, gt=0)
+    worker_health_file: str = "/tmp/worker-health"
+    worker_shutdown_grace_seconds: float = Field(default=30.0, ge=0)
+    # Outbox relay: how often it looks for unpublished events, how many it takes, and when it gives up on one.
+    outbox_poll_interval_seconds: float = Field(default=1.0, gt=0)
+    outbox_batch_size: int = Field(default=50, gt=0)
+    outbox_max_attempts: int = Field(default=10, gt=0)
+    # For one-process hosting (no separate worker service): run this many workers, and the relay, inside the API.
+    embedded_workers: int = Field(default=0, ge=0)
+    embedded_relay: bool = False
+
     azure_oai_base: str | None = None
     azure_oai_key: str | None = None
     groq_api_key: str | None = None

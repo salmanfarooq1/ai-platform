@@ -84,7 +84,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["api", "core", "gateway", "ports", "adapters"]
+source = ["api", "core", "gateway", "ports", "adapters", "workers"]
 omit = ["*/tests/*"]
 
 [tool.ruff]
@@ -98,7 +98,7 @@ ignore = ["E501"]  # line length handled by formatter, not linter
 
 [tool.mypy]
 python_version = "3.11"
-files = ["api", "core", "gateway", "ports", "adapters", "config.py"]
+files = ["api", "core", "gateway", "ports", "adapters", "workers", "config.py"]
 ignore_missing_imports = true
 warn_unused_ignores = true
 check_untyped_defs = true

@@ -49,8 +49,10 @@ class InProcessAgentRuntime:
         execution_id = spec.execution_id or uuid4()
         spec = dataclasses.replace(spec, execution_id=execution_id)
         run_id = str(execution_id)
-        if run_id in self._runs:
-            raise ValueError(f"run {run_id} already exists")
+        existing = self._runs.get(run_id)
+        if existing is not None and not existing.status.state.terminal:
+            raise ValueError(f"run {run_id} already exists")  # a finished run id may start again (a job's next attempt)
+        self._runs.pop(run_id, None)
         entry = _Entry(RunStatus(
             run_id=run_id, execution_id=execution_id, tenant_id=spec.tenant_id, kind=spec.kind,
             state=RunState.RUNNING, started_at=datetime.now(timezone.utc),

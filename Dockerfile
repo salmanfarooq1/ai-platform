@@ -63,6 +63,7 @@ COPY --from=builder /app/core core/
 COPY --from=builder /app/gateway gateway/
 COPY --from=builder /app/ports ports/
 COPY --from=builder /app/adapters adapters/
+COPY --from=builder /app/workers workers/
 COPY --from=builder /app/config.py config.py
 COPY --from=builder /app/alembic.ini alembic.ini
 COPY --from=builder /app/migrations migrations/

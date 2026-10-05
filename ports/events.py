@@ -9,6 +9,7 @@ SPEC_VERSION = "1.0"
 WILDCARD = "*"
 
 DECISION_RECORDED = "platform.gateway.decision.v1"
+INGEST_COMPLETED = "platform.ingest.completed.v1"
 
 
 @dataclass(frozen=True)
@@ -42,6 +43,16 @@ class CloudEvent:
         if self.subject is not None:
             out["subject"] = self.subject
         return out
+
+    @classmethod
+    def from_dict(cls, body: dict[str, Any]) -> "CloudEvent":
+        """The inverse of `to_dict`: the event an outbox row holds."""
+        return cls(
+            type=body["type"], source=body["source"], subject=body.get("subject"), tenantid=body["tenantid"],
+            data=body.get("data") or {}, id=body["id"], time=datetime.fromisoformat(body["time"]),
+            specversion=body.get("specversion", SPEC_VERSION),
+            datacontenttype=body.get("datacontenttype", "application/json"),
+        )
 
 
 # A handler gets the event and the caller's transaction context (whatever `publish(..., tx=...)` was given).

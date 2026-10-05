@@ -1,5 +1,5 @@
 import time
-from collections.abc import Iterable
+from collections.abc import Awaitable, Callable, Iterable
 from itertools import islice
 from pathlib import Path
 from typing import Generator
@@ -38,6 +38,7 @@ async def ingestion_pipeline(
     store: KnowledgeStore,
     embeddings: EmbeddingPort,
     tenant_id: UUID,         # owner of the rows; always the authenticated principal's tenant
+    on_progress: Callable[[int, int], Awaitable[None]] | None = None,  # (chunks stored, chunks in total)
 ) -> dict:
     '''
     Chunk → embed → insert through the knowledge store port.
@@ -59,6 +60,8 @@ async def ingestion_pipeline(
         chunk.metadata["source_filename"] = source_filename or Path(input_file_path).name
 
     total_chunks = 0
+    if on_progress is not None:
+        await on_progress(0, len(chunks))
 
     for batch in batch_generator(chunks, batch_size):
         embedded_batch, model, dim = await embed_chunks(embeddings, batch)
@@ -68,6 +71,8 @@ async def ingestion_pipeline(
                 for c in embedded_batch if c.embedding is not None]
         await store.insert_chunks(tenant_id, document_id, namespace, rows, embedding_model=model, embedding_dim=dim)
         total_chunks += len(embedded_batch)
+        if on_progress is not None:
+            await on_progress(total_chunks, len(chunks))
 
     elapsed_time = time.perf_counter() - start_time
 

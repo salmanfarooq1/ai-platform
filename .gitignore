@@ -31,3 +31,6 @@ ui/dist/
 ui/e2e/.state/
 ui/test-results/
 ui/playwright-report/
+
+# raw uploads of the local object store (Sprint 007)
+data/objects/

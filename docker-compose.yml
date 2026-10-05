@@ -19,6 +19,37 @@ services:
     volumes:
       - "redis_data:/data"
 
+  # Runs the jobs (ingestion, agent runs) and relays the outbox. Same image as the API (the Dockerfile), another command.
+  # The API answers 202 for an ingest and waits for a worker for an agent run, so run one when you run the API:
+  #   docker compose up -d postgres redis worker      (or `poetry run python -m workers` on the host)
+  # Needs the migrated database (`scripts/setup_db.sh`). Model keys come from the environment, as for the API.
+  worker:
+    build: .
+    image: gap-platform
+    container_name: worker
+    command: ["python", "-m", "workers", "--concurrency", "2"]
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      MODE: "local"
+      DATABASE_URL: "postgresql://gap_app:${APP_DB_PASSWORD:-gap_app}@postgres:5432/rag_platform"
+      REDIS_URL: "redis://redis:6379"
+      OBJECT_STORE_DIR: "/data/objects"
+      WORKER_HEALTH_FILE: "/tmp/worker-health"
+    env_file:
+      - path: .env.local
+        required: false
+    volumes:
+      - "objects:/data/objects"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os, sys, time; sys.exit(0 if time.time() - os.path.getmtime('/tmp/worker-health') < 30 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
   ollama:
     image: ollama/ollama
     container_name: ollama
@@ -28,6 +59,7 @@ services:
       - "ollama_data:/root/.ollama"
 
 volumes:
+  objects:
   pgdata:
   redis_data:
   ollama_data:
