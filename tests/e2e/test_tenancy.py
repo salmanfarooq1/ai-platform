@@ -112,7 +112,7 @@ async def test_every_other_v1_operation_requires_authentication(app, anon_client
     spec = (await anon_client.get("/openapi.json")).json()
     checked = []
     for path, methods in spec["paths"].items():
-        if path in PUBLIC:
+        if path in PUBLIC or path == "/metrics":  # /metrics is open in local mode; the closed mode is tested in test_metrics.py
             continue
         for method in methods:
             if method == "post" and path in SESSION_CREATE_ROUTES:

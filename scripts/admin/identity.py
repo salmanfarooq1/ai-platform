@@ -7,6 +7,7 @@
     poetry run python scripts/admin/identity.py revoke-key <prefix>
     poetry run python scripts/admin/identity.py list-keys [--tenant acme]
     poetry run python scripts/admin/identity.py set-policy acme policy.json [--by alice]
+    poetry run python scripts/admin/identity.py set-retention acme 30      (days, or `default`)
     poetry run python scripts/admin/identity.py show-policy acme
 
 `create-key` prints the full key once. Only its SHA-256 hash is stored, so a lost key cannot be
@@ -28,6 +29,7 @@ from core.identity.admin import (  # noqa: E402 - needs the sys.path line above
     create_tenant,
     list_keys,
     revoke_key,
+    set_retention,
 )
 from core.identity.models import ALL_SCOPES, PRINCIPAL_KINDS  # noqa: E402
 from core.settings import get_settings  # noqa: E402
@@ -69,6 +71,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("file", type=Path)
     p.add_argument("--by", default="admin-cli", help="who is publishing it (recorded as created_by)")
 
+    p = sub.add_parser("set-retention", help="set how many days a tenant's decision records are kept (or `default`)")
+    p.add_argument("tenant")
+    p.add_argument("days", help="a number of days (1 or more), or `default` for the platform default")
+
     p = sub.add_parser("show-policy", help="print a tenant's active policy")
     p.add_argument("tenant")
     return parser
@@ -107,6 +113,17 @@ def run(args: argparse.Namespace) -> int:
                 raise AdminError(f"cannot read policy file: {exc}") from exc
             version = set_policy(conn, args.tenant, document, args.by)
             print(f"policy version {version} is now active for tenant {args.tenant}")
+        elif args.command == "set-retention":
+            if args.days == "default":
+                set_retention(conn, args.tenant, None)
+                print(f"tenant {args.tenant} now uses the platform default retention")
+            else:
+                try:
+                    days = int(args.days)
+                except ValueError:
+                    raise AdminError("days must be a whole number or `default`") from None
+                set_retention(conn, args.tenant, days)
+                print(f"tenant {args.tenant} keeps decision records for {days} days")
         elif args.command == "show-policy":
             policy = show_policy(conn, args.tenant)
             if policy is None:

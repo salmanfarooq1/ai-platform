@@ -113,11 +113,20 @@ async def test_cost_uses_model_pricing():
     assert usage["total_cost"] == pytest.approx(2.50 + 10.00)
 
 
-async def test_unknown_model_costs_zero():
+async def test_unknown_model_is_costed_at_the_highest_known_rate():  # Sprint 008 (QA M3): it used to cost 0
     fake = AsyncMock(return_value=_response(_answer([])))
     with patch("adapters.litellm_llm.litellm.acompletion", fake):
         _, usage = await generate_with_citations(LLM, "q", CHUNKS, model="made-up/model")
-    assert usage["total_cost"] == 0.0
+    assert usage["total_cost"] > 0.0
+    known = await _cost_of("azure/gpt-4o")
+    assert usage["total_cost"] >= known  # never cheaper than a priced model with the same tokens
+
+
+async def _cost_of(model: str) -> float:
+    fake = AsyncMock(return_value=_response(_answer([])))
+    with patch("adapters.litellm_llm.litellm.acompletion", fake):
+        _, usage = await generate_with_citations(LLM, "q", CHUNKS, model=model)
+    return float(usage["total_cost"])
 
 
 async def test_missing_usage_degrades_to_zero_tokens():

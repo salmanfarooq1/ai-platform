@@ -1,0 +1,9 @@
+{
+  "suite": "fixed-12",
+  "tolerance": 0.02,
+  "scores": {
+    "retrieval_hit": 0.8333,
+    "answer_fact": 0.8333,
+    "citation_ok": 0.8333
+  }
+}

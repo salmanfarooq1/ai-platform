@@ -215,7 +215,7 @@ async def test_unversioned_health_and_root_stay_and_match_v1_health(client, fake
 
 async def test_openapi_lists_only_versioned_product_routes(client):
     paths = (await client.get("/openapi.json")).json()["paths"]
-    product = {p for p in paths if p != "/"}
+    product = {p for p in paths if p not in ("/", "/metrics")}  # /metrics is unversioned like /health: Prometheus expects it
     assert product and all(p.startswith("/v1/") for p in product)
     assert {"/v1/search", "/v1/ingest", "/v1/agent/query", "/v1/documents", "/v1/feedback",
             "/v1/analytics/summary", "/v1/health"} <= product

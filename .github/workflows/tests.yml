@@ -63,6 +63,30 @@ jobs:
       - name: Type check with mypy
         run: poetry run mypy
 
+  eval-gate:
+    # The eval regression gate (Sprint 008): a fixed suite with the fake LLM, compared to scripts/eval/baseline.json.
+    # No key, no network, no cost. It fails the build when a score drops by more than the baseline's tolerance. The run
+    # with real providers is scripts/eval/run_real.py, a manual script that CI never runs.
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: poetry-
+      - name: Install dependencies
+        run: poetry install --with dev
+      - name: Run the eval gate
+        run: poetry run python scripts/eval/run_gate.py
+
   unit-tests:
     runs-on: ubuntu-latest
     needs: lint

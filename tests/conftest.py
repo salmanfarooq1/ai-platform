@@ -20,6 +20,8 @@ from typing import Any
 os.environ.setdefault("JOB_POLL_INTERVAL_SECONDS", "0.05")
 os.environ.setdefault("JOB_BEAT_INTERVAL_SECONDS", "0.1")
 os.environ.setdefault("JOB_BACKOFF_BASE_SECONDS", "0.05")
+# The retention scheduler is off in tests: a test that needs it calls `schedule_purges` itself.
+os.environ.setdefault("RETENTION_SCHEDULE_INTERVAL_SECONDS", "0")
 
 import litellm  # noqa: E402
 import pytest  # noqa: E402

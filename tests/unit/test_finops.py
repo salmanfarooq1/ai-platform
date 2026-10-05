@@ -44,9 +44,13 @@ def test_ollama_models_cost_zero_even_if_unpriced():
     assert compute_cost("ollama/qwen2.5", 10_000_000, 10_000_000) == 0.0
 
 
-def test_unknown_model_costs_zero_and_warns(caplog):
-    with caplog.at_level("WARNING", logger="api.finops"):
-        assert compute_cost("made-up/model", 1000, 1000) == 0.0
+def test_unknown_model_is_costed_at_the_highest_known_rate_and_warns(caplog):
+    """Sprint 008 (QA M3): an unpriced model used to cost 0 and so never tripped the cost cap."""
+    top_in = max(r["input"] for r in MODEL_PRICING.values())
+    top_out = max(r["output"] for r in MODEL_PRICING.values())
+    with caplog.at_level("WARNING", logger="core.pricing"):
+        cost = compute_cost("made-up/model", 1_000_000, 1_000_000)
+    assert cost == pytest.approx(top_in + top_out) and cost > 0
     assert "made-up/model" in caplog.text
 
 

@@ -20,6 +20,7 @@ def test_public_preview_disables_reranker(monkeypatch):
     # Sprint 002: hosted modes require explicit DSNs (no placeholder defaults).
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
     monkeypatch.setenv("REDIS_URL", "redis://cache.example.test:6379")
+    monkeypatch.setenv("RECEIPT_SIGNING_KEY", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")  # hosted modes need one (Sprint 008)
     reloaded = importlib.reload(config)
     assert reloaded.FEATURES["reranker_enabled"] is False
     assert reloaded.DATABASE_CONFIG["pool_size"] == 5

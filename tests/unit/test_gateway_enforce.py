@@ -172,7 +172,7 @@ STAGE_NAMES = [name for name, _ in STAGES]
 
 
 def test_the_stage_list_is_in_the_documented_order():
-    assert STAGE_NAMES == ["principal", "boundary", "policy", "guardrails", "rate", "budget"]
+    assert STAGE_NAMES == ["principal", "boundary", "policy", "guardrails", "rate", "budget", "cost"]
 
 
 @pytest.mark.parametrize("broken", STAGE_NAMES)

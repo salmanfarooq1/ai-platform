@@ -12,7 +12,10 @@ What it does, in order:
 4. Serves the app with uvicorn. Real Postgres and Redis. The fakes are passed to `create_app(adapter_overrides=...)` here,
    in this script; the product code has no fake switch. On exit the throwaway database is dropped.
 
-With `--preview` the app runs with MODE=public-preview and PREVIEW_PRINCIPAL_ID set to the seeded principal.
+5. Runs the eval gate once and records it in `eval_runs`, so the Trust page has a real history to show.
+
+With `--preview` the app runs with MODE=public-preview and PREVIEW_PRINCIPAL_ID set to the seeded principal. That mode
+needs a receipt signing key, so a throwaway one is made in memory for the process (it is never written anywhere).
 Needs Postgres and Redis (`docker compose up -d postgres redis`).
 """
 import argparse
@@ -56,6 +59,25 @@ def seed(owner_dsn: str) -> dict[str, str]:
         writer_key = create_key(conn, principal_id, WRITER_SCOPES)
         set_policy(conn, TENANT_SLUG, POLICY, "e2e-seed")
     return {"principal_id": str(principal_id), "api_key": key.token, "writer_key": writer_key.token, "seed_token": seed_key.token, "seed_prefix": seed_key.prefix}
+
+
+def throwaway_signing_key() -> str:
+    """A fresh Ed25519 private key as base64 text, for a mode that requires RECEIPT_SIGNING_KEY. Kept in memory only."""
+    import base64
+
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
+
+    raw = Ed25519PrivateKey.generate().private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption())
+    return base64.b64encode(raw).decode()
+
+
+def record_eval_gate(owner_dsn: str) -> None:
+    """Run the eval gate (fake LLM) and record the run, as CI's manual `--record` would."""
+    from scripts.eval import run_gate
+
+    if run_gate.main(["--record", "--dsn", owner_dsn]) != 0:
+        raise RuntimeError("the eval gate failed while seeding the end-to-end database")
 
 
 def fake_adapters() -> dict:
@@ -138,9 +160,12 @@ def main() -> int:
     os.environ["MODE"] = "public-preview" if args.preview else "local"
     # Raw uploads go under the state directory (gitignored), never into the repository's data/objects.
     os.environ["OBJECT_STORE_DIR"] = str(args.state_dir / "objects")
+    if args.preview:
+        os.environ["RECEIPT_SIGNING_KEY"] = throwaway_signing_key()
     os.environ.pop("JWT_SECRET", None)
     os.environ.pop("JWT_JWKS_URL", None)
     seeded = seed(owner_dsn)
+    record_eval_gate(owner_dsn)
     if args.preview:
         # The web edge reads the setting per request, so a fresh read is enough (config was imported without it).
         from core.settings import get_settings

@@ -11,7 +11,8 @@ LEGACY_SCHEMA = Path(__file__).parent / "fixtures" / "legacy_schema.sql"
 BASELINE_TABLES = {"documents", "document_registry", "usage_log", "feedback"}
 IDENTITY_TABLES = {"tenants", "principals", "api_keys", "knowledge_bases"}
 GATEWAY_TABLES = {"policies", "gateway_decisions"}
-JOB_TABLES = {"jobs", "outbox", "processed_events"}  # Sprint 007
+JOB_TABLES = {"jobs", "outbox", "processed_events"}
+TRUST_TABLES = {"chain_heads", "chain_checkpoints", "eval_runs"}  # Sprint 008
 TENANT_OWNED = ["documents", "document_registry", "usage_log", "feedback"]
 DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -59,8 +60,8 @@ def _snapshot(dsn):
 def test_empty_database_reaches_head(blank_db):
     harness.migrate(blank_db)
     tables = {r[0] for r in _query(blank_db, "SELECT tablename FROM pg_tables WHERE schemaname = 'public'")}
-    assert tables == BASELINE_TABLES | IDENTITY_TABLES | GATEWAY_TABLES | JOB_TABLES | {"alembic_version"}
-    assert _query(blank_db, "SELECT version_num FROM alembic_version") == [("0008",)]
+    assert tables == BASELINE_TABLES | IDENTITY_TABLES | GATEWAY_TABLES | JOB_TABLES | TRUST_TABLES | {"alembic_version"}
+    assert _query(blank_db, "SELECT version_num FROM alembic_version") == [("0009",)]
     assert _query(blank_db, "SELECT extname FROM pg_extension WHERE extname = 'vector'") == [("vector",)]
     index_names = {r[0] for r in _query(blank_db, "SELECT indexname FROM pg_indexes WHERE schemaname = 'public'")}
     # 0002 replaces the namespace-only indexes with indexes that lead with tenant_id.
@@ -141,7 +142,7 @@ def _counts(dsn):
 
 
 def _assert_backfilled(dsn, before):
-    assert _query(dsn, "SELECT version_num FROM alembic_version") == [("0008",)]
+    assert _query(dsn, "SELECT version_num FROM alembic_version") == [("0009",)]
     assert _counts(dsn) == before == {"documents": 6, "document_registry": 3, "usage_log": 3, "feedback": 1}
     for table in TENANT_OWNED:
         assert _query(dsn, f"SELECT DISTINCT tenant_id::text FROM {table}") == [(DEFAULT_TENANT_ID,)]

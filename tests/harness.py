@@ -22,7 +22,7 @@ ADMIN_URL = os.getenv("TEST_DATABASE_ADMIN_URL", "postgresql://postgres:postgres
 REDIS_URL = os.getenv("TEST_REDIS_URL", "redis://localhost:6379/0")
 APP_ROLE = "gap_app"
 APP_PASSWORD = os.getenv("APP_DB_PASSWORD", "gap_app")
-PLATFORM_REDIS_PREFIXES = ("rl:", "budget:", "cache:", "semcache:", "websess:")
+PLATFORM_REDIS_PREFIXES = ("rl:", "budget:", "cost:", "cache:", "semcache:", "websess:")
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -114,7 +114,8 @@ def truncate_tables(dsn: str) -> None:
     conn.autocommit = True
     with conn.cursor() as cur:
         cur.execute("TRUNCATE documents, document_registry, usage_log, feedback, api_keys, principals, "
-            "knowledge_bases, policies, gateway_decisions, jobs, outbox, processed_events, tenants RESTART IDENTITY")
+            "knowledge_bases, policies, gateway_decisions, jobs, outbox, processed_events, chain_heads, chain_checkpoints, "
+            "eval_runs, tenants RESTART IDENTITY")
     conn.close()
 
 

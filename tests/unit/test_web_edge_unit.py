@@ -134,6 +134,7 @@ def test_preview_principal_id_is_accepted_in_local_and_public_preview_and_refuse
         clean_env.setenv("MODE", mode)
         clean_env.setenv("DATABASE_URL", "postgresql://u:p@db/x")
         clean_env.setenv("REDIS_URL", "redis://r")
+        clean_env.setenv("RECEIPT_SIGNING_KEY", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")  # hosted modes need one (Sprint 008)
         if mode == "prod":
             with pytest.raises(SettingsError, match="PREVIEW_PRINCIPAL_ID must not be set when MODE=prod"):
                 get_settings()
