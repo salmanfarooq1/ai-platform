@@ -1,7 +1,7 @@
 import { get, request, type ApiResult } from './client'
 import type {
   AgentAccepted, AgentRequest, AgentResponse, AgentRun, AgentRunPage, DecisionDetail, DecisionFilters, DecisionPage, DocumentRow, HealthResponse, JobAccepted, JobPage,
-  PlatformConfig, PolicyList, ReasonCode, RequestDetail, RequestFilters, RequestPage, Overview, PolicyVersion, PrincipalSummary, SearchRequest, SearchResponse, SessionInfo, UsageSummary,
+  PlatformConfig, PolicyList, ReasonCode, Receipt, ReceiptKey, TrustSummary, VerifyResult, RequestDetail, RequestFilters, RequestPage, Overview, PolicyVersion, PrincipalSummary, SearchRequest, SearchResponse, SessionInfo, UsageSummary,
 } from './types'
 
 export const api = {
@@ -26,6 +26,13 @@ export const api = {
   requestDetail: (id: string) => get<RequestDetail>(`/v1/requests/${encodeURIComponent(id)}`),
   reasonCodes: () => get<ReasonCode[]>('/v1/reason-codes'),
   usage: (days = 7) => get<UsageSummary>('/v1/usage/summary', { days }),
+
+  // Trust (Sprint 008): signed receipts, their verification, retention and the eval gate. All need audit:read.
+  receipt: (decisionId: string) => get<Receipt>(`/v1/receipts/${encodeURIComponent(decisionId)}`),
+  receiptKeys: () => get<ReceiptKey[]>('/v1/receipts/keys'),
+  verifyReceipt: async (receipt: unknown) =>
+    (await request<VerifyResult>('/v1/receipts/verify', { method: 'POST', json: receipt })).data,
+  trustSummary: () => get<TrustSummary>('/v1/trust/summary'),
 
   // Workspace
   feedback: async (body: { request_id: string; endpoint: string; rating: 'up' | 'down' }) => {

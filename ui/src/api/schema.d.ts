@@ -21,6 +21,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Metrics
+         * @description Prometheus text format: request counts and latency per route, decisions per outcome, jobs per status and the
+         *     outbox lag. Open when `METRICS_PUBLIC` is true, otherwise it needs the `admin` scope.
+         */
+        get: operations["metrics_metrics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/agent/query": {
         parameters: {
             query?: never;
@@ -422,6 +443,67 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/receipts/keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Receipt Keys
+         * @description The public keys receipts may be signed with. No secret is ever returned.
+         */
+        get: operations["list_receipt_keys_v1_receipts_keys_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/receipts/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Verify A Receipt
+         * @description Run the receipt checks on a receipt the caller holds. It does not matter whose tenant it names: the checks
+         *     use only the receipt and the public keys.
+         */
+        post: operations["verify_a_receipt_v1_receipts_verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/receipts/{decision_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Receipt
+         * @description The signed receipt of one decision of the caller's tenant.
+         */
+        get: operations["get_receipt_v1_receipts__decision_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/requests": {
         parameters: {
             query?: never;
@@ -525,6 +607,26 @@ export interface paths {
          * @description An automatic read-only session for the configured preview principal. 404 unless the mode allows it.
          */
         post: operations["start_preview_v1_session_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/trust/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Trust Summary
+         * @description How long decisions are kept, the oldest one and the last purge, the eval gate and where the metrics are.
+         */
+        get: operations["trust_summary_v1_trust_summary_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -811,6 +913,30 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /**
+         * EvalGate
+         * @description The latest run of the eval regression gate.
+         */
+        EvalGate: {
+            /** Baseline */
+            baseline: {
+                [key: string]: number;
+            };
+            /** Latest */
+            latest: {
+                [key: string]: number;
+            };
+            /**
+             * Run At
+             * Format: date-time
+             */
+            run_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "passed" | "failed";
+        };
         /** FeedbackRequest */
         FeedbackRequest: {
             /** Comment */
@@ -1085,6 +1211,58 @@ export interface components {
             /** Title */
             title: string;
         };
+        /**
+         * Receipt
+         * @description A signed receipt. `canonical` is the exact text that was signed: the canonical JSON of the chain link and the
+         *     decision record. It holds no input text, only the SHA-256 that is on the decision.
+         */
+        Receipt: {
+            /**
+             * Alg
+             * @constant
+             */
+            alg: "Ed25519";
+            /** Canonical */
+            canonical: string;
+            chain: components["schemas"]["ReceiptChain"];
+            decision: components["schemas"]["DecisionDetail"];
+            /** Key Id */
+            key_id: string;
+            /**
+             * Signature
+             * @description Base64 Ed25519 signature over the UTF-8 bytes of `canonical`
+             */
+            signature: string;
+        };
+        /**
+         * ReceiptChain
+         * @description Where the decision sits in the tenant's hash chain.
+         */
+        ReceiptChain: {
+            /** Position */
+            position: number;
+            /** Prev Hash */
+            prev_hash: string;
+            /** Row Hash */
+            row_hash: string;
+        };
+        /** ReceiptKey */
+        ReceiptKey: {
+            /** Active */
+            active: boolean;
+            /**
+             * Alg
+             * @constant
+             */
+            alg: "Ed25519";
+            /** Key Id */
+            key_id: string;
+            /**
+             * Public Key
+             * @description Base64 of the 32 raw public key bytes
+             */
+            public_key: string;
+        };
         /** RequestDetail */
         RequestDetail: {
             /** Decisions */
@@ -1249,6 +1427,24 @@ export interface components {
             /** Slug */
             slug: string;
         };
+        /** TrustSummary */
+        TrustSummary: {
+            eval_gate: components["schemas"]["EvalGate"] | null;
+            /** Eval History */
+            eval_history: components["schemas"]["EvalGate"][];
+            /** Grafana Url */
+            grafana_url: string | null;
+            /** Last Purge At */
+            last_purge_at: string | null;
+            /** Metrics Public */
+            metrics_public: boolean;
+            /** Oldest Decision At */
+            oldest_decision_at: string | null;
+            /** Retention Days */
+            retention_days: number;
+            /** Retention Is Default */
+            retention_is_default: boolean;
+        };
         /** UsageByDay */
         UsageByDay: {
             /** Cost Usd */
@@ -1306,6 +1502,22 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /** VerifyCheck */
+        VerifyCheck: {
+            /** Detail */
+            detail: string;
+            /** Name */
+            name: string;
+            /** Ok */
+            ok: boolean;
+        };
+        /** VerifyResult */
+        VerifyResult: {
+            /** Checks */
+            checks: components["schemas"]["VerifyCheck"][];
+            /** Valid */
+            valid: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -1331,6 +1543,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    metrics_metrics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": unknown;
                 };
             };
         };
@@ -1919,6 +2151,90 @@ export interface operations {
             };
         };
     };
+    list_receipt_keys_v1_receipts_keys_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptKey"][];
+                };
+            };
+        };
+    };
+    verify_a_receipt_v1_receipts_verify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Receipt"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_receipt_v1_receipts__decision_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                decision_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Receipt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_requests_v1_requests_get: {
         parameters: {
             query?: {
@@ -2148,6 +2464,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    trust_summary_v1_trust_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrustSummary"];
+                };
             };
         };
     };

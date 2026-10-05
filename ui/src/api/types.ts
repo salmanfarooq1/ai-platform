@@ -30,6 +30,12 @@ export type RequestSummary = S['RequestSummary']
 export type RequestDetail = S['RequestDetail']
 export type ReasonCode = S['ReasonCode']
 export type FirstDeny = S['FirstDeny']
+export type Receipt = S['Receipt']
+export type ReceiptKey = S['ReceiptKey']
+export type VerifyResult = S['VerifyResult']
+export type VerifyCheck = S['VerifyCheck']
+export type TrustSummary = S['TrustSummary']
+export type EvalGate = S['EvalGate']
 
 export type Outcome = 'allow' | 'deny'
 

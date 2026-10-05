@@ -23,7 +23,10 @@ export function DecisionDetailView({ decision }: { decision: DecisionDetail }) {
           {decision.policy_version !== null ? <> under policy version <code className="mono">{decision.policy_version}</code></> : <> under the platform default policy</>}.
         </p>
         {denied ? <DenyCallout reason={decision.reason} stage={decision.stage} policyVersion={decision.policy_version} /> : null}
-        <Link to={`/app/requests/${encodeURIComponent(decision.request_id)}`} className="self-start text-callout text-seal underline-offset-2 hover:underline">Open the whole request</Link>
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          <Link to={`/app/requests/${encodeURIComponent(decision.request_id)}`} className="text-callout text-seal underline-offset-2 hover:underline">Open the whole request</Link>
+          <Link to={`/app/trust?decision=${encodeURIComponent(decision.id)}`} className="text-callout text-seal underline-offset-2 hover:underline">Verify receipt</Link>
+        </div>
       </div>
       <section aria-label="Stage trace">
         <h3 className="mb-2">Trace</h3>

@@ -78,7 +78,7 @@ for (const c of all) {
 }
 
 console.log('\n5. Nothing from the must-not-claim list on the public pages')
-const MUST_NOT = /\b(approvals?|approve[sd]?|signed receipts?|hash chains?|uptime|availability|customers?|testimonials?|customer logos?|logo wall|kafka|openshell|sandbox(ed)?|pii|redaction|opa|eval gate|metrics dashboards?|enterprise-grade|trusted by)\b/i
+const MUST_NOT = /\b(approvals?|approve[sd]?|uptime|availability|customers?|testimonials?|customer logos?|logo wall|kafka|openshell|sandbox(ed)?|pii|redaction|opa|enterprise-grade|trusted by)\b/i
 const publicFiles = [...walk(path.join(UI, 'src/landing'), (p) => /\.(ts|tsx)$/.test(p) && !/\.test\./.test(p))]
 let mustHits = 0
 for (const f of publicFiles) {
