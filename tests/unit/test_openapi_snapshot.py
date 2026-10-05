@@ -16,7 +16,7 @@ TABLE = "TA" + "BLE"  # built at runtime so this file does not trip the DDL chec
 
 def test_snapshot_matches_the_app():
     assert SNAPSHOT_PATH.read_text() == render_openapi(), (
-        "docs/openapi.json is out of date. If the API change is intended, run: "
+        "docs/api/openapi.json is out of date. If the API change is intended, run: "
         "poetry run python scripts/update_openapi.py"
     )
 

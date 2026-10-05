@@ -10,7 +10,7 @@ quantities are honoured, and the text OpenShell logs for a denied connection (se
 
 The SDK is synchronous (gRPC), so the calls run in threads. The `openshell` package is imported only here, and only when a
 driver is built, so the default image does not need it. Nothing is downloaded by this code: install the pinned wheel by
-hash, as `docs/runbooks/openshell.md` shows.
+hash, as `docs/operations.md` shows.
 """
 import asyncio
 import logging
@@ -98,7 +98,7 @@ class OpenShellSdkDriver:
                 import openshell
             except ImportError as exc:
                 raise SandboxUnavailable(
-                    f"the openshell package is not installed (install openshell=={PINNED_VERSION} as docs/runbooks/openshell.md shows)"
+                    f"the openshell package is not installed (install openshell=={PINNED_VERSION} as docs/operations.md shows)"
                 ) from exc
             self._sdk = openshell
         return self._sdk

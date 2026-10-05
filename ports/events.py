@@ -14,6 +14,36 @@ DECISIONS_PURGED = "platform.gateway.purge.v1"
 
 
 @dataclass(frozen=True)
+class EventInfo:
+    """What `docs/contracts/` says about one event type. A unit test checks `data_fields` against the real event."""
+
+    type: str
+    source: str
+    subject: str
+    summary: str
+    data_fields: tuple[str, ...]
+
+
+EVENT_CATALOGUE: tuple[EventInfo, ...] = (
+    EventInfo(
+        DECISION_RECORDED, "/gateway", "the decision id",
+        "The gateway recorded a decision, allow or deny. It is written in the decision's transaction. It holds the verdict and ids, never the input text or its hash.",
+        ("decision_id", "outcome", "stage", "reason", "action", "resource", "request_id", "execution_id"),
+    ),
+    EventInfo(
+        INGEST_COMPLETED, "/ingest", "the job id",
+        "A worker finished an ingest job. It holds ids, the content hash and counts, never file content.",
+        ("job_id", "document_id", "namespace", "content_hash", "status", "total_chunks"),
+    ),
+    EventInfo(
+        DECISIONS_PURGED, "/gateway/retention", "the job id",
+        "A worker purged expired decision records of one tenant. It holds counts and the chain checkpoint, no decision content.",
+        ("job_id", "purged", "retention_days", "checkpoint_position", "checkpoint_hash"),
+    ),
+)
+
+
+@dataclass(frozen=True)
 class CloudEvent:
     """A CloudEvents 1.0 envelope. `data` is JSON-serialisable and never carries input text."""
 
@@ -65,4 +95,6 @@ class EventBus(Protocol):
         """Deliver the event to subscribers of its type (and of `*`). `tx` is passed through to in-process handlers."""
         ...
 
-    def subscribe(self, type: str, handler: Handler) -> None: ...
+    def subscribe(self, type: str, handler: Handler) -> None:
+        """Call `handler` for each event published with this type. The type `*` matches every event."""
+        ...

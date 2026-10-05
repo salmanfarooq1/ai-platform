@@ -61,7 +61,9 @@ class RunResult:
 
 
 class AgentRuntime(Protocol):
-    async def start(self, spec: RunSpec) -> RunHandle: ...
+    async def start(self, spec: RunSpec) -> RunHandle:
+        """Start a run and return its handle. The run's `execution_id` is the one in the spec, or a new one."""
+        ...
 
     async def status(self, run_id: str) -> RunStatus:
         """Raises `RunNotFound`."""

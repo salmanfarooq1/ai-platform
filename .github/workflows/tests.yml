@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: poetry install --with dev
       - name: Lint with ruff
-        run: poetry run ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e
+        run: poetry run ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e scripts/docs
       - name: No schema DDL outside migrations/ (strict rule 7)
         # Fails on CREATE TABLE or ALTER TABLE in .py/.sql files outside migrations/.
         # Exemptions (exact, documented in the script): the frozen legacy schema fixture and scripts/labs/.

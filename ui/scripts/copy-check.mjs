@@ -30,7 +30,7 @@ const uiFiles = [
   path.join(UI, 'index.html'),
   ...walk(path.join(UI, 'public'), (p) => /\.(svg|html|json|txt)$/.test(p)),
 ]
-const docFiles = [...walk(path.join(REPO, 'docs/design'), (p) => p.endsWith('.md')), path.join(REPO, 'docs/UI_GUIDELINES.md'), path.join(REPO, 'docs/adr/0010-design-tokens-and-ink-paper-palette.md')]
+const docFiles = [...walk(path.join(REPO, 'docs/design'), (p) => p.endsWith('.md')), path.join(REPO, 'docs/adr/0010-design-tokens-and-ink-paper-palette.md')]
 
 console.log('1. Headline and subline')
 const EXPECT_H = 'Your agents can only ever do less.'

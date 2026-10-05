@@ -56,139 +56,236 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(extra="ignore", case_sensitive=False)
 
-    mode: Mode = "local"
+    mode: Mode = Field(
+        default="local",
+        description="Deployment mode: `local`, `public-preview` or `prod`. It picks the model defaults and which values are required.",
+    )
 
-    # Required (no default) in public-preview and prod. Local falls back to Docker Compose.
-    database_url: str | None = None
-    # Owner role, used by Alembic and the admin CLI only. Falls back to DATABASE_URL.
-    migration_database_url: str | None = None
-    redis_url: str | None = None
+    database_url: str | None = Field(
+        default=None,
+        description="Postgres URL the app connects with. It must be a role that is neither superuser nor BYPASSRLS. Required outside local mode; local mode defaults to the `gap_app` role of the compose Postgres.",
+        json_schema_extra={"secret": True},
+    )
+    migration_database_url: str | None = Field(
+        default=None,
+        description="Postgres URL of the owner role, used by Alembic and `scripts/admin/identity.py`. Falls back to `DATABASE_URL`; local mode defaults to the compose superuser.",
+        json_schema_extra={"secret": True},
+    )
+    redis_url: str | None = Field(
+        default=None,
+        description="Redis URL. The server needs the RediSearch module. Required outside local mode; local mode defaults to `redis://localhost:6379`.",
+        json_schema_extra={"secret": True},
+    )
 
-    llm_model: str | None = None
-    embed_model: str | None = None
-    embedding_dim: int = Field(default=768, gt=0)
-    # Ordered, comma separated fallbacks tried when the primary embedding model fails (Sprint 006). A fallback
-    # whose vectors have another width than EMBEDDING_DIM is refused. Empty by default: no provider is invented.
-    embed_fallback_models: str | None = None
+    llm_model: str | None = Field(
+        default=None,
+        description="LiteLLM model name for completions. Default by mode: `gemini/gemini-3.5-flash-lite` (local, public-preview), `azure/gpt-4o` (prod).",
+    )
+    embed_model: str | None = Field(
+        default=None,
+        description="LiteLLM model name for embeddings. Default by mode: `ollama/nomic-embed-text` (local), `gemini/gemini-embedding-001` (public-preview), `azure/text-embedding-3-small` (prod). Chunks record the model that made them, and search ignores chunks of another model.",
+    )
+    embedding_dim: int = Field(
+        default=768, gt=0,
+        description="Width of every stored vector. It must match the `vector` column of the schema.",
+    )
+    embed_fallback_models: str | None = Field(
+        default=None,
+        description="Comma separated embedding models tried in order when the primary fails. A model whose vectors have another width than `EMBEDDING_DIM` is refused. Empty means no fallback.",
+    )
 
-    # Object store adapter (ports/objects.py): `local` writes under OBJECT_STORE_DIR, `s3` talks to an S3 API (R2, MinIO).
-    object_store: Literal["local", "s3"] = "local"
-    object_store_dir: str = "data/objects"
-    s3_endpoint_url: str | None = None
-    s3_bucket: str | None = None
-    s3_region: str = "auto"
-    s3_access_key_id: str | None = None
-    s3_secret_access_key: str | None = None
+    object_store: Literal["local", "s3"] = Field(
+        default="local",
+        description="Object store adapter for raw uploads: `local` writes files under `OBJECT_STORE_DIR`, `s3` uses an S3 API (R2, MinIO, S3).",
+    )
+    object_store_dir: str = Field(default="data/objects", description="Directory of the `local` object store.")
+    s3_endpoint_url: str | None = Field(default=None, description="S3 API endpoint. Required when `OBJECT_STORE=s3`.")
+    s3_bucket: str | None = Field(default=None, description="S3 bucket name. Required when `OBJECT_STORE=s3`.")
+    s3_region: str = Field(default="auto", description="S3 region.")
+    s3_access_key_id: str | None = Field(
+        default=None, description="S3 access key id. Required when `OBJECT_STORE=s3`.",
+        json_schema_extra={"secret": True},
+    )
+    s3_secret_access_key: str | None = Field(
+        default=None, description="S3 secret access key. Required when `OBJECT_STORE=s3`.",
+        json_schema_extra={"secret": True},
+    )
 
-    # Events and agent runs (Sprint 007, ADR-0008 and ADR-0009). The defaults are the durable adapters: the outbox
-    # (decision and ingest events are written in the transaction that made them) and the queued runtime (an agent
-    # run is a job that a worker executes). `inprocess` keeps both in the API process, for tests and tools.
-    # `kafka` (Sprint 010, ADR-0008): the API still writes the outbox in the decision's transaction. The relay publishes the
-    # rows to Kafka instead of the in-process bus. Kafka is never reached inside a request.
-    event_bus: Literal["inprocess", "outbox", "kafka"] = "outbox"
-    # Kafka (EVENT_BUS=kafka). SASL values come from the environment only and the password is never logged.
-    kafka_bootstrap: str | None = None
-    kafka_client_id: str = "gap-platform"
-    kafka_group_id: str = "gap-platform"
-    kafka_security_protocol: Literal["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] = "PLAINTEXT"
-    kafka_sasl_mechanism: Literal["PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"] | None = None
-    kafka_sasl_username: str | None = None
-    kafka_sasl_password: SecretStr | None = None
-    # A consumer tries a message this many times, then sends it to `<topic>.dlq` and moves on.
-    kafka_max_attempts: int = Field(default=5, gt=0)
-    kafka_retry_backoff_seconds: float = Field(default=0.5, ge=0)
-    # Short producer limits: the relay holds a row lock while it waits for the broker's acknowledgement.
-    kafka_request_timeout_seconds: float = Field(default=10.0, gt=0)
-    kafka_send_timeout_seconds: float = Field(default=15.0, gt=0)
-    # `openshell` (Sprint 009): the worker runs each agent run inside an OpenShell sandbox. The API still queues the run
-    # as a job, so status and the runs API are unchanged (ADR-0009).
-    agent_runtime: Literal["inprocess", "queued", "openshell"] = "queued"
-    # How long `/v1/agent/query` waits for the worker before it answers 202 with the execution id.
-    agent_sync_wait_seconds: float = Field(default=25.0, gt=0)
+    event_bus: Literal["inprocess", "outbox", "kafka"] = Field(
+        default="outbox",
+        description="Event bus: `outbox` writes events in the transaction of the change and a relay publishes them, `kafka` makes the relay publish to Kafka, `inprocess` keeps events in the API process (tests and tools).",
+    )
+    kafka_bootstrap: str | None = Field(
+        default=None, description="Comma separated `host:port` list of Kafka brokers. Required when `EVENT_BUS=kafka`.",
+    )
+    kafka_client_id: str = Field(default="gap-platform", description="Kafka client id.")
+    kafka_group_id: str = Field(default="gap-platform", description="Kafka consumer group.")
+    kafka_security_protocol: Literal["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"] = Field(
+        default="PLAINTEXT", description="Kafka security protocol. A SASL protocol needs the three `KAFKA_SASL_*` values.",
+    )
+    kafka_sasl_mechanism: Literal["PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"] | None = Field(
+        default=None, description="SASL mechanism. Required with a SASL protocol.",
+    )
+    kafka_sasl_username: str | None = Field(default=None, description="SASL user name. Required with a SASL protocol.")
+    kafka_sasl_password: SecretStr | None = Field(
+        default=None, description="SASL password. Required with a SASL protocol. Set it in the environment only.",
+        json_schema_extra={"secret": True},
+    )
+    kafka_max_attempts: int = Field(
+        default=5, gt=0, description="Tries a consumer makes for a message before it goes to `<topic>.dlq`.",
+    )
+    kafka_retry_backoff_seconds: float = Field(default=0.5, ge=0, description="Pause between consumer tries, in seconds.")
+    kafka_request_timeout_seconds: float = Field(
+        default=10.0, gt=0, description="Limit of one request to the broker, in seconds.",
+    )
+    kafka_send_timeout_seconds: float = Field(
+        default=15.0, gt=0,
+        description="Limit of one send with its acknowledgement, in seconds. The relay holds a row lock meanwhile, so keep it short.",
+    )
+    agent_runtime: Literal["inprocess", "queued", "openshell"] = Field(
+        default="queued",
+        description="Agent runtime: `queued` runs each agent run as a job in a worker, `openshell` runs it in an OpenShell sandbox started by a worker, `inprocess` runs it in the API process.",
+    )
+    agent_sync_wait_seconds: float = Field(
+        default=25.0, gt=0,
+        description="How long `POST /v1/agent/query` waits for the worker before it answers 202 with the execution id.",
+    )
 
-    # Job queue and workers (`python -m workers`). A claimed job is held under a lease and renewed while it runs.
-    job_lease_seconds: int = Field(default=60, gt=0)
-    job_poll_interval_seconds: float = Field(default=0.5, gt=0)
-    # How often a running job renews its lease and looks for a stop request.
-    job_beat_interval_seconds: float = Field(default=1.0, gt=0)
-    job_max_attempts: int = Field(default=5, gt=0)
-    job_backoff_base_seconds: float = Field(default=2.0, ge=0)
-    worker_concurrency: int = Field(default=1, gt=0)
-    worker_health_file: str = "/tmp/worker-health"
-    worker_shutdown_grace_seconds: float = Field(default=30.0, ge=0)
-    # Outbox relay: how often it looks for unpublished events, how many it takes, and when it gives up on one.
-    outbox_poll_interval_seconds: float = Field(default=1.0, gt=0)
-    outbox_batch_size: int = Field(default=50, gt=0)
-    outbox_max_attempts: int = Field(default=10, gt=0)
-    # For one-process hosting (no separate worker service): run this many workers, and the relay, inside the API.
-    embedded_workers: int = Field(default=0, ge=0)
-    embedded_relay: bool = False
+    job_lease_seconds: int = Field(
+        default=60, gt=0, description="Lease of a claimed job, in seconds. A worker renews it while the job runs; a lost lease lets another worker take the job.",
+    )
+    job_poll_interval_seconds: float = Field(default=0.5, gt=0, description="How often an idle worker looks for a job, in seconds.")
+    job_beat_interval_seconds: float = Field(
+        default=1.0, gt=0, description="How often a running job renews its lease and looks for a stop request, in seconds.",
+    )
+    job_max_attempts: int = Field(default=5, gt=0, description="Tries a job gets before it ends `dead`.")
+    job_backoff_base_seconds: float = Field(
+        default=2.0, ge=0, description="Base of the retry delay in seconds. The delay is the base times 2 to the power of the attempts, with jitter.",
+    )
+    worker_concurrency: int = Field(default=1, gt=0, description="Jobs one worker process runs at the same time.")
+    worker_health_file: str = Field(
+        default="/tmp/worker-health", description="File a worker touches while it is healthy. The compose health check reads its age.",
+    )
+    worker_shutdown_grace_seconds: float = Field(
+        default=30.0, ge=0, description="How long a worker waits for running jobs after SIGTERM, in seconds.",
+    )
+    outbox_poll_interval_seconds: float = Field(
+        default=1.0, gt=0, description="How often the outbox relay looks for unpublished events, in seconds.",
+    )
+    outbox_batch_size: int = Field(default=50, gt=0, description="Events the outbox relay takes in one pass.")
+    outbox_max_attempts: int = Field(
+        default=10, gt=0, description="Tries the relay makes for one event before it leaves the row for an operator.",
+    )
+    embedded_workers: int = Field(
+        default=0, ge=0, description="Number of workers to run inside the API process. 0 means none. For hosts that run one container.",
+    )
+    embedded_relay: bool = Field(default=False, description="Run the outbox relay inside the API process.")
 
-    # Sandboxed agent runs (AGENT_RUNTIME=openshell, ADR-0009). SANDBOX_GATEWAY_URL is the address of this API as the
-    # sandbox sees it: the agent gets it as GATEWAY_URL, and it is the only host the sandbox may connect to.
-    sandbox_gateway_url: str | None = None
-    # OpenShell gateway (gRPC host:port). Unset: the driver uses the active gateway of the OpenShell CLI configuration.
-    openshell_endpoint: str | None = None
-    openshell_workspace: str = "default"
-    openshell_image: str | None = None  # a sandbox image with python3; unset uses the OpenShell default image
-    sandbox_cpu: str = "1"
-    sandbox_memory: str = "512Mi"
-    sandbox_wall_seconds: int = Field(default=300, gt=0, le=3600)
-    sandbox_work_dir: str = "/sandbox/work"
-    # System paths the sandbox may read so python3 can start. Nothing else outside the work directory is readable.
-    sandbox_read_only_paths: str = "/usr,/lib,/lib64,/bin,/sbin"
-    # The executables that may open the sandbox's one network route (real paths or globs, comma separated). The agent is a
-    # python3 script, so this lists the interpreter. OpenShell names a process by the real path of its executable.
-    sandbox_network_binaries: str = "/usr/bin/python3*"
+    sandbox_gateway_url: str | None = Field(
+        default=None,
+        description="Address of this API as the sandbox sees it. It is the only host the sandbox may connect to, and it must not be loopback. Required when `AGENT_RUNTIME=openshell`.",
+    )
+    openshell_endpoint: str | None = Field(
+        default=None,
+        description="OpenShell gateway `host:port`. Unset uses the active gateway of the OpenShell CLI configuration.",
+    )
+    openshell_workspace: str = Field(default="default", description="OpenShell workspace name.")
+    openshell_image: str | None = Field(
+        default=None,
+        description="Workload image of the sandbox. It needs `python3`, a user named `sandbox` and the work directory. Unset uses the OpenShell default image, which has no `python3`.",
+    )
+    sandbox_cpu: str = Field(default="1", description="CPU limit of a sandbox, for example `1` or `500m`.")
+    sandbox_memory: str = Field(default="512Mi", description="Memory limit of a sandbox, for example `512Mi`.")
+    sandbox_wall_seconds: int = Field(
+        default=300, gt=0, le=3600,
+        description="Wall-clock limit of a sandboxed run, in seconds. It is also the life of the run token, plus a minute.",
+    )
+    sandbox_work_dir: str = Field(
+        default="/sandbox/work", description="The one directory a sandbox may write. It must exist in the image. An absolute path other than `/`.",
+    )
+    sandbox_read_only_paths: str = Field(
+        default="/usr,/lib,/lib64,/bin,/sbin",
+        description="Comma separated system paths a sandbox may read so `python3` can start. Nothing else outside the work directory is readable.",
+    )
+    sandbox_network_binaries: str = Field(
+        default="/usr/bin/python3*",
+        description="Comma separated real paths or globs of the executables that may open the sandbox's one network route. A symlink does not match.",
+    )
 
-    azure_oai_base: str | None = None
-    azure_oai_key: str | None = None
-    groq_api_key: str | None = None
+    azure_oai_base: str | None = Field(default=None, description="Azure OpenAI endpoint. Used by `azure/...` models.")
+    azure_oai_key: str | None = Field(
+        default=None, description="Azure OpenAI key. Used by `azure/...` models.", json_schema_extra={"secret": True},
+    )
+    groq_api_key: str | None = Field(
+        default=None, description="Groq API key. Used only when `LLM_MODEL` names a Groq model.", json_schema_extra={"secret": True},
+    )
 
-    max_query_length: int = Field(default=1000, gt=0)
-    confidence_floor: float = Field(default=0.45, ge=0.0, le=1.0)
+    max_query_length: int = Field(default=1000, gt=0, description="Longest question the input guardrail accepts, in characters.")
+    confidence_floor: float = Field(
+        default=0.45, ge=0.0, le=1.0, description="Retrieval score below which the output guardrail flags an answer.",
+    )
 
-    rate_limit_requests: int = Field(default=60, gt=0)
-    rate_limit_window_seconds: int = Field(default=60, gt=0)
-    daily_token_budget: int = Field(default=500_000, gt=0)
-    # Daily cost cap per tenant in USD (Sprint 008). A tenant policy may set a lower cap, never a higher one.
-    daily_cost_cap_usd: float = Field(default=10.0, gt=0)
+    rate_limit_requests: int = Field(default=60, gt=0, description="Requests one principal may make in a rate-limit window.")
+    rate_limit_window_seconds: int = Field(default=60, gt=0, description="Length of the rate-limit window, in seconds.")
+    daily_token_budget: int = Field(default=500_000, gt=0, description="Tokens a tenant may use per UTC day.")
+    daily_cost_cap_usd: float = Field(
+        default=10.0, gt=0, description="Cost a tenant may spend per UTC day, in USD. A tenant policy may set a lower cap, never a higher one.",
+    )
 
-    # Audit receipts (ADR-0012). RECEIPT_SIGNING_KEY is an Ed25519 private key, base64 of its 32 raw bytes. It is
-    # required in public-preview and prod; local mode makes a throwaway key at startup. The previous public keys
-    # (comma separated, base64) stay listed after a rotation so older receipts still verify.
-    receipt_signing_key: SecretStr | None = None
-    receipt_previous_public_keys: str | None = None
+    receipt_signing_key: SecretStr | None = Field(
+        default=None,
+        description="Ed25519 private key for receipts: base64 of 32 raw bytes. Required in `public-preview` and `prod`; local mode makes a throwaway key at startup. Set the same key in the API and every worker.",
+        json_schema_extra={"secret": True},
+    )
+    receipt_previous_public_keys: str | None = Field(
+        default=None,
+        description="Comma separated base64 public keys of earlier signing keys. They stay listed after a rotation so older receipts still verify.",
+    )
 
-    # Retention (Q7, ADR-0012): how long decision records are kept. A tenant may override it (`set-retention`).
-    decision_retention_days: int = Field(default=90, ge=30)  # the purge function floors at 30 days too
-    purge_batch_size: int = Field(default=1000, gt=0)
-    # How often a worker looks for tenants with expired records and queues a `purge_decisions` job (one a day per
-    # tenant). 0 turns the scheduler off.
-    retention_schedule_interval_seconds: float = Field(default=3600.0, ge=0)
+    decision_retention_days: int = Field(
+        default=90, ge=30,
+        description="Days decision records are kept. A tenant may set its own value. The minimum is 30.",
+    )
+    purge_batch_size: int = Field(default=1000, gt=0, description="Decision rows one purge step deletes.")
+    retention_schedule_interval_seconds: float = Field(
+        default=3600.0, ge=0,
+        description="How often a worker looks for tenants with expired records and queues a purge job (one a day per tenant). 0 turns the scheduler off.",
+    )
 
-    # Metrics (Sprint 008). `/metrics` is open when this is true and needs the `admin` scope when it is false. The
-    # default is true in local and false elsewhere. WORKER_METRICS_PORT serves the worker's own series (0 is off).
-    metrics_public: bool | None = None
-    worker_metrics_port: int = Field(default=0, ge=0, le=65535)
-    # A link the Trust page shows when the observability profile is running (for example http://localhost:3000).
-    grafana_url: str | None = None
+    metrics_public: bool | None = Field(
+        default=None,
+        description="`/metrics` is open when true and needs the `admin` scope when false. Unset means true in local mode and false elsewhere.",
+    )
+    worker_metrics_port: int = Field(
+        default=0, ge=0, le=65535, description="Port where a worker serves its own metrics. 0 turns it off.",
+    )
+    grafana_url: str | None = Field(
+        default=None, description="Link the Trust page shows when the observability profile runs, for example `http://localhost:3000`.",
+    )
 
-    # JWT verification (optional). Set JWT_JWKS_URL (asymmetric keys) or JWT_SECRET (HS256).
-    jwt_jwks_url: str | None = None
-    jwt_secret: str | None = None
-    jwt_issuer: str | None = None
-    jwt_audience: str | None = None
+    jwt_jwks_url: str | None = Field(
+        default=None, description="JWKS URL for JWT verification with asymmetric keys. Set only one of this and `JWT_SECRET`.",
+    )
+    jwt_secret: str | None = Field(
+        default=None,
+        description="HS256 secret for JWT verification, at least 32 characters. Set only one of this and `JWT_JWKS_URL`.",
+        json_schema_extra={"secret": True},
+    )
+    jwt_issuer: str | None = Field(default=None, description="Expected JWT issuer. Required when JWT verification is on.")
+    jwt_audience: str | None = Field(default=None, description="Expected JWT audience. Required when JWT verification is on.")
 
-    frontend_url: str | None = None
-    # Web edge: the principal a public-preview visitor gets a read-only session for. A principal id, never a key.
-    preview_principal_id: UUID | None = None
-    web_concurrency: int = Field(default=1, gt=0)
-    log_level: str = "INFO"
+    frontend_url: str | None = Field(default=None, description="Extra origin allowed by CORS. The Vite dev and preview ports on localhost are always allowed.")
+    preview_principal_id: UUID | None = Field(
+        default=None,
+        description="Principal id (a UUID, never a key) that a visitor gets a read-only session for at `POST /v1/session/preview`. Used only when `MODE=public-preview`, and not allowed when `MODE=prod`.",
+    )
+    web_concurrency: int = Field(default=1, gt=0, description="Number of API worker processes you run. The API logs the total database connection budget from it.")
+    log_level: str = Field(default="INFO", description="Log level of the JSON logs.")
 
-    # OpenTelemetry: an exporter is created only when this is set.
-    otel_exporter_otlp_endpoint: str | None = None
-    otel_service_name: str = "ai-platform-api"
+    otel_exporter_otlp_endpoint: str | None = Field(
+        default=None, description="OTLP endpoint for traces. Unset means no exporter and no background thread.",
+    )
+    otel_service_name: str = Field(default="ai-platform-api", description="Service name on exported traces.")
 
     @field_validator("preview_principal_id", mode="before")
     @classmethod

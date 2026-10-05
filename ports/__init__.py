@@ -5,7 +5,16 @@ Protocols and frozen dataclasses only. No provider SDK is imported here; adapter
 from ports.bundle import Adapters
 from ports.cache import CachePort, CacheUnavailable, SemanticHit
 from ports.embeddings import EmbeddingDimensionMismatch, EmbeddingError, EmbeddingPort, Embeddings
-from ports.events import DECISION_RECORDED, DECISIONS_PURGED, INGEST_COMPLETED, CloudEvent, EventBus, Handler
+from ports.events import (
+    DECISION_RECORDED,
+    DECISIONS_PURGED,
+    EVENT_CATALOGUE,
+    INGEST_COMPLETED,
+    CloudEvent,
+    EventBus,
+    EventInfo,
+    Handler,
+)
 from ports.knowledge import ChunkRow, DocumentRecord, Hit, KnowledgeStore
 from ports.llm import ChatModel, ChatModelPort, Completion, LLMPort
 from ports.objects import ObjectNotFound, ObjectStore
@@ -35,7 +44,7 @@ from ports.sandbox import (
 
 __all__ = [
     "Adapters", "AgentRuntime", "CachePort", "CacheUnavailable", "ChatModel", "ChatModelPort", "ChunkRow", "CloudEvent",
-    "Completion", "DECISION_RECORDED", "DECISIONS_PURGED", "DocumentRecord", "INGEST_COMPLETED", "EmbeddingDimensionMismatch", "EmbeddingError",
+    "Completion", "DECISION_RECORDED", "DECISIONS_PURGED", "DocumentRecord", "EVENT_CATALOGUE", "EventInfo", "INGEST_COMPLETED", "EmbeddingDimensionMismatch", "EmbeddingError",
     "EmbeddingPort", "Embeddings", "EventBus", "Handler", "Hit", "KnowledgeStore", "LLMPort", "ObjectNotFound",
     "ObjectStore", "RunHandle", "RunNotFound", "RunResult", "RunSpec", "RunState", "RunStatus", "Runner", "SemanticHit",
     "EgressRule", "SandboxDriver", "SandboxEvent", "SandboxEventKind", "SandboxExit", "SandboxLaunch", "SandboxLimits",

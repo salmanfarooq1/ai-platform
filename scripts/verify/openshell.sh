@@ -4,7 +4,7 @@
 #     OPENSHELL_SANDBOX_IMAGE=<image with python3, user "sandbox", /sandbox/work> scripts/verify/openshell.sh
 #
 # Needs a Linux or WSL 2 host with Docker (or Podman), a running OpenShell gateway registered for the current user, Postgres
-# and Redis (`docker compose up -d postgres redis`). docs/runbooks/openshell.md covers the install and the kernel requirements.
+# and Redis (`docker compose up -d postgres redis`). docs/operations.md covers the install and the kernel requirements.
 # Optional: OPENSHELL_ENDPOINT (gateway host:port), VERIFY_GATEWAY_HOST (an address of this machine the sandbox can reach, not
 # loopback; default: the Docker bridge address), VERIFY_PORT (default 8010).
 #

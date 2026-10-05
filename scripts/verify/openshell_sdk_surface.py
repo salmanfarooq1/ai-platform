@@ -29,7 +29,7 @@ def main() -> int:
         from openshell import SandboxClient
         from openshell._proto import openshell_pb2, sandbox_pb2
     except ImportError as exc:
-        print(f"SKIP  the openshell package is not importable ({exc}); see docs/runbooks/openshell.md")
+        print(f"SKIP  the openshell package is not importable ({exc}); see docs/operations.md")
         return 2
     check("openshell version is the pinned one", openshell.__version__ == PINNED, openshell.__version__)
     for method in ("create_from_template", "exec_stream", "exec", "delete", "wait_ready", "sandbox_templates", "close", "from_active_cluster"):

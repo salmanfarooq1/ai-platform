@@ -1,4 +1,4 @@
-"""Regenerate docs/openapi.json from the app. Run after any intentional API change:
+"""Regenerate docs/api/openapi.json from the app. Run after any intentional API change:
 
     poetry run python scripts/update_openapi.py
 """

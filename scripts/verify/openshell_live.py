@@ -18,7 +18,7 @@ What it does, in one process:
 
 Needs: Linux with Docker (or Podman), a running OpenShell gateway with a Docker or Podman driver, a workload image with
 python3, a user named `sandbox` and an existing /sandbox/work owned by it (OPENSHELL_SANDBOX_IMAGE), Postgres and Redis
-(`docker compose up -d postgres redis`). See docs/runbooks/openshell.md. The model and the embeddings are fakes, so this
+(`docker compose up -d postgres redis`). See docs/operations.md. The model and the embeddings are fakes, so this
 checks the sandbox and the gateway path, not an LLM.
 """
 import asyncio
@@ -70,7 +70,7 @@ def preflight() -> tuple[str, str] | None:
         client.close()
         record("preflight: an OpenShell gateway answers", "PASS", f"version {health.version}")
     except Exception as exc:
-        record("preflight: an OpenShell gateway answers", "FAIL", f"{type(exc).__name__}: start the gateway and register it (docs/runbooks/openshell.md)")
+        record("preflight: an OpenShell gateway answers", "FAIL", f"{type(exc).__name__}: start the gateway and register it (docs/operations.md)")
         return None
     image = os.getenv("OPENSHELL_SANDBOX_IMAGE", "")
     if not image:
