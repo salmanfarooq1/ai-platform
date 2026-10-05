@@ -10,23 +10,25 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
+from pydantic import ValidationError
+
 from adapters.inprocess_events import InProcessEventBus
-from adapters.inprocess_runtime import InProcessAgentRuntime
 from adapters.pg_outbox_events import OutboxRelay
+from adapters.registry import build_local_runtime
 from api.agent.graph import build_agent_graph
-from api.agent.response import book_agent_usage, build_agent_result
+from api.agent.response import book_agent_usage, build_agent_result, build_sandbox_result
 from api.agent.runner import AgentRunOutput, make_agent_runner
 from core.database.jobs import KIND_AGENT_RUN, KIND_INGEST, KIND_PURGE
 from core.database.tenant import DbPool
 from core.settings import Settings, get_settings
 from gateway import EnforcementContext, GatewayRuntime
 from gateway.receipts import Keyring, keyring_from_settings
-from ports import Adapters, EventBus, RunSpec
+from ports import Adapters, EventBus, RunSpec, SandboxDriver
 from workers.handlers.agent_run import make_agent_run_handler
 from workers.handlers.ingest import make_ingest_handler
 from workers.handlers.purge import make_purge_handler
 from workers.loop import Worker
-from workers.types import Handler, JobContext
+from workers.types import Handler, JobContext, PermanentJobError
 
 logger = logging.getLogger("workers.context")
 
@@ -39,6 +41,15 @@ def _since_claim(jctx: JobContext) -> float:
 
 async def _finish_agent_run(spec: RunSpec, output: Any, ctx: EnforcementContext | None, jctx: JobContext) -> dict[str, Any]:
     """The stored result of an agent run: the response, and the usage booked once, here, where the run ended."""
+    if isinstance(output, dict):
+        # A sandboxed run (Sprint 009). The model calls were booked by the gateway as the agent made them, so nothing is booked here.
+        try:
+            return build_sandbox_result(
+                output, str(spec.input["question"]), str(spec.input.get("namespace", "default")), _since_claim(jctx),
+            )
+        except ValidationError:
+            logger.error("run %s: the sandbox output did not fit the output model", spec.execution_id)
+            raise PermanentJobError("sandbox_output_invalid") from None
     if not isinstance(output, AgentRunOutput):
         raise TypeError("an agent run returned something other than AgentRunOutput")
     result = build_agent_result(
@@ -55,12 +66,12 @@ async def _finish_agent_run(spec: RunSpec, output: Any, ctx: EnforcementContext 
 
 def build_handlers(
     adapters: Adapters, pool: DbPool, gateway_runtime: GatewayRuntime, agent_graph: Any | None = None,
-    settings: Settings | None = None, keyring: Keyring | None = None,
+    settings: Settings | None = None, keyring: Keyring | None = None, sandbox_driver: SandboxDriver | None = None,
 ) -> dict[str, Handler]:
     """The handler of every job kind. The agent runs on a runtime of its own inside this process."""
     active = settings if settings is not None else get_settings()
     graph = agent_graph if agent_graph is not None else build_agent_graph(adapters)
-    local = InProcessAgentRuntime(make_agent_runner(lambda: graph))
+    local = build_local_runtime(active, runner=make_agent_runner(lambda: graph), pool=pool, sandbox_driver=sandbox_driver)
     return {
         KIND_INGEST: make_ingest_handler(adapters.knowledge, adapters.embeddings, adapters.objects),
         KIND_AGENT_RUN: make_agent_run_handler(local, gateway_runtime, _finish_agent_run),

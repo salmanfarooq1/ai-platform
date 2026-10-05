@@ -19,10 +19,25 @@ from ports.runtime import (
     RunState,
     RunStatus,
 )
+from ports.sandbox import (
+    EgressRule,
+    SandboxDriver,
+    SandboxEvent,
+    SandboxEventKind,
+    SandboxExit,
+    SandboxLaunch,
+    SandboxLimits,
+    SandboxMessage,
+    SandboxOutput,
+    SandboxPolicy,
+    SandboxUnavailable,
+)
 
 __all__ = [
     "Adapters", "AgentRuntime", "CachePort", "CacheUnavailable", "ChatModel", "ChatModelPort", "ChunkRow", "CloudEvent",
     "Completion", "DECISION_RECORDED", "DECISIONS_PURGED", "DocumentRecord", "INGEST_COMPLETED", "EmbeddingDimensionMismatch", "EmbeddingError",
     "EmbeddingPort", "Embeddings", "EventBus", "Handler", "Hit", "KnowledgeStore", "LLMPort", "ObjectNotFound",
     "ObjectStore", "RunHandle", "RunNotFound", "RunResult", "RunSpec", "RunState", "RunStatus", "Runner", "SemanticHit",
+    "EgressRule", "SandboxDriver", "SandboxEvent", "SandboxEventKind", "SandboxExit", "SandboxLaunch", "SandboxLimits",
+    "SandboxMessage", "SandboxOutput", "SandboxPolicy", "SandboxUnavailable",
 ]

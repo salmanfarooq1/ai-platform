@@ -84,7 +84,9 @@ class Settings(BaseSettings):
     # (decision and ingest events are written in the transaction that made them) and the queued runtime (an agent
     # run is a job that a worker executes). `inprocess` keeps both in the API process, for tests and tools.
     event_bus: Literal["inprocess", "outbox"] = "outbox"
-    agent_runtime: Literal["inprocess", "queued"] = "queued"
+    # `openshell` (Sprint 009): the worker runs each agent run inside an OpenShell sandbox. The API still queues the run
+    # as a job, so status and the runs API are unchanged (ADR-0009).
+    agent_runtime: Literal["inprocess", "queued", "openshell"] = "queued"
     # How long `/v1/agent/query` waits for the worker before it answers 202 with the execution id.
     agent_sync_wait_seconds: float = Field(default=25.0, gt=0)
 
@@ -105,6 +107,23 @@ class Settings(BaseSettings):
     # For one-process hosting (no separate worker service): run this many workers, and the relay, inside the API.
     embedded_workers: int = Field(default=0, ge=0)
     embedded_relay: bool = False
+
+    # Sandboxed agent runs (AGENT_RUNTIME=openshell, ADR-0009). SANDBOX_GATEWAY_URL is the address of this API as the
+    # sandbox sees it: the agent gets it as GATEWAY_URL, and it is the only host the sandbox may connect to.
+    sandbox_gateway_url: str | None = None
+    # OpenShell gateway (gRPC host:port). Unset: the driver uses the active gateway of the OpenShell CLI configuration.
+    openshell_endpoint: str | None = None
+    openshell_workspace: str = "default"
+    openshell_image: str | None = None  # a sandbox image with python3; unset uses the OpenShell default image
+    sandbox_cpu: str = "1"
+    sandbox_memory: str = "512Mi"
+    sandbox_wall_seconds: int = Field(default=300, gt=0, le=3600)
+    sandbox_work_dir: str = "/sandbox/work"
+    # System paths the sandbox may read so python3 can start. Nothing else outside the work directory is readable.
+    sandbox_read_only_paths: str = "/usr,/lib,/lib64,/bin,/sbin"
+    # The executables that may open the sandbox's one network route (real paths or globs, comma separated). The agent is a
+    # python3 script, so this lists the interpreter. OpenShell names a process by the real path of its executable.
+    sandbox_network_binaries: str = "/usr/bin/python3*"
 
     azure_oai_base: str | None = None
     azure_oai_key: str | None = None
@@ -183,6 +202,17 @@ class Settings(BaseSettings):
             raise ValueError("JWT_ISSUER and JWT_AUDIENCE must be set when JWT verification is configured")
         if self.preview_principal_id is not None and self.mode == "prod":
             raise ValueError("PREVIEW_PRINCIPAL_ID must not be set when MODE=prod (preview sessions are for local and public-preview)")
+        if self.agent_runtime == "openshell":
+            if not self.sandbox_gateway_url:
+                raise ValueError("SANDBOX_GATEWAY_URL must be set when AGENT_RUNTIME=openshell")
+            if self.sandbox_egress() is None:
+                raise ValueError("SANDBOX_GATEWAY_URL must be an http or https URL with a host")
+        if not self.sandbox_work_dir.startswith("/") or self.sandbox_work_dir.rstrip("/") == "":
+            raise ValueError("SANDBOX_WORK_DIR must be an absolute path other than /")
+        if not self.sandbox_network_binaries_list or any(not p.startswith("/") for p in self.sandbox_network_binaries_list):
+            raise ValueError("SANDBOX_NETWORK_BINARIES must list at least one absolute path or glob")
+        if any(not p.startswith("/") or p.rstrip("/") == "" for p in self.sandbox_read_only):
+            raise ValueError("SANDBOX_READ_ONLY_PATHS must be absolute paths other than /")
         if self.object_store == "s3":
             missing_s3 = [
                 name.upper()
@@ -222,6 +252,27 @@ class Settings(BaseSettings):
         if self.mode == "local" and self.database_url == LOCAL_DATABASE_URL:
             return LOCAL_MIGRATION_DATABASE_URL
         return self.database_dsn
+
+    def sandbox_egress(self) -> tuple[str, int] | None:
+        """(host, port) of `SANDBOX_GATEWAY_URL`: the one place a sandbox may connect to. None if it is not a usable URL."""
+        from urllib.parse import urlparse
+
+        try:
+            parsed = urlparse(self.sandbox_gateway_url or "")
+            host, port = parsed.hostname, parsed.port
+        except ValueError:
+            return None
+        if parsed.scheme not in ("http", "https") or not host:
+            return None
+        return host, port or (443 if parsed.scheme == "https" else 80)
+
+    @property
+    def sandbox_read_only(self) -> tuple[str, ...]:
+        return tuple(p.strip() for p in self.sandbox_read_only_paths.split(",") if p.strip())
+
+    @property
+    def sandbox_network_binaries_list(self) -> tuple[str, ...]:
+        return tuple(p.strip() for p in self.sandbox_network_binaries.split(",") if p.strip())
 
     @property
     def embed_fallbacks(self) -> list[str]:

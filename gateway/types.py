@@ -41,6 +41,9 @@ class Action:
     input_text: str | None = field(default=None, repr=False, compare=False)
     rate: bool = False
     budget: bool = False
+    # What a tool call passes to the tool. Checked against the policy's `tool_arguments` schema. Like `input_text`
+    # it is never stored, logged or shown in `repr`: a deny records the reason code only.
+    arguments: Mapping[str, Any] | None = field(default=None, repr=False, compare=False)
 
     @property
     def input_hash(self) -> str | None:

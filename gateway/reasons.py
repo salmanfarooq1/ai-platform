@@ -27,6 +27,10 @@ _ENTRIES = (
         "missing_scope", "Missing scope", "The key does not hold the scope this call needs.", None, "boundary",
     ),
     ReasonInfo(
+        "run_token_scope", "Run token outside its run",
+        "A run token was used for something other than the run it was issued for.", None, "boundary",
+    ),
+    ReasonInfo(
         "action_not_allowed", "Action not allowed", "The key's scopes do not allow this kind of action.", None, "boundary",
     ),
     ReasonInfo(
@@ -42,6 +46,10 @@ _ENTRIES = (
     ),
     ReasonInfo(
         "tool_not_allowed", "Tool not allowed", "The policy does not list this tool.", "allowed_tools", "policy",
+    ),
+    ReasonInfo(
+        "tool_argument_not_allowed", "Tool argument not allowed",
+        "The arguments of the tool call do not fit the schema the policy sets for this tool.", "tool_arguments", "policy",
     ),
     ReasonInfo(
         "model_not_allowed", "Model not allowed", "The policy does not list this model.", "allowed_models", "policy",

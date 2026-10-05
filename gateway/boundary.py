@@ -4,7 +4,8 @@
 agent and its tools receive the boundary (through the enforcement context), never the raw principal.
 `"*"` in a resource set means every resource of that type.
 """
-from dataclasses import dataclass, replace
+from collections.abc import Mapping
+from dataclasses import dataclass, field, replace
 from typing import Any
 from uuid import UUID
 
@@ -58,6 +59,8 @@ class ExecutionBoundary:
     daily_cost_cap_usd: float | None = None
     # Set when the tenant policy could not be loaded or parsed: every action is then denied.
     unavailable_reason: str | None = None
+    # A JSON Schema per tool name (the policy's `tool_arguments`). Narrowing never changes it.
+    tool_arguments: Mapping[str, Any] = field(default_factory=dict)
 
     def to_payload(self) -> dict[str, Any]:
         """A JSON form of the boundary, so a job can carry it to a worker (it holds no secret)."""
@@ -67,7 +70,7 @@ class ExecutionBoundary:
             "models": sorted(self.models), "max_tool_calls": self.max_tool_calls, "max_tokens": self.max_tokens,
             "max_query_length": self.max_query_length, "blocked_terms": sorted(self.blocked_terms),
             "policy_version": self.policy_version, "unavailable_reason": self.unavailable_reason,
-            "daily_cost_cap_usd": self.daily_cost_cap_usd,
+            "daily_cost_cap_usd": self.daily_cost_cap_usd, "tool_arguments": dict(self.tool_arguments),
         }
 
     @classmethod
@@ -80,6 +83,7 @@ class ExecutionBoundary:
             max_tokens=int(body["max_tokens"]), max_query_length=int(body["max_query_length"]),
             blocked_terms=frozenset(body["blocked_terms"]), policy_version=body["policy_version"],
             unavailable_reason=body["unavailable_reason"], daily_cost_cap_usd=body.get("daily_cost_cap_usd"),
+            tool_arguments=dict(body.get("tool_arguments") or {}),
         )
 
     def visible_kbs(self) -> list[str] | None:
@@ -148,6 +152,7 @@ def build_boundary(
         blocked_terms=frozenset(t.casefold() for t in doc.blocked_terms),
         policy_version=policy_version,
         daily_cost_cap_usd=doc.daily_cost_cap_usd,
+        tool_arguments=dict(doc.tool_arguments),
     )
 
 

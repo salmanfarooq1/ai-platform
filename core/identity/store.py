@@ -37,6 +37,7 @@ async def authenticate_api_key(pool: Pool, token: str) -> Principal | None:
         tenant_id=row["tenant_id"],
         kind=cast(PrincipalKind, row["principal_kind"]),
         scopes=parse_scopes(cast(Any, row["scopes"])),
+        credential_id=row["key_id"],
     )
 
 
