@@ -170,3 +170,44 @@ docker compose up -d postgres redis && poetry run pytest -q && (cd ui && npm run
 ```bash
 git push -u origin sprint/007-durable-jobs
 ```
+
+## Sprint 008: trust baseline
+Tree `9e425e6c8b3eb1fd641a26af52132cf2354ab036`. This branch starts from `sprint/007-durable-jobs`.
+
+```bash
+git switch -c sprint/008-trust-baseline sprint/007-durable-jobs
+```
+
+```bash
+git restore --source=9e425e6c8b3eb1fd641a26af52132cf2354ab036 --staged -- migrations core ports adapters workers gateway config.py docker docker-compose.yml pyproject.toml poetry.lock .env.example
+git commit -m "feat: signed receipts on a per-tenant hash chain, retention purge, cost cap and metrics"
+```
+
+```bash
+git restore --source=9e425e6c8b3eb1fd641a26af52132cf2354ab036 --staged -- api docs/openapi.json
+git commit -m "feat: receipt, trust summary and metrics routes"
+```
+
+```bash
+git restore --source=9e425e6c8b3eb1fd641a26af52132cf2354ab036 --staged -- tests scripts .github
+git commit -m "test: receipts, retention, cost cap, metrics and the eval gate in CI"
+```
+
+```bash
+git restore --source=9e425e6c8b3eb1fd641a26af52132cf2354ab036 --staged -- ui
+git commit -m "feat(ui): Trust page with receipt verification, retention and eval history"
+```
+
+```bash
+git restore --source=9e425e6c8b3eb1fd641a26af52132cf2354ab036 --staged -- .
+git commit -m "docs: ADR-0012, retention decision and the Sprint 008 report"
+git diff --quiet 9e425e6c8b3eb1fd641a26af52132cf2354ab036 HEAD && echo "branch matches the Sprint 008 snapshot"
+```
+
+```bash
+docker compose up -d postgres redis && poetry run pytest -q && (cd ui && npm run tokens:check && npm run lint && npx tsc --noEmit && npm test -- --run && npm run build && npx playwright test)
+```
+
+```bash
+git push -u origin sprint/008-trust-baseline
+```

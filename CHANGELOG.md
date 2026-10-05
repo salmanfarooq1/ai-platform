@@ -2,6 +2,24 @@
 
 One short entry per sprint, newest first. Full detail lives in `planning/sprints/`.
 
+## Sprint 009: sandboxed agent runs
+- **What was built:**
+  - **OpenShell runtime (ADR-0009 updated, runbook).** `AGENT_RUNTIME=openshell` makes a worker run each agent run in an NVIDIA OpenShell sandbox (Apache-2.0, pinned 0.1.2). It sits behind a new `SandboxDriver` port (`ports/sandbox.py`) with an OpenShell SDK driver and a test double. The sandbox's one network route is the gateway, it writes one work directory, and it has CPU, memory and wall-clock limits. The default runtime does not change.
+  - **Run tokens (migration `0010`).** A token bound to one `execution_id` and one principal, hash only, short-lived, revoked when the run ends, valid only on `/v1/sandbox/runs/{execution_id}/...` (any other route is a 403 with a `run_token_scope` deny row). The agent in the sandbox (`sandbox_agent/`, standard library only) calls those routes for every tool and model call, so `enforce()` decides and records each one with the run's `execution_id`.
+  - **Tool argument checks.** A policy may hold `tool_arguments`, a JSON Schema per tool. A call that does not fit is denied with `tool_argument_not_allowed`. It covers the sandbox, the LangGraph tools and MCP search.
+  - **Events.** `sandbox_events` (append-only for the app role) holds start, exit, refused connections, limits and warnings per run. `GET /v1/agent/runs/{execution_id}` now returns them with a `timeline` that merges them with the run's decisions by time.
+  - **UI.** The Agent runs page shows sandbox events on the step timeline next to the gateway decisions, one icon and one word per kind. A blocked network call or file access is a deny state.
+  - **Live check.** `scripts/verify/openshell.sh` runs A2 to A5 and the memory and CPU limits against a real gateway. `docs/runbooks/openshell.md` has the pinned versions with SHA-256, the install, the images and what the live run showed.
+- **API change:** new `POST /v1/sandbox/runs/{execution_id}/tools/{name}` and `/model` (run token only). `GET /v1/agent/runs/{execution_id}` adds `sandbox_events` and `timeline`. Policies accept `tool_arguments`. New reasons `tool_argument_not_allowed` and `run_token_scope`. Settings: `SANDBOX_GATEWAY_URL` (required for `openshell`), `OPENSHELL_IMAGE`, `OPENSHELL_ENDPOINT`, `OPENSHELL_WORKSPACE`, `SANDBOX_CPU`, `SANDBOX_MEMORY`, `SANDBOX_WALL_SECONDS`, `SANDBOX_WORK_DIR`, `SANDBOX_READ_ONLY_PATHS`, `SANDBOX_NETWORK_BINARIES`. `jsonschema` is a direct dependency. The Dockerfile copies `sandbox_agent`.
+- **Found on the live gateway (all in the runbook):** a sandbox name over 19 characters is refused; a network rule must name the interpreter's real path, not a symlink; OpenShell's baseline readable paths include `/etc`; OpenShell logs no event for a refused file read; the memory limit shows as exit 137 with no event.
+- **Test delta:**
+  - Backend: 1294 → 1504 passed (+210) before QA fixes, 10 skipped (the live MinIO runs, unchanged).
+  - Frontend: 192 → 207 Vitest, 77 → 82 Playwright.
+  - Live: 25 SDK-surface checks and 13 live checks against OpenShell 0.1.2.
+- **QA fixes:** M1 faults on the sandbox routes are 503; M2 `set-policy` refuses unknown tool names; M3 no `pattern`, `patternProperties` or `format` in tool schemas, and the argument check has a time limit off the event loop (timeout is a deny); L1 out-of-run token uses write at most one deny row per token and path per minute; L2 sandboxed answers list `agent_reported` fields; L3 `network_denied` keeps host, port and reason; L6 a run token ends when its API key is revoked (`run_tokens.key_id`, migration `0010` changed in place). L4 and L5 accepted (runbook, `RISKS.md`).
+- **QA test delta:** backend 1504 → 1523 (+19), 10 skipped; Vitest 207; Playwright 82. Each fix was checked by removing it and watching its test fail.
+- **Not verified here:** the standard `ghcr.io` OpenShell images (the live run used images rebuilt from the checksum-checked release archives), Podman, Kubernetes, WSL 2, other versions, a real model, CI on GitHub, a Docker image build, and the hosted migration `0010`.
+
 ## Sprint 008: trust baseline
 - **What was built:**
   - **Receipts and a hash chain (migration `0009`, ADR-0012).** Each decision row links to the one before it per tenant. `GET /v1/receipts/{id}` returns an Ed25519 signed receipt, `GET /v1/receipts/keys` the public keys, `POST /v1/receipts/verify` the same checks as the offline `scripts/verify/receipt.py`. `RECEIPT_SIGNING_KEY` is required outside local mode.

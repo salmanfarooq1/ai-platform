@@ -1,6 +1,6 @@
 # Frontend: current state
 
-This is a snapshot for design and content work. It is checked against the code in `ui/` as of Sprint 008. It says plainly what is built, what is a placeholder and what has not been reviewed.
+This is a snapshot for design and content work. It is checked against the code in `ui/` as of Sprint 009. It says plainly what is built, what is a placeholder and what has not been reviewed.
 
 The design rules live in `docs/design/` (index: `docs/UI_GUIDELINES.md`). The may-claim and must-not-claim lists moved to `docs/design/CONTENT_STYLE.md`.
 
@@ -33,7 +33,7 @@ The stack is React and TypeScript, with Tailwind and hand-built components on Ra
 | Policies | `/app/policies` | Built, read-only. Version list and the policy document. Editing stays in the admin command line tool. |
 | Keys and principals | `/app/keys` | Built, read-only. Key prefixes, scopes and dates. Secrets are never shown. |
 | Usage | `/app/usage` | Built. Totals, by principal, by day (chart), and denials by cause. |
-| Agent runs | `/app/runs` | Built. Each run shows its execution id and its status, read from the durable job queue (Sprint 007). A caller sees only runs in knowledge bases its policy allows, and without `audit:read` only its own runs. |
+| Agent runs | `/app/runs` | Built. Each run shows its execution id and its status, read from the durable job queue (Sprint 007). A caller sees only runs in knowledge bases its policy allows, and without `audit:read` only its own runs. **Sprint 009:** a run that executed in a sandbox shows its steps as one rail: the gateway decisions and the sandbox's own events (started, exited, network call blocked, file access blocked, limit reached, log) in time order, each kind with its own icon and word. A blocked network call or file access is a deny state (red bar, "Denied", what was tried). A summary line says what the sandbox blocked. A run without sandbox events keeps the request trace. |
 | Trust | `/app/trust` | Built (Sprint 008). Verify a receipt by decision id or by pasting one: valid or invalid, each check, chain position and key id. The decision panel has a "Verify receipt" link that opens it with the id. Retention settings (read only), the eval gate latest run and history, and a Grafana link when `GRAFANA_URL` is set. Needs `audit:read`. |
 | System | `/app/system` | Built. Health of the API, the database and the cache. |
 
@@ -68,8 +68,8 @@ Browser storage: the allowed `localStorage` keys are `theme`, `density`, `walkth
 
 ## 4. What's measured (and how)
 Evidence files are in `planning/sprints/005b-polish/evidence/`.
-- **Unit tests (Sprint 008):** Vitest and Testing Library, 192 tests, all passing. They cover the reason sentence, deny emphasis, the governance line, the overview tiles, the drawer, the command palette, the walkthrough, the session menu, the tokens and the contrast pairs. ESLint and `tsc --noEmit` are clean.
-- **Playwright (Sprint 008):** 77 tests against the real API (fakes for the model and embeddings), all passing. They cover the walkthrough, the governance line and drawer, Overview to the deny-filtered list, the palette, a deny's sentence and policy field, the first-run rule, console views, the session menu, landing, reduced motion, preview, and phone widths.
+- **Unit tests (Sprint 009):** Vitest and Testing Library, 207 tests (the new ones cover `RunSteps`, the sandbox words and the runs page with and without sandbox events), all passing. They cover the reason sentence, deny emphasis, the governance line, the overview tiles, the drawer, the command palette, the walkthrough, the session menu, the tokens and the contrast pairs. ESLint and `tsc --noEmit` are clean.
+- **Playwright (Sprint 009):** 82 tests against the real API (fakes for the model and embeddings), all passing. The sandbox spec reads two runs that were made while seeding with a fake sandbox, so it proves the page and the runs API, not OpenShell. They cover the walkthrough, the governance line and drawer, Overview to the deny-filtered list, the palette, a deny's sentence and policy field, the first-run rule, console views, the session menu, landing, reduced motion, preview, and phone widths.
 - **Accessibility:** axe found 0 violations of any impact on 12 pages and states in each theme (landing, How it works, Overview, Requests list, the drawer, the walkthrough, the palette, the session menu, Ask with an answer, Ask denied, Decisions allowed and denied).
 - **Landing page performance:** Lighthouse 12, run in the build container against `vite preview`. Desktop 99. Mobile 85 (simulated throttling). The ring loads after the load event, so Lighthouse sees little of its cost.
 - **Code splitting:** every route is its own chunk. A grep finds no GSAP or WebGL in any chunk that loads under `/app`.

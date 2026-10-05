@@ -1,0 +1,21 @@
+# What a live OpenShell 0.1.2 sandbox lets a python3 process read and write (policy: read-only /usr /lib /lib64 /bin /sbin, read-write /sandbox/work, plus OpenShell's baseline paths). Scratch probe, not part of the repo.
+# Landlock refused: /home/sandbox, /var/lib/dpkg/status, /opt, /srv, /sandbox, /mnt, /boot, /root. Allowed: /etc (baseline), /proc, /tmp, /var/log, /sandbox/work.
+/etc/hostname                read ok
+/etc/passwd                  read ok
+/home/sandbox/.bashrc        PermissionError
+/home/sandbox                PermissionError
+/var/lib/dpkg/status         PermissionError
+/opt                         PermissionError
+/srv                         PermissionError
+/usr/bin/python3             UnicodeDecodeError
+/proc/self/status            read ok
+/tmp                         dir ok
+/var/log                     dir ok
+/root                        PermissionError
+/sandbox                     PermissionError
+/sandbox/work                dir ok
+/sandbox/work/x.txt          write ok
+/mnt                         PermissionError
+/boot                        PermissionError
+
+SandboxExit(code=0)

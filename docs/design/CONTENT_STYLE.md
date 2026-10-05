@@ -27,6 +27,8 @@ Use these words with these meanings, everywhere.
 | Signed receipt | A decision with its place in the tenant's hash chain and an Ed25519 signature. Anyone with the public key can check it offline. The Trust page and `GET /v1/receipts/{id}` give it. |
 | Request | One call to the platform. It can cause several decisions, for example a search checks a knowledge base read and a model call. A request id groups them. |
 | Run | One agent request handled by the agent runtime. It has an execution id, and every decision the run causes carries it. Its status is Running, Finished, Failed or Stopped. The runtime keeps status in memory, so an older run says "Not tracked". |
+| Sandbox | The isolated space a run can execute in (`AGENT_RUNTIME=openshell`). Its only network route is the gateway, it can write one work directory, and it has CPU, memory and time limits. |
+| Sandbox event | Something the sandbox reported about a run: it started or exited, it blocked a network call or a file access, or it hit a limit. Shown on the run's steps next to the gateway decisions. It is not a decision and has no policy version. |
 | Execution id | The id of one run. It groups all the decisions of that run. It is shown in mono and can be copied. |
 | Policy | A tenant's document that narrows what its callers may do: knowledge bases, tools, models, tool calls and tokens. |
 | Policy version | The number of the policy that applied. Each change adds a version. "default" means the tenant had no policy and the platform defaults applied. |
@@ -75,7 +77,7 @@ Planned or not built. Do not write these as if they exist.
 |---|---|
 | Background jobs and live ingestion progress | 007 |
 | Anchoring the chain outside the database, signing keys in a managed key service, eval scores from real providers in CI | not scheduled |
-| Sandboxed agent execution (NVIDIA OpenShell) | 009 |
+| Sandboxed agent execution (NVIDIA OpenShell): built behind a port and run live on one host (Docker driver, OpenShell 0.1.2), not on the standard images or any other driver | 009 |
 | Kafka event streaming | 010 |
 | Approvals (escalate), PII redaction, OPA policies | not scheduled |
 | Hosted availability, uptime or scale numbers | hosting is parked |

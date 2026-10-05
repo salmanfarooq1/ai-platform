@@ -172,9 +172,15 @@ Superseded in part by Decision 25 (Sprint 003): `render.yaml` also holds the sec
 **QA fixes:** purge checkpoints are signed with the receipt key and written only by the purge function; retention has a 30-day floor; an unpriced model is costed at the highest known rate (hosted modes refuse to start for one); the cost cap is checked before and booked after a call, so concurrent calls can overshoot it by one call each.
 **Trade-off:** decision writes of one tenant are serialized by an advisory lock. The chain is tamper evident, not tamper proof (ADR-0012). `jobs`, `outbox`, `processed_events` and raw files still have no purge (Q27).
 
+## Decision 30: Sandboxed agent runs and tool argument checks (Sprint 009, ADR-0009)
+**Context:** An agent run executed in the worker process with the platform's own credentials. Nothing stopped it from calling a model provider directly or reading files, and a policy could allow a tool but not say how it may be called.
+**Decision:** `AGENT_RUNTIME=openshell` runs each run in an NVIDIA OpenShell sandbox (Apache-2.0, pinned 0.1.2). The runtime sits behind a small `SandboxDriver` port (`ports/sandbox.py`); the sandbox gets one network route (the gateway), one writable directory and CPU, memory and wall-clock limits. The agent in it (`sandbox_agent/entry.py`) has no model key and no database: it calls `/v1/sandbox/runs/{execution_id}/tools/{name}` and `/model` with a **run token** bound to that run, so `enforce()` decides and records every call. A policy may hold `tool_arguments`, a JSON Schema per tool, and the policy stage denies with `tool_argument_not_allowed`. The sandbox's events (start, exit, refused connections, limits) go to `sandbox_events` and the runs API merges them with the run's decisions by time.
+**Data:** migration `0010` adds `sandbox_events` (append-only for the app role), `run_tokens` (hash only, short-lived, revocable), a unique `(id, tenant_id)` on `principals` for the token's foreign key, and the narrow lookup function `auth_lookup_run_token`.
+**Trade-off:** the worker host needs the OpenShell gateway, Docker and an image. The agent in the sandbox is a retrieve-then-answer program, not the LangGraph agent. OpenShell logs nothing when it refuses a file read. Verified here on a live 0.1.2 gateway with the Docker driver; the standard images could not be pulled, other drivers and platforms are untested (runbook).
+
 ## Current state
 
-Where the system stands after Sprint 007. The decisions above hold the reasons; this section holds the shape.
+Where the system stands after Sprint 009. The decisions above hold the reasons; this section holds the shape.
 
 ### Data model (Sprint 003)
 Migration `0002` adds identity and tenancy on top of the `0001` baseline.
@@ -205,6 +211,12 @@ Migration `0002` adds identity and tenancy on top of the `0001` baseline.
 - **Layout:** `gateway/chain.py` (canonical JSON, hashes, chain check), `gateway/receipts.py` (keyring, sign, verify), `gateway/record.py` (chained write), `core/metrics.py`, `api/middleware/metrics.py`, `api/routers/receipts.py`, `api/routers/trust.py`, `workers/handlers/purge.py`, `workers/scheduler.py`, `workers/metrics_server.py`, `scripts/eval/`, `scripts/verify/receipt.py`, `docker/observability/`.
 - **Routes:** `GET /v1/receipts/{id}`, `GET /v1/receipts/keys`, `POST /v1/receipts/verify`, `GET /v1/trust/summary` (all `audit:read`), `GET /metrics` (open when `METRICS_PUBLIC`, else `admin`).
 - **Migration chain:** `0009` trust baseline.
+
+### Sandboxed runs (Sprint 009)
+- **Layout:** `ports/sandbox.py` (the driver contract), `adapters/openshell_runtime.py` (the `AgentRuntime`), `adapters/openshell_driver.py` (the OpenShell SDK driver, imported lazily), `adapters/openshell_events.py` and `adapters/sandbox_events.py` (turn and write events), `core/identity/run_tokens.py`, `api/routers/sandbox.py`, `sandbox_agent/` (the program that runs inside), `tests/fake_sandbox.py` (the test double), `scripts/verify/openshell.sh` and `docs/runbooks/openshell.md`.
+- **Routes:** `POST /v1/sandbox/runs/{execution_id}/tools/{name}` and `/model`, which accept a run token only. `GET /v1/agent/runs/{execution_id}` returns `sandbox_events` and `timeline`.
+- **Where it runs:** the API queues the run as before. The worker builds the sandbox runtime (`build_local_runtime`), so `AGENT_RUNTIME=openshell` needs a gateway, Docker and a workload image on the worker host.
+- **Migration chain:** `0010` sandbox events and run tokens.
 
 ### Jobs and the outbox (Sprint 007)
 - **Layout:** `core/database/jobs.py` (queue SQL), `workers/` (`loop.py` the worker, `handlers/` ingest and agent run, `embedded.py`, `__main__.py`), `adapters/job_runtime.py` (queued runtime), `adapters/pg_outbox_events.py` (outbox bus, relay, idempotent consumer).

@@ -60,3 +60,12 @@ An index, one line per decision, newest first. The reasoning lives in `docs/ARCH
 - **Sprint 008:** The decision chain is per tenant, takes the next link under an advisory lock, and the receipt signature covers the chain link as well as the decision. Receipts use Ed25519. Rejected: signing each row at write time (a key on the hot path and no way to rotate the signing key without re-signing).
 - **Sprint 008:** `/metrics` is unversioned (Prometheus expects it) and open only when `METRICS_PUBLIC=true` (default true in local, false elsewhere); otherwise it needs `admin`.
 - **Sprint 008:** The eval gate uses the fake LLM and a fixed suite with deterministic DeepEval metrics, and a tolerance of 0.02 on a stored baseline. The real-provider run is a manual script that needs `REAL_EVAL=1`.
+
+## Sprint 009: sandboxed agent execution (ADR-0009)
+- **Sprint 009 (2026-10-05):** OpenShell 0.1.2 is the pinned sandbox (Apache-2.0). The sandbox sits behind a `SandboxDriver` port of our own, with the OpenShell SDK driver and a test double. Facts about OpenShell were read from its tagged docs and wheel and checked on a live gateway; none were invented. Rejected: building only against a fake because the project could not be confirmed (it could).
+- **Sprint 009:** `AGENT_RUNTIME=openshell` selects the sandbox in the worker. The API still queues the run, so status, the runs API and the sync wait do not change. The default stays `queued` (Q36).
+- **Sprint 009:** A run token is bound to one `execution_id` and one principal, carries the boundary the run was accepted with, stores only a hash, lives for the wall limit plus a minute and opens only that run's `/v1/sandbox/runs/{id}/...` routes. Rejected: a short-lived normal API key (it would open every route its scopes allow).
+- **Sprint 009:** Tool arguments are checked in the gateway's policy stage against a per-tool JSON Schema, and a call with no stated arguments is checked as `{}`. The deny stores the reason only.
+- **Sprint 009:** `sandbox_events` are an observation, not the control record: a failed event write is logged and does not fail the run. The gateway decisions remain the control record and still fail closed.
+- **Sprint 009:** The sandbox agent is a thin standard-library program that retrieves and answers through the gateway (Q34).
+

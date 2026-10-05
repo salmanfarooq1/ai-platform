@@ -1,0 +1,52 @@
+# scripts/verify/openshell.sh against a live OpenShell 0.1.2 gateway (Docker driver), 2026-10-05T09:31Z
+# host: Linux 6.18.44-fc-v70 x86_64; Landlock ABI 7; Docker version 29.3.1, build c2be9cc
+# gateway and CLI: openshell_0.1.2-1_amd64.deb sha256 1f5416ea08f32fdc621f20a2cc0324298e60aba8bbe996459d9e3b44195f23df, extracted (not installed), run as: OPENSHELL_COMPUTE_DRIVER=docker openshell-gateway, mTLS, registered with 'openshell gateway add ... --local'
+# runtime images: built locally from openshell-sandbox-x86_64-unknown-linux-musl.tar.gz (sha256 f07ad7177f4c3ff7743f89531eda36bb784c56b45b166f49c5a51fbcfa5274a6) and openshell-supervisor-x86_64-unknown-linux-gnu.tar.gz (sha256 801d717f4211b4c24449b08a47ce5571ff623ce993c10d44e133dbe2edc36611), tagged ghcr.io/nvidia/openshell/{supervisor,sandbox}:0.1.2, because the ghcr blob host is forbidden from this container
+# workload image: local/openshell-workload:py (redis-stack-server base, Ubuntu 22.04, python3.10, user sandbox, /sandbox/work)
+# model and embeddings: fakes (tests/fakes.py). Postgres and Redis: real.
+
+--- the SDK surface the driver uses
+PASS  openshell version is the pinned one  0.1.2
+PASS  SandboxClient.create_from_template exists
+PASS  SandboxClient.exec_stream exists
+PASS  SandboxClient.exec exists
+PASS  SandboxClient.delete exists
+PASS  SandboxClient.wait_ready exists
+PASS  SandboxClient.sandbox_templates exists
+PASS  SandboxClient.close exists
+PASS  SandboxClient.from_active_cluster exists
+PASS  exec_stream takes workdir, env, stdin, timeout_seconds
+PASS  template create takes image, cpu, memory
+PASS  SandboxPolicy has filesystem, landlock, process, network_policies
+PASS  FilesystemPolicy has include_workdir, read_only, read_write
+PASS  NetworkEndpoint has host, port, protocol, enforcement
+PASS  NetworkPolicyRule has name, endpoints, binaries
+PASS  SandboxSpec has policy, template, environment
+PASS  WatchSandboxRequest has sandbox, follow_logs, follow_events, workspace_scope
+PASS  SandboxLogLine has level, message, fields, event_time
+PASS  PlatformEvent has type, reason, message, metadata, event_time
+PASS  the policy has one network route, to the gateway
+PASS  the policy names the interpreter as the only binary that may use the route
+PASS  the policy has one read-write directory
+PASS  the watch request follows logs and events of this sandbox
+PASS  the sandbox spec survives a protobuf round trip
+PASS  a denied-connection log line is classified (rule check only)
+
+25 of 25 checks passed
+--- A2 to A5 against the gateway
+PASS  preflight: the SDK is the pinned version  0.1.2, pinned 0.1.2
+PASS  preflight: an OpenShell gateway answers  version 0.1.2
+PASS  preflight: the sandbox reaches the platform at  172.17.0.1:8010
+PASS  the platform started with AGENT_RUNTIME=openshell
+PASS  A3 a direct call to a model provider fails  failed (URLError)
+PASS  A3 OpenShell reported the denied connection as an event  host=api.openai.com:None
+PASS  A4 a read outside the work directory fails  failed (PermissionError) (/var/lib/dpkg/status)
+PASS  A4 an event is recorded for it  from the probe's own report (OpenShell logs no event for a refused file read)
+PASS  L1 a process over the memory limit is killed  exit status 137 (128Mi limit, 600 MiB asked)
+PASS  L2 the memory and CPU limits are on the container  memory, nano cpus: (134217728, 500000000)
+PASS  L3 cancelling a run removes its sandbox
+PASS  A2 the agent completes an authorised task in the sandbox  tool_calls=1 flagged=False sandbox events=['start', 'log', 'exit'] tool decisions=['allow']
+PASS  A5 an unauthorised tool argument is a deny row  deny rows=[('tool.call', 'tool_argument_not_allowed')] flagged=True
+
+13 passed, 0 failed, 0 skipped
+exit=0
