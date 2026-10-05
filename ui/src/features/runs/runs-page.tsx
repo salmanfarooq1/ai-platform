@@ -3,11 +3,13 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '@/api/endpoints'
 import { EmptyState, ErrorState, PageHeader, TableSkeleton } from '@/components/governance/states'
 import { CopyValue } from '@/components/governance/copy-value'
+import { RunSteps } from '@/components/governance/run-steps'
 import { TraceTimeline } from '@/components/governance/trace-timeline'
 import { VerdictBadge } from '@/components/governance/verdict-badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useReasonCodes } from '@/lib/reasons'
+import { sandboxSummary } from '@/lib/sandbox'
 import { cn, formatTime } from '@/lib/utils'
 import { runDuration, runStatusWord } from './run-status'
 
@@ -16,6 +18,12 @@ import { runDuration, runStatusWord } from './run-status'
 function RunTimeline({ id }: { id: string }) {
   const q = useQuery({ queryKey: ['decision', id], queryFn: () => api.decision(id), retry: false })
   const { byCode } = useReasonCodes()
+  // The run's own record: its sandbox events, merged by time with every decision it caused. A run that was refused before
+  // it started, or that the caller may not read, has none: the page then shows the request's trace as before.
+  const executionId = q.data?.execution_id ?? undefined
+  const run = useQuery({ queryKey: ['agent-run', executionId], queryFn: () => api.agentRunDetail(executionId ?? ''), enabled: !!executionId, retry: false })
+  const sandboxed = (run.data?.sandbox_events.length ?? 0) > 0
+  const stopped = sandboxSummary(run.data?.sandbox_events ?? [])
   if (q.isLoading) return <div role="status" aria-label="Loading run" className="flex flex-col gap-2"><Skeleton className="h-6" /><Skeleton className="h-24" /></div>
   if (q.error) return <ErrorState error={q.error} onRetry={() => void q.refetch()} title="Could not load this run." />
   if (!q.data) return null
@@ -28,8 +36,18 @@ function RunTimeline({ id }: { id: string }) {
         <dt className="text-fg-secondary">Execution id</dt>
         <dd>{q.data.execution_id ? <CopyValue value={q.data.execution_id} label="execution id" /> : 'None'}</dd>
       </dl>
+      {sandboxed ? (
+        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-footnote">
+          <dt className="text-fg-secondary">Sandbox</dt>
+          <dd data-testid="run-sandbox-summary">{stopped ?? 'Ran inside the sandbox. Nothing was blocked.'}</dd>
+        </dl>
+      ) : null}
       <h3>Steps</h3>
-      <TraceTimeline steps={q.data.trace} currentId={q.data.id} reasons={byCode} />
+      {sandboxed && run.data ? (
+        <RunSteps items={run.data.timeline} reasons={byCode} />
+      ) : (
+        <TraceTimeline steps={q.data.trace} currentId={q.data.id} reasons={byCode} />
+      )}
       <Link to={`/app/decisions/${q.data.id}`} className="text-callout text-seal underline-offset-2 hover:underline">Open receipt in Decisions</Link>
     </div>
   )

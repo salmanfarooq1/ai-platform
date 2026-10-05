@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@/api/endpoints'
 import { REASONS_KEY } from '@/lib/reasons'
-import { CATALOGUE, decision, detail } from '@/test/fixtures'
+import { CATALOGUE, decision, detail, sandboxedRun } from '@/test/fixtures'
 import { renderWithProviders, testClient } from '@/test/render'
 import { runDuration, runStatusWord } from './run-status'
 import RunsPage from './runs-page'
@@ -120,5 +120,51 @@ describe('RunsPage', () => {
     expect(runDuration('2026-09-14T09:30:00Z', '2026-09-14T09:35:00Z')).toBe('5 min')
     expect(runDuration('2026-09-14T09:30:00Z', null)).toBe('Running')
     expect(runDuration(null, null)).toBe('None')
+  })
+
+  it('shows the sandbox events next to the gateway decisions for a sandboxed run, and says what the sandbox stopped', async () => {
+    vi.spyOn(api, 'decisions').mockResolvedValue({ items: runs, next_cursor: null })
+    vi.spyOn(api, 'decision').mockResolvedValue(detail({ id: 'run-1', execution_id: FINISHED, run_status: 'succeeded', action: 'agent.run' }))
+    const merged = vi.spyOn(api, 'agentRunDetail').mockResolvedValue(sandboxedRun(FINISHED))
+    page('/app/runs?run=run-1')
+    const panel = await screen.findByRole('complementary', { name: 'Run timeline' })
+    expect(await within(panel).findByRole('list', { name: 'Run steps' })).toBeInTheDocument()
+    expect(merged).toHaveBeenCalledWith(FINISHED)
+    expect(within(panel).getByTestId('run-sandbox-summary')).toHaveTextContent('1 network call blocked, 1 file access blocked')
+    expect(within(panel).getAllByTestId('sandbox-kind-word').map((w) => w.textContent)).toEqual([
+      'Sandbox started', 'Network call blocked', 'File access blocked', 'Sandbox exited',
+    ])
+    expect(within(panel).queryByRole('list', { name: 'Request trace' })).not.toBeInTheDocument()
+  })
+
+  it('says the sandbox blocked nothing when it did not', async () => {
+    vi.spyOn(api, 'decisions').mockResolvedValue({ items: runs, next_cursor: null })
+    vi.spyOn(api, 'decision').mockResolvedValue(detail({ id: 'run-1', execution_id: FINISHED, run_status: 'succeeded' }))
+    const quiet = sandboxedRun(FINISHED)
+    vi.spyOn(api, 'agentRunDetail').mockResolvedValue({ ...quiet, sandbox_events: quiet.sandbox_events.filter((e) => e.kind === 'start' || e.kind === 'exit') })
+    page('/app/runs?run=run-1')
+    expect(await screen.findByTestId('run-sandbox-summary')).toHaveTextContent('Ran inside the sandbox. Nothing was blocked.')
+  })
+
+  it('keeps the request trace for a run that has no sandbox events, or whose record cannot be read', async () => {
+    vi.spyOn(api, 'decisions').mockResolvedValue({ items: runs, next_cursor: null })
+    vi.spyOn(api, 'decision').mockResolvedValue(detail({ id: 'run-1', execution_id: FINISHED, run_status: 'succeeded' }))
+    const noEvents = vi.spyOn(api, 'agentRunDetail').mockResolvedValue({ ...sandboxedRun(FINISHED), sandbox_events: [], timeline: [] })
+    const first = page('/app/runs?run=run-1')
+    expect(await screen.findByRole('list', { name: 'Request trace' })).toBeInTheDocument()
+    expect(screen.queryByTestId('run-sandbox-summary')).not.toBeInTheDocument()
+    first.unmount()
+    noEvents.mockRejectedValue(new Error('not found'))
+    page('/app/runs?run=run-1')
+    expect(await screen.findByRole('list', { name: 'Request trace' })).toBeInTheDocument()
+  })
+
+  it('does not ask for the run record when the decision has no execution id', async () => {
+    vi.spyOn(api, 'decisions').mockResolvedValue({ items: runs, next_cursor: null })
+    vi.spyOn(api, 'decision').mockResolvedValue(detail({ id: 'run-4', execution_id: null, run_status: null }))
+    const merged = vi.spyOn(api, 'agentRunDetail').mockResolvedValue(sandboxedRun(FINISHED))
+    page('/app/runs?run=run-4')
+    await screen.findByTestId('run-status')
+    expect(merged).not.toHaveBeenCalled()
   })
 })

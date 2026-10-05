@@ -15,6 +15,8 @@ export interface E2EState {
   denied_kb: string
   preview: boolean
   base_url: string
+  /** Two sandboxed runs made while seeding (a fake sandbox): one clean, one where the sandbox blocked a network call and a file read. */
+  sandbox_runs: { completed: string; blocked: string }
 }
 
 /** serve.py writes the seeded key here. The directory is gitignored. */

@@ -88,7 +88,8 @@ export interface paths {
         };
         /**
          * Get Run
-         * @description One run: its status, and its answer once it succeeded. It reads the job, so it also works after a restart.
+         * @description One run: its status, its answer once it succeeded, the sandbox events and the run's decisions merged by time.
+         *     It reads the job, so it also works after a restart.
          */
         get: operations["get_run_v1_agent_runs__execution_id__get"];
         put?: never;
@@ -548,6 +549,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/sandbox/runs/{execution_id}/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Call Model
+         * @description One model call by a sandboxed agent. The gateway checks the model and the token cap, the platform makes the call
+         *     (the sandbox has no provider key) and books the usage against the tenant.
+         */
+        post: operations["call_model_v1_sandbox_runs__execution_id__model_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sandbox/runs/{execution_id}/tools/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Call Tool
+         * @description One tool call by a sandboxed agent. The gateway checks the tool, its arguments and the data it reads.
+         */
+        post: operations["call_tool_v1_sandbox_runs__execution_id__tools__name__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/search": {
         parameters: {
             query?: never;
@@ -726,6 +768,11 @@ export interface components {
         };
         /** AgentResponse */
         AgentResponse: {
+            /**
+             * Agent Reported
+             * @default []
+             */
+            agent_reported: string[];
             /** Answer */
             answer: string;
             /**
@@ -803,6 +850,45 @@ export interface components {
              */
             status: "queued" | "running" | "succeeded" | "failed" | "stopped";
         };
+        /**
+         * AgentRunDetail
+         * @description One run with what happened around it: the sandbox events, and the decisions and events merged by time.
+         */
+        AgentRunDetail: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Decisions Url */
+            decisions_url: string;
+            /** Error Code */
+            error_code?: string | null;
+            /**
+             * Execution Id
+             * Format: uuid
+             */
+            execution_id: string;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Job Id
+             * Format: uuid
+             */
+            job_id: string;
+            result: components["schemas"]["AgentResponse"] | null;
+            /** Sandbox Events */
+            sandbox_events: components["schemas"]["SandboxEventOut"][];
+            /** Started At */
+            started_at: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "succeeded" | "failed" | "stopped";
+            /** Timeline */
+            timeline: components["schemas"]["RunTimelineItem"][];
+        };
         /** AgentRunPage */
         AgentRunPage: {
             /** Items */
@@ -814,6 +900,16 @@ export interface components {
         Body_ingest_v1_ingest_post: {
             /** File */
             file: string;
+        };
+        /** ChatMessage */
+        ChatMessage: {
+            /** Content */
+            content: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "system" | "user" | "assistant";
         };
         /** DecisionDetail */
         DecisionDetail: {
@@ -1082,6 +1178,33 @@ export interface components {
             /** Scopes */
             scopes: string[];
         };
+        /** ModelCall */
+        ModelCall: {
+            /**
+             * Max Tokens
+             * @default 1024
+             */
+            max_tokens: number;
+            /** Messages */
+            messages: components["schemas"]["ChatMessage"][];
+        };
+        /** ModelResult */
+        ModelResult: {
+            /** Model */
+            model: string;
+            /** Text */
+            text: string;
+            usage: components["schemas"]["ModelUsage"];
+        };
+        /** ModelUsage */
+        ModelUsage: {
+            /** Completion Tokens */
+            completion_tokens: number;
+            /** Prompt Tokens */
+            prompt_tokens: number;
+            /** Total Cost */
+            total_cost: number;
+        };
         /** Overview */
         Overview: {
             /** Blocked */
@@ -1312,6 +1435,78 @@ export interface components {
              */
             started_at: string;
         };
+        /**
+         * RunDecisionOut
+         * @description One gateway decision the run caused (the same facts as a decision row, without the principal).
+         */
+        RunDecisionOut: {
+            /** Action */
+            action: string;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "allow" | "deny";
+            /** Reason */
+            reason: string;
+            /** Resource */
+            resource: string | null;
+            /** Stage */
+            stage: string;
+        };
+        /**
+         * RunTimelineItem
+         * @description A step of the run: a gateway decision or a sandbox event, in time order. Exactly one of the two is set.
+         */
+        RunTimelineItem: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            decision?: components["schemas"]["RunDecisionOut"] | null;
+            sandbox?: components["schemas"]["SandboxEventOut"] | null;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "decision" | "sandbox";
+        };
+        /**
+         * SandboxEventOut
+         * @description One thing the sandbox reported for the run (Sprint 009). `detail` holds no secret and no input text.
+         */
+        SandboxEventOut: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Detail */
+            detail: {
+                [key: string]: unknown;
+            };
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "start" | "exit" | "network_denied" | "file_denied" | "limit_hit" | "log";
+        };
         /** SearchRequest */
         SearchRequest: {
             /**
@@ -1426,6 +1621,24 @@ export interface components {
             id: string;
             /** Slug */
             slug: string;
+        };
+        /** ToolCall */
+        ToolCall: {
+            /**
+             * Arguments
+             * @description The arguments of the tool call. The policy may check them against a schema.
+             */
+            arguments?: {
+                [key: string]: unknown;
+            };
+        };
+        /** ToolResult */
+        ToolResult: {
+            /**
+             * Result
+             * @description What the tool returned (JSON text for the retrieval tool)
+             */
+            result: unknown;
         };
         /** TrustSummary */
         TrustSummary: {
@@ -1658,7 +1871,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AgentRun"];
+                    "application/json": components["schemas"]["AgentRunDetail"];
                 };
             };
             /** @description Validation Error */
@@ -2295,6 +2508,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RequestDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    call_model_v1_sandbox_runs__execution_id__model_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                execution_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModelCall"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    call_tool_v1_sandbox_runs__execution_id__tools__name__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                execution_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ToolCall"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToolResult"];
                 };
             };
             /** @description Validation Error */

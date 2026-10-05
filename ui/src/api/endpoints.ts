@@ -1,6 +1,6 @@
 import { get, request, type ApiResult } from './client'
 import type {
-  AgentAccepted, AgentRequest, AgentResponse, AgentRun, AgentRunPage, DecisionDetail, DecisionFilters, DecisionPage, DocumentRow, HealthResponse, JobAccepted, JobPage,
+  AgentAccepted, AgentRequest, AgentResponse, AgentRun, AgentRunDetail, AgentRunPage, DecisionDetail, DecisionFilters, DecisionPage, DocumentRow, HealthResponse, JobAccepted, JobPage,
   PlatformConfig, PolicyList, ReasonCode, Receipt, ReceiptKey, TrustSummary, VerifyResult, RequestDetail, RequestFilters, RequestPage, Overview, PolicyVersion, PrincipalSummary, SearchRequest, SearchResponse, SessionInfo, UsageSummary,
 } from './types'
 
@@ -44,6 +44,8 @@ export const api = {
   agent: (body: Partial<AgentRequest> & Pick<AgentRequest, 'question'>): Promise<ApiResult<AgentResponse | AgentAccepted>> =>
     request<AgentResponse | AgentAccepted>('/v1/agent/query', { method: 'POST', json: body }),
   agentRun: (executionId: string) => get<AgentRun>(`/v1/agent/runs/${encodeURIComponent(executionId)}`),
+  /** The same route with the run's sandbox events and its decisions merged by time. */
+  agentRunDetail: (executionId: string) => get<AgentRunDetail>(`/v1/agent/runs/${encodeURIComponent(executionId)}`),
   agentRuns: (cursor?: string, limit = 50) => get<AgentRunPage>('/v1/agent/runs', { cursor, limit }),
   jobs: (filters: { kind?: 'ingest' | 'agent_run'; status?: string } = {}, cursor?: string, limit = 100) =>
     get<JobPage>('/v1/jobs', { ...filters, cursor, limit }),

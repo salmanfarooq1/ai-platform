@@ -38,3 +38,49 @@ export const CATALOGUE: ReasonCode[] = [
   { code: 'token_limit', title: 'Token limit exceeded', sentence: 'The call would use more tokens than the policy allows for one request.', policy_field: 'max_tokens_per_request', stage: 'policy' },
   { code: 'query_blocked', title: 'Input blocked', sentence: 'The input matched a guardrail.', policy_field: 'blocked_terms', stage: 'guardrails' },
 ]
+
+import type { AgentRunDetail, RunTimelineItem, SandboxEvent } from '@/api/types'
+
+/** One sandbox event, as the runs API returns it. */
+export function sandboxEvent(over: Partial<SandboxEvent> = {}): SandboxEvent {
+  return { id: 'ev-1', kind: 'log', at: '2026-09-14T09:30:12.500Z', detail: {}, ...over }
+}
+
+/** A step of a sandboxed run: a decision or a sandbox event. */
+export function decisionStep(over: Partial<DecisionSummary> = {}): RunTimelineItem {
+  const d = decision(over)
+  return {
+    source: 'decision', at: d.created_at,
+    decision: { id: d.id, at: d.created_at, action: d.action, resource: d.resource ?? null, outcome: d.outcome, stage: d.stage, reason: d.reason },
+    sandbox: null,
+  }
+}
+
+export function sandboxStep(over: Partial<SandboxEvent> = {}): RunTimelineItem {
+  const e = sandboxEvent(over)
+  return { source: 'sandbox', at: e.at, decision: null, sandbox: e }
+}
+
+/** A sandboxed run whose sandbox stopped a network call and a file read, between a start and an exit. */
+export function sandboxedRun(execution_id: string, over: Partial<AgentRunDetail> = {}): AgentRunDetail {
+  const events = [
+    sandboxEvent({ id: 'ev-start', kind: 'start', at: '2026-09-14T09:30:11.000Z', detail: { host: 'gateway.internal', port: 8000, limit: 'cpu 1, memory 512Mi, wall 300s' } }),
+    sandboxEvent({ id: 'ev-net', kind: 'network_denied', at: '2026-09-14T09:30:12.000Z', detail: { host: 'api.openai.com', port: 443 } }),
+    sandboxEvent({ id: 'ev-file', kind: 'file_denied', at: '2026-09-14T09:30:13.000Z', detail: { path: '/var/lib/dpkg/status' } }),
+    sandboxEvent({ id: 'ev-exit', kind: 'exit', at: '2026-09-14T09:30:15.000Z', detail: { code: 0 } }),
+  ]
+  const timeline: RunTimelineItem[] = [
+    decisionStep({ id: 'dec-run', action: 'agent.run', resource: null, created_at: '2026-09-14T09:30:10.500Z' }),
+    { source: 'sandbox', at: events[0]!.at, decision: null, sandbox: events[0]! },
+    decisionStep({ id: 'dec-tool', action: 'tool.call', resource: 'retrieve_chunks', created_at: '2026-09-14T09:30:11.500Z' }),
+    { source: 'sandbox', at: events[1]!.at, decision: null, sandbox: events[1]! },
+    { source: 'sandbox', at: events[2]!.at, decision: null, sandbox: events[2]! },
+    decisionStep({ id: 'dec-deny', action: 'tool.call', resource: 'retrieve_chunks', outcome: 'deny', stage: 'policy', reason: 'kb_not_allowed', created_at: '2026-09-14T09:30:14.000Z' }),
+    { source: 'sandbox', at: events[3]!.at, decision: null, sandbox: events[3]! },
+  ]
+  return {
+    execution_id, job_id: 'job-1', status: 'succeeded', error_code: null, created_at: '2026-09-14T09:30:10.000Z',
+    started_at: '2026-09-14T09:30:10.600Z', finished_at: '2026-09-14T09:30:15.100Z', result: null, decisions_url: '/v1/decisions',
+    sandbox_events: events, timeline, ...over,
+  }
+}

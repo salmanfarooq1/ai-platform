@@ -8,7 +8,7 @@ import AskPage from './ask-page'
 
 const config = { namespaces: { legal: 'Legal' }, confidence_floor: 0.5, max_query_length: 1000, daily_token_budget: 1, rate_limit_rpm: 1, rate_limit_window_seconds: 60, reranker_enabled: false, agent_defaults: { max_iterations: 1, enable_verifier: false, max_verify_retries: 0 } } as PlatformConfig
 const EXEC = '3f1c2d4e-5a6b-4c7d-8e9f-0a1b2c3d4e5f'
-const answer = { question: 'q', answer: 'Seventy-two hours.', confidence: 0.9, citations: [], model_used: 'fake', verified: true, verification_notes: '', reasoning_steps: [], tool_calls_made: 1, total_time_seconds: 30, total_cost_usd: 0, flagged: false, flag_reason: null } as AgentResponse
+const answer = { question: 'q', answer: 'Seventy-two hours.', confidence: 0.9, citations: [], model_used: 'fake', verified: true, verification_notes: '', reasoning_steps: [], tool_calls_made: 1, total_time_seconds: 30, total_cost_usd: 0, flagged: false, flag_reason: null, agent_reported: [] } as AgentResponse
 const accepted = (status: number, data: unknown) => ({ data, requestId: 'req-1', headers: new Headers(), status }) as never
 
 afterEach(() => { vi.restoreAllMocks(); localStorage.clear() })
