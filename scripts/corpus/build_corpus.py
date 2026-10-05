@@ -82,10 +82,10 @@ from bs4 import BeautifulSoup
 # Project root on path — so core.* imports work
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from core.pipeline.db_ingest import ingestion_pipeline
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _tenant import corpus_tenant_id  # noqa: E402 - the script directory is added to sys.path just above
+from _standalone import standalone_ingest  # noqa: E402 - same reason: the script directory is on sys.path
 
 # ── Output directories ─────────────────────────────────────────────────────────
 LEGAL_DIR   = Path("data/compliance/real/legal")
@@ -503,7 +503,7 @@ async def stage_ingest(
 
         print(f"  [INGEST] {filename:<40} (namespace={namespace}, doc_id={document_id}, {size_kb:.1f} KB)")
         try:
-            metrics = await ingestion_pipeline(
+            metrics = await standalone_ingest(
                 input_file_path=str(path),
                 document_id=document_id,
                 namespace=namespace,

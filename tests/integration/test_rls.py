@@ -21,7 +21,8 @@ async def _seed(owner_pool, tenant) -> None:
     """One row per tenant-owned table for `tenant` (knowledge bases, principals and api_keys exist already)."""
     tid = UUID(tenant.id)
     await owner_pool.execute(
-        "INSERT INTO documents (tenant_id, document_id, namespace, content, embedding) VALUES ($1, $2, 'legal', $3, $4)",
+        "INSERT INTO documents (tenant_id, document_id, namespace, content, embedding, embedding_model, embedding_dim) "
+        "VALUES ($1, $2, 'legal', $3, $4, 'test/model', 768)",
         tid, f"{tenant.slug}.md", f"content of {tenant.slug}", VECTOR)
     await owner_pool.execute(
         "INSERT INTO document_registry (tenant_id, document_id, namespace, content_hash, chunk_count) "
@@ -95,8 +96,8 @@ async def test_tenants_table_exposes_only_the_callers_own_row(db_pool, seeded):
 
 
 INSERTS = {
-    "documents": ("INSERT INTO documents (tenant_id, document_id, namespace, content, embedding) "
-                  "VALUES ($1, 'x.md', 'legal', 'x', $2)"),
+    "documents": ("INSERT INTO documents (tenant_id, document_id, namespace, content, embedding, embedding_model, embedding_dim) "
+                  "VALUES ($1, 'x.md', 'legal', 'x', $2, 'test/model', 768)"),
     "document_registry": ("INSERT INTO document_registry (tenant_id, document_id, namespace, content_hash) "
                           "VALUES ($1, 'x.md', 'legal', $2)"),
     "usage_log": "INSERT INTO usage_log (tenant_id, request_id, endpoint, model) VALUES ($1, 'r', '/e', $2)",

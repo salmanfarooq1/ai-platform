@@ -8,9 +8,8 @@ import json
 from uuid import UUID
 
 import pytest
-import redis.asyncio as aioredis
 
-import api.services.cache as cache
+from adapters.redis_cache import RedisCache
 from api.mcp.context import current_principal
 from api.mcp.server import mcp
 from core.identity.admin import admin_connection
@@ -122,11 +121,9 @@ class LoopingLLM(FakeLLM):
         return await super().acompletion(model=model, messages=messages, **kwargs)
 
 
-async def test_3_max_tool_calls_stops_a_looping_agent_with_a_partial_flagged_answer(client, pool, tenant_a, database_url, monkeypatch, fake_embeddings):
-    import litellm
-
+async def test_3_max_tool_calls_stops_a_looping_agent_with_a_partial_flagged_answer(client, pool, tenant_a, database_url, monkeypatch, fake_embeddings, fake_llm):
     looping = LoopingLLM(agent_namespace="legal")
-    monkeypatch.setattr(litellm, "acompletion", looping.acompletion)
+    fake_llm.use(looping)
     await ingest(client)
     publish(database_url, tenant_a, {**ALL, "max_tool_calls": 1})
 
@@ -145,7 +142,7 @@ async def test_3_max_tool_calls_stops_a_looping_agent_with_a_partial_flagged_ans
     ]
 
 
-async def test_3b_verifier_retries_count_toward_max_tool_calls(client, pool, tenant_a, database_url, monkeypatch, fake_embeddings):
+async def test_3b_verifier_retries_count_toward_max_tool_calls(client, pool, tenant_a, database_url, monkeypatch, fake_embeddings, fake_llm):
     """The verifier loop sends the agent back to retrieve; those calls share the one counter."""
     import litellm
 
@@ -161,7 +158,7 @@ async def test_3b_verifier_retries_count_toward_max_tool_calls(client, pool, ten
             return await super().acompletion(model=model, messages=messages, **kwargs)
 
     llm = StrictVerifier(agent_namespace="legal")
-    monkeypatch.setattr(litellm, "acompletion", llm.acompletion)
+    fake_llm.use(llm)
     await ingest(client)
     publish(database_url, tenant_a, {**ALL, "max_tool_calls": 1})
 
@@ -201,12 +198,12 @@ async def test_4b_the_token_cap_denies_a_request_whose_estimate_is_over_it(clien
 
 # ------------------------------------------------------------------ 6. Redis down
 
-async def test_6_with_redis_down_search_is_503_dependency_unavailable_and_nothing_is_called(client, pool, tenant_a, fake_llm, fake_embeddings):
+async def test_6_with_redis_down_search_is_503_dependency_unavailable_and_nothing_is_called(client, app, pool, tenant_a, fake_llm, fake_embeddings):
     await ingest(client)
     embedded_before = len(fake_embeddings.calls)
-    real = cache._redis_pool
-    dead = aioredis.Redis.from_url("redis://127.0.0.1:1/0", decode_responses=True, socket_connect_timeout=1)
-    cache._redis_pool = dead  # a real client whose connection is refused
+    real = app.state.gateway_runtime.cache
+    dead = RedisCache("redis://127.0.0.1:1/0", 768)
+    app.state.gateway_runtime.cache = dead  # a real adapter whose connection is refused
     try:
         resp = await client.post("/v1/search", json=QUERY)
         err = error_of(resp, 503, "dependency_unavailable")
@@ -216,8 +213,8 @@ async def test_6_with_redis_down_search_is_503_dependency_unavailable_and_nothin
         error_of(await client.post("/v1/agent/query", json=AGENT), 503, "dependency_unavailable")
         assert (await client.get("/v1/documents")).status_code == 200  # not metered: does not need Redis
     finally:
-        cache._redis_pool = real
-        await dead.aclose()
+        app.state.gateway_runtime.cache = real
+        await dead.close()
 
     denied = await rows(pool, tenant_a, "AND outcome = 'deny'")
     assert {(r["stage"], r["reason"]) for r in denied} == {("rate", "dependency_unavailable")}
@@ -239,12 +236,12 @@ async def test_6b_a_down_budget_store_alone_also_fails_closed(client, app, tenan
         def __getattr__(self, name):
             return getattr(self.real, name)
 
-    real = cache._redis_pool
-    cache._redis_pool = HalfBroken(real)
+    real = app.state.gateway_runtime.cache
+    app.state.gateway_runtime.cache = HalfBroken(real)
     try:
         error_of(await client.post("/v1/search", json=QUERY), 503, "dependency_unavailable")
     finally:
-        cache._redis_pool = real
+        app.state.gateway_runtime.cache = real
     assert fake_llm.calls == []
 
 

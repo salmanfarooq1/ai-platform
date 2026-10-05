@@ -113,3 +113,44 @@ def test_require_scope_with_the_scope_or_admin_passes():
 
 def test_require_scope_without_a_principal_is_401_not_403():
     assert TestClient(make_app(None)).get("/needs-write").status_code == 401
+
+
+def test_only_the_two_session_create_posts_are_exempt_from_auth_under_v1():
+    """Every /v1 route and method is called with no credential and the middleware's refusal is observed. Only
+    POST /v1/session and POST /v1/session/preview may get past the auth middleware. A newly exempted route must
+    fail this test."""
+    import logging
+    import re
+
+    from api.main import create_app
+
+    class Collect(logging.Handler):
+        def __init__(self):
+            super().__init__(logging.INFO)
+            self.messages: list[str] = []
+
+        def emit(self, record):
+            self.messages.append(record.getMessage())
+
+    collect = Collect()
+    auth_logger = logging.getLogger("api.auth")
+    auth_logger.setLevel(logging.INFO)
+    auth_logger.addHandler(collect)
+
+    app = create_app()
+    client = TestClient(app, raise_server_exceptions=False)
+    # Every documented /v1 operation, plus the raw ASGI routes that are not in the schema (the MCP transport).
+    calls = {(m.upper(), p) for p, ops in app.openapi()["paths"].items() if p.startswith("/v1") for m in ops}
+    calls |= {("GET", "/v1/mcp/sse"), ("POST", "/v1/mcp/messages/")}
+    exempt = set()
+    for method, template in sorted(calls):
+        path = re.sub(r"\{[^}]+\}", "x", template)
+        collect.messages.clear()
+        client.request(method, path)
+        # The middleware logs "authentication failed" when it refuses. A route that gets past it (even if the
+        # handler then answers 401 itself) leaves no such record.
+        if not any("authentication failed" in m for m in collect.messages):
+            exempt.add((method, path))
+    auth_logger.removeHandler(collect)
+    exempt -= {("GET", "/v1/health")}  # the documented public health route
+    assert exempt == {("POST", "/v1/session"), ("POST", "/v1/session/preview")}

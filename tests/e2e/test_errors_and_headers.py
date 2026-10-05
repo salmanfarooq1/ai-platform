@@ -79,10 +79,10 @@ async def test_rate_limit_is_429_in_standard_format(client, monkeypatch, fake_ll
     assert HEX32.match(third.headers["X-Trace-ID"])  # even rejected requests are traceable
 
 
-async def test_token_budget_is_429_in_standard_format(client, app, tenant_a, fake_llm, fake_embeddings):
+async def test_token_budget_is_429_in_standard_format(client, app, tenant_a, fake_llm, fake_embeddings, redis_raw):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     # The budget is per tenant now: the key carries the tenant id, not a namespace.
-    await app.state.redis.set(f"budget:{tenant_a.id}:{today}", config.DEFAULT_DAILY_TOKEN_BUDGET)
+    await redis_raw.set(f"budget:{tenant_a.id}:{today}", config.DEFAULT_DAILY_TOKEN_BUDGET)
 
     resp = await client.post("/v1/search", json={"query": "anything about retention", "namespace": "legal"})
 

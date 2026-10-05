@@ -33,26 +33,52 @@ def platform_config(monkeypatch, app_database_url, clean_state):
     import api.agent.tools
     import api.mcp.tools
     import api.routers.search
-    import api.services.cache
     import core.database.pool
 
     monkeypatch.setitem(core.database.pool.DATABASE_CONFIG, "url", app_database_url)
     monkeypatch.setitem(core.database.pool.DATABASE_CONFIG, "pool_size", 4)
-    monkeypatch.setitem(api.services.cache.CACHE_CONFIG, "url", harness.REDIS_URL)
     for module in (api.routers.search, api.agent.tools, api.agent.graph, api.mcp.tools):
         monkeypatch.setitem(module.FEATURES, "reranker_enabled", False)
-    monkeypatch.setattr(api.services.cache, "_redis_pool", None)
     return app_database_url
 
 
+def adapter_overrides(request) -> dict[str, Any]:
+    """The adapters the test app is built with (through `adapters/registry.py`).
+
+    Postgres is the real adapter on a throwaway database, and so is Redis (the test instance). The provider
+    ports get the fakes the test asked for (`fake_llm`, `fake_embeddings`). A test that asks for none keeps the
+    real LiteLLM adapters, which the network guard blocks: that is what the network-guard tests rely on.
+    """
+    from adapters.redis_cache import RedisCache
+    from config import EMBEDDING_DIM
+
+    overrides: dict[str, Any] = {"cache": RedisCache(harness.REDIS_URL, EMBEDDING_DIM)}
+    if "fake_llm" in request.fixturenames:
+        llm = request.getfixturevalue("fake_llm")
+        overrides.update(llm=llm, chat=llm)
+    if "fake_embeddings" in request.fixturenames:
+        overrides["embeddings"] = request.getfixturevalue("fake_embeddings")
+    return overrides
+
+
 @pytest_asyncio.fixture
-async def app(platform_config):
+async def app(platform_config, request):
     """A fresh app instance with its real lifespan started."""
     from api.main import create_app
 
-    application = create_app()
+    application = create_app(adapter_overrides=adapter_overrides(request))
     async with LifespanManager(application):
         yield application
+
+
+@pytest_asyncio.fixture
+async def redis_raw(app):
+    """A plain Redis client on the test instance, to look at the keys the platform wrote (not the app's adapter)."""
+    import redis.asyncio as aioredis
+
+    client = aioredis.Redis.from_url(harness.REDIS_URL, decode_responses=True)
+    yield client
+    await client.aclose()
 
 
 @pytest_asyncio.fixture

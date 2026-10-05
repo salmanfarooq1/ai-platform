@@ -143,17 +143,17 @@ async def test_overview_by_day_adds_up_to_the_totals(audit, pool, tenant_a):
     assert sum(d["blocked"] for d in body["by_day"]) == body["blocked"] == 1
 
 
-async def test_overview_budget_reads_the_real_redis_counter(audit, app, tenant_a):
+async def test_overview_budget_reads_the_real_redis_counter(audit, app, tenant_a, redis_raw):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     assert (await audit.get("/v1/overview")).json()["budget"] == {
         "used_tokens": 0, "limit_tokens": config.DEFAULT_DAILY_TOKEN_BUDGET, "period": "day"}
-    await app.state.redis.set(f"budget:{tenant_a.id}:{today}", 1234)
+    await redis_raw.set(f"budget:{tenant_a.id}:{today}", 1234)
     assert (await audit.get("/v1/overview")).json()["budget"]["used_tokens"] == 1234
 
 
-async def test_overview_budget_is_per_tenant(audit, audit_b, app, tenant_a, tenant_b):
+async def test_overview_budget_is_per_tenant(audit, audit_b, app, tenant_a, tenant_b, redis_raw):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    await app.state.redis.set(f"budget:{tenant_b.id}:{today}", 777)
+    await redis_raw.set(f"budget:{tenant_b.id}:{today}", 777)
     assert (await audit.get("/v1/overview")).json()["budget"]["used_tokens"] == 0
     assert (await audit_b.get("/v1/overview")).json()["budget"]["used_tokens"] == 777
 
@@ -349,7 +349,8 @@ async def test_request_detail_lists_decisions_oldest_first_and_is_a_deny_if_any_
     assert [(d["outcome"], d["reason"]) for d in body["decisions"]] == [("allow", "allowed"), ("deny", "kb_not_allowed"), ("allow", "allowed")]
     times = [d["created_at"] for d in body["decisions"]]
     assert times == sorted(times)
-    assert set(body["decisions"][0]) == {"id", "created_at", "request_id", "principal", "action", "resource", "outcome", "stage", "reason", "policy_version"}
+    assert set(body["decisions"][0]) == {"id", "created_at", "request_id", "principal", "action", "resource", "outcome", "stage", "reason", "policy_version",
+        "execution_id", "run_status"}
     allowed = (await audit.get("/v1/requests/detail-other")).json()
     assert allowed["outcome"] == "allow" and len(allowed["decisions"]) == 1
 

@@ -21,28 +21,13 @@ from core.settings import Settings, SettingsError, get_settings
 from gateway import Action, ActionKind
 from gateway.boundary import SCOPE_ACTIONS
 from gateway.enforce import STAGES, _decide
+from tests.fakes import FakeCache
 from tests.gateway_helpers import make_ctx
 
 pytestmark = pytest.mark.unit
 
 
-class MemoryRedis:
-    def __init__(self):
-        self.data: dict[str, str] = {}
-        self.ttl: dict[str, int] = {}
-
-    async def set(self, key, value, ex=None):
-        self.data[key] = value
-        self.ttl[key] = ex
-
-    async def get(self, key):
-        return self.data.get(key)
-
-    async def expire(self, key, seconds):
-        self.ttl[key] = seconds
-
-    async def delete(self, key):
-        self.data.pop(key, None)
+MemoryRedis = FakeCache  # the in-memory CachePort: `data` holds the values and `ttl` the TTL last set
 
 
 async def test_session_value_has_the_contract_fields_and_no_key_material():

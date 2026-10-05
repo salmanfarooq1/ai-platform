@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: poetry install --with dev
       - name: Lint with ruff
-        run: poetry run ruff check api/ core/ gateway/ tests/
+        run: poetry run ruff check api core gateway ports adapters tests scripts/e2e
       - name: No schema DDL outside migrations/ (strict rule 7)
         # Fails on CREATE TABLE or ALTER TABLE in .py/.sql files outside migrations/.
         # Exemptions (exact, documented in the script): the frozen legacy schema fixture and scripts/labs/.
@@ -125,13 +125,13 @@ jobs:
       - name: Install dependencies
         run: poetry install --with dev
       - name: Run integration and e2e tests (none may be skipped)
-        # -rs prints skip reasons. The tests skip when Postgres or Redis is
-        # unreachable, so a skip here means the service containers are broken: fail the job.
+        # The tests skip when Postgres or Redis is unreachable, so a skip here means the service containers are
+        # broken. The only allowed skips are the 10 live-MinIO runs of the object store contract
+        # (scripts/verify/minio.sh). scripts/check_skips.py reads the JUnit report and fails on any other skip,
+        # and on any count other than 10.
         run: |
-          poetry run pytest -m "integration or e2e" -v -rs | tee pytest-int-e2e.log
-          if grep -qE "^SKIPPED|[0-9]+ skipped" pytest-int-e2e.log; then
-            echo "Integration/e2e tests were skipped. Failing the job."; exit 1
-          fi
+          poetry run pytest -m "integration or e2e" -v -rs --junitxml=pytest-int-e2e.xml
+          poetry run python scripts/check_skips.py pytest-int-e2e.xml --expect 10
 
   migration-check:
     runs-on: ubuntu-latest

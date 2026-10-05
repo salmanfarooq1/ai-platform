@@ -1,11 +1,11 @@
-"""Structure check: every agent tool, MCP tool and MCP resource calls the gateway, and only the model seam imports a provider."""
+"""Structure check: every agent tool, MCP tool and MCP resource calls the gateway, and no provider is imported outside adapters/."""
 import ast
 import textwrap
 
 import pytest
 
 from tests.gate_lint import MCP_FILES, ROOT, agent_tools, governed_functions, mcp_endpoints
-from tests.import_lint import GUARDED_FILES, PROVIDER_SEAM
+from tests.import_lint import GUARDED_FILES
 
 AGENT_TOOLS = {"list_namespaces", "retrieve_chunks"}
 MCP_TOOLS = {"list_namespaces", "search_documents", "multi_namespace_search", "get_ingestion_status", "get_cost_summary"}
@@ -107,12 +107,15 @@ def _providers_imported(path) -> list[str]:
     return hits
 
 
-def test_the_model_seam_is_the_only_agent_or_mcp_module_that_imports_a_provider():
+def test_no_agent_or_mcp_module_imports_a_provider_the_adapters_do():
+    """The old seam (api/agent/models.py) moved: since Sprint 006 the providers are imported only in adapters/."""
     importers = {
         p.relative_to(ROOT).as_posix()
         for folder in ("agent", "mcp")
         for p in sorted((ROOT / "api" / folder).glob("*.py"))
         if _providers_imported(p)
     }
-    assert importers == {PROVIDER_SEAM.relative_to(ROOT).as_posix()} == {"api/agent/models.py"}
-    assert "litellm" in _providers_imported(PROVIDER_SEAM) and "langchain_litellm" in _providers_imported(PROVIDER_SEAM)
+    assert importers == set()
+    adapters = {p.name: _providers_imported(p) for p in sorted((ROOT / "adapters").glob("*.py"))}
+    assert "litellm" in adapters["litellm_llm.py"] and "litellm" in adapters["litellm_embeddings.py"]
+    assert "langchain_litellm" in adapters["litellm_chat.py"]

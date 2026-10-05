@@ -2,7 +2,7 @@
 tests/conftest.py
 
 Shared config for the whole suite. Auto-tags every test with a tier
-marker (unit / integration / e2e) based on which directory it lives in,
+marker (unit / integration / e2e) based on which directory it lives in (tests/contracts counts as integration),
 and installs the network guard for every test.
 
 Run subsets with:
@@ -29,7 +29,8 @@ def pytest_collection_modifyitems(config, items):
         parts = item.path.parts
         if "unit" in parts:
             item.add_marker(pytest.mark.unit)
-        elif "integration" in parts:
+        elif "integration" in parts or "contracts" in parts:
+            # The contract suites run every adapter of a port, the real ones (Postgres, Redis) included.
             item.add_marker(pytest.mark.integration)
         elif "e2e" in parts:
             item.add_marker(pytest.mark.e2e)

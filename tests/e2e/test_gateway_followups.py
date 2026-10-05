@@ -4,8 +4,6 @@ Each test asserts the fake LLM and embedding call counts and the `gateway_decisi
 """
 from uuid import UUID
 
-import litellm
-
 from tests.e2e.test_gateway_e2e import AGENT, ALL, LoopingLLM, _mcp_call, error_of, publish, rows, summary
 from tests.e2e.test_search_flow import QUERY, ingest
 
@@ -215,9 +213,9 @@ async def test_l3_the_agent_run_counts_its_completion_tokens_too(client, pool, t
 
 # ------------------------------------------------------------------ L4: no verifier call after a halt
 
-async def test_l4_no_verifier_call_after_a_halt(client, pool, tenant_a, database_url, monkeypatch, fake_embeddings):
+async def test_l4_no_verifier_call_after_a_halt(client, pool, tenant_a, database_url, monkeypatch, fake_embeddings, fake_llm):
     looping = LoopingLLM(agent_namespace="legal")
-    monkeypatch.setattr(litellm, "acompletion", looping.acompletion)
+    fake_llm.use(looping)
     await ingest(client)
     publish(database_url, tenant_a, {**ALL, "max_tool_calls": 1})
 
@@ -258,7 +256,7 @@ async def test_every_reason_the_gateway_records_is_in_the_catalogue(client, pool
     assert resp.status_code == 200 and "tool_not_allowed" in resp.json()["flag_reason"]
 
     looping = LoopingLLM(agent_namespace="legal")
-    monkeypatch.setattr(litellm, "acompletion", looping.acompletion)
+    fake_llm.use(looping)
     publish(database_url, tenant_a, {**ALL, "max_tool_calls": 1})
     assert (await client.post("/v1/agent/query", json={**AGENT, "enable_verifier": False})).status_code == 200  # tool_call_limit
 

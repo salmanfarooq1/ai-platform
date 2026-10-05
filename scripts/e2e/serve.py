@@ -1,4 +1,4 @@
-"""Start the real app for the cross-stack Playwright tests, with the LLM and embedding fakes patched in.
+"""Start the real app for the cross-stack Playwright tests, built by the adapter registry with the LLM and embedding fakes.
 
     poetry run python scripts/e2e/serve.py [--port 8000] [--state-dir ui/e2e/.state] [--preview]
 
@@ -9,8 +9,8 @@ What it does, in order:
 2. Ingests one small document into `default` through the real API, with a short-lived `kb:write` key that is
    revoked straight after.
 3. Writes `state.json` (with the key) under the state directory, which is gitignored. It is the only place the key goes.
-4. Serves the app with uvicorn. Real Postgres and Redis. The fakes are patched here, in this script; the product
-   code has no fake switch. On exit the throwaway database is dropped.
+4. Serves the app with uvicorn. Real Postgres and Redis. The fakes are passed to `create_app(adapter_overrides=...)` here,
+   in this script; the product code has no fake switch. On exit the throwaway database is dropped.
 
 With `--preview` the app runs with MODE=public-preview and PREVIEW_PRINCIPAL_ID set to the seeded principal.
 Needs Postgres and Redis (`docker compose up -d postgres redis`).
@@ -55,6 +55,14 @@ def seed(owner_dsn: str) -> dict[str, str]:
     return {"principal_id": str(principal_id), "api_key": key.token, "seed_token": seed_key.token, "seed_prefix": seed_key.prefix}
 
 
+def fake_adapters() -> dict:
+    """The fake LLM, chat model and embeddings, put behind their ports through the registry's overrides."""
+    from tests.fakes import FakeEmbeddings, FakeLLM
+
+    fake_llm = FakeLLM()
+    return {"llm": fake_llm, "chat": fake_llm, "embeddings": FakeEmbeddings()}
+
+
 async def ingest_and_close_seed_key(app_dsn_owner: str, seeded: dict[str, str]) -> None:
     import httpx
     from asgi_lifespan import LifespanManager
@@ -62,7 +70,7 @@ async def ingest_and_close_seed_key(app_dsn_owner: str, seeded: dict[str, str]) 
     from api.main import create_app
     from core.identity.admin import admin_connection, revoke_key
 
-    app = create_app()
+    app = create_app(adapter_overrides=fake_adapters())
     async with LifespanManager(app):
         transport = httpx.ASGITransport(app=app)
         async with httpx.AsyncClient(transport=transport, base_url="http://seed") as client:
@@ -128,18 +136,12 @@ def main() -> int:
         get_settings.cache_clear()
     harness.clean_redis()
 
-    # Patch the fakes in this process only. The app code is unchanged.
-    import litellm
-
+    # The fakes go behind their ports through the registry (see fake_adapters). The app code is unchanged.
     import api.agent.graph
     import api.agent.tools
     import api.mcp.tools
     import api.routers.search
-    from tests.fakes import FakeEmbeddings, FakeLLM
 
-    fake_llm, fake_embeddings = FakeLLM(), FakeEmbeddings()
-    litellm.acompletion = fake_llm.acompletion
-    litellm.aembedding = fake_embeddings.aembedding
     for module in (api.routers.search, api.agent.tools, api.agent.graph, api.mcp.tools):
         module.FEATURES["reranker_enabled"] = False
 
@@ -160,7 +162,7 @@ def main() -> int:
 
     from api.main import create_app
 
-    uvicorn.run(create_app(), host=args.host, port=args.port, log_level="warning")
+    uvicorn.run(create_app(adapter_overrides=fake_adapters()), host=args.host, port=args.port, log_level="warning")
     return 0
 
 

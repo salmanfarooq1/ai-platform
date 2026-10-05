@@ -8,20 +8,11 @@ from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 import pytest
-import redis.asyncio as aioredis
 
 from api.web_edge.session import ABSOLUTE_CAP, COOKIE_NAME, SLIDING_TTL, redis_key
-from tests import harness
 from tests.e2e.web_helpers import bearer, edge_settings_override, insert_decision, key_with, secret_of
 
 FEEDBACK = {"request_id": "r-1", "endpoint": "/v1/search", "rating": "up"}
-
-
-@pytest.fixture
-async def redis_raw(app):
-    client = aioredis.Redis.from_url(harness.REDIS_URL, decode_responses=True)
-    yield client
-    await client.aclose()
 
 
 async def sign_in(client, token):
@@ -281,13 +272,15 @@ async def test_the_session_routes_fail_closed_when_redis_is_down(app, anon_clien
 
             return boom
 
-    real = app.state.redis
-    app.state.redis = Down()
+    import dataclasses
+
+    real = app.state.adapters
+    app.state.adapters = dataclasses.replace(real, cache=Down())
     try:
         assert (await anon_client.get("/v1/session")).status_code == 503
         assert (await anon_client.post("/v1/session", json={"api_key": tenant_a.tokens["full"]})).status_code == 503
     finally:
-        app.state.redis = real
+        app.state.adapters = real
 
 
 async def test_revoking_the_key_ends_its_cookie_session(anon_client, tenant_a, redis_raw, database_url):

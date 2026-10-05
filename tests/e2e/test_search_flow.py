@@ -88,11 +88,11 @@ async def test_ingest_search_documents_feedback_analytics(client, pool, fake_llm
     ]
 
 
-async def test_second_identical_search_is_an_exact_cache_hit(client, fake_llm, fake_embeddings):
+async def test_second_identical_search_is_an_exact_cache_hit(client, fake_llm, fake_embeddings, redis_raw):
     await ingest(client)
     first = await client.post("/v1/search", json=QUERY)
     assert first.headers["X-Cache"] == "MISS"
-    await eventually(lambda: _cache_written(client))  # cache write is fire-and-forget
+    await eventually(lambda: _cache_written(redis_raw))  # cache write is fire-and-forget
 
     second = await client.post("/v1/search", json=QUERY)
 
@@ -103,11 +103,8 @@ async def test_second_identical_search_is_an_exact_cache_hit(client, fake_llm, f
     assert fake_llm.kinds == ["synthesis"]  # the LLM was not called a second time
 
 
-async def _cache_written(client) -> bool:
-    from api.services.cache import get_redis
-
-    r = await get_redis()
-    return bool([k async for k in r.scan_iter(match="cache:v*")])
+async def _cache_written(redis_raw) -> bool:
+    return bool([k async for k in redis_raw.scan_iter(match="cache:v*")])
 
 
 async def test_search_in_empty_namespace_is_404_in_standard_format(client, fake_llm, fake_embeddings):

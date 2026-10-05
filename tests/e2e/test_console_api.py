@@ -56,7 +56,8 @@ async def test_decisions_are_newest_first_and_carry_the_contract_fields(audit, p
     body = (await audit.get("/v1/decisions", params={"action": "kb.read"})).json()
     assert [i["id"] for i in body["items"]] == [str(new), str(old)] and body["next_cursor"] is None
     item = body["items"][0]
-    assert set(item) == {"id", "created_at", "request_id", "principal", "action", "resource", "outcome", "stage", "reason", "policy_version"}
+    assert set(item) == {"id", "created_at", "request_id", "principal", "action", "resource", "outcome", "stage", "reason", "policy_version",
+        "execution_id", "run_status"}
     assert item["principal"] == {"id": tenant_a.principal_id, "name": "tenant-a-service"}
     assert (item["outcome"], item["stage"], item["reason"], item["policy_version"], item["resource"]) == ("deny", "policy", "kb_not_allowed", 2, "legal")
 
@@ -172,7 +173,8 @@ async def test_decision_detail_has_tenant_hash_and_the_request_trace_oldest_firs
     assert body["tenant"] == {"id": tenant_a.id, "slug": "tenant-a"}
     assert body["id"] == str(mid) and body["action"] == "model.invoke" and body["input_sha256"] is None
     assert [t["id"] for t in body["trace"]] == [str(first), str(mid), str(last)]
-    assert set(body["trace"][0]) == {"id", "created_at", "request_id", "principal", "action", "resource", "outcome", "stage", "reason", "policy_version"}
+    assert set(body["trace"][0]) == {"id", "created_at", "request_id", "principal", "action", "resource", "outcome", "stage", "reason", "policy_version",
+        "execution_id", "run_status"}
     head = (await audit.get(f"/v1/decisions/{first}")).json()
     assert head["input_sha256"] == digest and len(head["trace"]) == 3
 

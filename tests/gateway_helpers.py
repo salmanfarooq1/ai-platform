@@ -17,7 +17,7 @@ def make_principal(scopes: Iterable[str] = ALL_SCOPES, tenant: UUID = TENANT) ->
 
 
 class FakeRedis:
-    """Just enough of redis.asyncio for the limits: incr, expire, get, incrby. `fail` makes every call raise."""
+    """A `CachePort` for the gateway limits (get, incr, expire, set, delete). `fail` makes every call raise."""
 
     def __init__(self, fail: bool = False) -> None:
         self.store: dict[str, int] = {}
@@ -27,32 +27,29 @@ class FakeRedis:
         if self.fail:
             raise ConnectionError("redis is down")
 
-    async def incr(self, key: str) -> int:
-        self._check()
-        self.store[key] = self.store.get(key, 0) + 1
-        return self.store[key]
-
-    async def expire(self, key: str, seconds: int) -> bool:
-        self._check()
-        return True
-
     async def get(self, key: str) -> str | None:
         self._check()
         return str(self.store[key]) if key in self.store else None
 
-    async def incrby(self, key: str, amount: int) -> int:
+    async def set(self, key: str, value: str, *, ttl: int) -> None:
+        self._check()
+        self.store[key] = int(value)
+
+    async def incr(self, key: str, amount: int = 1, *, ttl: int | None = None) -> int:
         self._check()
         self.store[key] = self.store.get(key, 0) + amount
         return self.store[key]
 
+    async def expire(self, key: str, ttl: int) -> None:
+        self._check()
+
+    async def delete(self, key: str) -> None:
+        self._check()
+        self.store.pop(key, None)
+
 
 def make_runtime(redis: FakeRedis | None = None, pool: Any = None) -> GatewayRuntime:
-    client = redis or FakeRedis()
-
-    async def get_redis() -> FakeRedis:
-        return client
-
-    return GatewayRuntime(pool=pool, get_redis=get_redis)
+    return GatewayRuntime(pool=pool, cache=redis or FakeRedis())
 
 
 def make_ctx(

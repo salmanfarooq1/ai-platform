@@ -14,6 +14,8 @@ import pytest_asyncio
 import redis.asyncio as aioredis
 from pgvector.asyncpg import register_vector
 
+from adapters.pg_knowledge import PgKnowledgeStore
+from adapters.redis_cache import RedisCache
 from tests import harness
 
 
@@ -46,3 +48,21 @@ async def redis_client(clean_state):
         yield client
     finally:
         await client.aclose()
+
+
+@pytest_asyncio.fixture
+async def knowledge_store(db_pool):
+    """The real Postgres knowledge store, as `gap_app` (row-level security applies)."""
+    return PgKnowledgeStore(db_pool)
+
+
+@pytest_asyncio.fixture
+async def redis_cache(clean_state):
+    """The real Redis cache adapter on the test instance."""
+    from config import EMBEDDING_DIM
+
+    cache = RedisCache(harness.REDIS_URL, EMBEDDING_DIM)
+    try:
+        yield cache
+    finally:
+        await cache.close()

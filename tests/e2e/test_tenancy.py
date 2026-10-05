@@ -127,11 +127,11 @@ async def test_every_other_v1_operation_requires_authentication(app, anon_client
     error_of(await anon_client.get("/v1/nope"), 401, "unauthorized")
 
 
-async def test_401_comes_before_any_limiter_or_route(anon_client, app, monkeypatch, fake_llm, fake_embeddings):
+async def test_401_comes_before_any_limiter_or_route(anon_client, app, monkeypatch, fake_llm, fake_embeddings, redis_raw):
     monkeypatch.setattr(config, "RATE_LIMIT_REQUESTS", 1)
     for _ in range(3):
         error_of(await anon_client.post("/v1/search", json=WHATEVER), 401, "unauthorized")
-    assert [k async for k in app.state.redis.scan_iter(match="rl:*")] == []
+    assert [k async for k in redis_raw.scan_iter(match="rl:*")] == []
     assert fake_llm.calls == [] and fake_embeddings.calls == []
 
 
@@ -335,20 +335,20 @@ def config_description(slug):
 
 # ---------------------------------------------------------------- caches
 
-async def _wait_for_both_cache_writes(app):
+async def _wait_for_both_cache_writes(app, redis_raw):
     async def written():
-        exact = [k async for k in app.state.redis.scan_iter(match="cache:v*")]
-        semantic = [k async for k in app.state.redis.scan_iter(match="semcache:*")]
+        exact = [k async for k in redis_raw.scan_iter(match="cache:v*")]
+        semantic = [k async for k in redis_raw.scan_iter(match="semcache:*")]
         return bool(exact) and bool(semantic)
 
     await eventually(written)
 
 
-async def test_cache_never_serves_one_tenants_answer_to_another(client, client_b, app, fake_llm, fake_embeddings):
+async def test_cache_never_serves_one_tenants_answer_to_another(client, client_b, app, fake_llm, fake_embeddings, redis_raw):
     await ingest(client, GDPR)
     first = await client.post("/v1/search", json=QUERY)
     assert first.headers["X-Cache"] == "MISS"
-    await _wait_for_both_cache_writes(app)
+    await _wait_for_both_cache_writes(app, redis_raw)
     again = await client.post("/v1/search", json=QUERY)
     assert (again.headers["X-Cache"], again.headers["X-Cache-Type"]) == ("HIT", "exact")
     near = await client.post("/v1/search", json=NEAR_QUERY)  # sanity: A itself gets a semantic hit for this
@@ -364,10 +364,10 @@ async def test_cache_never_serves_one_tenants_answer_to_another(client, client_b
     assert len(fake_llm.calls) == calls_before
 
 
-async def test_cache_miss_for_b_then_b_gets_its_own_answer_and_its_own_cache(client, client_b, app, fake_llm, fake_embeddings):
+async def test_cache_miss_for_b_then_b_gets_its_own_answer_and_its_own_cache(client, client_b, app, fake_llm, fake_embeddings, redis_raw):
     await ingest(client, GDPR)
     await client.post("/v1/search", json=QUERY)
-    await _wait_for_both_cache_writes(app)
+    await _wait_for_both_cache_writes(app, redis_raw)
     await ingest(client_b, GDPR_V2)
 
     b_first = await client_b.post("/v1/search", json=QUERY)
@@ -377,15 +377,15 @@ async def test_cache_miss_for_b_then_b_gets_its_own_answer_and_its_own_cache(cli
     assert b_near.status_code == 200
     assert "72 hours" not in b_near.json()["answer"] and "48 hours" in b_near.json()["answer"]
     assert "72 hours" not in json.dumps(b_near.json()["results"])  # (the echoed query text itself contains "72 hours")
-    await eventually(lambda: _exact_entries(app, 2))
+    await eventually(lambda: _exact_entries(app, 2, redis_raw))
     b_again = await client_b.post("/v1/search", json=QUERY)
     assert (b_again.headers["X-Cache"], b_again.json()["answer"]) == ("HIT", b_first.json()["answer"])
     a_again = await client.post("/v1/search", json=QUERY)
     assert "72 hours" in a_again.json()["answer"]
 
 
-async def _exact_entries(app, n):
-    return len([k async for k in app.state.redis.scan_iter(match="cache:v*")]) >= n
+async def _exact_entries(app, n, redis_raw):
+    return len([k async for k in redis_raw.scan_iter(match="cache:v*")]) >= n
 
 
 # ---------------------------------------------------------------- rate limit and budget
@@ -405,15 +405,15 @@ async def test_rate_limit_counts_per_principal_not_per_tenant_or_namespace(clien
         assert (await client.post("/v1/search", json=body)).status_code == 429
 
 
-async def test_rate_limit_keys_are_the_principal_id(client, app, tenant_a, fake_llm, fake_embeddings):
+async def test_rate_limit_keys_are_the_principal_id(client, app, tenant_a, fake_llm, fake_embeddings, redis_raw):
     await client.post("/v1/search", json=WHATEVER)
-    keys = [k async for k in app.state.redis.scan_iter(match="rl:*")]
+    keys = [k async for k in redis_raw.scan_iter(match="rl:*")]
     assert len(keys) == 1 and keys[0].startswith(f"rl:{tenant_a.principal_id}:")
 
 
-async def test_token_budget_is_per_tenant_shared_by_its_principals(client, client_b, key_with, tenant_a, app, fake_llm, fake_embeddings):
+async def test_token_budget_is_per_tenant_shared_by_its_principals(client, client_b, key_with, tenant_a, app, fake_llm, fake_embeddings, redis_raw):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    await app.state.redis.set(f"budget:{tenant_a.id}:{today}", config.DEFAULT_DAILY_TOKEN_BUDGET)
+    await redis_raw.set(f"budget:{tenant_a.id}:{today}", config.DEFAULT_DAILY_TOKEN_BUDGET)
 
     error_of(await client.post("/v1/search", json=WHATEVER), 429, "daily_token_budget_exceeded")
     error_of(await key_with(["query"]).post("/v1/search", json=WHATEVER), 429, "daily_token_budget_exceeded")  # same tenant
@@ -422,13 +422,13 @@ async def test_token_budget_is_per_tenant_shared_by_its_principals(client, clien
     error_of(await client.post("/v1/search", json={**WHATEVER, "namespace": "kyc_aml"}), 429, "daily_token_budget_exceeded")
 
 
-async def test_tokens_used_are_booked_against_the_tenant(client, app, tenant_a, fake_llm, fake_embeddings):
+async def test_tokens_used_are_booked_against_the_tenant(client, app, tenant_a, fake_llm, fake_embeddings, redis_raw):
     await ingest(client)
     resp = await client.post("/v1/search", json=QUERY)
     used = int(resp.headers["X-Tokens-In"]) + int(resp.headers["X-Tokens-Out"])
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    assert int(await app.state.redis.get(f"budget:{tenant_a.id}:{today}")) == used
-    assert [k async for k in app.state.redis.scan_iter(match="budget:legal:*")] == []
+    assert int(await redis_raw.get(f"budget:{tenant_a.id}:{today}")) == used
+    assert [k async for k in redis_raw.scan_iter(match="budget:legal:*")] == []
 
 
 # ---------------------------------------------------------------- usage, analytics, feedback per tenant
@@ -454,7 +454,7 @@ async def test_the_agent_retrieve_tool_of_tenant_b_cannot_see_tenant_a_documents
     from api.agent.tools import make_retrieve_tool
 
     await ingest(client)
-    tool = make_retrieve_tool(app.state.db_pool)
+    tool = make_retrieve_tool(app.state.adapters)
     args = {"query": "breach notification supervisory authority 72 hours", "namespace": "legal"}
 
     as_b = json.loads(await tool.ainvoke(args, config=await agent_config(app, tenant_b)))
@@ -479,7 +479,7 @@ async def test_the_agent_list_namespaces_tool_shows_only_the_tenants_kbs(app, te
 
     with admin_connection(database_url) as conn:
         create_kb(conn, "tenant-b", "b-only", "B private")
-    tool = make_list_namespaces_tool(app.state.db_pool)
+    tool = make_list_namespaces_tool(app.state.adapters)
     as_a = json.loads(await tool.ainvoke({}, config=await agent_config(app, tenant_a)))
     as_b = json.loads(await tool.ainvoke({}, config=await agent_config(app, tenant_b)))
     assert "b-only" not in as_a and set(as_a) == {"default", "kyc_aml", "legal"}
@@ -728,7 +728,7 @@ async def test_agent_retrieve_tool_checks_the_namespace_against_the_tenants_know
 
     with admin_connection(database_url) as conn:
         create_kb(conn, "tenant-b", "b-secret-kb", "only B")
-    tool = make_retrieve_tool(app.state.db_pool)
+    tool = make_retrieve_tool(app.state.adapters)
     cfg = await agent_config(app, tenant_a)
     foreign = json.loads(await tool.ainvoke({"query": "retention", "namespace": "b-secret-kb"}, config=cfg))
     missing = json.loads(await tool.ainvoke({"query": "retention", "namespace": "no-such-kb"}, config=cfg))

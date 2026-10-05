@@ -3,9 +3,9 @@ name: Frontend
 on:
   push:
     branches: [main]
-    paths: ["ui/**", "api/**", "gateway/**", "core/**", "migrations/**", "docs/openapi.json", "scripts/e2e/**", ".github/workflows/frontend.yml"]
+    paths: ["ui/**", "api/**", "gateway/**", "ports/**", "adapters/**", "core/**", "migrations/**", "docs/openapi.json", "scripts/e2e/**", ".github/workflows/frontend.yml"]
   pull_request:
-    paths: ["ui/**", "api/**", "gateway/**", "core/**", "migrations/**", "docs/openapi.json", "scripts/e2e/**", ".github/workflows/frontend.yml"]
+    paths: ["ui/**", "api/**", "gateway/**", "ports/**", "adapters/**", "core/**", "migrations/**", "docs/openapi.json", "scripts/e2e/**", ".github/workflows/frontend.yml"]
 
 defaults:
   run:
