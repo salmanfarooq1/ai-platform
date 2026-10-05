@@ -1,0 +1,70 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0 -- /root/.cache/pypoetry/virtualenvs/ai-platform-OrHxThiT-py3.11/bin/python
+hypothesis profile 'default'
+rootdir: /home/user/ai-platform
+configfile: pyproject.toml
+plugins: rerunfailures-16.4, xdist-3.8.0, repeat-0.9.4, asyncio-1.4.0, hypothesis-6.168.3, langsmith-0.10.15, cov-7.1.0, anyio-4.13.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 53 items
+
+tests/e2e/test_agent_worker.py::test_the_run_executes_in_the_worker_not_in_the_request PASSED [  1%]
+tests/e2e/test_agent_worker.py::test_every_decision_of_the_run_carries_the_execution_id_the_job_has PASSED [  3%]
+tests/e2e/test_agent_worker.py::test_usage_is_booked_once_by_the_worker_and_the_headers_still_show_the_cost PASSED [  5%]
+tests/e2e/test_agent_worker.py::test_a_slow_run_answers_202_and_is_read_from_the_runs_endpoint_until_it_finishes PASSED [  7%]
+tests/e2e/test_agent_worker.py::test_a_run_status_is_durable_it_survives_a_new_runtime_and_a_new_process PASSED [  9%]
+tests/e2e/test_agent_worker.py::test_the_runs_endpoints_are_scoped_gated_and_tenant_isolated PASSED [ 11%]
+tests/e2e/test_agent_worker.py::test_a_run_keeps_the_boundary_of_the_request_that_started_it PASSED [ 13%]
+tests/e2e/test_agent_worker.py::test_a_crashing_run_is_failed_once_with_the_error_not_retried PASSED [ 15%]
+tests/e2e/test_agent_worker.py::test_a_too_long_question_is_refused_at_the_entry PASSED [ 16%]
+tests/e2e/test_agent_worker.py::test_m1_a_policy_that_hides_a_knowledge_base_hides_its_runs_and_answers PASSED [ 18%]
+tests/e2e/test_agent_worker.py::test_m1_a_caller_without_audit_read_sees_only_its_own_runs PASSED [ 20%]
+tests/e2e/test_agent_worker.py::test_m2_the_jobs_routes_hide_agent_runs_of_a_hidden_knowledge_base PASSED [ 22%]
+tests/contracts/test_agent_runtime_contract.py::test_a_run_starts_with_an_execution_id_and_finishes_with_its_output[in-process] PASSED [ 24%]
+tests/contracts/test_agent_runtime_contract.py::test_a_run_starts_with_an_execution_id_and_finishes_with_its_output[job-queue] PASSED [ 26%]
+tests/contracts/test_agent_runtime_contract.py::test_every_run_gets_its_own_execution_id_and_a_caller_may_choose_it[in-process] PASSED [ 28%]
+tests/contracts/test_agent_runtime_contract.py::test_every_run_gets_its_own_execution_id_and_a_caller_may_choose_it[job-queue] PASSED [ 30%]
+tests/contracts/test_agent_runtime_contract.py::test_status_is_running_until_the_run_ends[in-process] PASSED [ 32%]
+tests/contracts/test_agent_runtime_contract.py::test_status_is_running_until_the_run_ends[job-queue] PASSED [ 33%]
+tests/contracts/test_agent_runtime_contract.py::test_a_failing_run_is_a_failed_result_with_the_error_not_an_exception[in-process] PASSED [ 35%]
+tests/contracts/test_agent_runtime_contract.py::test_a_failing_run_is_a_failed_result_with_the_error_not_an_exception[job-queue] PASSED [ 37%]
+tests/contracts/test_agent_runtime_contract.py::test_stop_during_a_tool_call_cancels_the_tool_and_ends_the_run_stopped[in-process] PASSED [ 39%]
+tests/contracts/test_agent_runtime_contract.py::test_stop_during_a_tool_call_cancels_the_tool_and_ends_the_run_stopped[job-queue] PASSED [ 41%]
+tests/contracts/test_agent_runtime_contract.py::test_stopping_a_finished_run_changes_nothing[in-process] PASSED [ 43%]
+tests/contracts/test_agent_runtime_contract.py::test_stopping_a_finished_run_changes_nothing[job-queue] PASSED [ 45%]
+tests/contracts/test_agent_runtime_contract.py::test_stopping_twice_is_fine[in-process] PASSED [ 47%]
+tests/contracts/test_agent_runtime_contract.py::test_stopping_twice_is_fine[job-queue] PASSED [ 49%]
+tests/contracts/test_agent_runtime_contract.py::test_a_run_stopped_before_it_took_a_step_is_stopped_too[in-process] PASSED [ 50%]
+tests/contracts/test_agent_runtime_contract.py::test_a_run_stopped_before_it_took_a_step_is_stopped_too[job-queue] PASSED [ 52%]
+tests/contracts/test_agent_runtime_contract.py::test_cleanup_stops_a_running_run_and_keeps_its_terminal_status_readable[in-process] PASSED [ 54%]
+tests/contracts/test_agent_runtime_contract.py::test_cleanup_stops_a_running_run_and_keeps_its_terminal_status_readable[job-queue] PASSED [ 56%]
+tests/contracts/test_agent_runtime_contract.py::test_cleanup_releases_the_output_of_a_finished_run[in-process] PASSED [ 58%]
+tests/contracts/test_agent_runtime_contract.py::test_cleanup_releases_the_output_of_a_finished_run[job-queue] PASSED [ 60%]
+tests/contracts/test_agent_runtime_contract.py::test_an_unknown_run_raises_run_not_found[in-process] PASSED [ 62%]
+tests/contracts/test_agent_runtime_contract.py::test_an_unknown_run_raises_run_not_found[job-queue] PASSED [ 64%]
+tests/contracts/test_agent_runtime_contract.py::test_concurrent_runs_are_independent[in-process] PASSED [ 66%]
+tests/contracts/test_agent_runtime_contract.py::test_concurrent_runs_are_independent[job-queue] PASSED [ 67%]
+tests/contracts/test_agent_runtime_contract.py::test_the_history_is_bounded_and_only_finished_runs_are_dropped PASSED [ 69%]
+tests/contracts/test_agent_runtime_contract.py::test_a_runtime_without_a_runner_refuses_to_start PASSED [ 71%]
+tests/e2e/test_ports_e2e.py::test_ingested_chunks_record_the_model_and_dimension_that_produced_them PASSED [ 73%]
+tests/e2e/test_ports_e2e.py::test_health_reports_no_stale_vectors_for_a_fresh_corpus PASSED [ 75%]
+tests/e2e/test_ports_e2e.py::test_changing_the_embedding_model_makes_old_chunks_stale_not_wrong PASSED [ 77%]
+tests/e2e/test_ports_e2e.py::test_the_semantic_cache_is_not_shared_across_embedding_models PASSED [ 79%]
+tests/e2e/test_ports_e2e.py::test_the_fallback_embeds_when_the_primary_fails_and_the_rows_say_which_model_did PASSED [ 81%]
+tests/e2e/test_ports_e2e.py::test_a_fallback_with_another_dimension_is_refused_and_logged PASSED [ 83%]
+tests/e2e/test_ports_e2e.py::test_every_recorded_decision_publishes_one_event_with_no_input_text PASSED [ 84%]
+tests/e2e/test_ports_e2e.py::test_a_failing_event_bus_fails_the_decision_closed PASSED [ 86%]
+tests/e2e/test_ports_e2e.py::test_a_subscriber_that_raises_does_not_break_the_request PASSED [ 88%]
+tests/e2e/test_ports_e2e.py::test_an_agent_query_runs_through_the_runtime_and_stamps_its_execution_id_on_every_decision PASSED [ 90%]
+tests/e2e/test_ports_e2e.py::test_a_denied_agent_entry_still_records_the_execution_id_it_would_have_had PASSED [ 92%]
+tests/e2e/test_ports_e2e.py::test_a_run_that_crashes_is_a_500_with_the_standard_error_and_a_failed_status PASSED [ 94%]
+tests/e2e/test_ports_e2e.py::test_a_client_that_disconnects_mid_run_stops_the_run PASSED [ 96%]
+tests/e2e/test_ports_e2e.py::test_stopping_a_real_agent_run_during_a_tool_call_cancels_the_tool PASSED [ 98%]
+tests/e2e/test_ports_e2e.py::test_the_console_shows_a_runs_execution_id_and_runtime_status_to_its_own_tenant_only PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/e2e/test_agent_worker.py::test_the_run_executes_in_the_worker_not_in_the_request
+  /root/.cache/pypoetry/virtualenvs/ai-platform-OrHxThiT-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 53 passed, 1 warning in 33.00s ========================

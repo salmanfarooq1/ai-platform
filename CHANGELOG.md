@@ -2,6 +2,20 @@
 
 One short entry per sprint, newest first. Full detail lives in `planning/sprints/`.
 
+## Sprint 007: durable jobs, the outbox and raw storage
+- **What was built:**
+  - **Job queue (migration `0008`, ADR-0011).** A `jobs` table with forced row-level security. Workers claim with `FOR UPDATE SKIP LOCKED` through a narrow SECURITY DEFINER function, hold a lease, retry with backoff and end `dead` after the last attempt. An idempotency key is unique per tenant. `python -m workers` handles SIGTERM, writes a health file and logs a line per job. `docker compose` has a `worker` service.
+  - **Outbox (ADR-0008 updated).** Events are written in the transaction of the change and a relay publishes them at least once. The Postgres outbox bus passes the EventBus contract suite. `IdempotentConsumer` dedupes by CloudEvent id, in memory and in `processed_events`. It is the default bus. The M1 rule holds: a decision row is never lost because of the bus.
+  - **Ingestion in a worker.** `POST /v1/ingest` stores the raw bytes by SHA-256 (once) and answers 202 with a job. The worker chunks, embeds, reports progress per batch and writes `platform.ingest.completed.v1`.
+  - **Agent runs in a worker.** `JobAgentRuntime` is the second `AgentRuntime`. `/v1/agent/query` keeps its synchronous contract and answers 202 `{execution_id, job_id}` after `AGENT_SYNC_WAIT_SECONDS`. Run status is durable (Q19 closed).
+  - **UI.** The Library shows each document's job status and progress (polled every 2 s only while a job is active). The Agent runs page reads `/v1/agent/runs` and shows status and duration. Ask in Agent mode shows a quiet "Still working" state for a slow run.
+- **API change:** `POST /v1/ingest` is 202 `{job_id, status}` (200 for a repeated `Idempotency-Key`), not the old ingest result. New: `GET /v1/jobs`, `GET /v1/jobs/{id}`, `GET /v1/agent/runs`, `GET /v1/agent/runs/{execution_id}`, `execution_id` filter on `/v1/decisions`. `POST /v1/agent/query` may answer 202.
+- **QA fixes:** run and job routes show only runs in knowledge bases the caller's policy allows, and without `audit:read` only the caller's own runs (new `jobs.principal_id` and `jobs.namespace`). Agent usage is booked at most once per `execution_id`. The payload cap follows the question's `max_query_length`. Failed runs return the code `agent_run_failed`, never the exception text. The question text is no longer logged. An unreadable claimed job is released at once.
+- **Test delta:**
+  - Backend: 1097 before, 1188 after, 10 skipped (the live MinIO run only).
+  - Frontend: 182 Vitest tests (167 before) and 72 Playwright tests (71 before).
+- **Not verified here:** the live MinIO run, the hosted migration (non-superuser owner tested locally only), CI on GitHub, a Docker image build and a run of the compose `worker` service, and any real provider.
+
 ## Sprint 006: ports and adapters, event bus, agent runtime
 - **What was built:**
   - **Ports and adapters (ADR-0005 updated).**

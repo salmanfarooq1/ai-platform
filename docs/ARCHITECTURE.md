@@ -159,9 +159,15 @@ Superseded in part by Decision 25 (Sprint 003): `render.yaml` also holds the sec
 **Data:** migration `0007` adds the two provenance columns (backfilled from the configured model, then not null), a nullable `gateway_decisions.execution_id`, indexes on both, and the `count_stale_vectors` function (narrow, `SECURITY DEFINER`).
 **Trade-off:** a thin layer of interfaces, and one more hop per call. The usage, feedback, analytics and console queries still use `tenant_connection` directly: they are not knowledge data. Run status and the in-process event bus live in memory; durable versions come with the queue (Sprint 007). A fallback that works can leave rows whose model is not the active one, which health reports as stale.
 
+## Decision 28: Durable jobs, the outbox and raw storage (Sprint 007, ADRs 0008, 0009, 0011)
+**Context:** Ingestion ran inside the request, agent run status lived in memory, events could be lost, and raw files were not kept.
+**Decision:** A `jobs` table is the queue. Workers (`python -m workers`) claim with `FOR UPDATE SKIP LOCKED`, hold a lease, retry with backoff and end `dead` after the last attempt. `POST /v1/ingest` stores the raw bytes in the object store under their SHA-256 (once) and answers 202 with a job; a worker chunks, embeds and stores. Agent runs are jobs too: `JobAgentRuntime` implements `AgentRuntime`, a worker runs the agent and stores the answer, and `/v1/agent/query` waits up to `AGENT_SYNC_WAIT_SECONDS` before it answers 202. `/v1/jobs`, `/v1/agent/runs` read the rows under row-level security. The default event bus is a transactional outbox: events are written in the transaction of the change, and a relay publishes them at least once; consumers dedupe by CloudEvent id.
+**Data:** migration `0008` adds `jobs`, `outbox` and `processed_events` (forced row-level security; `gap_app` may select, insert and update) and three narrow SECURITY DEFINER functions (`jobs_claim`, `jobs_tenant_of_execution`, `outbox_pending`).
+**Trade-off:** no new service (Postgres is the queue), at the price of polling and a database-sized ceiling. A worker must run, or `EMBEDDED_WORKERS` must be set. Every decision writes an outbox row, and nothing purges the new tables yet (Sprint 008).
+
 ## Current state
 
-Where the system stands after Sprint 006. The decisions above hold the reasons; this section holds the shape.
+Where the system stands after Sprint 007. The decisions above hold the reasons; this section holds the shape.
 
 ### Data model (Sprint 003)
 Migration `0002` adds identity and tenancy on top of the `0001` baseline.
@@ -188,15 +194,21 @@ Migration `0002` adds identity and tenancy on top of the `0001` baseline.
 - **Migration chain:** `0001` to `0005` as above, `0006` preview principal lookup, `0007` embedding and run provenance. All forward-only.
 - **Tests:** `tests/contracts/` runs one suite per port against every adapter. The app in the integration and e2e tiers is built by the registry with the fakes the test asks for.
 
+### Jobs and the outbox (Sprint 007)
+- **Layout:** `core/database/jobs.py` (queue SQL), `workers/` (`loop.py` the worker, `handlers/` ingest and agent run, `embedded.py`, `__main__.py`), `adapters/job_runtime.py` (queued runtime), `adapters/pg_outbox_events.py` (outbox bus, relay, idempotent consumer).
+- **Routes:** `POST /v1/ingest` (202), `GET /v1/jobs`, `GET /v1/jobs/{id}`, `GET /v1/agent/runs`, `GET /v1/agent/runs/{execution_id}`; `POST /v1/agent/query` may answer 202.
+- **Run it:** `docker compose up -d postgres redis worker`, or `poetry run python -m workers`, or `EMBEDDED_WORKERS=1` in the API process.
+- **Visibility:** jobs carry `namespace` and `principal_id`. Job and run routes show only the knowledge bases the boundary allows; `/v1/agent/runs` shows a caller without `audit:read` only its own runs (ADR-0011).
+- **Migration chain:** `0008` jobs, outbox, processed events.
+
 ## Known Open Gaps (Deferred by Design)
 
 - **Real-time citation content validation:** The code validates that a `chunk_id` exists in the database, but does not run an LLM check on the live path to prove the chunk content strictly entails the sentence. Doing this synchronously would add 300ms+ latency and double LLM token cost per request. Offline DeepEval faithfulness scoring measures citation quality in batch. Live citation validation is deferred.
 - **Monthly aggregate budget caps:** Daily LLM spend is tracked and capped in Redis to prevent catastrophic runaway costs. Monthly aggregation and billing tier logic require persistent DB rollups and accounting rules, which are deferred because daily caps mitigate 99% of financial risk.
 - **Event-driven CDC cache invalidation:** Cache invalidation uses TTL=3600s. Real-time CDC (Change Data Capture) via Postgres triggers or Redis Pub/Sub would immediately invalidate cached queries when a document changes, but adds background worker complexity. Because compliance documents update quarterly at most, TTL expiry combined with SHA-256 document lifecycle management is an acceptable tradeoff. CDC invalidation is deferred.
 - **`fetch_full_document` tool:** For when a 500-character chunk is not enough surrounding context. Needs to be confirmed against the actual `documents` table schema before building to ensure reassembly by chunk order sorts on how `chunk_index` is actually stored (e.g. inside a metadata JSON column), not row insertion order. Deferred to future work.
-- **Decision record retention:** `gateway_decisions` grows by one row per governed call and has no purge or archive job. Retention is open (`planning/QUESTIONS.md` Q7); Sprint 007 extends the table.
-- **Ingestion runs inside the request:** durable jobs and a worker are Sprint 007.
-- **Stale vectors are not re-embedded:** after an `EMBED_MODEL` change old chunks are ignored and counted (`stale_vectors`); the re-embedding job needs the queue (Sprint 007).
-- **The object store port has no caller yet:** raw files by hash arrive with the queue (Sprint 007). The live MinIO run is `scripts/verify/minio.sh`.
+- **Decision record retention:** `gateway_decisions` grows by one row per governed call and has no purge or archive job. Retention is open (`planning/QUESTIONS.md` Q7). `jobs`, `outbox` and `processed_events` have no purge either.
+- **Stale vectors are not re-embedded:** after an `EMBED_MODEL` change old chunks are ignored and counted (`stale_vectors`); the queue now exists, so a re-embedding job can be built on it (not scheduled).
+- **Raw files are stored, never read back by a person:** the object store keeps every upload by SHA-256 and nothing deletes them. The live MinIO run is `scripts/verify/minio.sh`.
 - **Old chunks cite `unknown`:** chunks ingested before Sprint 002 have no `source_filename` in metadata until they are re-ingested.
 - **Closed:** the persistent-usage question is answered by Decision 18 (`usage_log`), and the no-identity gap by Decisions 25 and 26.

@@ -1,0 +1,113 @@
+
+> ai-platform-ui@2.0.0 test
+> vitest --run
+
+
+ RUN  v2.1.9 /home/user/ai-platform/ui
+
+ ✓ src/features/walkthrough/walkthrough.test.tsx (8 tests) 1187ms
+   ✓ WalkthroughPage > runs one allowed and one blocked request and shows both side by side, the blocked one at the guardrails stage 670ms
+ ✓ src/components/governance/governance.test.tsx (15 tests) 1238ms
+   ✓ TraceTimeline > lists the steps oldest first with action, resource, stage and time to the next step 431ms
+ ✓ src/features/requests/requests.test.tsx (10 tests) 1343ms
+   ✓ RequestsTable > lists one row per request with outcome, checks, the stage that stopped it and the policy 444ms
+ ✓ src/features/runs/runs-page.test.tsx (7 tests) 921ms
+   ✓ RunsPage > lists each run with its execution id and the status the runtime reports 458ms
+ ✓ src/features/overview/overview.test.tsx (9 tests) 713ms
+ ✓ src/app/command-palette.test.tsx (15 tests) 1585ms
+   ✓ CommandPalette > typing ../x and pressing Enter never navigates outside /app/requests/ 476ms
+ ✓ src/lib/reasons.test.tsx (7 tests) 157ms
+ ✓ src/styles/tokens.test.ts (7 tests) 27ms
+ ✓ src/components/ui/ui.test.tsx (10 tests) 600ms
+ ✓ src/components/governance/deny-callout.test.tsx (6 tests) 129ms
+ ✓ src/features/library/library-page.test.tsx (6 tests) 7337ms
+   ✓ LibraryPage ingest status > polls every 2 seconds while a job is active and stops when none is 4667ms
+   ✓ LibraryPage ingest status > reads the registry again when the last job ends 2044ms
+ ✓ src/features/ask/ask-run.test.tsx (3 tests) 4360ms
+   ✓ Ask in Agent mode with a slow run > shows a quiet "Still working" state while it polls the run, then the answer 3024ms
+   ✓ Ask in Agent mode with a slow run > a run that failed becomes an error, not a silent empty answer 1176ms
+ ✓ src/api/client.test.ts (9 tests) 19ms
+ ✓ src/app/session-menu.test.tsx (4 tests) 859ms
+   ✓ SessionMenu > shows who you are, the tenant and the scopes 397ms
+ ✓ src/features/auth/signin-page.test.tsx (3 tests) 596ms
+   ✓ SignInPage destination > opens the walkthrough the first time, and remembers it 410ms
+ ✓ src/features/auth/signin-form.test.tsx (4 tests) 571ms
+   ✓ SignInForm > keeps the submit button disabled until a key is typed, and masks the key 354ms
+ ✓ src/features/ask/ask.test.tsx (5 tests) 355ms
+   ✓ AnswerView > shows the verdict, confidence, evidence and the receipt link 308ms
+ ✓ src/features/ask/governance-line.test.tsx (6 tests) 600ms
+   ✓ GovernanceLine > says the record is not available, with the error code, when the lookup fails 313ms
+ ✓ src/features/library/job-status.test.ts (4 tests) 6ms
+stdout | src/styles/contrast.test.ts > ACCESSIBILITY.md contrast pairs > every pair meets its minimum in the light theme
+contrast, light theme
+light text-primary    on bg-canvas      16.12:1  (min 4.5)  Body text on the page
+light text-primary    on bg-surface     17.28:1  (min 4.5)  Text on cards, tables and drawers
+light text-primary    on bg-muted       15.02:1  (min 4.5)  Text in inputs and table heads
+light text-primary    on bg-selected    15.32:1  (min 4.5)  Text in a selected row or active nav item
+light text-secondary  on bg-selected     5.85:1  (min 4.5)  Secondary text in a selected row or the active palette option
+light text-tertiary   on bg-selected     4.87:1  (min 4.5)  Quiet labels in a selected row
+light text-secondary  on bg-canvas       6.16:1  (min 4.5)  Secondary text on the page
+light text-secondary  on bg-surface      6.60:1  (min 4.5)  Secondary text on cards
+light text-secondary  on bg-muted        5.74:1  (min 4.5)  Secondary text in inputs and table heads
+light text-tertiary   on bg-canvas       5.12:1  (min 4.5)  Placeholders and hints on the page
+light text-tertiary   on bg-surface      5.49:1  (min 4.5)  Placeholders and hints on cards
+light text-tertiary   on bg-muted        4.77:1  (min 4.5)  Placeholders in inputs
+light text-on-ink     on ink            17.28:1  (min 4.5)  Label on a primary button
+light text-on-ink     on ink-hover      12.06:1  (min 4.5)  Label on a hovered primary button
+light seal            on bg-canvas       6.81:1  (min 4.5)  Links on the page
+light seal            on bg-surface      7.30:1  (min 4.5)  Links on cards, and the focus ring
+light seal            on bg-muted        6.35:1  (min 4.5)  Links on quiet fills
+light seal            on bg-selected     6.48:1  (min 4.5)  Links in a selected row
+light allow           on bg-surface      6.38:1  (min 4.5)  Allowed verdict text
+light deny            on bg-surface      5.74:1  (min 4.5)  Denied verdict text
+light escalate        on bg-surface      5.85:1  (min 4.5)  Needs-approval verdict text
+light allow           on allow-tint      5.51:1  (min 4.5)  Allowed badge
+light deny            on deny-tint       4.90:1  (min 4.5)  Denied badge and the deny callout heading
+light escalate        on escalate-tint   5.08:1  (min 4.5)  Needs-approval badge
+light text-primary    on deny-tint      14.77:1  (min 4.5)  Sentence in the deny callout
+light text-secondary  on deny-tint       5.64:1  (min 4.5)  Labels in the deny callout
+light deny            on bg-muted        4.99:1  (min 4.5)  Deny text on a quiet fill
+
+stdout | src/styles/contrast.test.ts > ACCESSIBILITY.md contrast pairs > every pair meets its minimum in the dark theme
+contrast, dark theme
+dark  text-primary    on bg-canvas      15.45:1  (min 4.5)  Body text on the page
+dark  text-primary    on bg-surface     14.31:1  (min 4.5)  Text on cards, tables and drawers
+dark  text-primary    on bg-muted       13.06:1  (min 4.5)  Text in inputs and table heads
+dark  text-primary    on bg-selected    11.67:1  (min 4.5)  Text in a selected row or active nav item
+dark  text-secondary  on bg-selected     5.32:1  (min 4.5)  Secondary text in a selected row or the active palette option
+dark  text-tertiary   on bg-selected     4.76:1  (min 4.5)  Quiet labels in a selected row
+dark  text-secondary  on bg-canvas       7.05:1  (min 4.5)  Secondary text on the page
+dark  text-secondary  on bg-surface      6.53:1  (min 4.5)  Secondary text on cards
+dark  text-secondary  on bg-muted        5.96:1  (min 4.5)  Secondary text in inputs and table heads
+dark  text-tertiary   on bg-canvas       6.31:1  (min 4.5)  Placeholders and hints on the page
+dark  text-tertiary   on bg-surface      5.84:1  (min 4.5)  Placeholders and hints on cards
+dark  text-tertiary   on bg-muted        5.33:1  (min 4.5)  Placeholders in inputs
+dark  text-on-ink     on ink            15.45:1  (min 4.5)  Label on a primary button
+dark  text-on-ink     on ink-hover      17.05:1  (min 4.5)  Label on a hovered primary button
+dark  seal            on bg-canvas       8.00:1  (min 4.5)  Links on the page
+dark  seal            on bg-surface      7.41:1  (min 4.5)  Links on cards, and the focus ring
+dark  seal            on bg-muted        6.76:1  (min 4.5)  Links on quiet fills
+dark  seal            on bg-selected     6.04:1  (min 4.5)  Links in a selected row
+dark  allow           on bg-surface      9.01:1  (min 4.5)  Allowed verdict text
+dark  deny            on bg-surface      6.78:1  (min 4.5)  Denied verdict text
+dark  escalate        on bg-surface      9.08:1  (min 4.5)  Needs-approval verdict text
+dark  allow           on allow-tint      6.84:1  (min 4.5)  Allowed badge
+dark  deny            on deny-tint       5.43:1  (min 4.5)  Denied badge and the deny callout heading
+dark  escalate        on escalate-tint   6.84:1  (min 4.5)  Needs-approval badge
+dark  text-primary    on deny-tint      11.44:1  (min 4.5)  Sentence in the deny callout
+dark  text-secondary  on deny-tint       5.22:1  (min 4.5)  Labels in the deny callout
+dark  deny            on bg-muted        6.20:1  (min 4.5)  Deny text on a quiet fill
+
+ ✓ src/styles/contrast.test.ts (3 tests) 7ms
+ ✓ src/components/governance/trace-deny.test.tsx (4 tests) 414ms
+ ✓ src/app/session.test.tsx (1 test) 37ms
+ ✓ src/styles/color-guard.test.ts (2 tests) 7ms
+ ✓ src/features/ask/ask-page.test.tsx (2 tests) 388ms
+ ✓ src/styles/eslint-colour-guard.test.ts (32 tests) 1818ms
+   ✓ eslint colour guard > a real colour fails: const s = { color: '#fff' } 1504ms
+
+ Test Files  25 passed (25)
+      Tests  182 passed (182)
+   Start at  17:27:58
+   Duration  35.68s (transform 1.66s, setup 4.69s, collect 41.26s, tests 25.27s, environment 23.56s, prepare 2.50s)
+

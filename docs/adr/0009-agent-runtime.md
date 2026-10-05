@@ -28,3 +28,6 @@
 ## Alternatives considered
 - **Start the run first and check inside it:** denials would stop being HTTP errors and the status codes would change.
 - **Store runs in Postgres now:** needs the queue and workers (Sprint 007). The port leaves room for it.
+
+## Queued runtime (Sprint 007)
+`JobAgentRuntime` (`adapters/job_runtime.py`) is the second implementation and the default (`AGENT_RUNTIME=queued`). `start` writes a job that carries the request's principal and fixed boundary; a worker rebuilds the context, runs the agent on an in-process runtime and stores the answer in the job. `status`, `wait`, `stop` and `cleanup` work on the job row, so status is durable (Q19 is closed) and any process can ask. The route waits up to `AGENT_SYNC_WAIT_SECONDS` and then answers 202 with the execution id; `GET /v1/agent/runs/{execution_id}` reads the run. The contract suite runs against both runtimes (a run's output must be JSON). See ADR-0011.

@@ -54,6 +54,11 @@ poetry run python scripts/admin/identity.py show-policy acme
 
 # run the API on :8000 (docs at /docs). All product routes live under /v1.
 poetry run uvicorn api.main:app --reload
+# run a worker in a second terminal. Ingestion (`POST /v1/ingest` answers 202) and agent runs are jobs, and a worker runs them.
+# Without one, an ingest stays queued and an agent query answers 202 after 25 seconds. Three ways to run it:
+poetry run python -m workers --concurrency 2        # on the host (also relays the outbox)
+docker compose up -d worker                         # the same image as the API, command `python -m workers`
+EMBEDDED_WORKERS=1 EMBEDDED_RELAY=true poetry run uvicorn api.main:app   # one process, for a single-container host
 curl localhost:8000/health        # unversioned, for platform health checks
 curl localhost:8000/v1/health     # same payload, versioned
 curl -H "Authorization: Bearer $GAP_KEY" localhost:8000/v1/documents   # every other /v1 route needs a key
@@ -73,7 +78,7 @@ cd ui && npm run e2e
 scripts/verify/lighthouse.sh   # landing page performance, target 85 or more
 
 # checks
-poetry run ruff check api/ core/ gateway/ tests/
+poetry run ruff check api core gateway ports adapters workers tests scripts/e2e
 poetry run mypy
 poetry run pytest -m unit -q
 poetry run pytest -m "integration or e2e" -q -rs   # needs the Postgres and Redis above
@@ -95,12 +100,13 @@ python scripts/labs/lab_2.5_integration_test.py
 ```
 api/                           # FastAPI app
 ├── main.py                    # app factory, middleware order, the /v1 router
-├── routers/                   # search, ingest, documents, config, analytics, feedback, health
+├── routers/                   # search, ingest (202 + job), jobs, documents, config, analytics, feedback, health
 ├── middleware/                # auth, then FinOps, plus request id, logging and latency
 ├── auth.py, gateway_deps.py   # scopes per route, gateway enforcement context
 ├── agent/                     # LangGraph agent (graph, tools, router, models)
 ├── mcp/                       # MCP server, tools, resources, prompts, SSE transport
 └── services/                  # retriever, llm, cache, guardrails, usage writer
+workers/                       # python -m workers: the job loop, ingest and agent-run handlers, the outbox relay
 gateway/                       # the governance path (section 15)
 ├── enforce.py                 # enforce() and require()
 ├── stages.py                  # principal, boundary, policy, guardrails, rate, budget
@@ -399,7 +405,7 @@ A `usage_log` table in Postgres stores one row per LLM-consuming request. The Fi
 ## 13. Platform Base (Sprint 002)
 
 - **Config:** `core/settings.py` validates the environment once. `MODE=public-preview` or `prod` without `DATABASE_URL` and `REDIS_URL` stops the process at startup. `config.py` keeps its public names.
-- **Migrations:** Alembic, forward-only. `poetry run alembic upgrade head` creates the schema (later sprints added `0002`–`0005`). The baseline `0001` is idempotent, so it is safe on a database that already has the tables. The Docker image runs it before starting uvicorn.
+- **Migrations:** Alembic, forward-only. `poetry run alembic upgrade head` creates the schema (later sprints added `0002`–`0008`; `0008` is the job queue, the outbox and consumer dedupe). The baseline `0001` is idempotent, so it is safe on a database that already has the tables. The Docker image runs it before starting uvicorn.
 - **API:** every product route is under `/v1`. Old unversioned paths return 404 in the standard error format. MCP clients connect to `/v1/mcp/sse` (see `claude_desktop_config.json`).
 - **Observability:** logs are one JSON object per line. Set `OTEL_EXPORTER_OTLP_ENDPOINT` to export traces. Without it, no exporter and no background thread is created.
 - **Tests:** `unit` has no external services. `integration` and `e2e` use a real Postgres and Redis, with fake LLM and embeddings, and skip with a reason when the services are down. A network guard fails any test that tries to reach a provider.

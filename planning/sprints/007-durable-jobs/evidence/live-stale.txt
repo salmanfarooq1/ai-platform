@@ -1,0 +1,28 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+phase 1: EMBED_MODEL=fake/model-a
+{"timestamp": "2026-10-04T16:45:39.832669+00:00", "level": "WARNING", "logger": "api.finops", "message": "[finops] Unknown model 'unknown' not in MODEL_PRICING. Cost reported as $0.00. Add an entry to config.py.", "request_id": "8504402b3e624f3fa8fd4b29397db156", "trace_id": "5e19a97f3e116e899084e1e89e66fd9e"}
+  ingest answered 202; job succeeded: 1 chunk(s)
+  [ok] the ingest job succeeded: None
+  [ok] search finds the chunk: HTTP 200, cited ['gdpr.md']
+  [ok] health stale_vectors is 0: stale_vectors=0
+  rows in the database (model, dim, count): [('fake/model-a', 768, 1)]
+  [ok] every row records model-a and 768
+phase 2: restart with EMBED_MODEL=fake/model-b
+  [ok] search (hybrid) finds none of the old chunks: HTTP 404: No documents found in namespace 'legal'. Ingest documents first.
+  [ok] search (vector_only) finds none of the old chunks: HTTP 404: No documents found in namespace 'legal'. Ingest documents first.
+  [ok] search (bm25_only) finds none of the old chunks: HTTP 404: No documents found in namespace 'legal'. Ingest documents first.
+  [ok] health stale_vectors > 0: stale_vectors=1
+  [ok] the old rows were not deleted: rows=[(1,)]
+phase 3: back to EMBED_MODEL=fake/model-a
+  [ok] the old chunks are found again: HTTP 200
+  [ok] health stale_vectors is 0 again
+RESULT: all checks passed

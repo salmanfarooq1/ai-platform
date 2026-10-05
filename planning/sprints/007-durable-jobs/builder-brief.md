@@ -42,3 +42,10 @@ Write `report.md` and the evidence files. Return a text summary with:
 - the test numbers
 - deviations
 - open questions
+
+## Baseline and notes from Sprint 006
+- **Baseline:** 1097 backend tests pass, and the only skips are the 10 live-MinIO runs. CI uses `scripts/check_skips.py --expect 10`. Update the count only if you add MinIO-parametrized tests. The UI has 167 Vitest tests and 71 Playwright tests.
+- **Migration:** this sprint's is `0008`.
+- **Run status (Q19):** it lives in memory today. This sprint makes it durable. Agent runs are jobs, and `/v1/agent/runs/{execution_id}` reads from the database. Close Q19 in QUESTIONS.md when it's done.
+- **Outbox and decisions:** the outbox adapter must keep the Sprint 006 M1 rule. A decision row is never lost because of the bus. An allow whose publish fails is denied with 503. A deny keeps its row.
+- **Reason codes:** add any new one to `gateway/reasons.py`.

@@ -22,6 +22,7 @@ The target design and its strict rules live in `docs/architecture/FOUNDATION.md`
 |---|---|
 | `api/` | FastAPI app: `routers/`, `middleware/` (auth, then FinOps), `auth.py`, `gateway_deps.py`, `agent/` (LangGraph), `mcp/`, `services/`, `models/` |
 | `ports/` | The contracts for every external provider: typed Protocols and frozen dataclasses. No SDK imports (ADR-0005) |
+| `workers/` | Job workers (`python -m workers`): the loop, the ingest and agent-run handlers, the outbox relay, embedded workers (ADR-0011) |
 | `adapters/` | The only code that imports `litellm`, `langchain_litellm`, `redis`, `boto3`: one adapter per port, and `registry.py`, the composition root that builds them from `Settings` |
 | `gateway/` | The governance path: `enforce()`, `ExecutionBoundary`, policies, stages, rate limit and token budget, decision record (ADR-0006) |
 | `core/` | Ingestion, processing, pipeline, DB pool and tenant-scoped access (`database/tenant.py`), identity (`identity/`), provider clients |
@@ -43,11 +44,12 @@ scripts/setup_db.sh                       # create rag_platform if missing, migr
 poetry run alembic upgrade head           # migrate only (runs as MIGRATION_DATABASE_URL, falls back to DATABASE_URL)
 poetry run python scripts/admin/identity.py --help   # tenants, principals, API keys (the key is printed once), set-policy / show-policy
 poetry run uvicorn api.main:app --reload  # run API on :8000 (product routes are under /v1)
+poetry run python -m workers              # run a worker: ingestion and agent runs need one (or `docker compose up -d worker`, or EMBEDDED_WORKERS=1)
 cd ui && npm ci && npm run dev            # run UI on :5173 (Vite proxies /v1 to :8000)
 poetry run pytest -m unit -q              # unit tests (no external services)
 poetry run pytest -m "integration or e2e" -q -rs  # real Postgres + Redis, fake LLM; skips with a reason if they are down
-poetry run ruff check api core gateway ports adapters tests scripts/e2e   # lint
-poetry run mypy                           # typecheck (api/ core/ gateway/ ports/ adapters/ config.py; strict for ports/ and adapters/)
+poetry run ruff check api core gateway ports adapters workers tests scripts/e2e   # lint
+poetry run mypy                           # typecheck (api/ core/ gateway/ ports/ adapters/ workers/ config.py; strict for ports/ and adapters/)
 poetry run python scripts/update_openapi.py  # refresh docs/openapi.json after an intended API change (unit test fails on drift)
 scripts/check_no_ddl.sh                   # no CREATE/ALTER TABLE outside migrations/
 cd ui && npm run tokens:check && npm run lint && npm run typecheck && npm test -- --run && npm run build && npm run chunk-report && npm run copy-check   # UI checks
@@ -60,6 +62,7 @@ cd ui && npm run e2e                      # Playwright against the real API with
 - **Ports and adapters:** routes, the gateway, the agent and MCP get their providers as ports from `request.app.state.adapters` (built once in the lifespan by `adapters/registry.py`), never an SDK. Provider SDKs (`litellm`, `langchain_litellm`, `boto3`, `redis`) are imported only in `adapters/`, and `asyncpg` only in `adapters/`, `core/database/` and `core/identity/store.py` (import-lint test, `tests/unit/test_import_lint_ports.py`). Routes that only need a type use `core.database.tenant.DbPool`. Chunks record `embedding_model` and `embedding_dim`; search ignores rows of another model, and `/v1/health` reports them as `stale_vectors`.
 - **How to add a provider:** (1) if the port exists, write `adapters/<name>.py` implementing it, typed strictly (mypy is strict there); (2) choose it in `adapters/registry.py` from a `Settings` value, and validate that value in `core/settings.py`; (3) add the adapter to the port's contract suite in `tests/contracts/` (real and fake must pass the same tests); (4) add a fake to `tests/fakes.py` if tests need one, and give tests the app through `create_app(adapter_overrides={...})`; (5) never import the SDK anywhere else. A new kind of port goes in `ports/` first, with a contract suite, and an ADR if it is a cross-cutting decision.
 - **Events and runs:** the gateway publishes `platform.gateway.decision.v1` (CloudEvents 1.0, no input text) for every recorded decision through the `EventBus` port (ADR-0008). `/v1/agent/query` runs through the `AgentRuntime` port (ADR-0009), and every decision a run causes carries its `execution_id`.
+- **Jobs and the outbox:** `POST /v1/ingest` answers 202 with a job; a worker ingests. Agent runs are jobs behind the `AgentRuntime` port (`/v1/agent/query` waits `AGENT_SYNC_WAIT_SECONDS`, then 202). Workers claim with `SKIP LOCKED` through a narrow SECURITY DEFINER function and then work under `tenant_connection`. The default event bus is the outbox: events commit with the change, a relay publishes them at least once, consumers dedupe by event id (ADR-0008, ADR-0011).
 - **API:** every product route is under `/v1`. Only `/` and `/health` are unversioned. Errors are always `{"error": {"code", "message", "request_id"}}`. 401 = no or bad credential, 403 = missing scope, 404 `kb_not_found` = unknown or foreign knowledge base (same body for both).
 - **Tests:** the integration and e2e tiers need `docker compose up -d postgres redis`. They create a throwaway database, connect as `gap_app`, use fake LLM and embeddings (`tests/fakes.py`, fake adapters put behind the ports through the registry), and a guard fixture blocks any real network call. `tests/contracts/` runs one suite per port against every adapter; the live MinIO run is `scripts/verify/minio.sh` (skipped, with a reason, when no MinIO is configured). The `tenants` fixture gives two tenants with keys of different scopes.
 

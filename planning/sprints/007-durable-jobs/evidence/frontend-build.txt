@@ -1,0 +1,176 @@
+
+> ai-platform-ui@2.0.0 build
+> tsc --noEmit && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 5624 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                  0.99 kB │ gzip:   0.56 kB
+dist/assets/Geist-Variable-Bj2R_7yk.woff2       69.65 kB
+dist/assets/GeistMono-Variable-Dispecij.woff2   71.37 kB
+dist/assets/index-DaVSfqcv.css                  31.47 kB │ gzip:   7.48 kB
+dist/assets/time-range-BpH6G2fq.js               0.21 kB │ gzip:   0.19 kB
+dist/assets/walkthrough-store-CMuV9Tm6.js        0.22 kB │ gzip:   0.16 kB
+dist/assets/stages-UorP1m-x.js                   0.27 kB │ gzip:   0.21 kB
+dist/assets/density-D1tfL_P2.js                  0.30 kB │ gzip:   0.22 kB
+dist/assets/select-CAypHzcS.js                   0.40 kB │ gzip:   0.29 kB
+dist/assets/trust-page-DMXLadIQ.js               0.58 kB │ gzip:   0.39 kB
+dist/assets/input-qvjcWWhf.js                    0.66 kB │ gzip:   0.39 kB
+dist/assets/governance-text-BFDU-hqm.js          0.73 kB │ gzip:   0.45 kB
+dist/assets/reasons-Fam7loDE.js                  0.96 kB │ gzip:   0.52 kB
+dist/assets/useInfiniteQuery-ClnWjQXL.js         1.16 kB │ gzip:   0.50 kB
+dist/assets/receipt-DQbYS3r4.js                  1.27 kB │ gzip:   0.66 kB
+dist/assets/history-page-rIzuJdKs.js             1.57 kB │ gzip:   0.81 kB
+dist/assets/X.es-DRNleXIz.js                     1.95 kB │ gzip:   0.66 kB
+dist/assets/keys-page-fVT179Xn.js                1.95 kB │ gzip:   0.90 kB
+dist/assets/hero-scene-DlO9yN3w.js               1.99 kB │ gzip:   1.06 kB
+dist/assets/deny-callout-sPyvtNgt.js             2.11 kB │ gzip:   0.82 kB
+dist/assets/trace-timeline-DIACCbCO.js           2.22 kB │ gzip:   1.02 kB
+dist/assets/copy-value-D4qeU4vs.js               2.44 kB │ gzip:   0.99 kB
+dist/assets/signin-page-CepJ3X5N.js              2.49 kB │ gzip:   1.28 kB
+dist/assets/policies-page-PUyWQe86.js            2.64 kB │ gzip:   1.21 kB
+dist/assets/system-page-D5f98BDk.js              2.81 kB │ gzip:   1.08 kB
+dist/assets/useMutation-9rRBenNy.js              3.24 kB │ gzip:   1.32 kB
+dist/assets/segmented-D3Qe4fZQ.js                3.39 kB │ gzip:   1.38 kB
+dist/assets/marketing-shell-DWR0so5T.js          3.89 kB │ gzip:   1.59 kB
+dist/assets/runs-page-DAqjtFMY.js                5.36 kB │ gzip:   2.14 kB
+dist/assets/usage-page-Zka4xpPY.js               5.64 kB │ gzip:   1.88 kB
+dist/assets/how-it-works-page-CruyyTP1.js        5.83 kB │ gzip:   2.28 kB
+dist/assets/walkthrough-page-CO9EInsT.js         5.86 kB │ gzip:   2.32 kB
+dist/assets/overview-page-CRa3XaCY.js            6.93 kB │ gzip:   2.47 kB
+dist/assets/decisions-page-BNOHyASA.js           7.59 kB │ gzip:   2.98 kB
+dist/assets/states-JVSZO6W1.js                   8.79 kB │ gzip:   2.59 kB
+dist/assets/verdict-badge-hM7pwt6g.js           10.31 kB │ gzip:   2.84 kB
+dist/assets/requests-page-CBxQied0.js           10.38 kB │ gzip:   3.79 kB
+dist/assets/library-page-BpxMAGzA.js            11.88 kB │ gzip:   4.42 kB
+dist/assets/landing-page-CV1JaqL8.js            17.92 kB │ gzip:   6.04 kB
+dist/assets/gsap-CcIkNsPr.js                   122.93 kB │ gzip:  48.91 kB
+dist/assets/react-CxfcT2zT.js                  171.48 kB │ gzip:  56.23 kB
+dist/assets/ask-page-DphYy34z.js               186.86 kB │ gzip:  56.83 kB
+dist/assets/index-L6L7UleK.js                  248.09 kB │ gzip:  76.28 kB
+dist/assets/webgl-gc836SuQ.js                  878.61 kB │ gzip: 235.14 kB
+✓ built in 36.61s
+
+> ai-platform-ui@2.0.0 chunk-report
+> node scripts/chunk-report.mjs
+
+Chunks (raw and gzip), largest last
+app/shared  time-range-BpH6G2fq.js                           0.2 kB     0.2 kB
+app/shared  walkthrough-store-CMuV9Tm6.js                    0.2 kB     0.2 kB
+app/shared  stages-UorP1m-x.js                               0.3 kB     0.2 kB
+app/shared  density-D1tfL_P2.js                              0.3 kB     0.2 kB
+app/shared  select-CAypHzcS.js                               0.4 kB     0.3 kB
+app/shared  trust-page-DMXLadIQ.js                           0.6 kB     0.4 kB
+app/shared  input-qvjcWWhf.js                                0.6 kB     0.4 kB
+app/shared  governance-text-BFDU-hqm.js                      0.7 kB     0.4 kB
+app/shared  reasons-Fam7loDE.js                              0.9 kB     0.5 kB
+app/shared  useInfiniteQuery-ClnWjQXL.js                     1.1 kB     0.5 kB
+app/shared  receipt-DQbYS3r4.js                              1.2 kB     0.6 kB
+app/shared  history-page-rIzuJdKs.js                         1.5 kB     0.8 kB
+app/shared  X.es-DRNleXIz.js                                 1.9 kB     0.6 kB
+app/shared  keys-page-fVT179Xn.js                            1.9 kB     0.9 kB
+marketing   hero-scene-DlO9yN3w.js                           1.9 kB     1.0 kB
+app/shared  deny-callout-sPyvtNgt.js                         2.1 kB     0.8 kB
+app/shared  trace-timeline-DIACCbCO.js                       2.2 kB     1.0 kB
+app/shared  copy-value-D4qeU4vs.js                           2.4 kB     1.0 kB
+app/shared  signin-page-CepJ3X5N.js                          2.4 kB     1.2 kB
+app/shared  policies-page-PUyWQe86.js                        2.6 kB     1.2 kB
+app/shared  system-page-D5f98BDk.js                          2.7 kB     1.1 kB
+app/shared  useMutation-9rRBenNy.js                          3.2 kB     1.3 kB
+app/shared  segmented-D3Qe4fZQ.js                            3.3 kB     1.4 kB
+marketing   marketing-shell-DWR0so5T.js                      3.8 kB     1.5 kB
+app/shared  runs-page-DAqjtFMY.js                            5.2 kB     2.1 kB
+app/shared  usage-page-Zka4xpPY.js                           5.5 kB     1.8 kB
+marketing   how-it-works-page-CruyyTP1.js                    5.7 kB     2.2 kB
+app/shared  walkthrough-page-CO9EInsT.js                     5.7 kB     2.3 kB
+app/shared  overview-page-CRa3XaCY.js                        6.8 kB     2.4 kB
+app/shared  decisions-page-BNOHyASA.js                       7.4 kB     2.9 kB
+app/shared  states-JVSZO6W1.js                               8.6 kB     2.5 kB
+app/shared  verdict-badge-hM7pwt6g.js                       10.1 kB     2.8 kB
+app/shared  requests-page-CBxQied0.js                       10.1 kB     3.7 kB
+app/shared  library-page-BpxMAGzA.js                        11.6 kB     4.3 kB
+marketing   landing-page-CV1JaqL8.js                        17.5 kB     5.9 kB
+marketing   gsap-CcIkNsPr.js                               120.1 kB    47.8 kB
+app/shared  react-CxfcT2zT.js                              167.5 kB    54.9 kB
+app/shared  ask-page-DphYy34z.js                           182.5 kB    55.5 kB
+app/shared  index-L6L7UleK.js                              242.3 kB    74.5 kB
+marketing   webgl-gc836SuQ.js                              858.0 kB   229.6 kB
+
+total app/shared 696.1 kB, total marketing 1007.0 kB, 40 chunks
+
+Each route is its own chunk
+ok   /                  landing-page-CV1JaqL8.js (17.5 kB)
+ok   /how-it-works      how-it-works-page-CruyyTP1.js (5.7 kB)
+ok   /signin            signin-page-CepJ3X5N.js (2.4 kB)
+ok   /app               overview-page-CRa3XaCY.js (6.8 kB)
+ok   /app/walkthrough   walkthrough-page-CO9EInsT.js (5.7 kB)
+ok   /app/ask           ask-page-DphYy34z.js (182.5 kB)
+ok   /app/library       library-page-BpxMAGzA.js (11.6 kB)
+ok   /app/history       history-page-rIzuJdKs.js (1.5 kB)
+ok   /app/requests      requests-page-CBxQied0.js (10.1 kB)
+ok   /app/decisions     decisions-page-BNOHyASA.js (7.4 kB)
+ok   /app/policies      policies-page-PUyWQe86.js (2.6 kB)
+ok   /app/keys          keys-page-fVT179Xn.js (1.9 kB)
+ok   /app/usage         usage-page-Zka4xpPY.js (5.5 kB)
+ok   /app/runs          runs-page-DAqjtFMY.js (5.2 kB)
+ok   /app/trust         trust-page-DMXLadIQ.js (0.6 kB)
+ok   /app/system        system-page-D5f98BDk.js (2.7 kB)
+
+No GSAP or WebGL in the chunks that load under /app (every chunk outside the marketing group)
+checked 34 chunks, grep for: WebGLRenderer|@react-three|THREE\.|ScrollTrigger|SplitText|gsap\.registerPlugin|getContext\(["']webgl
+ok   index.html preloads no marketing chunk
+
+Where GSAP and WebGL live
+     landing-page-CV1JaqL8.js
+     gsap-CcIkNsPr.js
+     webgl-gc836SuQ.js
+
+PASS
+
+> ai-platform-ui@2.0.0 copy-check
+> node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/copy-check.mjs
+
+1. Headline and subline
+ok   headline: "Your agents can only ever do less."
+ok   subline: "Control what your agents can do. See everything they did."
+ok   landing-page.tsx renders HEADLINE and SUBLINE from claims.ts
+
+2. No long dash or en dash
+ok   97 files scanned, none holds U+2014 or U+2013
+
+3. Banned words and "demo" wording
+ok   89 UI files scanned for \b(elevate[sd]?|seamless(ly)?|unleash(es|ed)?|next-gen(eration)?)\b and \bdemo
+
+4. Every landing claim maps to the may-claim list
+ok   may-claim list has 8 items
+ok   [capabilities] "One gateway for every call"
+       -> may-claim 1: One gateway for every model, tool and knowledge-base call. Agent code does not import the model clie...
+ok   [capabilities] "Policies that only narrow"
+       -> may-claim 2: Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token lim...
+ok   [capabilities] "A record for every call"
+       -> may-claim 3: A decision record for every call, allow or deny, with a reason, the policy version and an input hash...
+ok   [capabilities] "Tenants kept apart by the database"
+       -> may-claim 4: Tenant isolation enforced by the database.
+ok   [capabilities] "Closed when in doubt"
+       -> may-claim 5: Fail closed: if a check or the decision record cannot be written, the call is denied.
+ok   [capabilities] "Rate limits and budgets"
+       -> may-claim 6: Rate limits and daily token budgets per tenant.
+ok   [capabilities] "Read-only previews"
+       -> may-claim 7: Read-only preview sessions. The API key stays on the server in a secure cookie session.
+ok   [capabilities] "Works with agent clients over MCP"
+       -> may-claim 8: Works over MCP for agent clients.
+ok   [use cases] "An internal knowledge assistant over company documents"
+       -> may-claim 2: Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token lim...
+ok   [use cases] "An agent with tool access"
+       -> may-claim 2: Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token lim...
+ok   [use cases] "A team that must see what its agents did"
+       -> may-claim 3: A decision record for every call, allow or deny, with a reason, the policy version and an input hash...
+ok   [why outside the agent] "Why the gateway sits outside the agent"
+       -> may-claim 1: One gateway for every model, tool and knowledge-base call. Agent code does not import the model clie...
+
+5. Nothing from the must-not-claim list on the public pages
+ok   12 landing files scanned for \b(approvals?|approve[sd]?|signed receipts?|hash chains?|uptime|availability|customers?|testimonials?|customer logos?|logo wall|kafka|openshell|sandbox(ed)?|pii|redaction|opa|eval gate|metrics dashboards?|enterprise-grade|trusted by)\b
+
+PASS

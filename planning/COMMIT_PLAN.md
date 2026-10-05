@@ -88,3 +88,44 @@ poetry run pytest -q && (cd ui && npm run tokens:check && npm run lint && npx ts
 ```bash
 git push -u origin sprint/005b-polish
 ```
+
+## Sprint 006: ports and adapters, event bus, agent runtime
+Tree `33601cc6f40ddbcfb6ab702b3de7965126b44b6d`. This branch starts from `sprint/005b-polish`.
+
+```bash
+git switch -c sprint/006-ports-adapters sprint/005b-polish
+```
+
+```bash
+git restore --source=33601cc6f40ddbcfb6ab702b3de7965126b44b6d --staged -- ports adapters
+git commit -m "feat: typed ports and adapters with a registry composition root"
+```
+
+```bash
+git restore --source=33601cc6f40ddbcfb6ab702b3de7965126b44b6d --staged -- api core gateway config.py migrations Dockerfile pyproject.toml poetry.lock .env.example
+git commit -m "refactor: route providers through ports; embedding provenance, event bus and agent runtime"
+```
+
+```bash
+git restore --source=33601cc6f40ddbcfb6ab702b3de7965126b44b6d --staged -- tests scripts .github/workflows
+git commit -m "test: contract suites per port, provenance, events, runtime and a strict skip check"
+```
+
+```bash
+git restore --source=33601cc6f40ddbcfb6ab702b3de7965126b44b6d --staged -- ui
+git commit -m "feat(ui): agent runs show execution id and status"
+```
+
+```bash
+git restore --source=33601cc6f40ddbcfb6ab702b3de7965126b44b6d --staged -- .
+git commit -m "docs: ADR-0005 update, ADR-0008, ADR-0009 and the Sprint 006 report"
+git diff --quiet 33601cc6f40ddbcfb6ab702b3de7965126b44b6d HEAD && echo "branch matches the Sprint 006 snapshot"
+```
+
+```bash
+poetry run pytest -q && (cd ui && npm run tokens:check && npm run lint && npx tsc --noEmit && npm test -- --run && npm run build && npx playwright test)
+```
+
+```bash
+git push -u origin sprint/006-ports-adapters
+```
