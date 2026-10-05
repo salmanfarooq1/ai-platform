@@ -3,12 +3,9 @@
 Open items that need a human answer. Work continues around them. When one is answered, delete it and record the answer in `DECISIONS.md`.
 
 - **Q1.** The local dev machine is WSL Ubuntu 22.04. The commands in `AGENTS.md` were verified in a Linux cloud container (Python 3.11, Poetry 2.3, Node 22, Docker CLI present but no daemon). Confirm they work the same in WSL, especially Docker Desktop and Ollama.
-- **Q2.** The hosted service on Render reads `MODE` from `render.yaml` when the Blueprint syncs. After this sprint, does the service get `MODE=public-preview` automatically, or must it be set by hand in the dashboard? Either way, it must be set before or with the next deploy.
-- **Q4.** For the hosted Neon database: is there a backup or branch to restore from before the first migration (Sprint 002)?
 
 ## Sprint 003
 - **Q5.** Public visitors of the hosted UI: should the preview key allow uploads (`kb:write`), or only asking questions? Default taken: query + read only; uploads need a separate key. Built that way, with one addition: the documented preview key also has the `agent` scope, because the UI's Ask page has an agent mode and would 403 without it. Say if the preview should be search-only.
-- **Q6.** The hosted Neon database user: is it the owner role (`neondb_owner`)? Sprint 003 needs a second, non-owner login role for the app so row-level security applies. Creating it on Neon is free; it needs a password set as a Render secret.
 
 ## Sprint 004
 - **Q7.** Retention of `gateway_decisions`: one row per governed call grows without bound (a search writes two or more, an agent run one per model and tool call). How long are decision records kept, and is there a purge or archive job? Left open; Sprint 007 extends the table and is the place to decide. No purge exists.
@@ -18,7 +15,6 @@ Open items that need a human answer. Work continues around them. When one is ans
 
 ## Builder, Sprint 003
 - **B8.** Docker image builds do not work in this sandbox (proxy TLS), so `ui/Dockerfile.ui` (nginx template, key guard script) and the API image start command were checked by unit tests and by reading, not by a real build and run. Run `docker build -f ui/Dockerfile.ui ui` and start it with and without `PREVIEW_API_KEY` where Docker Hub is reachable.
-- **B9.** Hosted rollout needs a human: create the `gap_app` role on Neon, set `MIGRATION_DATABASE_URL`, `DATABASE_URL` and `PREVIEW_API_KEY` on Render, create the preview key (steps in `docs/render-deployment.md`). Nothing was run against Neon.
 
 ## Builder, Sprint 002
 - **B5.** `MODEL_PRICING` has `gemini/gemini-3.5-flash-lite` at `$0 / $0` (free tier) so the config's own model has an entry. What rates apply once the key is on a paid plan?
@@ -27,4 +23,16 @@ Open items that need a human answer. Work continues around them. When one is ans
 
 ## Found in the docs pass
 - **Q9.** `scripts/labs/lab_6.3_model_routing.py` imports `classify_query_complexity`, which commit `efde99f` removed from `api/services/llm.py` (Decision 7). The lab no longer runs. Keep it as a historical record, or restore a copy of the classifier inside the lab?
+
+## Sprint 005 setup
+- **Q11.** This container's network policy blocks `21st.dev` and `threeui.com` (proxy 403). GitHub and npm work. So in this container no component is copied from those sites. The equivalents are built from shadcn/ui (npm) and from three.js, `@react-three/fiber` and `@react-three/drei` (MIT, npm), with sources noted in comments. To use a specific 21st.dev or ThreeUI item, allow those hosts in the environment's network settings, or install the item on your machine with the shadcn CLI and its URL.
+- **Q12.** The web edge sign-in limit (10 a minute per client IP) uses the socket address. Behind a hosting proxy that is the proxy's address, so all visitors would share one budget. Which proxy hops can be trusted to set a forwarded address, so a trusted-proxy setting can read it? Until answered, the limit is correct locally and may be too strict when hosted.
+- **Q13.** `usage_log` has no principal column, so the console usage summary attributes rows to a principal through the `gateway_decisions` rows with the same request id. Should Sprint 007 add a `principal_id` column to `usage_log`?
+
+## Parked: hosting
+Deployment is not a concern for now. These wait until it is.
+- **Q2.** The hosted service on Render reads `MODE` from `render.yaml` when the Blueprint syncs. After this sprint, does the service get `MODE=public-preview` automatically, or must it be set by hand in the dashboard? Either way, it must be set before or with the next deploy.
+- **Q4.** For the hosted Neon database: is there a backup or branch to restore from before the first migration (Sprint 002)?
+- **Q6.** The hosted Neon database user: is it the owner role (`neondb_owner`)? Sprint 003 needs a second, non-owner login role for the app so row-level security applies. Creating it on Neon is free; it needs a password set as a Render secret.
+- **B9.** Hosted rollout needs a human: create the `gap_app` role on Neon, set `MIGRATION_DATABASE_URL`, `DATABASE_URL` and `PREVIEW_API_KEY` on Render, create the preview key (steps in `docs/render-deployment.md`). Nothing was run against Neon.
 - **Q10.** The top of `docs/render-deployment.md` says the first deploy was prepared and not yet done, while `README.md` lists live preview URLs. Which is current? Confirm that the hosted services are live and which migration the hosted database is at.

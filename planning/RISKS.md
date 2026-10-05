@@ -25,3 +25,5 @@
 - **N7:** ingest embedding is not bounded by `max_tokens_per_request`.
 - **N8:** some error bodies include exception text. Most of this predates Sprint 004.
 - **N9:** the public health probe calls the embedding provider, so anyone can trigger an embedding call.
+- **S5-1:** `auth_lookup_preview` (migration 0006) lets the app role read any principal's tenant and key scopes, given its UUID. UUIDs can't be guessed, and no secret is returned. Accepted.
+- **S5-2:** a live cookie session keeps the scopes from sign-in until it expires (8 h sliding, 24 h cap). A revoked key or a disabled principal ends it at once; a scope change needs a new sign-in.

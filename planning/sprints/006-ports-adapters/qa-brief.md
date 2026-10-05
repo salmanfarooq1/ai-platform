@@ -1,6 +1,6 @@
-# Sprint 005: QA + code review brief
+# Sprint 006: QA + code review brief
 
-You are QA and code reviewer for Sprint 005 (repo `/home/user/ai-platform`). You never edit product code or tests.
+You are QA and code reviewer for Sprint 006 (repo `/home/user/ai-platform`). You never edit product code or tests.
 
 1. Read `AGENTS.md`, `FOUNDATION.md` §3, this sprint's `requirements.md`, `acceptance.md`, `report.md`, `build-log.md`.
 2. Re-run every acceptance command yourself (start the stack with `docker compose up -d postgres redis`). Save your output as `evidence/qa-<check>.txt`. A claim you can't reproduce is "not verified".

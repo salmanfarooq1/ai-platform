@@ -2,6 +2,13 @@
 
 An index, one line per decision, newest first. The reasoning lives in `docs/ARCHITECTURE.md` (Decision N) and `docs/adr/`. This file only points to it. Log entries may carry the date they were recorded.
 
+## Direction after Sprint 004
+- **The frontend is first-class.** It is designed and built with the backend. Feature sprints are vertical slices: the API contract comes first, then backend and frontend briefs and one e2e test across both. `ROADMAP.md`.
+- **New sprint order:** 005 frontend foundation and showcase, 006 ports and adapters with EventBus and AgentRuntime, 007 durable jobs with an outbox, 008 trust with metrics and decision retention, 009 OpenShell sandbox, 010 Kafka adapter. `ROADMAP.md`.
+- **Deployment is parked.** Hosting items wait in `QUESTIONS.md`.
+- **One project design skill.** `.claude/skills/governed-design/` merges apple-design, the MIT taste skill (main, soft and minimalist) and `docs/UI_GUIDELINES.md`.
+- **Web edge inside the monolith, not a separate BFF.** ADR-0007 (Sprint 005). Planned ADRs: 0008 event bus, 0009 agent runtime.
+
 ## Sprint 004: gateway core
 - **One `enforce()` for every model, tool and KB call.** Any error is a deny. Decision 26, ADR-0006.
 - **Decision writes fail closed.** A failed write on an allow gives 503 `decision_unrecorded`. Token booking after the work stays best effort. Decision 26, ADR-0006.

@@ -1,9 +1,9 @@
-# Sprint 005: Builder brief
+# Sprint 006: Builder brief
 
-You are the Builder for Sprint 005 of the Governed Agent Platform (repo `/home/user/ai-platform`). You implement the whole sprint end to end.
+You are the Builder for Sprint 006 of the Governed Agent Platform (repo `/home/user/ai-platform`). You implement the whole sprint end to end.
 
 ## Read in this order
-1. `AGENTS.md`  2. `planning/STATE.md`  3. `planning/sprints/005-ports-adapters/requirements.md`  4. `blueprint.md`  5. `acceptance.md`  6. `docs/architecture/FOUNDATION.md` §3 (strict rules).
+1. `AGENTS.md`  2. `planning/STATE.md`  3. `planning/sprints/006-ports-adapters/requirements.md`  4. `blueprint.md`  5. `acceptance.md`  6. `docs/architecture/FOUNDATION.md` §3 (strict rules).
 
 ## Autonomy policy (verbatim from AGENTS.md)
 Work continuously until the sprint is complete. Never pause to ask for review. Write a short plan into `build-log.md`, then start. Fix problems yourself (failing tests, imports, Docker, ports, packages). Log as you go. The only stop conditions: a change that contradicts a strict rule or the blueprint; a destructive or irreversible action; a missing secret; spending money. On a stop condition, record it in `planning/QUESTIONS.md` and `build-log.md`, skip only that item, finish the rest. Never commit or push.
@@ -25,7 +25,7 @@ Implement `blueprint.md` and make every check in `acceptance.md` pass, saving ca
 - Don't touch `planning/` files other than this sprint folder, `STATE.md`, `QUESTIONS.md`.
 
 ## Finish with `report.md`
-1. Acceptance: done / not done / uncertain per check, with evidence path. 2. Files changed. 3. Test numbers (e.g. "84 passed, 0 failed"). 4. Problems and fixes. 5. Skipped items and why. 6. Decisions you made and deferred costs. 7. STATE/CHANGELOG updates applied. 8. Proposed commit commands on branch `sprint/005-ports-adapters`, grouped (ports, adapters per port, registry+wiring, migration, tests, docs).
+1. Acceptance: done / not done / uncertain per check, with evidence path. 2. Files changed. 3. Test numbers (e.g. "84 passed, 0 failed"). 4. Problems and fixes. 5. Skipped items and why. 6. Decisions you made and deferred costs. 7. STATE/CHANGELOG updates applied. 8. Proposed commit commands on branch `sprint/006-ports-adapters`, grouped (ports, adapters per port, registry+wiring, migration, tests, docs).
 
 ## Sprint-specific notes
 - Subagents cannot write report files. Return the full `report.md` text in your final reply, and the Architect saves it. Write evidence via shell redirection of real command output.
