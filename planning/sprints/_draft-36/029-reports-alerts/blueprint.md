@@ -1,0 +1,44 @@
+# Sprint 029: Blueprint
+- **Contract:**
+  - `GET|POST /v1/insights/subscriptions`, `PUT|DELETE /v1/insights/subscriptions/{id}`. Body: `{target: {dashboard_id, tile_id?}, cron, format: inapp|pdf|csv, recipients: [principal_id], filters}`. Scope `data:read`. Action `report.write`.
+  - Adding another principal as a recipient needs `insights:write`. A recipient can always unsubscribe.
+  - `GET|POST /v1/insights/alerts`, `PUT|DELETE /v1/insights/alerts/{id}`. Body: `{metric_id, filters, rule: {op: above|below|change_pct, value}, cron?, on_ingest: bool, recipients}`. Scope `data:read`. Action `report.write`. Only certified metrics (028).
+  - `GET /v1/insights/runs?subscription_id=&alert_id=` and `GET /v1/insights/runs/{id}`: status, manifest, decision ids, file link.
+  - `POST /v1/insights/runs/{id}/download` returns a short-lived signed URL. It re-runs `enforce()` for the caller.
+  - `GET /v1/inbox`, `POST /v1/inbox/{id}/read`. Kernel routes, scope `kb:read` (any principal). Each item is visible only to its principal.
+  - Refresh the OpenAPI snapshot.
+- **Package `insights/`:**
+  - `reports.py`: one run per recipient. Takes one snapshot id, renders tiles through `render.py` (028), builds the manifest.
+  - `export_pdf.py`: Vega-Lite to SVG with `vl-convert-python`, then HTML to PDF with WeasyPrint. WeasyPrint uses a URL fetcher that refuses every URL. Fonts ship in the image.
+  - `export_csv.py`: the aggregate result of table tiles only, from the same `data.read` as the tile.
+  - `alerts.py`: rule check, dedupe, hysteresis (own small implementation; no `dataplane` import).
+  - `delivery.py`: `ReportDelivery` port with `inapp` (default) and `smtp` adapters.
+- **Jobs:** job kinds `insights.report.run` and `insights.alert.check`, on the existing queue. Schedules in the 018 `schedules` table. Retries and dead letters as for other jobs.
+- **Data:** migration "next free after Sprint 028's head".
+  - `insight_subscriptions (id, tenant_id, owner_principal_id, dashboard_id, tile_id NULL, cron, format, filters jsonb, schedule_id, enabled, created_at)`.
+  - `insight_subscription_recipients (subscription_id, tenant_id, principal_id, unsubscribed_at)`.
+  - `insight_alerts (id, tenant_id, owner_principal_id, metric_id, filters jsonb, rule jsonb, on_ingest, schedule_id NULL, state ok|firing, last_value_hash, last_fired_at, enabled)`.
+  - `insight_runs (id, tenant_id, kind report|alert, subscription_id NULL, alert_id NULL, recipient_principal_id, status, manifest jsonb, manifest_sha256, object_key NULL, file_sha256 NULL, decision_id, started_at, finished_at)`.
+  - `inbox_items (id, tenant_id, principal_id, kind, title, link, run_id NULL, created_at, read_at)`. Kernel table (`core/inbox.py`). Generic, so later sprints can post other kinds.
+  - All with `tenant_id`, RLS and grants to `gap_app`. Purge through a SECURITY DEFINER function, as in 018.
+- **Gateway:**
+  - New action kinds: `report.write` (scope `data:read`), `report.deliver` (principal = recipient). Register both → `insights` in the action-to-module map (013).
+  - The job acts as the recipient's principal, with the scopes stored for it. Record v2 extension `on_behalf: {initiator, subscription_id, job_id}`. Sprint 035 adds staleness checks and 036 turns this into a delegation chain.
+  - `report.deliver` runs once per recipient per run, after rendering and before the file is stored or sent. Its context names the format, the channel and the manifest hash.
+  - Tiles inside a report are normal `data.read` decisions with `surface = "report"` (alerts use `"alert"`), the dashboard's purpose and the run id.
+  - New reason codes: `recipient_not_principal`, `delivery_channel_disabled`, `alert_metric_not_certified`.
+- **Events:** `platform.insights.report.delivered.v1`, `platform.insights.alert.fired.v1`.
+- **Lineage:** each run emits through `LineageEmitter`: job `insights.report.run`, inputs the source datasets, output `insights://{tenant}/reports/{subscription_id}`. The decision ids go in the 025 `decisionRecordId` facet.
+- **Settings (placeholders):** `INSIGHTS_REPORT_RETENTION_DAYS` (default 90), `INSIGHTS_ALERT_DEDUPE_MINUTES` (default 60), `INSIGHTS_EMAIL_ATTACH` (default false), `INSIGHTS_SMTP_*` (empty, adapter off). Validated in `core/settings.py`. The Builder logs a question for each placeholder.
+- **Compose:** profile `mail` with `axllent/mailpit:v1.31.4` (MIT), bound to localhost. Not in the default profile.
+- **UI** (`.claude/skills/governed-design/SKILL.md`):
+  - Insights > Reports: subscriptions, alerts, runs with status, download and a receipt link.
+  - "Subscribe" on a dashboard and on a tile. "Alert me" on a metric.
+  - Inbox list.
+- **Tests:**
+  - Contract: `tests/contracts/test_report_delivery_contract.py` (inapp, smtp against a fake server, and a fake).
+  - Unit: `test_alert_rules`, `test_alert_hysteresis`, `test_pdf_fetcher_refuses_urls`, `test_svg_render_offline`.
+  - Integration: `test_report_renders_as_recipient`, `test_report_one_snapshot_per_run`, `test_report_manifest_hash_in_decision`, `test_csv_is_aggregate_data_read`, `test_run_records_on_behalf`, `test_download_rechecks_enforce`, `test_revoked_grant_withholds_next_run`, `test_alert_value_hidden_without_grant`, `test_alert_on_snapshot_committed`, `test_recipient_must_be_principal`, `test_inbox_items_private_to_principal`, `test_report_lineage_event`, `test_reports_tenancy`, `test_report_retention_purge`.
+  - Playwright: `ui/e2e/reports.spec.ts` (subscribe, run now, open the PDF from the inbox, see the receipt).
+  - Live verify: `scripts/verify/mail.sh` sends one report through the `mail` profile.
+- **Docs:** ADR-0031 (add reports and alerts), `docs/contracts/events.md` (new event types), `docs/architecture.md`, `docs/operations.md` (report jobs, retention), `docs/configuration.md`, the API docs.

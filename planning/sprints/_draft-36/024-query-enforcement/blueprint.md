@@ -1,0 +1,33 @@
+# Sprint 024: Blueprint
+- **Contract:**
+  - `POST /v1/data/query` (`data:read`): `{sql, purpose, snapshot_id?}`. Returns `columns` (with `masked: bool`), `rows` (at most `QUERY_MAX_ROWS`), `snapshot_id`, `withheld_columns`, `decision_id`.
+  - Denies are 403 with the reason code. 400 `sql_not_parsed` for SQL that does not parse. 409 `grant_changed` when the grant changed during the query.
+  - OpenAPI snapshot refreshed.
+- **Rewrite** (`dataplane/query/rewrite.py`, pure, no I/O):
+  - Input: parsed SQL and a map of granted relations (product table → grant columns, row filter, masks, k).
+  - Exactly one statement, and it must be a query (`SELECT`, `WITH ... SELECT`, set operations). Else `statement_not_allowed`.
+  - Each `Table` node must name a granted product table. It is replaced by `(SELECT <granted columns, masked> FROM <physical table> AT (VERSION => <pinned>) WHERE <row filter>) AS <alias>`. Else `relation_not_granted`.
+  - A CTE name that shadows a product table is resolved as the CTE, never as the table.
+  - `*` and `t.*` expand to granted columns only. A named column outside the grant is `column_not_granted`.
+  - Table functions, `AT` or `VERSION` clauses, catalog-qualified names and DuckDB or DuckLake metadata functions are `relation_not_granted`.
+  - After rewriting, a final walk checks that every relation is one the rewrite inserted. Else `relation_not_granted`.
+- **Masks** (`dataplane/query/masks.py`): `null`, `hash` (SHA-256 with a per-tenant salt from a secret), `partial` (last four characters kept), `none`. The mask for a column comes from the tenant policy's new `mask_policy` (classification → mask) unless the grant names the column as unmasked. Defaults are placeholders, recorded in `planning/QUESTIONS.md`. Masked columns are listed in `withheld_columns`.
+- **Row filters:** the structured filter from Sprint 023, compiled into sqlglot nodes with bound parameters.
+- **Minimum group size:** a contract custom property `minGroupSize` per product (k). A contract without it uses the setting `QUERY_MIN_GROUP_SIZE`. When a query aggregates over a table with classified columns, every grouped SELECT gets `HAVING count(*) >= k`. A global aggregate gets the same. Non-aggregate queries are masked, not suppressed.
+- **Gateway:**
+  - New stage `purpose` in `gateway/stages.py` (introduced here). Stage order follows `planning/program/conventions.md`: `purpose`, `query`, `duties`, `grant`. It acts on `data.read` and `data.extract` that carry grants in `context`. Reasons: `purpose_required`, `purpose_mismatch`.
+  - New stage `query` (introduced here) reads the rewrite outcome from `context` and denies with its reason: `statement_not_allowed`, `relation_not_granted`, `column_not_granted`. All are added to `gateway/reasons.py`.
+  - New record v2 extension `query` (introduced here, registered in `evidence/extensions.py`): `sql_sha256` (input), `rewritten_sql_sha256`, `grant_ids` with versions, `purpose`, `withheld_columns`. The snapshot id stays in the `data` extension (016). Sprint 026 extends `query`. Never the SQL text or literals.
+  - `PolicyDocument` gains `mask_policy` (validated: known classifications and mask names). No migration.
+- **Cache:** results in Valkey through `CachePort`. Key: SHA-256 of tenant, principal, sorted `(grant_id, grant_version)` pairs, snapshot id and rewritten SQL hash. TTL `QUERY_CACHE_TTL_SECONDS`.
+- **Revocation:** the query worker (Sprint 016 process model) keeps a registry of running queries by grant id. A watchdog reads `grants.version` and `state` every `QUERY_REVOKE_POLL_SECONDS` and calls DuckDB `interrupt()` on a change. After execution the grant version is checked again; a change returns 409 `grant_changed` and nothing is cached. Polling works with the default outbox bus; no new event.
+- **Placeholders:** `QUERY_MIN_GROUP_SIZE`, `QUERY_MAX_ROWS`, `QUERY_CACHE_TTL_SECONDS` and the `mask_policy` defaults are business numbers or rules. Each is a setting (or policy default) with a default, and the Builder logs a question for each in `planning/QUESTIONS.md`.
+- **Over-limit:** a query over a limit is denied with its reason code. No "approval required" outcome exists until 034.
+- **Data:** no migration expected. If one is needed, it takes the next free number after Sprint 023's head.
+- **Pins:** `sqlglot` exact pin (MIT), re-checked, in `evidence/pins.txt`.
+- **UI** (governed-design skill): Workspace > Data query: SQL editor (monospace textarea), purpose picker filled from the caller's active grants, results table with a masked badge per column, a withheld-columns note, and a link to the decision.
+- **Tests:**
+  - `tests/fixtures/query_bypass.yaml`: 50+ cases, each with category, SQL and the expected reason or masking. Categories: ungranted table, catalog-qualified name, table functions (`read_parquet`, `read_csv`, `glob`, `query_table`), CTE shadowing, subquery and lateral, set operations, star expansion, aliasing a masked column, functions over masked columns, metadata functions, time travel, multiple statements, comment and quoting tricks, case folding, small groups, grouping by a unique key, window functions, recursive CTE, sampling.
+  - `tests/unit/test_rewrite.py` (corpus runner plus golden rewrites); `tests/unit/test_masks.py`; `tests/unit/test_purpose_stage.py`; `tests/unit/test_query_extension_schema.py` (`test_query_extension_fields`: an unknown field or SQL text is refused).
+  - `tests/integration/test_query_enforcement.py`; `test_query_cache_isolation.py`; `test_query_revoke_cancel.py`; `test_query_pruning.py` (data files read, from `EXPLAIN ANALYZE`, equal before and after rewrite on a month-partitioned table); Playwright `ui/e2e/data-query.spec.ts`.
+- **Docs:** ADR-0019, `docs/contracts/query.md` (what the rewrite allows), reason codes, `docs/configuration.md` (`mask_policy`, query settings).

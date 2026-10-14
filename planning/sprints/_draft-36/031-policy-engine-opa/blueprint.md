@@ -1,0 +1,62 @@
+# Sprint 031: Blueprint
+- **Seam:**
+  - Move the `PolicyEngine` Protocol, `PolicyInput` and `PolicyVerdict` to `ports/policy.py`. Re-export them from `gateway/policy.py`, so callers do not change.
+  - `PolicyInput` is a frozen dataclass. It is built by the gateway and holds no free text:
+    - `principal` (id, scopes)
+    - `tenant`
+    - `action` (kind, resource, estimated tokens)
+    - `arguments_sha256`, plus `arguments_schema_valid`, which the gateway computes as today
+    - `input_sha256`
+    - `purpose` and `grant_purpose`
+    - `boundary` (allow-lists, limits)
+    - `policy_version` and `check` (`policy` or `purpose`)
+    - `surface` (added in 028: `api`, `agent`, `dashboard`, `report`, `alert`). Keep it in the move.
+  - Later sprints add fields, each with decision-table rows for both engines: 036 the delegation chain, 038 `taint` and the trifecta flags, 039 the autonomy `tier`.
+  - `PolicyVerdict` gains `outcome: allow|deny|approval_required` and `rule_ids`.
+- **Adapters:**
+  - `adapters/opa_policy.py` sends `POST {OPA_URL}/v1/data/platform/decision` with `{"input": canonical PolicyInput}` over `httpx`.
+  - Timeout `OPA_TIMEOUT_MS` (default 200).
+  - Any error, timeout, non-200 or missing result is a deny `policy_unavailable`.
+  - Selection: `POLICY_ENGINE=python|opa` (default `python`), validated in `core/settings.py`. `OPA_URL` must be set for `opa`.
+- **Bundle:**
+  - `policy/rego/` (package `platform`) holds the rules, and `policy/data/` holds the platform data.
+  - Build it with `opa build -b policy -o policy/bundle.tar.gz --signing-key <file>`. OPA runs with `--verification-key`.
+  - `bundle_sha256` is the SHA-256 of the tar. It is also set as the manifest `revision`.
+  - At startup, the adapter reads `/v1/data/system/bundles` and refuses to start if the revision differs from the expected hash.
+  - The Python engine's `bundle_sha256` is the hash of the canonical JSON of `policy/data/` plus `PythonPolicyEngine.VERSION`.
+- **Gateway:**
+  - The `purpose` stage from 024 stays in the same place in `STAGES`. It now calls `ENGINE.evaluate(..., check="purpose")`, so stage names and reason codes stay the same.
+  - On `approval_required`: `Decision(allowed=False, stage="policy", reason="approval_required")`. Add `approval_required` to `gateway/reasons.py`.
+- **Evidence:**
+  - Record v2 extension `policy` holds `{engine, bundle_sha256, input_sha256, outcome, rule_ids}`.
+  - The canonical input document is stored for replay.
+- **Data** (migration: next free number after Sprint 030's head):
+  - `policy_inputs (tenant_id, input_sha256, document jsonb, created_at)`, PK `(tenant_id, input_sha256)`, FORCE RLS, `GRANT SELECT, INSERT` to `gap_app`. It is purged with decisions by the `purge_decisions` job.
+  - `policy_bundles (bundle_sha256 PK, engine, object_key, created_at)`, platform-level, `GRANT SELECT` to `gap_app`.
+  - Bundle tars are kept in the object store.
+- **Contract:**
+  - `GET /v1/policies/engine` (`audit:read`) returns `{engine, bundle_sha256, revision, loaded_at}`.
+  - `GET /v1/decisions/{id}/policy-input` (`audit:read`) returns the stored input document. It holds hashes only.
+  - New scope `policy:write` (this sprint introduces it; the name is in `planning/program/conventions.md`): publish and test tenant policies. Add it to `Scope` in `core/identity/models.py` and to `docs/api/`. `admin` still satisfies it. Today only the admin CLI (`scripts/admin/identity.py set-policy`) publishes a policy; the 032 routes use this scope.
+  - Refresh the OpenAPI snapshot.
+- **Fixtures (Q8):**
+  - The 015 persona policy files in `data/reference-company/policies/` become real policies: producer, steward, consumer, operator, auditor, agent developer.
+  - Each has decision-table rows.
+- **Compose:**
+  - Profile `policy` runs the OPA service, pinned by digest. Its port is bound to `127.0.0.1` and it has a healthcheck (`/health?bundles`).
+  - The bundle and verification key are mounted read-only.
+  - It runs with `--skip-version-check`, decision logs off, and `--authorization=basic` with a system policy that refuses every write API.
+- **Tests:**
+  - `tests/policy/decision_table.yaml` (every 024 purpose case, every 009 tool-argument case, each persona, all three outcomes). It also has rows for the Insights kinds: `dashboard.write`, `report.write`, `report.deliver`, and `data.read` with `surface=dashboard` and `surface=report`.
+  - `test_decision_table_insights_kinds` (the Insights rows give the same outcome on both engines).
+  - `test_decision_table_python`, plus `test_decision_table_opa`, which runs `opa eval` with the pinned static binary on the bundle.
+  - `opa test policy/` (Rego unit tests).
+  - `test_policy_write_scope_known` (`parse_scopes` keeps `policy:write`; `admin` satisfies it).
+  - `test_opa_down_denies`, `test_bundle_revision_mismatch_refuses_start`, `test_unsigned_bundle_refused`, `test_policy_extension_in_record`, `test_offline_replay_matches`, `test_approval_required_is_deny`.
+  - Contract suite `tests/contracts/test_policy_engine_contract.py` runs on the Python engine and on OPA against a fake OPA HTTP server.
+  - Playwright: `policies.spec.ts`.
+- **Scripts:**
+  - `scripts/verify/opa.sh` brings up the profile and runs the table against the live sidecar, then tears it down.
+  - `scripts/verify/replay_decision.py --decision <id>` fetches the input and the bundle, runs `opa eval` offline and compares the outcome.
+- **UI:** on Governance > Policies, an engine badge, the bundle hash, the persona policies, and the `blocked_terms` display per Q15. Follow `.claude/skills/governed-design/SKILL.md`.
+- **Docs:** ADR-0022 (OPA behind the policy seam, three outcomes, replayable decisions), `docs/configuration.md`, `docs/operations.md` (signing key, bundle build), the runbook `docs/runbooks/opa.md`.

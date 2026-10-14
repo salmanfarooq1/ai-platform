@@ -1,0 +1,26 @@
+# Sprint 044: Blueprint
+- **Contract** (OpenAPI snapshot refreshed):
+  - `GET /v1/observability/status` (`audit:read`): `{otlp_configured, semconv_opt_in, semconv_version, content_capture: false, grafana_url?}`.
+  - `GET /v1/observability/audit?since=&until=&group_by=day|action|outcome|reason|principal` (`audit:read`): `{rows: [{key, count, allow, deny}], window}`. Window capped by `AUDIT_ANALYTICS_MAX_DAYS` (422 `window_too_large`).
+- **Code facts:** `api/observability.py` sets up tracing; the OTLP exporter is created only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set; DB, cache and model spans were deferred there. The worker exposes metrics on `WORKER_METRICS_PORT` (9100). The profile has one dashboard, `docker/observability/grafana/dashboards/platform.json`, and Grafana runs with anonymous Viewer and `GRAFANA_ADMIN_PASSWORD` defaulting to `admin`.
+- **Tracing:**
+  - `setup_tracing` gains a worker form. The job row carries the W3C `traceparent` of the request that queued it; the worker continues it. Baggage from clients is dropped.
+  - `enforce()` opens span `gateway.enforce` with `decision_id`, `gateway.action`, `gateway.outcome`, `gateway.reason`, `gateway.stage`, `execution_id`. Never input text.
+  - Model calls through the gateway get a span. With the opt-in set, it uses GenAI attributes (`gen_ai.operation.name`, `gen_ai.request.model`, `gen_ai.provider.name`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`). Content attributes are never set.
+- **Redaction:**
+  - `RedactingSpanProcessor` in `api/observability.py`: an allowlist of attribute keys; any other key is dropped; URL query strings removed; `Authorization`, cookies and CSRF headers never recorded.
+  - `JsonFormatter` drops `extra` keys on a deny list (`prompt`, `query`, `text`, `content`, `answer`, `sql`, `messages`, `body`).
+  - `TELEMETRY_CAPTURE_CONTENT` (default `false`; `true` refused outside `local`), validated in `core/settings.py`.
+  - The collector config repeats the rule: an `attributes` delete list and a `transform` that drops `gen_ai.*.messages`, `db.statement` and `http.request.body`.
+- **Ports and adapters:** `ports/audit_analytics.py`: `AuditAnalytics`. `adapters/duckdb_audit_analytics.py` loads the caller's rows through `tenant_connection` (RLS) in batches into an in-memory DuckDB connection, locked as in Sprint 016 (`enable_external_access=false`, `lock_configuration=true`, `memory_limit`), and aggregates. No DuckDB connection ever reaches Postgres directly. Columns loaded: ids, action, outcome, stage, reason, principal id, time. Settings: `AUDIT_ANALYTICS_MAX_DAYS`, `AUDIT_ANALYTICS_MEMORY_LIMIT`.
+- **Metrics for dashboards:** new series without tenant or product labels: `gateway_cost_usd_total`, `pipeline_runs_total{status}`, `freshness_slo_breaches`, `quality_score` (histogram), `approvals_waiting`, and for Insights (M6) `insights_report_runs_total{status}`, `insights_alerts_fired_total`, `insights_view_seconds` (histogram). Each module emits its own; a disabled module emits none.
+- **Data:** no migration expected. If one is needed, the next free number after Sprint 043's head.
+- **Gateway:** new action kind `observability.read` for the two routes. No new stage.
+- **Events:** none.
+- **UI** (follows `.claude/skills/governed-design/SKILL.md`): Platform > Observability. Status card (collector, opt-in, content capture off), links to each Grafana dashboard when `GRAFANA_URL` is set, and the audit analytics charts: decisions per day by outcome, top deny reasons. Empty, loading and error states from `docs/design/PATTERNS.md`.
+- **Compose and scripts:**
+  - Service `otel-collector` by digest, ports `127.0.0.1:4317` and `127.0.0.1:4318`, `memory_limiter` and `batch` processors, file exporter to a volume, Prometheus exporter scraped by Prometheus.
+  - Grafana: `GRAFANA_ADMIN_PASSWORD` required, no default. Six dashboard JSON files under `docker/observability/grafana/dashboards/`.
+  - `scripts/verify/observability.sh` extended: collector up, a governed request leaves a trace with its `decision_id` in the file export, a canary string is absent, Grafana lists the six provisioned dashboards.
+- **Tests:** in-memory span exporter tests; redaction unit tests; collector config test (parse the YAML, check the delete list); audit analytics cross-tenant and window tests; `test_insights_metrics_emitted` (a report run, an alert and a dashboard view move the three series; with Insights disabled none is emitted); `test_metric_labels_bounded` covers them; Playwright for the page.
+- **Docs:** `docs/operations.md` "Observability" (profile, opt-in, redaction, dashboards); `docs/configuration.md` rows; `.env.example`.

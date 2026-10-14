@@ -1,0 +1,14 @@
+# Sprint 030: Acceptance
+- [ ] **A1.** All checks pass. The test delta is stated against Sprint 029's report. `check_skips` passes with the allowlist, with no new entries. Evidence: `evidence/checks.txt`.
+- [ ] **A2.** Field-level extraction accuracy on the reference invoices and contracts is measured and recorded per contract. Evidence: `evidence/extraction-accuracy.json`.
+- [ ] **A3.** The malicious PDF is contained:
+  - The run is tainted. `send_report` is denied with `tainted_run_tool_blocked`.
+  - No HR data is read. The output has no link or image.
+  - The fake sandbox network logs no egress.
+  - Evidence: `evidence/malicious-pdf.txt`.
+- [ ] **A4.** Parse and extract work with the network blocked in the test. The pre-fetched weight digests match `models.lock`. Every weight is recorded as Apache-2.0, or table structure is off. Evidence: `evidence/offline.txt`.
+- [ ] **A5.** A reviewer approves, edits and rejects extractions. Approved rows appear in the target dataset through `DataAccess.submit_write` and the 017 write path. An uncited field cannot be approved unedited. Evidence: `evidence/review-flow.txt`.
+- [ ] **A6.** The review view draws each field's box on the right page (Playwright). Evidence: `evidence/playwright.txt`.
+- [ ] **A7.** MB journey: "What was Q3 gross margin by region?" is answered in a sandbox with metric, snapshot and masked columns, then replayed; the poisoned invoice PDF cannot leak data. Evidence: `evidence/mb-journey.txt`.
+- [ ] **A-sec.** The threat-model tests pass. Evidence: `evidence/threat-tests.txt`.
+- [ ] **A-mem.** The `docker stats` line for the worker while it parses the reference set, and the volume size of `docling-models`. Evidence: `evidence/memory.txt`.

@@ -1,0 +1,45 @@
+# Sprint 032: Blueprint
+- **Contract rules:**
+  - `dataplane/contracts/agent_rules.py` reads the contract's agent-context section. Confirm the field path against the ODCS 3.2.0 JSON Schema and record it in `evidence/odcs-field.txt`.
+  - "Must never" rules must use our structured shape `docs/contracts/policy/must-never-1.json`: `{id, action_kinds, metrics?, columns?, purposes?, effect: deny}`.
+  - A free-text rule with no structured form is refused at contract validation with `contract_rule_unstructured`.
+  - Usage instructions are kept as text and returned by `describe_dataset` (027).
+  - On contract certification, the rules compile to `policy/data` per tenant and product (`products/<product_id>.json`). This publishes a new bundle hash. Both engines read the same data.
+- **AuthZEN:**
+  - `POST /v1/authzen/access/v1/evaluation` and `POST /v1/authzen/access/v1/evaluations`. Request and response shapes follow AuthZEN 1.0 (`subject`, `resource`, `action`, `context`, then `{decision, context}`).
+  - Scope `admin`. The subject must be a principal of the caller's tenant. Another tenant's subject gives `decision: false` with no detail.
+  - Mapping: the subject is a principal, the resource is `{type: kb|tool|model|dataset|metric, id}`, and the action name is an `ActionKind`.
+  - Each evaluation runs `enforce()` stages up to `purpose` with `evaluate_only=True`, so no rate, budget or cost is booked.
+  - Each evaluation writes a decision row with extension `authzen: {evaluation: true}`.
+  - Discovery: the AuthZEN 1.0 metadata document is served at `GET /.well-known/authzen-configuration` (rule 9 in `planning/program/vision-and-architecture.md`). It is read-only and public, needs no credential, holds no tenant data, and lists the `/v1/authzen/...` endpoints. This is the first rule 9 path: record the decision in `planning/DECISIONS.md` and in `docs/architecture.md`.
+- **Drafts:**
+  - `POST /v1/policies/drafts` (`policy:write`, from 031) takes `{document, product_rules?}`.
+  - `GET /v1/policies/drafts/{id}`.
+  - `POST /v1/policies/drafts/{id}/evaluate` takes `{inputs: [policy input ids or crafted PolicyInput]}` and returns per-input outcomes. It writes no decision rows for the inputs. The call itself is recorded as one decision under `policy:write`.
+  - Drafts are never loaded by either engine for real traffic.
+- **What-if:**
+  - `POST /v1/policies/drafts/{id}/what-if` (`policy:write`) takes `{days: 1..30}` and answers 202 with a job (kind `policy_whatif`).
+  - The job evaluates the draft over the stored `policy_inputs` (031) in that window, with the draft's data on the recorded bundle's Rego.
+  - The result lists `{decision_id, recorded_outcome, draft_outcome, rule_ids}` for changed rows only, plus counts.
+  - Inputs before 031 count as `no_input_recorded`.
+- **Publish:** `POST /v1/policies/drafts/{id}/publish` (`policy:write`) needs a finished what-if for the same draft hash. It then goes through the existing set-policy path and writes a decision.
+- **Replay:**
+  - `POST /v1/decisions/{id}/replay` (`audit:read`) re-evaluates the stored input with the recorded bundle (not the current one).
+  - It returns `{recorded_outcome, replayed_outcome, matches, rule_ids, bundle_sha256}`.
+  - CLI: `scripts/verify/replay_decision.py --decision <id> --explain`.
+- **Data** (migration: next free number after Sprint 031's head). Both tables have `tenant_id`, FORCE RLS and a `GRANT` to `gap_app`:
+  - `policy_drafts (id, tenant_id, document jsonb, product_rules jsonb, draft_sha256, created_by, created_at, status draft|published|discarded)`.
+  - `policy_whatif_runs (id, tenant_id, draft_id, draft_sha256, days, changed jsonb, counts jsonb, job_id, finished_at)`.
+- **Gateway:**
+  - New reason codes: `contract_must_never` (policy field `product_rules`), `whatif_required`, `contract_rule_unstructured`.
+  - Add `evaluate_only` to the enforcement context.
+- **UI:**
+  - Governance > Policies gets a test bench (JSON editor with schema hints, an input picker from recent decisions, a results table) and what-if (window picker, changed decisions table, publish button enabled only after a what-if).
+  - Evidence > Decisions gets a Replay action with the match state and rule ids.
+  - Follow `.claude/skills/governed-design/SKILL.md`.
+- **Tests:**
+  - `test_must_never_denies_agent_action` (a reference product rule denies the 027 agent querying a salary column for purpose `marketing`).
+  - `test_unstructured_rule_refused`, `test_authzen_interop_vectors`, `test_authzen_foreign_subject`, `test_authzen_discovery_public_no_tenant_data`, `test_draft_never_active`, `test_whatif_shows_changed_decision`, `test_publish_requires_whatif`, `test_replay_matches_stored`, `test_replay_uses_recorded_bundle`, `test_replay_output_hashes_only`.
+  - Both engines run the new decision-table rows.
+  - Playwright: `policy-bench.spec.ts` and `decision-replay.spec.ts`.
+- **Docs:** ADR-0022 (append: authoring, what-if, replay, AuthZEN mapping), `docs/api/` (AuthZEN mapping table), `docs/contracts/policy/`, `docs/architecture.md` and `planning/DECISIONS.md` (rule 9: public discovery documents under `/.well-known/`).

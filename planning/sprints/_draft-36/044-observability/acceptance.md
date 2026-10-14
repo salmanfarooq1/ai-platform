@@ -1,0 +1,12 @@
+# Sprint 044: Acceptance
+- [ ] **A1.** All checks pass. Test delta stated against Sprint 043's numbers. `check_skips.py` passes with the allowlist. Evidence: `evidence/checks.txt`.
+- [ ] **A2.** One agent answer gives one trace across API and worker. Its spans carry the `decision_id`s that `GET /v1/agent/runs/{execution_id}` lists. Evidence: `evidence/trace-links.txt`.
+- [ ] **A3.** A canary string in a prompt, a document and a SQL filter appears in no exported span and no log line, with and without the GenAI opt-in. Evidence: `evidence/no-content.txt`.
+- [ ] **A4.** Grafana loads the six dashboards from provisioned files and refuses to start without `GRAFANA_ADMIN_PASSWORD`. Evidence: `evidence/dashboards.txt`.
+- [ ] **A5.** Audit analytics for tenant A never counts tenant B's decisions; counts equal a direct SQL count under RLS. Evidence: `evidence/audit-analytics.txt`.
+- [ ] **A6.** `scripts/verify/observability.sh` passes live, or is marked "not verified here" with the reason. Evidence: `evidence/observability-live.txt`.
+- [ ] **A7.** Playwright: Platform > Observability shows status, dashboard links and analytics. Evidence: `evidence/e2e.txt`.
+- [ ] **A8.** MD journey: an auditor exports a signed evidence pack for one system and one quarter and verifies it offline with replay. Evidence: `evidence/md-journey.txt`.
+- [ ] **A9.** `/metrics` exposes `insights_report_runs_total{status}`, `insights_alerts_fired_total` and `insights_view_seconds` with no tenant labels, and none when Insights is disabled (`test_insights_metrics_emitted`). Evidence: `evidence/insights-metrics.txt`.
+- [ ] **A-sec.** The threat-model tests pass. Evidence: `evidence/threat-tests.txt`.
+- [ ] **A-mem.** `docker stats` lines for `otel-collector`, `prometheus` and `grafana`. Evidence: `evidence/memory.txt`.

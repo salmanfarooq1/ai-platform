@@ -1,0 +1,52 @@
+# Sprint 027: Blueprint
+- **Contract:**
+  - `POST /v1/ask/data` (scope `agent` plus `data:read` (016)). Body: `{question, purpose}`. It answers 202 with `execution_id`, or 200 within `AGENT_SYNC_WAIT_SECONDS`.
+  - `GET /v1/ask/data/{execution_id}` returns `{answer, result: {columns, rows}, provenance: {metric_ids, group_by, filters, snapshot_id, sql_sha256, result_sha256, withheld_columns, row_filter_ids, model_digest}, receipt_decision_id, tainted}`.
+  - `POST /v1/ask/data/{execution_id}/replay` returns `{matches, result_sha256}`.
+  - Refresh the OpenAPI snapshot.
+- **Runtime:**
+  - A data run takes the `AgentRuntime` port with the OpenShell adapter only.
+  - The registry refuses to build a data runtime from any other adapter. The run is denied `sandbox_required`.
+  - Tests inject the in-process runtime only through `create_app(adapter_overrides=...)`. No setting enables it.
+- **Sandbox agent:**
+  - `sandbox_agent/data_agent.py` builds a LangGraph graph whose model and tool nodes are HTTP calls to `/v1/sandbox/runs/{execution_id}/model` and `/tools/{name}`.
+  - The sandbox image gains `langgraph` and `langchain-core` only.
+  - Catalog and S3 secrets never enter the launch environment.
+- **Tools.** Server side, they live in `api/routers/sandbox.py` and call the `DataAccess` port. Add them to `KNOWN_TOOLS`. Each has a capability tag in `gateway/tool_capabilities.py`:
+  - `list_metrics` (reads, trusted).
+  - `describe_dataset` (reads, trusted contract text).
+  - `query_metric` (reads, the 026 path through `DataAccess.query_metric` with `surface=agent`).
+  - `guarded_sql` (reads, the 026 guard and the 024 rewrite).
+  - Tags: `reads_private`, `reads_untrusted`, `sends_out`, `writes`. Free-text columns and knowledge-base chunks are `reads_untrusted`.
+- **Taint:**
+  - `EnforcementContext.taint` is set by any tool result tagged `reads_untrusted`. It is stored on each later decision as extension `taint`.
+  - A new stage `taint` (introduced here), placed after `grant` as the stage order in `planning/program/conventions.md` says, denies a `tool.call` with `sends_out` or `writes` on a tainted run: `tainted_run_tool_blocked`.
+  - A test-only `send_report` tool with `sends_out` proves the breaker.
+- **Output:**
+  - The final answer is a `model.invoke` call through `enforce()` (request path step 9), marked as the answer step of the run. No new action kind.
+  - `gateway/output_strip.py` removes markdown links and images, HTML `a` and `img` tags, and bare URLs, while keeping the link text.
+  - The UI renders answers as plain text.
+- **Answer receipt:**
+  - The answer step's `model.invoke` decision carries extension `answer`: `sql_sha256`, `metric_ids`, `group_by`, `filters`, `snapshot_id` (one catalog-wide id), `result_sha256` (SHA-256 of canonical JSON rows), `withheld_columns`, `row_filter_ids`, `model_digest` and `answer_sha256`.
+  - `GET /v1/receipts/{decision_id}` signs it. Sprint 028 pins answers to dashboards from `metric_ids`, `group_by` and `filters`.
+- **Replay:**
+  - Replay runs the recorded SQL hash's query again through the 026 path. It uses the same snapshot (protected by 017), with the caller's current grant.
+  - A revoked grant means a deny, not a replay.
+  - Replay writes a `data.read` decision with extension `replay_of`.
+- **Data** (migration: next free number after Sprint 026's head):
+  - `eval_runs` gains `tier`, `model_digest`, `dataset_sha256`, `signature` and `key_id`.
+  - Rows are signed with the receipt key over canonical JSON.
+- **Gateway:**
+  - No new action kind. The answer uses `model.invoke`; tools use `tool.call`; reads use `data.read`.
+  - New reason codes: `sandbox_required`, `tainted_run_tool_blocked`.
+  - New stage `taint` (after `grant`).
+- **Lineage:** each data run emits `agentRun`, `modelCall` and `decisionRecordId` facets through `LineageEmitter` (025).
+- **UI:** Workspace > Ask, data mode. It shows the answer, the result table, the provenance panel and the replay button with its match state, plus a "tainted" badge. Follow `.claude/skills/governed-design/SKILL.md`.
+- **Evals** (`scripts/eval/data_agent/`):
+  - `questions.yaml` holds 40+ questions with expected result sets and `hand_verified_by`. It includes 8+ abstention and 6+ leakage cases.
+  - `run_tier.py --tier pr|nightly|release`.
+  - Result-set compare: order-insensitive unless the question asks for an order, with decimal tolerance 1e-6.
+  - garak and PyRIT target the local endpoint in the nightly and release workflows.
+- **Tests:** `test_data_run_requires_openshell`, `test_tainted_run_blocks_send_report`, `test_output_strip_corpus`, `test_answer_receipt_fields`, `test_provenance_keeps_group_by_filters`, `test_agent_query_surface_agent`, `test_replay_matches`, `test_replay_after_revoke_denied`, `test_masked_column_never_changes_answer`, `test_eval_pr_tier`, `test_eval_run_signed`, `test_no_catalog_secret_in_launch_env`, `test_sandbox_agent_import_lint`. Playwright: `ask-data.spec.ts`.
+- **Compose and scripts:** `scripts/verify/openshell.sh` gains the data-run checks. Add the nightly and release workflows.
+- **Docs:** ADR-0009 (append: the data agent in the sandbox), `docs/architecture.md`, `docs/operations.md` (eval tiers), and the red-team runbook.

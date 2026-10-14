@@ -1,0 +1,11 @@
+# Sprint 017: Acceptance
+- [ ] **A1.** All checks pass. Test delta stated against Sprint 016's report. `check_skips` passes with the allowlist. Evidence: `evidence/checks.txt`.
+- [ ] **A2.** Two concurrent writers on one table never abort a job: both upload jobs succeed, and a provoked conflict is retried. Evidence: `evidence/writer-lock.txt`.
+- [ ] **A3.** A protected snapshot (named in a `data.read` decision) survives maintenance expiry; an unprotected older one is expired. Evidence: `evidence/maintenance.txt`.
+- [ ] **A4.** Erasure leaves no readable row in any snapshot, data file, inlined catalog row or raw upload, and lists the unreplayable decisions. Evidence: `evidence/erasure.txt`.
+- [ ] **A5.** The seed load is reproducible: two loads give the same row counts and content hash per table. Evidence: `evidence/seed-load.txt`.
+- [ ] **A6.** Oversized, over-row and zip-bomb uploads are refused before any lakehouse write. Evidence: `evidence/upload-limits.txt`.
+- [ ] **A7.** Playwright: Data > Datasets shows schema versions, snapshots, a preview and a preview "as of" an older snapshot. Evidence: `evidence/playwright.txt`.
+- [ ] **A8.** Each committed write emits one `platform.data.snapshot.committed.v1` with the tenant, dataset id and new snapshot id; a failed write emits none. Evidence: `evidence/snapshot-event.txt`.
+- [ ] **A-sec.** The threat-model tests pass. Evidence: `evidence/threat-tests.txt`.
+- [ ] **A-mem.** `docker stats --no-stream` for the worker during an upload of the medium finance set. Evidence: `evidence/memory.txt`.

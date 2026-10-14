@@ -1,0 +1,26 @@
+# Sprint 041: Blueprint
+- **Contract** (all `audit:read`, each route `require()`s an audit read like the receipt routes; OpenAPI snapshot refreshed):
+  - `GET /v1/transparency/checkpoint` gives the latest signed checkpoint `{origin, size, root_hash, note, kid, timestamp?, anchors[]}`.
+  - `GET /v1/transparency/proofs/inclusion?leaf_hash=&size=` gives `{index, size, path[]}`. A leaf of another tenant gives the same 404 as a missing one (`leaf_not_found`).
+  - `GET /v1/transparency/proofs/consistency?from=&to=` gives `{from, to, path[]}`. Bad sizes give 422.
+  - `GET /v1/transparency/status` gives `{log_size, last_checkpoint_at, last_timestamp_at, tsa: ok|unavailable, clock: ok|drift, drift_ms, external_anchor: none|rekor|public_tsa, warning?}`.
+  - `GET /v1/receipts/{decision_id}` gains `log: {index, checkpoint_size, inclusion_path[]}|null` and `timestamp: {token_b64, gen_time}|null`. The receipt body that is signed does not change.
+- **Ports and adapters:**
+  - `ports/transparency.py`: `TransparencyLog` (append, checkpoint, inclusion, consistency). The real one is `evidence/translog.py` on Postgres.
+  - `ports/timestamp.py`: `TimestampAuthority` (stamp digest, verify token). `adapters/rfc3161_tsa.py` uses `rfc3161-client`. A fake TSA in `tests/fakes.py` signs with a test key.
+  - `ports/anchor.py`: `ExternalAnchor`. `adapters/rekor_anchor.py`, `adapters/public_tsa_anchor.py`, and a no-op default.
+  - Settings, validated in `core/settings.py`: `TSA_URL`, `TIMESTAMP_INTERVAL_MINUTES`, `CLOCK_MAX_DRIFT_MS`, `EXTERNAL_ANCHOR` (`none|rekor|public_tsa`), `REKOR_URL`, `PUBLIC_TSA_URL`. An anchor value without its URL fails at start. Key paths come from the Sprint 040 key settings.
+- **Data** (migration: next free number after Sprint 040's head; tenant_id + RLS + `GRANT SELECT, INSERT` to `gap_app`, no UPDATE or DELETE):
+  - `translog_leaves`: `tenant_id`, `idx`, `leaf_hash`, `kind` (`receipt|chain_head|pack`), `ref_id`, `created_at`. Unique (`tenant_id`, `idx`) and (`tenant_id`, `kind`, `ref_id`).
+  - `translog_checkpoints`: `tenant_id`, `size`, `root_hash`, `note` (signed text), `kid`, `created_at`.
+  - `timestamps`: `tenant_id`, `subject_kind`, `subject_hash`, `token` (DER), `gen_time`, `tsa_cert_sha256`, `created_at`.
+  - A trigger refuses UPDATE and DELETE on the three tables, for every role.
+- **Log rules:** append takes `pg_advisory_xact_lock` on the tenant's log. A receipt is appended once, when first issued (idempotent by decision id). The checkpoint note uses the C2SP checkpoint text (origin, size, root hash) and a signature line with `kid`.
+- **Jobs:** job kind `timestamp_heads` on the generalised scheduler. Per tenant with new chain rows: append the chain head, write a checkpoint, run the clock check, stamp the checkpoint root, store the token, then call the anchor adapter if one is set. TSA down: the job retries; decisions are never blocked.
+- **Gateway:** no new action kind or stage. Reason codes for job logs and status only: `clock_drift`, `tsa_unavailable`.
+- **Events:** `platform.evidence.checkpoint.v1` (tenant, size, root hash; no content) through the outbox.
+- **UI:** the receipt view in Evidence > Receipts shows the log index, checkpoint size and timestamp time, or "not yet in a checkpoint". Follows `.claude/skills/governed-design/SKILL.md`.
+- **Verifier v2** (`scripts/verify/receipt.py`, still imports nothing from the platform): new subcommands `inclusion`, `consistency`, `checkpoint` and `timestamp`. `receipt` also checks the log entry and timestamp when present.
+- **Compose and scripts:** profile `trust` with `timestamp-server` by digest, bound to `127.0.0.1`, healthcheck, signer key and certificate chain mounted read-only from files. Clock check added to `scripts/preflight.sh`. `scripts/verify/tsa.sh` brings up the profile, stamps a digest, verifies it with the CA chain, and tears down.
+- **Tests:** Merkle vectors (RFC 9162 and known log vectors), proofs for every size from 1 to 64, append-only trigger, cross-tenant 404, fake TSA contract suite (fake and live share it; live only in `tsa.sh`), anchor no-op by default, clock drift refusal, scheduler idempotency, offline verifier parity with `evidence/translog.py`.
+- **Docs:** ADR-0030; `docs/operations.md` sections "Transparency log and timestamps" and "Backup of keys and the log"; `docs/configuration.md` rows; `.env.example`; Q29 closed in `planning/QUESTIONS.md`.

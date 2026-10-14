@@ -1,0 +1,30 @@
+# Sprint 019: Blueprint
+- **Contract:**
+  - Pipeline definitions gain `transforms`: an ordered list of `{template, parameters, target_dataset_id, materialization}`. `materialization` is `table` or `incremental`. Validated against the template's JSON Schema; 422 `transform_invalid` otherwise.
+  - `GET /v1/data/templates` (`data:read`): the template catalogue with each parameter schema.
+  - `GET /v1/data/pipelines/runs/{run_id}` shows transform tasks (`dbt_build`, one per model) with status, rows and timing.
+  - OpenAPI snapshot refreshed.
+- **Templates and generation** (`dataplane/transforms/`):
+  - `templates/<name>/model.sql.j2` and `schema.json`. Reference templates: `stg_invoices`, `stg_ledger`, `fin_revenue_by_region_month` (incremental, merge on `region, month`).
+  - `generate.py` renders a project into a per-run temp dir (mode 0700): `dbt_project.yml`, `models/`, `packages.yml`.
+  - Parameters accept identifiers that match `^[a-z_][a-z0-9_]{0,62}$` and typed scalars only. Values with `{`, `}`, `%` or quotes are refused. Rendering uses a sandboxed Jinja environment with no globals.
+- **Packages:**
+  - Vendored under `dataplane/transforms/vendor/<name>-<version>/`. Allowlist `dataplane/transforms/packages.lock`: name, version, SHA-256 of the tree, licence.
+  - The generator writes only `local:` package entries. A pre-check refuses any package not in the lock, or whose hash differs, before dbt starts.
+- **Profiles and process:**
+  - `profiles.yml` written per run (mode 0600) in the temp dir: type `duckdb`, `:memory:` path, attach of the tenant's DuckLake catalog, S3 settings.
+  - Secrets reach dbt only as env vars of the subprocess (`env_var()` in the profile), with a short-lived catalog password and S3 session from Sprint 016's per-tenant identity. Never written to disk.
+  - The subprocess env is built from an explicit allowlist. It holds `DO_NOT_TRACK=1`, `DBT_SEND_ANONYMOUS_USAGE_STATS=false`, `DBT_PROFILES_DIR`, the secrets, nothing else.
+  - Timeout from `DBT_RUN_TIMEOUT_SECONDS`. The temp dir is deleted in a `finally`. `target/run_results.json` is summarised into task rows first.
+  - The worker takes the advisory lock on every target dataset id of the run, in sorted order, before `dbt build`. It retries on a DuckLake conflict up to `DBT_CONFLICT_RETRIES`.
+- **Data** (migration: next free number after Sprint 018's head; `tenant_id`, RLS, GRANT to `gap_app`):
+  - `lineage_raw_events`: id, tenant_id, run_id, source (`openlineage-dbt` or `platform`), event JSONB (SQL literals removed), received_at. It is the spool of the no-op `LineageEmitter` adapter and belongs to M5 (lineage), not to `dataplane/`. Sprint 025 replays it once.
+  - `pipelines.transforms` JSONB column.
+- **Lineage capture:** if the spike passes, the OpenLineage dbt integration writes events through a file transport into the temp dir, and the worker stores them. If it fails, `dataplane/transforms/lineage.py` builds equivalent events from `manifest.json` and `run_results.json`. Either way the worker sends each event through the `LineageEmitter` port (013), never to the table directly. Until 025 the no-op adapter spools it into `lineage_raw_events` with `source` saying which path made it.
+- **Gateway:** no new action kind. Changing transforms is `data.write`. The job itself is a worker job and is not a gateway call.
+- **Events:** none new. Each committed dbt target goes through Sprint 017's write path, which emits `platform.data.snapshot.committed.v1`. Lineage goes through `LineageEmitter`.
+- **UI** (governed-design skill): pipeline editor gets a transform step list (template picker, generated parameter form from the schema). Run timeline shows dbt tasks.
+- **Compose and scripts:** dbt and the adapter are Python dependencies in the worker image. No new service. DuckDB extensions stay preinstalled; the profile sets no `extensions` that would download.
+- **Spike:** branch `spike/019-openlineage-dbt`, never merged. Result in `evidence/openlineage-spike.md` with the command output.
+- **Tests:** `tests/unit/test_transform_generate.py`; `tests/unit/test_dbt_packages.py`; `tests/integration/test_dbt_finance_marts.py`; `tests/integration/test_dbt_incremental.py`; `tests/integration/test_dbt_secrets.py`; `tests/integration/test_dbt_writer_lock.py`; `tests/integration/test_lineage_raw_events.py` (`test_lineage_goes_through_emitter`: `dataplane/` never imports or writes the spool table); `tests/integration/test_dbt_snapshot_committed.py` (`test_dbt_run_emits_snapshot_committed`); Playwright `ui/e2e/pipelines-transforms.spec.ts`.
+- **Docs:** ADR-0016 section on dbt, `docs/runbooks/pipelines.md` (transforms, vendoring a package), `docs/configuration.md`.

@@ -1,0 +1,45 @@
+# Sprint 033: Blueprint
+- **Transport:**
+  - `POST /v1/mcp` is a stateless streamable HTTP endpoint, built on the `mcp==2.2.0` streamable HTTP server in stateless mode. Each request carries its own credential, and there is no session id.
+  - Any of `kb:read`, `query` or `agent` opens it. Each JSON-RPC request is one `enforce()` call.
+  - The legacy `GET /v1/mcp/sse` and `POST /v1/mcp/messages/` stay only when `MCP_LEGACY_SSE=true` (default false). Their responses carry `Deprecation: true` and a `Link` to the new endpoint.
+- **Header policy:**
+  - Before the body is parsed, `api/mcp/headers.py` reads `Mcp-Method` and `Mcp-Name`, and the gateway checks them against the policy (tool, resource or prompt allow-lists).
+  - After the body is parsed, the headers must equal `method` and `params.name` (or `params.uri`).
+  - A missing or different value gives JSON-RPC error `-32020` and a deny row `mcp_header_mismatch`.
+- **Auth:**
+  - Protected resource metadata (RFC 9728) is served at the path that RFC 9728 forms for `{MCP_RESOURCE_URI}`: `/.well-known/oauth-protected-resource` followed by the resource path (for example `/.well-known/oauth-protected-resource/v1/mcp`). This uses rule 9 in `planning/program/vision-and-architecture.md`, which Sprint 032 recorded: public, read-only, no credential, no tenant data. It names `JWT_ISSUER` as the authorization server and lists the supported scopes.
+  - A 401 carries `WWW-Authenticate: Bearer resource_metadata="..."`.
+  - A JWT on `/v1/mcp` must have `aud` equal to `MCP_RESOURCE_URI` (RFC 8707). A token for another audience is a 401. Platform API keys keep working.
+  - Client ID metadata document: when the gateway calls a downstream MCP server, its `client_id` is the HTTPS URL of its own metadata document, served at `/v1/mcp/client-metadata.json`.
+- **No passthrough:**
+  - `adapters/mcp_client.py` calls downstream servers. It is the only downstream caller.
+  - It sends the registry entry's own credential (env var name in the entry, a `SecretStr`). It never sends the caller's `Authorization` header or cookies.
+  - Downstream tools appear as `<server>.<tool>`, and each call is a `tool.call` through `enforce()`.
+- **Pinned definitions:**
+  - `tool_sha256` is the SHA-256 of canonical JSON `{name, title, description, inputSchema, outputSchema, annotations}`. This applies to our own tools at startup and to downstream tools at listing.
+  - A listed tool whose hash differs from its approved pin is hidden from `tools/list`. A call to it is denied `tool_definition_changed`.
+  - Re-approval is `POST /v1/mcp/registry/tools/{id}/approve` (`admin`). It is recorded.
+- **Trace:**
+  - `params._meta.traceparent` and `tracestate` are validated against the W3C format and stored as record v2 extension `trace`.
+  - A bad value is dropped and counted. It is never trusted as the platform trace id.
+- **Registry:**
+  - `POST /v1/mcp/registry/servers` (`admin`) takes `{manifest, signature}`.
+  - The manifest is canonical JSON `{name, url, version, tools: [{name, tool_sha256}], credential_env}`. The signature is Ed25519 by a key in `MCP_REGISTRY_TRUSTED_KEYS`.
+  - The URL must pass the 018 egress allowlist.
+  - `GET /v1/mcp/registry/servers`, and `POST .../{id}/approve` and `/disable`.
+- **Data** (migration: next free number after Sprint 032's head). Both tables have `tenant_id`, FORCE RLS and a `GRANT` to `gap_app`:
+  - `mcp_registry_entries (id, tenant_id, kind 'mcp_server', name, url, manifest jsonb, manifest_sha256, signature, key_id, status pending|approved|disabled, approved_by, approved_at)`.
+  - `mcp_tool_pins (id, tenant_id, entry_id NULL for own tools, name, tool_sha256, status approved|changed, approved_by, approved_at)`.
+- **Gateway:** new reason codes `mcp_header_mismatch`, `tool_definition_changed`, `registry_entry_not_approved`, `manifest_signature_invalid`.
+- **Settings** (validated in `core/settings.py`): `MCP_RESOURCE_URI`, `MCP_LEGACY_SSE`, `MCP_REGISTRY_TRUSTED_KEYS`.
+- **UI:** Governance > MCP registry.
+  - Lists entries with signature state and tool pins. Changed tools are highlighted with a diff of the description.
+  - Approve and disable buttons.
+  - Follow `.claude/skills/governed-design/SKILL.md`.
+- **Tests:**
+  - `test_stateless_client_tools_call`, using the `mcp==2.2.0` client over streamable HTTP.
+  - `test_header_mismatch_denied_and_recorded`, `test_missing_header_rejected`, `test_wrong_audience_401`, `test_resource_metadata_shape`, `test_no_token_passthrough`, `test_changed_description_blocked`, `test_reapproval_restores`, `test_unsigned_manifest_refused`, `test_registry_url_egress_checked`, `test_traceparent_in_record`, `test_legacy_sse_off_by_default`.
+  - The downstream peer is an in-process MCP server.
+  - Playwright: `mcp-registry.spec.ts`.
+- **Docs:** ADR-0023 (MCP 2026-07-28 at the gateway and the private registry), `docs/api/mcp.md`, `docs/configuration.md`, the migration note for clients on the legacy transport.

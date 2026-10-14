@@ -1,0 +1,11 @@
+# Sprint 028: Acceptance
+- [ ] **A1.** All checks pass. The test delta is stated against Sprint 027's report. `check_skips` passes with the allowlist, with no new entries. Evidence: `evidence/checks.txt`.
+- [ ] **A2.** The finance dashboard (gross margin, revenue, pipeline value by region and quarter) renders, and its numbers match the 026 hand-computed results. Evidence: `evidence/dashboard-results.txt`.
+- [ ] **A3.** The same published dashboard shows an analyst masked or withheld tiles and a finance lead full tiles. Each tile has its own decision row under the viewer's principal. Evidence: `evidence/viewer-rights.txt` and the Playwright run.
+- [ ] **A4.** Every tile in one view names the same snapshot id, and each tile drawer links to a receipt that verifies offline. Evidence: `evidence/snapshot-consistency.txt`.
+- [ ] **A5.** A metric whose source product is not certified cannot be certified. A changed definition loses its certification. Evidence: `evidence/metric-certification.txt`.
+- [ ] **A6.** The lineage graph shows source, pipeline, product, metric and dashboard for the finance dashboard. Evidence: `evidence/dashboard-lineage.txt`.
+- [ ] **A7.** With `ENABLED_MODULES=gateway,data,lineage` (no insights), the Insights group is hidden and its routes return `module_disabled`. Evidence: `evidence/module-off.txt`.
+- [ ] **A8.** A tile read under a purpose the viewer's grant does not allow is withheld, and a cached tile still writes a decision. Evidence: `evidence/purpose-and-cache.txt`.
+- [ ] **A-sec.** The threat-model tests pass. Evidence: `evidence/threat-tests.txt`.
+- [ ] **A-mem.** Not applicable: no new compose service. Record the render time of the finance dashboard on the CPU profile.

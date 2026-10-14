@@ -1,0 +1,24 @@
+# Sprint 015: Blueprint
+- **Contract:** no route change. OpenAPI unchanged.
+- **Ports and adapters:** none.
+- **Data:** no migration. `refco_source` is a fixture database outside the platform schema. Its DDL lives in `data/reference-company/source_schema.sql`; `scripts/check_no_ddl.sh` gets one exact, documented exemption for that file.
+- **Generators (`data/reference-company/`):**
+  - `generate.py --size small|medium --seed 42 --out DIR`: writes CSV per table, the PDFs and `manifest.json` (file name, rows, SHA-256).
+  - Tables: `fin_invoices`, `fin_invoice_lines`, `fin_ledger_entries`, `fin_budgets`, `crm_accounts`, `crm_contacts`, `crm_opportunities`, `hr_employees`, `hr_salaries`.
+  - Sizes: small (50 accounts, 200 contacts, 1,000 invoices, 40 employees); medium (2,000 accounts, 10,000 contacts, 100,000 invoices, 400 employees).
+  - Names come from built-in syllable lists. Emails use only `example.com`, `example.org` and `example.net`. Phone numbers use a reserved fictional range. Bank and tax ids carry a `TEST-` prefix and fail real checksums.
+  - PDFs: invoice and contract PDFs from the rows, with a fixed creation date and producer field so the bytes are stable. PDF library pinned, OSI licence, licence gate run.
+  - `dictionary.md`: every table and column with type, meaning, classification (`public`, `internal`, `pii`, `restricted`).
+  - `data-policy.md`: the company's plain-language policy (who may see salaries, contact PII is masked for analysts, purposes). It is fixture text for later sprints, not a platform rule.
+  - `checksums.json`: the expected manifest hash per size and seed.
+  - `deny_list.txt`: brand and real-company names, and real email domains, that must never appear.
+- **Source database:** compose service `refco-source` in profile `lake` (Postgres 16 pinned by digest, `127.0.0.1:5433`, healthcheck `pg_isready`, password from `REFCO_SOURCE_PASSWORD`). `data/reference-company/load_source.py --size small` creates the schema and loads the CSVs. `change_generator.py --seed S --steps N` makes a fixed sequence of inserts, updates and deletes.
+- **Personas (`data/reference-company/personas/`):** one JSON file per persona: `name`, principal `kind`, `scopes`, and the tenant `policy` that persona's journey step publishes. `scripts/showcase/setup_personas.sh` creates tenant `refco`, the principals and keys through `scripts/admin/identity.py`, and writes keys to a git-ignored `.showcase/keys.env` (never printed to logs). Scopes: producer `kb:write query`; steward `kb:read audit:read`; consumer `query kb:read`; operator `admin`; auditor `audit:read`; agent developer `agent query kb:read`.
+- **Gateway and events:** no change.
+- **Showcase:**
+  - `scripts/showcase/m0.sh`: (1) the operator publishes a policy whose `allowed_models` leaves out the local chat model; (2) the consumer asks a question and gets 403 `model_not_allowed`; (3) the auditor fetches the deny's receipt and checks `extensions.model.digest` and the signature with `scripts/verify/receipt.py`; (4) the app restarts with `ENABLED_MODULES=gateway`, and `/v1/system/modules` shows `agents` off and `/v1/agent/query` answers `module_disabled`. Each step prints PASS or FAIL. Exit 1 on any FAIL.
+  - `scripts/e2e/serve.py --seed reference-company` seeds tenant `refco` with the personas and the small data set.
+  - `ui/e2e/showcase-m0.spec.ts`: the deny appears on the Decisions page with its reason, the receipt shows the model digest, and Platform > Modules lists the modules.
+  - `docs/showcase.md`: one section per milestone (M0, MA, MB, MC, MD, ME) with the journey from `planning/program/sprint-map.md` and its script name.
+- **Tests:** `tests/unit/test_refco_determinism.py` (two runs, same seed, same manifest hash, equal to `checksums.json`; another seed differs); `tests/unit/test_refco_deny_list.py` (no deny-list term in any CSV or PDF text; every email domain is reserved); `tests/unit/test_refco_dictionary.py` (every generated column is in the dictionary with a classification); `tests/integration/test_refco_source.py` (load small into a throwaway database and count rows; the change generator is deterministic); `tests/unit/test_personas.py` (every persona file parses and its policy passes `parse_policy`).
+- **Docs:** `docs/showcase.md`, `data/reference-company/README.md`, `docs/getting-started.md` (one paragraph), `CHANGELOG.md`.

@@ -1,0 +1,31 @@
+# Sprint 011: Blueprint
+- **Contract:** no route change. The OpenAPI snapshot test proves `docs/api/openapi.json` is unchanged.
+- **Ports and adapters:** none.
+- **Settings:** `_load_env_files` calls `load_dotenv(..., override=False)` for `.env.local` and for `.env`. Order of precedence: real environment, then `.env.local`, then `.env`. Which file is read stays the same (`.env.local` if present, else `.env`).
+- **Data:** no migration.
+- **Gateway and events:** no change.
+- **UI:** no change. The UI checks still run.
+- **Pins:**
+  - `pyproject.toml`: `mcp==2.2.0`, then `poetry lock` with Poetry 2.3.3.
+  - `docker-compose.yml`, both workflows and the `Dockerfile` base image: pinned tag plus `@sha256:` digest. Pins and digests are saved in `evidence/pins.txt`.
+  - The `redis/redis-stack-server` image is pinned by digest for now. Sprint 012 replaces it.
+- **Skip allowlist:** `tests/skip_allowlist.json`, a list of `{classname, name_contains, reason_prefix, count, why}`. `poetry run python scripts/check_skips.py REPORT.xml [--allowlist PATH]` reads it. The default path is that file. The expected skip count is the sum of the `count` fields, so no sprint passes a number on the command line. Today it holds one entry: the live-MinIO skip, count 10.
+- **Supply chain (`scripts/supply_chain/`):**
+  - `export_locks.sh`: `poetry export --with-hashes` (plugin `poetry-plugin-export`, pinned) writes `requirements/main.txt` and `requirements/dev.txt`. CI fails when they drift from `poetry.lock`.
+  - `sbom.sh`: `cyclonedx-py` 7.5.0 (Python environment) and `@cyclonedx/cyclonedx-npm` 6.0.1 (`ui/`) write `sbom/python.cdx.json` and `sbom/npm.cdx.json`. CI uploads both as one artifact.
+  - `licence_gate.sh`: `pip-licenses` 5.5.5 `--allow-only` on the main group, and `license-checker-rseidelsohn` 5.0.1 `--production --onlyAllow` in `ui/`. One allowlist: `osi-licences.txt` (SPDX ids, OSI-approved only). Packages with missing or odd metadata go in `licence-exceptions.txt`, each with the licence found by hand and a reason. A `--fixture DIR` flag runs the same check on a test fixture.
+  - Image scan: osv-scanner or grype (pin chosen and saved in `evidence/pins.txt`) on the built app image and the pinned compose images. It fails on a critical finding that has a fix. An ignore file holds each accepted finding with a reason.
+- **CI (`.github/`):**
+  - `actions/setup/action.yml`: a composite action. Python 3.11, `pipx install poetry==2.3.3`, `virtualenvs.in-project true`, cache of `.venv` keyed on the OS, Python version and `poetry.lock` hash, then `poetry install` with an input for the groups.
+  - Every job of `tests.yml` and `frontend.yml` uses it. Each workflow has `concurrency: {group: ${{ github.workflow }}-${{ github.ref }}, cancel-in-progress: true}`.
+  - Path filters: docs-only and planning-only changes skip the test jobs. `ui/**` changes run the frontend workflow. Backend paths and `docs/api/openapi.json` run both.
+  - `secret-scan` job runs the gitleaks CLI (pinned version, checksum checked) with `--redact` over the full history. `.gitleaksignore` keeps its two reviewed entries.
+  - New `supply-chain` job: lock drift, SBOM artifact, licence gate, image scan.
+  - Workflow-level env: `DEEPEVAL_TELEMETRY_OPT_OUT=YES`, `DO_NOT_TRACK=1`.
+- **Templates:** `.github/pull_request_template.md` adds: acceptance table, threat model signed off, licence gate, memory measured for new services, test delta against the baseline, migrations listed. `planning/sprints/_template/threat-model.md` copies the shape in `planning/program/sprint-template.md`.
+- **Tests:**
+  - `tests/unit/test_config_mode.py`: `test_real_env_beats_env_local` (a `.env.local` in a temp dir sets `MODE=prod`, the environment sets `MODE=local`, the environment wins). The two existing mode tests pass with a `.env.local` present.
+  - `tests/unit/test_docs_links.py`: `test_git_ignored_paths_are_skipped` (a temp git repo with an ignored folder holding a broken link).
+  - `tests/unit/test_check_skips.py`: allowed skip passes, unknown skip fails, wrong count fails, a missing allowlist file fails.
+  - `tests/unit/test_licence_gate.py`: a fixture with a `BUSL-1.1` package fails the gate; an all-MIT fixture passes.
+- **Docs:** `AGENTS.md` (Poetry 2.3.3, stack, scope list, licence gate command), `CONTRIBUTING.md` (licence gate, SBOM, how to add an exception), `docs/getting-started.md` (WSL notes, Q1), `planning/DECISIONS.md` (Q36), `planning/STATE.md`, `CHANGELOG.md`.

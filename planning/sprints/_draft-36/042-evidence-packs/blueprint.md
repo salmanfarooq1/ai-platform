@@ -1,0 +1,26 @@
+# Sprint 042: Blueprint
+- **Contract** (OpenAPI snapshot refreshed; every route `require()`s its action):
+  - `GET /v1/evidence/systems` (`audit:read`): `[{id, name, high_risk, retention: {days, floor, source}}]`.
+  - `PUT /v1/evidence/systems/{id}` (`admin`): `{name, description, principal_ids[], high_risk}`. The change is a recorded decision.
+  - `POST /v1/evidence/packs` (`audit:read`): `{system_id, from, to}` gives 202 `{pack_id, job_id}`. A window over `EVIDENCE_PACK_MAX_DAYS` gives 422 `window_too_large`.
+  - `GET /v1/evidence/packs` and `GET /v1/evidence/packs/{id}`: status, manifest, counts, `warnings[]`.
+  - `GET /v1/evidence/packs/{id}/download`: 302 to a presigned URL, short expiry. Foreign or missing ids give the same 404 `pack_not_found`.
+  - `GET /v1/evidence/search` (`audit:read`): filters `request_id, decision_id, execution_id, principal, action, outcome, reason, system_id, since, until`, cursor, `limit<=200`. Reuse the query code behind `GET /v1/decisions`.
+  - `GET /v1/evidence/search/export?format=csv|json` with the same filters, streamed, capped at `EVIDENCE_EXPORT_MAX_ROWS` (422 `export_too_large` above it).
+- **System:** a named set of principals (agents and service clients) in one tenant, stored in `ai_systems`, which this sprint introduces. No earlier sprint has a system table. A decision belongs to a system through its principal. Sprint 039's `incidents.system` holds the system for an incident; the migration links it to `ai_systems` (backfill by name, unknown names listed in the report). Approvals and the oversight log (`oversight_events`, Sprint 034) join through their decision ids.
+- **Data** (migration: next free number after Sprint 041's head; tenant_id + RLS + GRANT to `gap_app`):
+  - `ai_systems` (`tenant_id, id, name, description, high_risk, updated_at`) and `ai_system_principals` (`tenant_id, system_id, principal_id`). New in this sprint; Sprint 043 (`system_assessments`, system cards) and Sprint 045 (the evidence module's migrations, the restore drill) reference them.
+  - `evidence_packs`: `tenant_id, id, system_id, window_from, window_to, status, manifest_sha256, object_key, leaf_idx, created_by, created_at`.
+  - The purge function `decisions_purge_batch` keeps its 30-day hard floor and raises it to the high-risk floor when the tenant has any `high_risk` system. The high-risk floor defaults to 183 days. It is a placeholder with a question in `planning/QUESTIONS.md`. It is set inside the function by the migration, never passed by the caller, so a change is a reviewed forward migration. Purge is contiguous per tenant chain, so the floor applies to the whole tenant. The cutoff is still computed inside the function.
+- **Pack layout** (zip): `manifest.json`, `manifest.cose`, `registration.json` (leaf index, checkpoint, inclusion proof, timestamp), `decisions.jsonl`, `receipts/`, `chain.json` (rows and the checkpoint before the window), `approvals.jsonl`, `oversight.jsonl`, `incidents.jsonl`, `reports.jsonl` (one line per 029 report or alert run in the window: run id, `decision_id`, `manifest_sha256`, `file_sha256`; no manifest body, no file), `lineage-summary.json`, `evals.jsonl`, `keys.json` (public keys only). Free-text fields (approval comments, incident descriptions) go in as SHA-256 only.
+- **Lineage summary:** read through the `EvidenceLookup` and lineage ports. With M5 off, the file says `not linked`. Assurance edition packs build without M5.
+- **Ports and adapters:** the job uses `ObjectStore`, `TransparencyLog`, `TimestampAuthority` and the receipt signer from 040. Settings validated in `core/settings.py`: `EVIDENCE_PACK_MAX_DAYS`, `EVIDENCE_EXPORT_MAX_ROWS`, `EVIDENCE_DOWNLOAD_TTL_SECONDS`.
+- **Jobs:** kind `evidence_pack`, worker only. The API never builds a pack.
+- **Gateway:** new action kinds `evidence.pack`, `evidence.export` (name from `planning/program/conventions.md`), `evidence.system.update`. Reason codes `window_too_large`, `export_too_large`.
+- **Events:** `platform.evidence.pack.built.v1` (tenant, system, window, manifest hash; no content).
+- **UI** (follows `.claude/skills/governed-design/SKILL.md` and `docs/design/PATTERNS.md`):
+  - Evidence > Evidence packs: systems with a high-risk badge and retention in force; a form for system and window; pack list with status, warnings, download and the verify command to copy.
+  - Evidence > Search: filters, a results table, the decision drawer on click, CSV and JSON export buttons.
+- **Verifier v2:** `scripts/verify/receipt.py pack <file.zip> --keys keys.json` runs every check and prints the warnings. Exit 1 on any failed check.
+- **Tests:** pack builder unit tests; integration for the job, purge floor and search; offline verifier on a built pack and on a tampered copy (one byte, one removed file, one removed decision); content canary scan; `test_pack_includes_report_manifest_hashes` (each report run in the window is listed by `manifest_sha256`, and the hash matches `insight_runs`); `test_pack_event_type` (`platform.evidence.pack.built.v1`); Playwright e2e for both pages.
+- **Docs:** `docs/operations.md` "Evidence packs"; `docs/contracts/evidence-pack.md` (layout and checks); `docs/configuration.md` rows; `docs/design/CONTENT_STYLE.md` may-claim entry only when A2 passes.

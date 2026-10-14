@@ -1,0 +1,32 @@
+# Sprint 012: Blueprint
+- **Contract:** no route change. OpenAPI unchanged.
+- **Ports and adapters:**
+  - `adapters/redis_cache.py` keeps the `CachePort` and the class name. Pin `redis==8.1.0` (works with Valkey).
+  - `_ft_create`: schema is `embedding` VECTOR HNSW, then the TAG and NUMERIC fields. No TEXT fields.
+  - `ensure_semantic_index`: tolerate an error whose text holds "already exists" (both servers). Any other error still raises `CacheUnavailable`.
+  - `semantic_lookup`: no `SORTBY`. `RETURN 3 response score query` stays.
+  - Fallback only if the Valkey spike fails: `adapters/pg_semantic_cache.py` behind the same port, selected by a `SEMANTIC_CACHE=valkey|postgres` setting validated in `core/settings.py`, and a migration for its table. Record the spike result in `evidence/valkey-spike.txt` either way.
+  - `REDIS_URL` description: "Valkey or Redis URL. The server needs a search module (valkey-search)".
+- **Data:** no migration (unless the fallback is taken).
+- **Gateway and events:** no change.
+- **Compose (`docker-compose.yml`):**
+  - Default services (`postgres`, `valkey`, `worker`): ports `127.0.0.1:5432:5432`, `127.0.0.1:6379:6379`. The service is renamed `valkey`; the volume is `valkey_data`. The worker's `REDIS_URL` points at `valkey`.
+  - Healthchecks: `pg_isready -U postgres`, `valkey-cli ping`, `ollama list`, and for SeaweedFS a TCP check on the S3 port. `depends_on` uses `condition: service_healthy`.
+  - Profile `models`: `ollama` (pin from 011), `127.0.0.1:11434`, and `ollama-pull`, a one-shot job that pulls `nomic-embed-text:v1.5`.
+  - Profile `cdc`: `kafka` (`apache/kafka:4.3.1`, KRaft, one node, `127.0.0.1:19092` for the host, `kafka:9092` inside) and `kafka-topics` (one-shot). Topics: `platform.gateway.decision`, `platform.ingest.completed`, `platform.gateway.purge`, each with `.dlq`; 3 partitions. These are Kafka topic names; the CloudEvent types on them keep the `.v1` suffix (`platform.gateway.decision.v1`, `platform.ingest.completed.v1`); `retention.ms` written in the job and in `docs/operations.md` (Q45).
+  - Profile `lake`: `seaweedfs` (`chrislusf/seaweedfs:4.47`, `server -s3`, `127.0.0.1:8333`) and `seaweedfs-init`, a one-shot job that creates the bucket named by `S3_BUCKET`. Access keys come from the environment.
+  - Profile `observability` keeps its two services.
+  - Every image stays pinned by digest. No default password in compose: values come from the environment with a local-only default, as `APP_DB_PASSWORD` does.
+- **CI:** the `redis` service in `tests.yml` and `frontend.yml` becomes `valkey/valkey-bundle:9.1.3` by digest, health command `valkey-cli ping`.
+- **Scripts:**
+  - `scripts/verify/kafka.sh` uses `--profile cdc` and the `kafka` and `kafka-topics` services.
+  - `scripts/verify/seaweedfs.sh` replaces `scripts/verify/minio.sh`. It starts the `lake` profile, runs the object store contract suite live, and a presigned GET and PUT with boto3.
+  - `tests/contracts/test_object_store_contract.py`: the live parameter is `seaweedfs`; settings `S3_LIVE_ENDPOINT`, `S3_LIVE_ACCESS_KEY`, `S3_LIVE_SECRET_KEY`, `S3_LIVE_BUCKET`. `tests/skip_allowlist.json` names the new class, name and reason.
+  - `scripts/preflight.sh`: engine (`docker info` or `podman info`, and it warns when the engine is Docker Desktop), free memory against the profile budget in `planning/program/stack.md`, clock skew against an NTP-free check (container clock vs host), and the ports 5432, 6379, 8000, 5173 free or held by our containers. Exit 1 on a failed check.
+- **Tests:**
+  - Cache contract suite on Valkey (CI and local).
+  - `test_index_create_is_idempotent_on_valkey`, `test_return_fetches_unindexed_fields`, `test_already_exists_text_of_both_servers` (unit, on the message text).
+  - Kafka suite on Apache Kafka through `scripts/verify/kafka.sh`.
+  - `tests/unit/test_compose.py`: `docker compose config` parsed for every profile; no published port without `127.0.0.1`; every service in a profile or with a healthcheck; every image has `@sha256:`.
+  - `tests/unit/test_preflight.py`: the script's checks with stubbed commands.
+- **Docs:** `docs/getting-started.md` (Docker Engine in WSL or Podman, `.wslconfig`, preflight), `docs/deployment.md` (profiles), `docs/operations.md` (Valkey, Kafka, SeaweedFS, topic retention), `docs/configuration.md` (regenerated), ADR-0008 Kafka section note (broker image), `CHANGELOG.md`, `STATE.md`.

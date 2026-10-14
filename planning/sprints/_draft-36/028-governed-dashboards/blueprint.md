@@ -1,0 +1,47 @@
+# Sprint 028: Blueprint
+- **Contract:**
+  - `GET /v1/insights/metrics` wraps `DataAccess.metric_catalog` and lists catalog entries the caller may see: id, label, definition, owner, dimensions, source products, certified, freshness, quality score. Scope: `data:read` (016).
+  - `GET /v1/insights/metrics/{id}` adds the glossary term and the upstream lineage (through the `LineageLookup` port, 025). Unknown or foreign id: 404 `metric_not_found`.
+  - `POST /v1/insights/metrics/{id}/certify` records a steward's approval of the definition. Scope `data:steward`, action `product.certify` (021) with `context.target = "metric"`. It is refused while a source product is not certified (`certification_blocked`).
+  - `GET|POST /v1/insights/dashboards`, `GET|PUT /v1/insights/dashboards/{id}`, `POST /v1/insights/dashboards/{id}/publish`, `POST /v1/insights/dashboards/{id}/archive`, `GET /v1/insights/dashboards/{id}/export`, `POST /v1/insights/dashboards/import`. Reads use `data:read`. Writes use the new scope `insights:write` and the new action `dashboard.write`.
+  - `POST /v1/insights/dashboards/{id}/render` takes `{filters, version?}` and returns `{view_id, snapshot_id, tiles: [{tile_id, state: ok|withheld|error, reason?, columns, rows, decision_id, withheld_columns, row_filter_ids, freshness}]}`. Scope `data:read`.
+  - Refresh the OpenAPI snapshot.
+- **Port:** extend `DataAccess` (013, 016, 026) with `metric_catalog(principal)`: each metric with source product certification, freshness and quality score. The real adapter lives in `dataplane/data_access.py`. The no-op raises `ModuleDisabled`. Extend `tests/contracts/test_data_access_contract.py`.
+- **Package `insights/`:**
+  - `spec.py`: `dashboard_spec` v1 models, validated against `docs/contracts/insights/dashboard-spec-1-0-0.json` (JSON Schema 2020-12).
+  - `catalog.py`: builds catalog entries from the semantic manifest (026) and product state (021, 022).
+  - `render.py`: resolves one view. It takes one snapshot id from `DataAccess.current_snapshot` first, then runs each tile with `DataAccess.query_metric(..., snapshot_id, purpose, surface="dashboard")`, with a bounded number of tiles in parallel.
+  - `charts.py`: turns a tile and its rows into a Vega-Lite spec. Data is inline. No URLs, no expressions from users.
+- **Dashboard spec:** `{version: 1, title, purpose, filters, layout, tiles}`. `purpose` is one of the tenant's declared purposes (024).
+- **Tile spec:** `{id, kind, title, metric_ids, group_by, time_grain, filters, chart: {type, x, y, series}}`. Filters reuse the 026 typed filters. Text tiles hold Markdown, rendered without HTML or links to images.
+- **Data:** migration "next free after Sprint 027's head".
+  - `insight_dashboards (id, tenant_id, slug, title, owner_principal_id, state, current_version, created_at, updated_at)`, unique `(tenant_id, slug)`.
+  - `insight_dashboard_versions (id, tenant_id, dashboard_id, version, spec jsonb, spec_sha256, created_by, created_at)`. Insert only.
+  - `insight_metric_certifications (id, tenant_id, metric_id, definition_sha256, certified_by, certified_at, revoked_at)`. A new definition hash needs a new approval.
+  - All with `tenant_id`, RLS and grants to `gap_app`.
+- **Gateway:**
+  - Tile reads are `data.read` (016) through the full stage pipeline. `context.surface = "dashboard"`, plus `dashboard_id`, `dashboard_version` and `tile_id`.
+  - New action kind `dashboard.write` (scope `insights:write`). New scope `insights:write`.
+  - `PolicyInput` (031 later) gets `surface`. Register `dashboard.write` → `insights` in the action-to-module map (013).
+  - Record v2 extension `insight`: `dashboard_id`, `dashboard_version`, `tile_id`, `view_id`.
+  - New reason codes: `dashboard_not_found`, `dashboard_spec_invalid`, `dashboard_tile_limit`.
+- **Cache:** no new cache. Tiles use the 024 query cache, which sits behind `enforce()`, so a cache hit still writes a `data.read` decision.
+- **Limits (placeholders):** `INSIGHTS_MAX_TILES_PER_DASHBOARD` (default 24), `INSIGHTS_MAX_PARALLEL_TILES` (default 4), `INSIGHTS_VIEW_TIMEOUT_SECONDS` (default 30). Validated in `core/settings.py`. The Builder logs a question for each.
+- **Lineage:** publishing a dashboard emits an OpenLineage event through `LineageEmitter`: inputs are the source datasets of its metrics, the output is `insights://{tenant}/dashboards/{slug}`. Extend the 021 breaking-change diff response with `affected_dashboards`, computed from lineage edges downstream of the product to `insights://` outputs (`LineageLookup`). M4 never reads M6 tables.
+- **Events:** `platform.insights.dashboard.published.v1`.
+- **Module registry:** `ModuleSpec` `insights`, nav group Insights (added to `docs/design/IA.md`). With the module off, its routes return `module_disabled`. `scripts/ci/edition_smoke.sh` runs Data as `gateway,data,lineage,insights`.
+- **Explore replaces** the 026 metrics panel on the Ask page. The Ask page links to Explore.
+- **UI** (`.claude/skills/governed-design/SKILL.md`):
+  - Insights > Metrics: catalog table, certified badge, freshness, quality, steward approve action.
+  - Insights > Explore: metric, dimensions, time grain, typed filters, chart type, "save as tile".
+  - Insights > Dashboards: list, view, edit (grid), publish, version history, export and import.
+  - Tile drawer: definition, snapshot, decision id, withheld columns, row filters, freshness, verify link.
+  - Charts use `vega-lite` and `vega-embed` with the loader turned off. Each chart has a table view for screen readers. Colours come from design tokens.
+  - Ask page (027): "Pin to dashboard" on metric answers.
+- **Tests:**
+  - Contract: `tests/contracts/test_dashboard_spec_schema.py`.
+  - Unit: `test_charts_inline_data_only`, `test_tile_spec_rejects_sql_and_urls`, `test_text_tile_no_html`.
+  - Integration: `test_viewer_rights_not_author_rights`, `test_one_snapshot_per_view`, `test_withheld_tile_does_not_fail_view`, `test_cached_tile_still_writes_decision`, `test_grant_revoke_misses_cache`, `test_tile_purpose_mismatch_withheld`, `test_breaking_change_lists_dashboards`, `test_insights_requires_data_module`, `test_metric_certification_blocked`, `test_dashboard_versions_insert_only`, `test_dashboard_lineage_event`, `test_insights_tenancy`, `test_tile_limit`, `test_pin_answer_keeps_metric_only`.
+  - Editions: Data edition smoke includes a dashboard render.
+  - Playwright: `ui/e2e/insights.spec.ts` (two personas see different numbers on one dashboard; drawer shows the decision id).
+- **Docs:** ADR-0031 (governed BI on the semantic layer), `docs/architecture.md` (Insights module), `docs/contracts/insights/README.md`, `docs/design/IA.md`, the API docs.

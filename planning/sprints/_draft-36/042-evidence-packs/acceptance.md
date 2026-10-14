@@ -1,0 +1,11 @@
+# Sprint 042: Acceptance
+- [ ] **A1.** All checks pass. Test delta stated against Sprint 041's numbers. `check_skips.py` passes with the allowlist. Evidence: `evidence/checks.txt`.
+- [ ] **A2.** A pack for one reference-company system and one window verifies offline with `scripts/verify/receipt.py pack`. A one-byte change, a removed file and a removed decision each fail. Evidence: `evidence/pack-verify.txt`.
+- [ ] **A3.** The pack manifest is a leaf in the tenant log. Its inclusion proof and timestamp verify. With no anchor set, the pack lists the warning. Evidence: `evidence/pack-registration.txt`.
+- [ ] **A4.** With a `high_risk` system, the purge keeps rows younger than the high-risk floor (placeholder default 183 days, question logged) even when the tenant sets 30. The pack states the retention in force. Evidence: `evidence/retention-floor.txt`.
+- [ ] **A5.** Search finds a decision by request id. CSV and JSON exports match the search rows. Evidence: `evidence/search.txt`.
+- [ ] **A6.** A canary input string sent through the gateway appears nowhere in the pack or the exports. Evidence: `evidence/no-content.txt`.
+- [ ] **A7.** Playwright: create a pack, download it, search by request id, export. Evidence: `evidence/e2e.txt`.
+- [ ] **A8.** The pack lists each report run of the window in `reports.jsonl` by `manifest_sha256` and `file_sha256`, and the verifier checks them against the decisions (`test_pack_includes_report_manifest_hashes`). Evidence: `evidence/report-manifests.txt`.
+- [ ] **A-sec.** The threat-model tests pass. Evidence: `evidence/threat-tests.txt`.
+- [ ] **A-mem.** No new service. Peak worker memory while building a pack of the medium reference data. Evidence: `evidence/memory.txt`.

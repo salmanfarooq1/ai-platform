@@ -1,0 +1,37 @@
+# Sprint 023: Blueprint
+- **Contract** (under `/v1/access`, except approvals under `/v1/approvals`; governed; OpenAPI snapshot refreshed):
+  - `GET /listings` (`data:read`): listings visible to the caller's tenant and groups. `POST /listings`, `DELETE /listings/{id}` (`data:steward`). 422 `listing_requires_classification`, 409 `product_not_certified`.
+  - `POST /requests` `{listing_id, columns, row_filter, purpose, justification, expires_at}`. 201 with `request_hash`. `GET /requests?mine=true`, `POST /requests/{id}/withdraw`.
+  - Approvals use the shared route `/v1/approvals` (router `api/routers/approvals.py`). Every item and every decision carries a `kind` field. This sprint defines one kind, `access_request`; Sprint 034 adds runtime actions to the same model and route.
+    - `GET /v1/approvals?kind=access_request` (`data:steward`): items `{kind, subject_id, step, subject_hash, ...}` waiting on a group the caller belongs to. For `access_request`, `subject_id` is the request id and `subject_hash` is its `request_hash`.
+    - `POST /v1/approvals/{subject_id}` `{kind, decision, subject_hash, note}`. 409 `request_changed` on a hash mismatch, 409 `step_already_decided`, 422 for an unknown `kind`.
+  - `GET /grants?mine=true`, `POST /grants/{id}/revoke` (`data:steward` of the producer tenant).
+  - `POST /grants/{id}/extracts` (202 job), `GET /grants/{id}/extracts/{eid}/url`: a presigned GET with `EXTRACT_URL_TTL_SECONDS`.
+  - `GET, POST /groups`, `PUT /groups/{id}/members` (admin); `GET, PUT /approval-policy` (admin); `GET, POST /purposes` (admin).
+  - Unknown or foreign ids are 404 with one body per kind.
+- **Placeholders:** `EXTRACT_URL_TTL_SECONDS` is a business number. It is a setting with a default, and the Builder logs a question for it in `planning/QUESTIONS.md`.
+- **Row filters** are structured, never SQL: a list of `{column, op, values}` with `op` in `eq`, `in`, `between`. Columns are checked against the contract.
+- **Purposes** are codes from the tenant's purpose list. Sprint 024 matches them.
+- **Request hash:** SHA-256 of the canonical JSON of product id, contract version, columns, row filter, purpose, expiry, requester id and the copied chain. An approval must quote it.
+- **Gateway:**
+  - New action kinds: `access.request` (`data:read`), `access.approve` (`data:steward`), `access.revoke` (`data:steward`), `data.extract` (`data:read`). Action-to-module map (013): register `access.*` and `data.extract` to `data`.
+  - The `duties` stage (022) is extended to `access.approve`, so it handles `product.certify` and `access.approve`. Reason `separation_of_duties` is unchanged.
+  - New stage `grant` (introduced here) for `data.extract`, reading server-built `context`. Reasons: `no_active_grant`, `grant_expired`, `grant_revoked`.
+  - Record v2 extension `access` (registered in `evidence/extensions.py`): `request_id`, `request_hash`, `grant_id`, `grant_version`. The snapshot id stays in the `data` extension (016).
+- **Approval flow** (`dataplane/access/`): approve runs in one transaction with `SELECT ... FOR UPDATE` on the request; the `approvals` row has a unique `(kind, subject_id, step)`; the last approval sets `approved` and enqueues `grant_provision`. The worker re-checks: hash unchanged, every step approved, product still certified and listed, requester principal active. Then it creates the grant and sets the request `granted`, or sets `grant_failed` with a code.
+- **Expiry and revocation:** every grant read checks `expires_at > now()` and `state = 'active'`. Job kind `grants_expire` on the Sprint 018 scheduler marks expired grants. Revocation bumps `grants.version`, deletes the grant's extract objects, and emits the event.
+- **Data** (migration: next free number after Sprint 022's head; `tenant_id`, RLS, GRANT to `gap_app`):
+  - `access_groups`, `access_group_members` (principal ids of the same tenant).
+  - `approval_policies`: tenant_id, version, document JSONB (sensitivity → ordered list of group ids). Versioned like `policies`.
+  - `access_purposes`: tenant_id, code, description.
+  - `listings`: id, tenant_id, product_id, audience (`tenants` or `groups`), audience_ids, state, created_by.
+  - `access_requests`: id, tenant_id (producer), consumer_tenant_id, requester_id, listing_id, product_id, contract_version, columns, row_filter, purpose, justification, expires_at, chain JSONB, approval_policy_version, request_hash, state (`submitted`, `approved`, `rejected`, `withdrawn`, `granted`, `grant_failed`).
+  - `approvals`: id, tenant_id, kind (`CHECK (kind IN ('access_request'))`; 034 widens it), subject_id, step, group_id, approver_id, decision, subject_hash, decision_id, at. Unique `(kind, subject_id, step)`. Insert-only. This is the one approval model that 034 extends.
+  - `grants`: id, tenant_id, consumer_tenant_id, principal_id, product_id, contract_version, columns, row_filter, purpose, expires_at, state, version, request_id, revoked_by, revoked_at. `gap_app` has no INSERT; rows come only from SECURITY DEFINER `grant_create(request_id)`, which re-checks the approvals.
+  - `extracts`: id, tenant_id, grant_id, object_key, format, rows, created_at.
+  - RLS on requests and grants allows the producer tenant and the consumer tenant to read. Consumer-side inserts go through SECURITY DEFINER `access_request_create(...)`, which checks listing visibility. `listings_visible_to(tenant, groups)` returns metadata only.
+- **Extracts:** CSV or Parquet of granted columns only, with the row filter, on one pinned catalog snapshot. The extract job calls the new `DataAccess.extract(principal, grant_id, ...)` (the 013 port; the real adapter uses `QueryEngine`, the no-op raises `ModuleDisabled`). Columns whose classification needs a mask are withheld. CSV formula cells neutralised (Sprint 017 rule). Object key under the producer tenant prefix `extracts/<grant id>/`.
+- **Events:** `platform.access.grant.changed.v1` (grant id, version, state; no columns or filters) through the outbox. Sprint 024 uses it.
+- **UI** (governed-design skill): Marketplace (listing cards, request dialog with column picker, purpose select, expiry), My access (requests with state, grants with expiry, extract download, withdraw), Approvals (queue, request detail with the chain and hash, approve or reject).
+- **Tests:** `tests/contracts/test_data_access_contract.py` grows (`test_extract_respects_grant` on the real adapter, `test_extract_module_disabled` on the no-op); `tests/unit/test_action_module_map.py::test_access_kinds_map_to_data`; `tests/integration/test_access_requests.py::test_record_extension_access`; `tests/unit/test_request_hash.py`; `tests/unit/test_duties_stage.py`; `tests/integration/test_listings.py`; `test_access_requests.py`; `test_approval_races.py`; `test_grant_queue.py`; `test_grant_expiry_revoke.py`; `test_extract_urls.py`; `test_access_tenancy.py`; Playwright `ui/e2e/access.spec.ts` (request, approve as another persona, download).
+- **Docs:** `docs/contracts/access.md`, the approval policy format in `docs/configuration.md`, reason codes, `planning/DOMAIN.md` (listing, grant, purpose states).

@@ -1,0 +1,12 @@
+# Sprint 025: Acceptance
+- [ ] **A1.** All checks pass. The test delta is stated against Sprint 024's report. `check_skips` passes with the allowlist, with no new entries. Evidence: `evidence/checks.txt`.
+- [ ] **A2.** After the reference finance pipeline runs, the graph shows source, then raw, then mart, then product, with physical and product edges merged. Evidence: `evidence/lineage-reference.json` and the Playwright run.
+- [ ] **A3.** Each agent facet validates against its published schema. A broken facet is refused and recorded as invalid. Evidence: `evidence/facet-schemas.txt`.
+- [ ] **A4.** No SQL literal is stored. A scan of every lineage table for the seeded literal values finds none, and `sql_sha256` matches the original. Evidence: `evidence/redaction-scan.txt`.
+- [ ] **A5.** A decision id in a facet resolves through `EvidenceLookup` and opens the decision. With the evidence lookup set to no-op, it shows "not linked". Evidence: `evidence/evidence-link.txt`.
+- [ ] **A6.** With `lineage` removed from `ENABLED_MODULES`, pipelines, dbt and CDC still run. Lineage routes answer `module_disabled`, the nav hides Lineage, and dropped events are counted. Evidence: `evidence/module-off.txt`.
+- [ ] **A7.** The 022 `no_lineage` check fails for a product with no upstream edge, and passes after its pipeline runs. Evidence: `evidence/auto-check.txt`.
+- [ ] **A8.** `LineageLookup` returns the product's upstream nodes on the real adapter and "not linked" on the no-op. Evidence: `evidence/lineage-lookup.txt`.
+- [ ] **A9.** `scripts/showcase/ma.sh` runs the MA journey end to end and `showcase-ma.spec.ts` passes. Evidence: `evidence/ma-journey.txt`.
+- [ ] **A-sec.** The threat-model tests pass. Evidence: `evidence/threat-tests.txt`.
+- [ ] **A-mem.** Not applicable: no new compose service.

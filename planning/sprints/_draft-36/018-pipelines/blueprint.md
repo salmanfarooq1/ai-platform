@@ -1,0 +1,34 @@
+# Sprint 018: Blueprint
+- **Contract** (all under `/v1/data/pipelines`, governed by `require()`; errors use the standard body):
+  - `GET /` and `GET /{id}` (`data:read`): definitions with last run and `freshness_seconds`.
+  - `POST /`, `PATCH /{id}` (`data:write`): create or change a definition. 422 `pipeline_invalid` on a bad source config or cron.
+  - `POST /{id}/runs` (`data:write`): run now, 202 with the job. 409 `pipeline_run_in_progress` when one is active.
+  - `POST /{id}/backfill` (`data:write`): `{"partitions": [...]}`, at most `PIPELINE_BACKFILL_MAX` items, 202 with the jobs.
+  - `GET /{id}/runs`, `GET /runs/{run_id}` with its tasks and log lines.
+  - A foreign or unknown pipeline is 404 `pipeline_not_found` (same body for both). OpenAPI snapshot refreshed.
+  - Scopes: `data:read` (016) and `data:write` (017). No new scope. Actions: `data.read` (no snapshot for metadata) and `data.write`. No new action kind.
+- **Ports and adapters:**
+  - `ports/sources.py`: `SourceConnector` Protocol (`kind`, `async extract(config, partition, secrets) -> AsyncIterator[RecordBatch]`) and frozen config dataclasses.
+  - `adapters/source_postgres.py` (asyncpg, read-only transaction), `adapters/source_objects.py` (over `ObjectStore`), `adapters/source_http.py` (httpx).
+  - `adapters/egress.py`: one `check_url()` used by the HTTP connector. Resolves DNS, denies private, loopback, link-local, multicast, reserved and IPv6 ULA ranges, single-label hosts and the compose service names. Connects to the checked IP. Redirects off. Size and time limits.
+  - Settings, validated in `core/settings.py`: `PIPELINE_HTTP_ALLOWED_HOSTS`, `PIPELINE_HTTP_MAX_BYTES`, `PIPELINE_HTTP_TIMEOUT_SECONDS`, `PIPELINE_BACKFILL_MAX`, `SOURCE_SECRETS_DIR` (default `/run/secrets`). `PIPELINE_BACKFILL_MAX`, `PIPELINE_HTTP_MAX_BYTES` and `PIPELINE_HTTP_TIMEOUT_SECONDS` are placeholder limits: settings with a default, and a question in `planning/QUESTIONS.md`. Secret refs resolve to `SOURCE_SECRET_<NAME>` or `<SOURCE_SECRETS_DIR>/<name>`.
+  - A source config holding a key named like a credential (`password`, `secret`, `token`, `dsn` with a password) is refused.
+- **Data** (migration: next free number after Sprint 017's head; every table has `tenant_id`, RLS and an explicit GRANT to `gap_app`):
+  - `pipelines`: id, tenant_id, name (unique per tenant), source_kind (`postgres`, `file`, `http`), source_config JSONB, secret_ref, target_dataset_id, schedule_id, parameters JSONB, partition_param, enabled, created_by, timestamps.
+  - `pipeline_runs`: id, tenant_id, pipeline_id, job_id, trigger (`schedule`, `manual`, `backfill`), partition, status (`queued`, `running`, `succeeded`, `failed`, `skipped`), skip_reason, rows_written, snapshot_id, error_code, started_at, finished_at.
+  - `pipeline_tasks`: id, tenant_id, run_id, name (`extract`, `load`), status, times, log JSONB (bounded lines, codes and counts, never row data or secrets).
+  - `schedules`: id, tenant_id, job_kind, cron, payload JSONB, enabled, next_due_at, last_job_id.
+  - SECURITY DEFINER functions: `schedules_due(p_now)` (names due schedules and their tenants), and one purge function per retained table, as `decisions_purge_batch` does. `gap_app` keeps no DELETE.
+- **Scheduler and jobs:**
+  - `workers/cron.py`: a small five-field cron parser (no new dependency). `workers/scheduler.py` runs the existing purge pass and a `schedules_due` pass.
+  - Idempotency key `sched:<schedule_id>:<slot UTC>`. Overlap means a `skipped` run with `skip_reason=overlap`.
+  - `core/database/jobs.py`: a job kind registry (`register_kind(name, user_visible)`) fed by the module registry. `USER_KINDS` is derived from it.
+  - New job kinds: `pipeline_run`, and `purge_platform` (one per tenant per day, all six tables).
+  - The load step writes through Sprint 017's write path: advisory lock on the dataset id, retry on conflict. The API never writes.
+- **Retention:** settings `RETENTION_JOBS_DAYS`, `RETENTION_OUTBOX_DAYS` (sent rows only), `RETENTION_PROCESSED_EVENTS_DAYS`, `RETENTION_RAW_FILES_DAYS`, `RETENTION_SANDBOX_EVENTS_DAYS`, `RETENTION_RUN_TOKENS_DAYS` (expired or revoked only). Defaults are placeholders equal to `DECISION_RETENTION_DAYS`; record them in `planning/QUESTIONS.md`.
+- **Metrics** (no tenant or pipeline labels): `pipeline_run_duration_seconds` histogram and `pipeline_runs_total` counter by `source_kind` and `status`; `pipeline_freshness_seconds` histogram sampled per run.
+- **Events:** none new. Each load commit goes through Sprint 017's write path, which emits `platform.data.snapshot.committed.v1`. Lineage emission comes in Sprint 025.
+- **UI** (follow `.claude/skills/governed-design/SKILL.md`): Data > Pipelines list, detail with runs and task logs, run-now button, backfill dialog (partition list), freshness column. Hidden when M4 is disabled.
+- **Compose and scripts:** no new service. The Postgres connector reaches `refco_source` (Sprint 015) with the role `refco_reader` (SELECT only, `default_transaction_read_only=on`). Reference definition: `data/reference-company/pipelines/finance_invoices.json`.
+- **Tests:** contract suite `tests/contracts/test_source_connector.py` (all three adapters plus a fake); `tests/unit/test_cron.py`; `tests/unit/test_egress.py` (SSRF corpus); `tests/integration/test_pipelines_api.py`; `tests/integration/test_scheduler_overlap.py`; `tests/integration/test_backfill.py`; `tests/integration/test_pipeline_snapshot_committed.py` (`test_pipeline_load_emits_snapshot_committed`); `tests/integration/test_retention_platform.py`; `tests/integration/test_pipelines_tenancy.py`; Playwright `ui/e2e/pipelines.spec.ts`.
+- **Docs:** ADR-0016, `docs/runbooks/pipelines.md`, `docs/configuration.md` (new settings), `docs/operations.md` (retention), `docs/api/`.

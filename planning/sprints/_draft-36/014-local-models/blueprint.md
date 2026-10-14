@@ -1,0 +1,24 @@
+# Sprint 014: Blueprint
+- **Contract:** no new route. A `model.invoke` decision and its receipt carry `extensions.model = {name, digest, source}`. OpenAPI unchanged (the `extensions` field exists since 013).
+- **Ports and adapters:**
+  - New port `ports/models.py`: `ModelCatalog.identify(model: str) -> ModelIdentity | None`; `ModelIdentity(name, digest, licence, source, verified: bool)`. Strict mypy.
+  - `adapters/ollama_catalog.py`: reads `models.lock`; for `ollama/` models it reads `GET /api/tags` from Ollama once (and on a miss) and sets `verified` when the digest equals the lock. Hosted models give `source="hosted"`, `digest=None`.
+  - `tests/fakes.py`: `FakeModelCatalog` with fixed fake digests. Contract suite `tests/contracts/test_model_catalog_contract.py` runs the real adapter against a stub Ollama HTTP server and the fake.
+  - `Adapters` gains `models`. The registry builds the catalog from settings.
+  - `adapters/litellm_chat.py` and `adapters/litellm_llm.py` pass `num_ctx` and `keep_alive` for `ollama/` models.
+- **Settings (`core/settings.py`):**
+  - `_LLM_MODEL_DEFAULTS["local"] = "ollama/qwen3:4b-instruct-2507-q4_K_M"`. `public-preview` and `prod` keep theirs.
+  - `OLLAMA_API_BASE` (default `http://localhost:11434`), `OLLAMA_NUM_CTX` (8192, > 0), `OLLAMA_KEEP_ALIVE` (text, Ollama format), `MODELS_LOCK_PATH` (default `models.lock`, must exist and parse at startup in `local` mode).
+  - `config.py`: `LLM_CONFIG["fallbacks"]` becomes `["ollama/qwen3:1.7b"]` in every mode. `MODEL_PRICING` gets the lock models at 0.0.
+- **`models.lock` (repo root, TOML):** one `[[model]]` per model: `name`, `digest` (`sha256:...`), `licence` (SPDX), `source` (registry URL), `size_bytes`, `use`. Models: `qwen3:4b-instruct-2507-q4_K_M`, `qwen3:1.7b`, `qwen3:0.6b`, `nomic-embed-text` (the tag the embed setting uses; record that it is v1.5), and `qwen3:8b` for the GPU profile.
+- **Scripts:**
+  - `scripts/models/check_lock.sh [--ollama URL] [--fixture FILE]` (the shell entry point; it may call a Python helper): exit 1 when a pulled model is missing or its digest differs; prints name, lock digest and pulled digest.
+  - `scripts/supply_chain/licence_gate.sh` also checks each `licence` in `models.lock` against the OSI allowlist.
+  - `scripts/verify/ollama.sh`: starts the `models` profile, runs `check_lock.sh`, then the API and a worker on a compose network with `internal: true` (no route out), asks one question in `local` mode, fetches the receipt, and prints tokens per second (`eval_count / eval_duration`). `--model` and `--smoke` flags for the nightly job.
+- **Data:** no migration. The digest uses the 013 `extensions` map. Register the key `model` in `evidence/extensions.py` with its JSON Schema.
+- **Gateway:** the gateway asks `ModelCatalog` for the resource of every `model.invoke` and writes `extensions.model`. A local (`ollama/`) model whose digest is not verified is denied with the new reason `model_digest_mismatch` (stage `policy`, `policy_field` None).
+- **Events:** none new.
+- **Compose:** `ollama` sets `OLLAMA_MAX_LOADED_MODELS=2`, `OLLAMA_NUM_PARALLEL=1`, `OLLAMA_KEEP_ALIVE`. `ollama-pull` pulls every model in `models.lock` whose `use` is not `gpu`, then runs `check_lock.sh`.
+- **CI:** unit and integration keep the fake LLM and `FakeModelCatalog`. `.github/workflows/nightly-models.yml` (schedule and manual): Ollama service, pull `qwen3:0.6b`, `scripts/verify/ollama.sh --model qwen3:0.6b --smoke`.
+- **Tests:** `test_model_catalog_contract.py`; `tests/unit/test_models_lock.py` (parse, every licence OSI, mismatch fixture fails `check_lock.sh`); `tests/unit/test_settings_local_models.py` (local defaults are `ollama/` models; no default names `llama`); `tests/integration/test_model_digest_record.py` (a `model.invoke` row has `extensions.model.digest`; the receipt shows it and verifies offline); `test_model_digest_mismatch_denies`.
+- **Docs:** ADR-0014, `docs/operations.md` (model profiles CPU and GPU with measured latency, pull and lock check), `docs/configuration.md` (generated), `docs/getting-started.md` (`--profile models`), `.env.example`.

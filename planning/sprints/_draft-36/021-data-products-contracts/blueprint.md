@@ -1,0 +1,36 @@
+# Sprint 021: Blueprint
+- **Contract** (under `/v1/data`, governed by `require()`; OpenAPI snapshot refreshed):
+  - `GET, POST /products`; `GET, PATCH /products/{id}` (PATCH only in `draft`). Body is an ODPS 1.1 document.
+  - `POST /products/{id}/contracts`: an ODCS 3.2 document (JSON or YAML). 201 with version and hash. 422 `contract_invalid` with a list of `{path, message}`. 422 `version_bump_too_small` when the diff needs a bigger bump. 422 `output_port_required` for a major without a new output port.
+  - `GET /products/{id}/contracts`, `GET .../contracts/{version}`, `GET .../contracts/{version}/diff?against=<version>`.
+  - `POST /products/{id}/transitions` `{to, note}`. 409 `transition_not_allowed`. 422 `classification_required`.
+  - `GET, POST /glossary`, `POST /glossary/{id}/links`; `GET, POST /aspect-types`; `PUT /products/{id}/aspects/{type}`.
+  - `GET /search?q=` returns ranked hits of kind `product`, `column` or `term`.
+  - A foreign or unknown product is 404 `product_not_found` (same body for both).
+- **Scopes and gateway:**
+  - New scope `data:steward` (introduced here): added to the `Scope` enum in `core/identity/models.py` (so `scripts/admin/identity.py create-key --scopes` accepts it), to `SCOPE_ACTIONS` in `gateway/boundary.py`, and to `docs/api/README.md`. It grants `data.read` and `product.certify`. It does not grant `data.write`.
+  - New action kind `product.certify` (introduced here, one sprint before the conventions table says; see the report note). It covers every steward-only step: the steward transitions in the lifecycle table (for example `in_review → certified`) and new aspect types. Sprint 022 adds the certification checks on it.
+  - Edits and owner transitions are `data.write`. Reads and search are `data.read` (no snapshot). No other new action kind. Action-to-module map (013): register `product.certify` to `data`.
+  - The publish decision carries the contract hash as a record v2 extension (`contract_sha256`).
+- **Validation** (`dataplane/products/`):
+  - `schemas/odps-1.1.0.json` and `schemas/odcs-3.2.0.json`, vendored with source URL and SHA-256 in `schemas/SOURCES.md`.
+  - `validate.py`: JSON Schema first, then `datacontract-cli` lint through its Python API, then a schema test: the contract's columns and types must match the dataset's current schema, read through the `QueryEngine` port.
+  - `datacontract-cli` never opens its own catalog connection or reads S3 secrets.
+  - Size limit `CONTRACT_MAX_BYTES`. YAML parsed with a safe loader.
+- **Diff** (`dataplane/products/diff.py`): pure function `(old, new) -> list[Change]`, each with a level. Major: removed column, narrowed type (table in the module), stricter rule (nullable to required, smaller enum, tighter range, higher threshold), changed classification. Minor: added optional column, looser rule. Patch: descriptions and tags.
+- **Deprecation:** on a major, the old output port is marked `deprecated` with `sunset_at = now + CONTRACT_DEPRECATION_DAYS`. It is a setting with a placeholder default; record the question in `planning/QUESTIONS.md`. `CONTRACT_MAX_BYTES` is a placeholder limit in the same way.
+- **Data** (migration: next free number after Sprint 020's head; tenant tables have `tenant_id`, RLS and GRANT to `gap_app`):
+  - `data_products`: id, tenant_id, name, owner_principal_id, state, sensitivity (`public`, `internal`, `confidential`, `restricted`, null until set), odps JSONB, search tsvector, timestamps.
+  - `data_contracts`: id, tenant_id, product_id, version (major, minor, patch), odcs JSONB, sha256, output_port, created_by, created_at. `gap_app` gets SELECT, INSERT only: versions are immutable.
+  - `output_ports`: id, tenant_id, product_id, name, major, state, sunset_at.
+  - `product_columns`: tenant_id, product_id, contract_id, name, type, classification, description, search tsvector. Filled from the current contract.
+  - `product_lifecycle_transitions`: from_state, to_state, action_kind. Platform reference data seeded by the migration, no tenant column, SELECT only.
+  - `product_events`: id, tenant_id, product_id, from_state, to_state, principal_id, decision_id, note, at. Append-only for `gap_app`.
+  - `glossary_terms`, `glossary_links`, `aspect_types` (schema JSONB, version), `aspects`.
+  - GIN indexes on the tsvector columns. Search uses `websearch_to_tsquery('simple', $1)`.
+- **Events:** `platform.products.lifecycle.changed.v1` (product id, from, to, decision id; no document body) through the outbox.
+- **UI** (governed-design skill): Data > Products: list with a search box; detail with tabs Overview, Contract (versions, diff view), Columns (classification, glossary links), Lifecycle (history, allowed next steps as buttons). Create by uploading ODPS and ODCS files.
+- **Personas:** the steward persona (015) gains `data:steward`.
+- **Reference data:** the finance product and contract for the reference company in `data/reference-company/products/`.
+- **Tests:** `tests/unit/test_contract_diff.py` (table-driven, one case per change kind); `tests/unit/test_contract_validate.py`; `tests/integration/test_products_api.py`; `test_product_lifecycle.py` (`test_event_per_transition` checks the type `platform.products.lifecycle.changed.v1`); `tests/unit/test_action_module_map.py::test_product_certify_maps_to_data`; `test_catalog_search.py`; `test_products_tenancy.py`; `test_contract_immutable.py`; Playwright `ui/e2e/products.spec.ts`.
+- **Docs:** ADR-0018, `docs/contracts/products.md` (which ODPS and ODCS fields are used), `docs/api/`, `planning/DOMAIN.md` lifecycle states.

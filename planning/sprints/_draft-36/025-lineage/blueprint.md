@@ -1,0 +1,48 @@
+# Sprint 025: Blueprint
+- **Contract:**
+  - `GET /v1/lineage/graph?node={type}:{id}&direction=up|down|both&depth=1..6` returns nodes, edges and facet summaries. Scope: `data:read` (016). Unknown or foreign node: 404 `lineage_node_not_found` (same body for both).
+  - `GET /v1/lineage/runs/{run_id}` returns one run with its facets and linked decision ids. Each decision id has `linked: true|false` from `EvidenceLookup`.
+  - Every read is a governed action: new action kind `lineage.read` (introduced here) through `enforce()`. `data:read` grants it in `SCOPE_ACTIONS`.
+  - Refresh the OpenAPI snapshot.
+- **Ports and adapters:**
+  - `LineageEmitter` (013) gets its real adapter `lineage/emitter.py`. It wraps an OpenLineage `RunEvent` in a CloudEvent and publishes it on the `EventBus` port.
+  - The no-op adapter stays for a disabled module. It drops events and counts them in `lineage_events_dropped_total` on `/metrics`.
+  - New port `LineageLookup` in `ports/lineage.py`: `upstream(node, depth)` and `downstream(node, depth)`. Real adapter `lineage/lookup.py` reads the store, tenant scoped. The no-op adapter returns "not linked". 022's `no_lineage` check and 028's metric lineage use only this port.
+  - The no-op emitter's spool `lineage_raw_events` (019) belongs to M5. The consumer replays it once into the store, then the spool stays for a disabled module only.
+  - `openlineage-python==1.53.0` is imported only in `lineage/`. Add it to the import-lint SDK list.
+- **Data** (migration: next free number after Sprint 024's head). All tables have `tenant_id`, FORCE RLS and a `GRANT` to `gap_app`:
+  - `lineage_jobs (id, tenant_id, namespace, name, kind, created_at)`, unique `(tenant_id, namespace, name)`.
+  - `lineage_runs (id, tenant_id, job_id, run_id, state, started_at, ended_at, event_id)`.
+  - `lineage_datasets (id, tenant_id, namespace, name, product_id NULL, dataset_id NULL)`.
+  - `lineage_edges (id, tenant_id, run_id, from_dataset, to_dataset, kind)`, where `kind` is `physical` or `product`.
+  - `lineage_facets (id, tenant_id, run_id, name, schema_url, body jsonb, body_sha256)`.
+- **Ingest:**
+  - A consumer on the worker reads `platform.lineage.event.v1`. It dedupes through `processed_events` and validates each facet against its schema.
+  - A facet that fails validation is kept out. The run row records it with `invalid_facets`.
+  - The tenant comes from the CloudEvent the platform emitted (from the emitting job's tenant). It never comes from the OpenLineage payload.
+  - Size cap: setting `LINEAGE_EVENT_MAX_BYTES` (default 256 KiB). Bigger events are refused and counted.
+- **Redaction (`lineage/redact.py`):**
+  - SQL facets are parsed with sqlglot. Each literal is replaced by `?`. The store keeps `sql_template` and `sql_sha256` of the original text.
+  - Column statistics facets keep counts only, never min, max or sample values.
+  - Redaction runs at emit time and again at ingest.
+- **Agent facets:** `docs/contracts/lineage/agentRun-1-0-0.json`, `modelCall-1-0-0.json` and `decisionRecordId-1-0-0.json` (JSON Schema 2020-12).
+  - `agentRun`: `execution_id`, runtime, sandbox image digest.
+  - `modelCall`: model id, model digest, token counts.
+  - `decisionRecordId`: a list of decision UUIDs.
+  - The schemas are served as static files and never fetched at runtime.
+- **Gateway:** new action kind `lineage.read`, registered in the action-to-module map (013) under `lineage`. No new reason code: an unknown node is a 404, not a deny.
+- **Events:** consumes `platform.lineage.event.v1`. Emit points: pipeline run end (018), the dbt run end and raw event replay (019), and CDC batch commit (020).
+- **Auto-check:** 022's `no_lineage` check calls `LineageLookup.upstream` and returns fail when a product has no upstream edge. With the no-op lookup it returns `stub`, as in 022 (`test_no_lineage_uses_lineage_lookup`).
+- **UI:** Data > Lineage, following `.claude/skills/governed-design/SKILL.md`.
+  - A graph with product and physical nodes, plus a side panel with facets.
+  - A decision id opens Evidence > Decisions. An unlinked id shows "not linked".
+  - Node names render as text only.
+- **Tests:**
+  - `tests/contracts/test_lineage_emitter_contract.py` and `tests/contracts/test_lineage_lookup_contract.py` run on the real and the no-op adapter.
+  - Unit: `test_lineage_read_maps_to_lineage_module`. Integration: `test_lineage_lookup_cross_tenant`.
+  - Unit: the redaction corpus and the facet schemas.
+  - Integration: ingest and dedupe, RLS as `gap_app`, a cross-tenant graph read, and a spoofed tenant in the payload.
+  - e2e: `test_reference_pipeline_lineage` (source to raw to mart to product).
+  - Playwright: `lineage.spec.ts` and `showcase-ma.spec.ts`.
+- **Scripts:** `scripts/showcase/ma.sh` runs the MA journey from `planning/program/sprint-map.md` on the reference company: finance and CRM land, become certified products, an analyst requests access with a purpose, a steward approves, the analyst reads masked rows, and the lineage graph shows every step.
+- **Docs:** ADR-0020 (lineage model and agent facets), `docs/architecture.md`, `docs/contracts/lineage/README.md`, `docs/operations.md` (dropped-event metric).
