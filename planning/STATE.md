@@ -14,7 +14,7 @@ Snapshot only. Edit in place and keep it under 60 lines.
 - **Tests:** 1568 backend (10 live-MinIO skipped), 207 Vitest and 82 Playwright.
 
 ## Next
-- **The planned roadmap (000 to 010) is complete.** The next pack is not yet written. Open items are listed in `QUESTIONS.md`. Retention of `jobs`, `outbox`, `processed_events` and raw files is still open (Q27). No consumer uses Kafka yet (Q41).
+- **The planned roadmap (000 to 010) is complete.** Program 2 (sprints 011 to 032, condensed from 36 on 2026-10-11) is planned in `planning/program/`, with packs in `planning/sprints/011-*` to `032-*`. The old 36 packs are archived in `planning/sprints/_draft-36/`. Sprint 011 is next. Open items are listed in `QUESTIONS.md`. Retention of `jobs`, `outbox`, `processed_events` and raw files is still open (Q27). No consumer uses Kafka yet (Q41).
 - **Direction:** feature sprints are vertical slices. The contract comes first, then the backend, then the UI, with one e2e test across both. See `ROADMAP.md`.
 - **Design:** every frontend builder follows `.claude/skills/governed-design/SKILL.md`.
 - **Deployment is parked.** All hosting items wait in `QUESTIONS.md` under "Parked: hosting".

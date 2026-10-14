@@ -2,6 +2,17 @@
 
 An index, one line per decision, newest first. The reasoning lives in `docs/adr/` and, for Decisions 1 to 30, in `planning/history/ARCHITECTURE_LOG.md`. This file only points to it. Log entries may carry the date they were recorded.
 
+## Program 2 direction (owner, 2026-10-11)
+- **Three pillars.** Gateway (security; mature on its own: identity, policy, guardrails, approvals, evidence, receipts), Data (storage, warehouse, streaming, BI, retrieval, memory, citations) and Agents (execution and monitoring). The modules M1–M6 map onto them.
+- **Integration first.** Clients connect their own agents, data sources, event streams and warehouses through existing connectors. Our own agents, client agents and external agents are all governed the same way through the gateway. Integration agents inspect new connections and suggest fixes. Rejected: replacing the client's stack.
+- **The local stack is the POC/MVP vehicle.** Real deployments run on cloud, with one Terraform module per cloud and the same core. POCs and portfolio projects run on cloud trial accounts, stay portable, and start and stop on demand.
+- **Delegation tokens are platform-minted by default (036).** Keycloak issues them only if the spike passes and nested delegation is no longer a preview feature. Preview features never run in the default stack.
+- **Docling weights: Apache-2.0 only (030).** TableFormer is taken under Apache-2.0. If that does not hold, table structure is off.
+- **Pins younger than two weeks at sprint start are replaced by the previous release.** The only exception is a security fix, noted in `evidence/pins.txt`.
+- **SCIM 2.0 provisioning and SIEM export are added to the plan.**
+- **Wording.** "Built on open-source components, no third-party licence fees." Our own code is private.
+- **The sprint map is condensed** around the three pillars (see `planning/program/sprint-map.md`).
+
 ## Sprint 010: Kafka event bus (ADR-0008)
 - **The Postgres outbox stays the default.** `EVENT_BUS=kafka` only changes where the relay publishes. Kafka is never inside a decision transaction.
 - **The topic is chosen per event type, and the key is the tenant id.** The relay stops a tenant's batch at its first failure, so that tenant's order holds. Ordering relies on sequential sends.

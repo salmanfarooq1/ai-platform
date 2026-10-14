@@ -33,3 +33,18 @@ Milestones only, with no dates. Each sprint is done when its acceptance checks p
 - Phase 2: gateway layer, built out with OPA, MCP and A2A traffic, approvals and PII guardrails.
 - Phase 3: an ask-your-data agent.
 - Phase 4: a document agent.
+
+## Program 2: governed data and agent platform (sprints 011 to 032)
+The full plan is in `planning/program/` (start with its `README.md`). There are three pillars: Gateway, Data and Agents. The plan is integration first, with an open-source stack, local Compose for development and demos, and cloud through OpenTofu for real deployments. It was condensed from 36 sprints to 22 on 2026-10-11. Milestones:
+
+| Milestone | Sprints | Result | Tag |
+|---|---|---|---|
+| M0 Foundations | 011–015 | Clean open-source stack, pillars and module boundaries, local or hosted models, reference company, cloud POC lifecycle | `v0.15.0` |
+| MG Gateway product | 016–020 | Gateway service and proxy (MCP, LLM API), receipts v2 with anchoring, OPA and replay, guardrails and approvals, SSO, SCIM and delegation | `v0.20.0` |
+| MD Data on the client's stack | 021–026 | Read client data in place, connectors and pipelines, products and contracts, grants and query enforcement, lineage and semantic layer, documents, retrieval and grounding | `v0.26.0` |
+| MA Agents and insights | 027–029 | Data and integration agents, one agent registry with monitoring and memory, governed dashboards and reports | `v0.29.0` |
+| ME Enterprise readiness | 030–032 | Evidence packs and SIEM, resilience and multi-cloud, release and vendor trust | `v1.0.0` |
+
+Sellable point: `v0.20.0`, after Sprint 020. The Gateway and Assurance editions stand on their own.
+
+Freeze point: `v0.27.0`, after Sprint 027. It is a complete first version: a client source row read in place, through to a signed agent answer.
