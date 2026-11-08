@@ -14,6 +14,8 @@ export const exampleTrace: DecisionSummary[] = [askDecision, kbAllow, kbDeny]
 
 export const exampleReceipt: DecisionDetail = {
   ...kbAllow,
+  record_version: 2,
+  extensions: {},
   tenant: { id: 't1', slug: 'northwind' },
   input_sha256: EXAMPLE_SHA,
   trace: exampleTrace,

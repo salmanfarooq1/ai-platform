@@ -18,10 +18,13 @@ export function looksLikeRequestId(q: string): boolean {
 }
 
 /** The list for the palette: screens that match the text, recent requests that match, and the typed id. */
-export function buildPaletteItems(query: string, recent: RequestSummary[] = []): PaletteItem[] {
+export function buildPaletteItems(query: string, recent: RequestSummary[] = [], enabledModules?: ReadonlySet<string>): PaletteItem[] {
   const q = query.trim()
   const needle = q.toLowerCase()
-  const screens = SCREENS.filter((s) => !needle || s.label.toLowerCase().includes(needle))
+  const screens = SCREENS.filter((s) => {
+    const nav = NAV.flatMap((group) => group.items).find((item) => item.to === s.to)
+    return (!nav?.module || enabledModules?.has(nav.module) === true) && (!needle || s.label.toLowerCase().includes(needle))
+  })
   const requests: PaletteItem[] = recent
     .filter((r) => needle && r.request_id.toLowerCase().includes(needle))
     .slice(0, 6)

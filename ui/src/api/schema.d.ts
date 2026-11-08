@@ -655,6 +655,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/system/modules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Modules
+         * @description Return edition and module availability after identity and scope authorization.
+         */
+        get: operations["get_modules_v1_system_modules_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/trust/summary": {
         parameters: {
             query?: never;
@@ -922,6 +942,10 @@ export interface components {
             created_at: string;
             /** Execution Id */
             execution_id?: string | null;
+            /** Extensions */
+            extensions: {
+                [key: string]: unknown;
+            };
             /**
              * Id
              * Format: uuid
@@ -939,6 +963,8 @@ export interface components {
             principal: components["schemas"]["PrincipalRef"] | null;
             /** Reason */
             reason: string;
+            /** Record Version */
+            record_version: number;
             /** Request Id */
             request_id: string;
             /** Resource */
@@ -1204,6 +1230,38 @@ export interface components {
             prompt_tokens: number;
             /** Total Cost */
             total_cost: number;
+        };
+        /** ModuleInfo */
+        ModuleInfo: {
+            /** Always On */
+            always_on: boolean;
+            /** Description */
+            description: string;
+            /** Enabled */
+            enabled: boolean;
+            /** Label */
+            label: string;
+            /** Name */
+            name: string;
+            /** Nav Group */
+            nav_group: string | null;
+            /**
+             * Pillar
+             * @enum {string}
+             */
+            pillar: "platform" | "gateway" | "data" | "agents";
+        };
+        /** ModuleList */
+        ModuleList: {
+            /**
+             * Deploy Shape
+             * @enum {string}
+             */
+            deploy_shape: "single_tenant" | "multi_tenant";
+            /** Edition */
+            edition: string | null;
+            /** Modules */
+            modules: components["schemas"]["ModuleInfo"][];
         };
         /** Overview */
         Overview: {
@@ -2748,6 +2806,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    get_modules_v1_system_modules_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleList"];
+                };
             };
         };
     };

@@ -8,7 +8,7 @@ import { detail } from '@/test/fixtures'
 import TrustPage from './trust-page'
 
 const receipt: Receipt = {
-  decision: detail(), chain: { prev_hash: 'b'.repeat(64), row_hash: 'c'.repeat(64), position: 12 },
+  decision: detail({ record_version: 1 }), chain: { prev_hash: 'b'.repeat(64), row_hash: 'c'.repeat(64), position: 12 },
   signature: 'sig', key_id: 'k'.repeat(16), alg: 'Ed25519',
   canonical: JSON.stringify({ chain: { position: 12, prev_hash: 'b'.repeat(64), row_hash: 'c'.repeat(64) }, decision: { id: 'dec-1', action: 'kb.read', outcome: 'allow', reason: 'allowed' } }),
 }
@@ -80,6 +80,16 @@ describe('Trust page', () => {
     await screen.findByTestId('receipt-result')
     expect(screen.getByLabelText('Decision id')).toHaveValue('dec-9')
     expect(fetchReceipt).toHaveBeenCalledTimes(1)
+  })
+
+  it('verifies a v2 receipt', async () => {
+    const v2Receipt: Receipt = { ...receipt, decision: detail({ record_version: 2 }) }
+    const fetchReceipt = vi.spyOn(api, 'receipt').mockResolvedValue(v2Receipt)
+    const verify = vi.spyOn(api, 'verifyReceipt').mockResolvedValue(good)
+    renderWithProviders(<TrustPage />, { route: '/app/trust?decision=dec-v2' })
+    expect(await screen.findByTestId('receipt-result')).toHaveAttribute('data-valid', 'true')
+    expect(fetchReceipt).toHaveBeenCalledWith('dec-v2')
+    expect(verify).toHaveBeenCalledWith(v2Receipt)
   })
 
   it('shows the API error code for an unknown decision', async () => {

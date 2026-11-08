@@ -12,6 +12,7 @@ import { useReasonCodes } from '@/lib/reasons'
 import { sandboxSummary } from '@/lib/sandbox'
 import { cn, formatTime } from '@/lib/utils'
 import { runDuration, runStatusWord } from './run-status'
+import { useModuleAvailability } from '@/app/modules'
 
 // Runs are listed from their decisions (the verdict, and the runs that were refused before they started) and joined
 // by execution id to GET /v1/agent/runs, which gives each run's status and times (see run-status.ts).
@@ -54,6 +55,7 @@ function RunTimeline({ id }: { id: string }) {
 }
 
 export default function RunsPage() {
+  const availability = useModuleAvailability()
   const [params, setParams] = useSearchParams()
   const selected = params.get('run') ?? undefined
   const q = useInfiniteQuery({
@@ -62,12 +64,14 @@ export default function RunsPage() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.next_cursor ?? undefined,
     retry: false,
+    enabled: availability.agentEnabled,
   })
   // The runs endpoint is where status and times come from. Poll it only while a run is queued or running.
   const runs = useQuery({
     queryKey: ['agent-runs'],
     queryFn: () => api.agentRuns(),
     retry: false,
+    enabled: availability.agentEnabled,
     refetchInterval: (r) => (r.state.data?.items.some((x) => x.status === 'queued' || x.status === 'running') ? 3000 : false),
   })
   const byExecution = new Map((runs.data?.items ?? []).map((r) => [r.execution_id, r]))
@@ -75,12 +79,16 @@ export default function RunsPage() {
   return (
     <div>
       <PageHeader title="Agent runs">Each run is one agent request, with its execution id and status. Select a run to see the calls it made.</PageHeader>
+      {availability.ready && !availability.agentEnabled ? <div role="status" className="mb-4 rounded-sm border border-hairline bg-surface p-4 text-callout text-fg-secondary">Agent runs are unavailable in this edition.</div> : null}
+      {!availability.ready && !availability.modules.isLoading && !availability.modules.error ? <div role="status" className="mb-4 rounded-sm border border-hairline bg-surface p-4 text-callout text-fg-secondary">Module availability is not known. Run data stays hidden until it can be checked.</div> : null}
+      {availability.modules.isLoading ? <div role="status" aria-label="Loading module availability"><Skeleton className="mb-4 h-16" /></div> : null}
+      {availability.modules.error ? <ErrorState error={availability.modules.error} onRetry={() => void availability.modules.refetch()} title="Could not load module availability." /> : null}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="min-w-0">
-          {q.isLoading ? <TableSkeleton rows={6} cols={7} /> : null}
-          {q.error ? <ErrorState error={q.error} onRetry={() => void q.refetch()} title="Could not load runs." /> : null}
-          {q.data && items.length === 0 ? <EmptyState title="No agent runs yet.">Ask a question in Agent mode. Each run and every tool call it makes appear here.</EmptyState> : null}
-          {items.length > 0 ? (
+          {availability.agentEnabled && q.isLoading ? <TableSkeleton rows={6} cols={7} /> : null}
+          {availability.agentEnabled && q.error ? <ErrorState error={q.error} onRetry={() => void q.refetch()} title="Could not load runs." /> : null}
+          {availability.agentEnabled && q.data && items.length === 0 ? <EmptyState title="No agent runs yet.">Ask a question in Agent mode. Each run and every tool call it makes appear here.</EmptyState> : null}
+          {availability.agentEnabled && items.length > 0 ? (
             <div className="overflow-x-auto rounded-sm border border-hairline bg-surface">
               <table className="w-full border-collapse text-footnote">
                 <caption className="sr-only">Agent runs, newest first</caption>
@@ -103,10 +111,10 @@ export default function RunsPage() {
               </table>
             </div>
           ) : null}
-          {q.hasNextPage ? <div className="mt-3"><Button variant="secondary" size="sm" onClick={() => void q.fetchNextPage()}>Load more</Button></div> : null}
+          {availability.agentEnabled && q.hasNextPage ? <div className="mt-3"><Button variant="secondary" size="sm" onClick={() => void q.fetchNextPage()}>Load more</Button></div> : null}
         </div>
         <aside aria-label="Run timeline" className="h-fit rounded-sm border border-hairline bg-surface p-4">
-          {selected ? <RunTimeline id={selected} /> : <p className="text-callout text-fg-secondary">Select a run to see its step timeline.</p>}
+          {availability.agentEnabled && selected ? <RunTimeline id={selected} /> : <p className="text-callout text-fg-secondary">{availability.agentEnabled ? 'Select a run to see its step timeline.' : 'Run details are hidden while Agent mode is unavailable.'}</p>}
         </aside>
       </div>
     </div>

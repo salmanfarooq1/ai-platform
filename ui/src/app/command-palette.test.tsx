@@ -60,6 +60,22 @@ describe('hostile input', () => {
 })
 
 describe('CommandPalette', () => {
+  it('palette hides disabled module entries', async () => {
+    vi.spyOn(api, 'requests').mockResolvedValue({ items: [], next_cursor: null })
+    renderWithProviders(<Harness />, {
+      route: '/app',
+      modules: {
+        edition: 'gateway', deploy_shape: 'single_tenant', modules: [
+          { name: 'gateway', label: 'Gateway', pillar: 'gateway', enabled: true, nav_group: 'Governance', always_on: true },
+          { name: 'agents', label: 'Agents', pillar: 'agents', enabled: false, nav_group: 'Governance', always_on: false },
+        ],
+      },
+    })
+    await screen.findByRole('dialog')
+    await userEvent.type(screen.getByRole('combobox'), 'runs')
+    expect(screen.queryByRole('option', { name: /Agent runs/ })).not.toBeInTheDocument()
+  })
+
   it.each(HOSTILE)('typing %s and pressing Enter never navigates outside /app/requests/', async (text) => {
     vi.spyOn(api, 'requests').mockResolvedValue({ items: [], next_cursor: null })
     renderWithProviders(<Harness />, { route: '/app' })

@@ -37,4 +37,9 @@ describe('DecisionDetailView', () => {
     renderWithProviders(<DecisionDetailView decision={detail()} />, { client: (() => { const c = testClient(); c.setQueryData(REASONS_KEY, CATALOGUE); return c })() })
     expect(screen.queryByTestId('deny-callout')).not.toBeInTheDocument()
   })
+
+  it('shows the decision record version as a quiet detail', () => {
+    renderWithProviders(<DecisionDetailView decision={detail({ record_version: 2 })} />)
+    expect(screen.getByText('Record v2')).toBeInTheDocument()
+  })
 })

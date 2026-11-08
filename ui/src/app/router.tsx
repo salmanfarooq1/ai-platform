@@ -22,6 +22,7 @@ const UsagePage = lazy(() => import('@/features/usage/usage-page'))
 const RunsPage = lazy(() => import('@/features/runs/runs-page'))
 const TrustPage = lazy(() => import('@/features/trust/trust-page'))
 const SystemPage = lazy(() => import('@/features/system/system-page'))
+const ModulesPage = lazy(() => import('@/features/system/modules-page'))
 
 function PageFallback() {
   return <div role="status" aria-label="Loading page" className="flex flex-col gap-3 p-1"><Skeleton className="h-8 w-48" /><Skeleton className="h-32" /></div>
@@ -61,6 +62,7 @@ export function AppRoutes() {
           <Route path="runs" element={<Lazy><RunsPage /></Lazy>} />
           <Route path="trust" element={<Lazy><TrustPage /></Lazy>} />
           <Route path="system" element={<Lazy><SystemPage /></Lazy>} />
+          <Route path="modules" element={<Lazy><ModulesPage /></Lazy>} />
           <Route path="*" element={<Navigate to="/app" replace />} />
         </Route>
       </Route>

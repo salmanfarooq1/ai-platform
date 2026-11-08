@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '@/api/endpoints'
 import { cn } from '@/lib/utils'
 import { buildPaletteItems, type PaletteItem } from './palette-items'
+import { useModuleAvailability } from './modules'
 
 interface CommandPaletteProps {
   open: boolean
@@ -19,6 +20,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const [active, setActive] = useState(0)
   const listId = useId()
   const listRef = useRef<HTMLUListElement>(null)
+  const { enabledModules } = useModuleAvailability()
 
   const recent = useQuery({
     queryKey: ['requests', 'palette'],
@@ -27,7 +29,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     staleTime: 10_000,
     retry: false,
   })
-  const items = useMemo(() => buildPaletteItems(query, recent.data?.items), [query, recent.data])
+  const items = useMemo(() => buildPaletteItems(query, recent.data?.items, enabledModules), [query, recent.data, enabledModules])
 
   useEffect(() => { setActive(0) }, [query])
   useEffect(() => { if (!open) setQuery('') }, [open])

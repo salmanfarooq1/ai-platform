@@ -10,6 +10,9 @@ const UI_PORT = 4173
 // A second API in MODE=public-preview, for the read-only preview test.
 const PREVIEW_API_PORT = 8001
 const PREVIEW_UI_PORT = 4174
+// Gateway-only edition for module boundary journeys.
+const GATEWAY_API_PORT = 8002
+const GATEWAY_UI_PORT = 4175
 
 export default defineConfig({
   testDir: './e2e',
@@ -65,6 +68,20 @@ export default defineConfig({
       command: `npx vite preview --host 127.0.0.1 --port ${PREVIEW_UI_PORT} --strictPort`,
       env: { API_URL: `http://127.0.0.1:${PREVIEW_API_PORT}` },
       url: `http://127.0.0.1:${PREVIEW_UI_PORT}/`,
+      timeout: 60_000,
+      reuseExistingServer: !!process.env.E2E_REUSE,
+    },
+    {
+      command: `poetry run python scripts/e2e/serve.py --enabled-modules gateway --port ${GATEWAY_API_PORT} --state-dir ui/e2e/.state/gateway`,
+      cwd: '..',
+      url: `http://127.0.0.1:${GATEWAY_API_PORT}/v1/health`,
+      timeout: 180_000,
+      reuseExistingServer: !!process.env.E2E_REUSE,
+    },
+    {
+      command: `npx vite preview --host 127.0.0.1 --port ${GATEWAY_UI_PORT} --strictPort`,
+      env: { API_URL: `http://127.0.0.1:${GATEWAY_API_PORT}` },
+      url: `http://127.0.0.1:${GATEWAY_UI_PORT}/`,
       timeout: 60_000,
       reuseExistingServer: !!process.env.E2E_REUSE,
     },

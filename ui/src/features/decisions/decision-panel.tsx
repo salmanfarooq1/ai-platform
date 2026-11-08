@@ -22,6 +22,7 @@ export function DecisionDetailView({ decision }: { decision: DecisionDetail }) {
           {decision.resource ? <> on <code className="mono">{decision.resource}</code></> : null}
           {decision.policy_version !== null ? <> under policy version <code className="mono">{decision.policy_version}</code></> : <> under the platform default policy</>}.
         </p>
+        <p className="text-footnote text-fg-secondary">Record v{decision.record_version}</p>
         {denied ? <DenyCallout reason={decision.reason} stage={decision.stage} policyVersion={decision.policy_version} /> : null}
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           <Link to={`/app/requests/${encodeURIComponent(decision.request_id)}`} className="text-callout text-seal underline-offset-2 hover:underline">Open the whole request</Link>

@@ -5,7 +5,10 @@ import type { Job, PlatformConfig } from '@/api/types'
 import { renderWithProviders } from '@/test/render'
 import LibraryPage from './library-page'
 
-vi.mock('@/app/session', () => ({ useSession: () => ({ can: () => true }) }))
+vi.mock('@/app/session', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/app/session')>(),
+  useSession: () => ({ can: () => true }),
+}))
 
 const config = { namespaces: { legal: 'Legal' }, confidence_floor: 0.5, max_query_length: 1000, daily_token_budget: 1, rate_limit_rpm: 1, rate_limit_window_seconds: 60, reranker_enabled: false, agent_defaults: { max_iterations: 1, enable_verifier: false, max_verify_retries: 0 } } as PlatformConfig
 const doc = (id: string) => ({ document_id: id, namespace: 'legal', source_filename: id, chunk_count: 4, content_hash: 'a'.repeat(64), last_ingested_at: '2026-09-14T09:30:00Z' })

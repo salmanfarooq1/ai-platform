@@ -6,7 +6,7 @@ export function denyReason(message: string): string {
 }
 
 /** Gateway denies that keep their own HTTP status. Their error code is the reason code itself. */
-const OWN_CODE_DENIES = new Set(['query_blocked', 'rate_limit_exceeded', 'daily_token_budget_exceeded', 'dependency_unavailable', 'decision_unrecorded'])
+const OWN_CODE_DENIES = new Set(['query_blocked', 'rate_limit_exceeded', 'daily_token_budget_exceeded', 'dependency_unavailable', 'decision_unrecorded', 'module_disabled'])
 
 /** The reason and message when an API error is a gateway deny, or null for any other error. */
 export function denyFromError(e: unknown): { reason: string; message: string; requestId: string | null } | null {

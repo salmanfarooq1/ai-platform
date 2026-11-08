@@ -57,6 +57,21 @@ export interface PlatformConfig {
   agent_defaults: { max_iterations: number; enable_verifier: boolean; max_verify_retries: number }
 }
 
+export interface PlatformModule {
+  name: string
+  label: string
+  pillar: 'platform' | 'gateway' | 'data' | 'agents'
+  enabled: boolean
+  nav_group: string | null
+  always_on: boolean
+}
+
+export interface ModuleList {
+  edition: string | null
+  deploy_shape: 'single_tenant' | 'multi_tenant'
+  modules: PlatformModule[]
+}
+
 /** One row of GET /v1/documents (no response model in the OpenAPI document). */
 export interface DocumentRow {
   document_id: string

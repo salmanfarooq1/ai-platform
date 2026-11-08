@@ -6,18 +6,20 @@ import { Logo } from '@/components/governance/logo'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { CommandPalette } from './command-palette'
-import { NAV, pageName } from './nav'
+import { pageName, visibleNav } from './nav'
 import { useSession } from './session'
 import { SessionMenu } from './session-menu'
 import { useTheme } from './theme'
 import { useEffect, useState } from 'react'
+import { useModuleAvailability } from './modules'
 
 const MODE_LABEL: Record<string, string> = { 'public-preview': 'Public preview', local: 'Local', prod: 'Production' }
 
-function SideNav({ onNavigate }: { onNavigate?: () => void }) {
+function SideNav({ onNavigate, enabled }: { onNavigate?: () => void; enabled?: ReadonlySet<string> }) {
+  const nav = visibleNav(enabled)
   return (
     <nav aria-label="Main" className="flex flex-col gap-5">
-      {NAV.map((g) => (
+      {nav.map((g) => (
         <div key={g.group}>
           <p className="eyebrow mb-1 px-2">{g.group}</p>
           <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
@@ -46,6 +48,7 @@ function SideNav({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AppShell() {
   const { session } = useSession()
+  const { enabledModules: enabled } = useModuleAvailability()
   const { isDark, toggle } = useTheme()
   const location = useLocation()
   const [open, setOpen] = useState(false)
@@ -71,7 +74,7 @@ export function AppShell() {
       <a href="#main" className="skip-link">Skip to content</a>
       <aside className="fixed inset-y-0 left-0 hidden w-[var(--layout-sidebar-width)] flex-col gap-6 border-r border-hairline bg-[var(--material-thin)] p-3 backdrop-blur-[var(--material-blur)] md:flex">
         <div className="px-2 pt-1"><Logo to="/app" /></div>
-        <SideNav />
+        <SideNav enabled={enabled} />
       </aside>
 
       <div className="md:pl-[var(--layout-sidebar-width)]">
@@ -109,7 +112,7 @@ export function AppShell() {
 
         {open ? (
           <div className="border-b border-hairline bg-surface p-3 md:hidden">
-            <SideNav onNavigate={() => setOpen(false)} />
+            <SideNav onNavigate={() => setOpen(false)} enabled={enabled} />
           </div>
         ) : null}
 

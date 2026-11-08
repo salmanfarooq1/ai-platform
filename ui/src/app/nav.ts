@@ -3,7 +3,7 @@ import {
   type Icon,
 } from '@phosphor-icons/react'
 
-export interface NavItem { to: string; label: string; icon: Icon; end?: boolean }
+export interface NavItem { to: string; label: string; icon: Icon; end?: boolean; module?: string }
 export interface NavGroup { group: string; items: NavItem[] }
 
 export const NAV: NavGroup[] = [
@@ -22,13 +22,21 @@ export const NAV: NavGroup[] = [
     { to: '/app/policies', label: 'Policies', icon: ShieldCheck },
     { to: '/app/keys', label: 'Keys', icon: Key },
     { to: '/app/usage', label: 'Usage', icon: Gauge },
-    { to: '/app/runs', label: 'Agent runs', icon: Path },
+    { to: '/app/runs', label: 'Agent runs', icon: Path, module: 'agents' },
   ] },
   { group: 'Platform', items: [
+    { to: '/app/modules', label: 'Modules', icon: Stack },
     { to: '/app/trust', label: 'Trust', icon: ListChecks },
     { to: '/app/system', label: 'System', icon: Gear },
   ] },
 ]
+
+export function visibleNav(enabled: ReadonlySet<string> | undefined): NavGroup[] {
+  return NAV.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !item.module || enabled?.has(item.module) === true),
+  })).filter((group) => group.items.length > 0)
+}
 
 export function pageName(pathname: string): string {
   let best: NavItem | undefined

@@ -1,7 +1,7 @@
 import { get, request, type ApiResult } from './client'
 import type {
   AgentAccepted, AgentRequest, AgentResponse, AgentRun, AgentRunDetail, AgentRunPage, DecisionDetail, DecisionFilters, DecisionPage, DocumentRow, HealthResponse, JobAccepted, JobPage,
-  PlatformConfig, PolicyList, ReasonCode, Receipt, ReceiptKey, TrustSummary, VerifyResult, RequestDetail, RequestFilters, RequestPage, Overview, PolicyVersion, PrincipalSummary, SearchRequest, SearchResponse, SessionInfo, UsageSummary,
+  ModuleList, PlatformConfig, PolicyList, ReasonCode, Receipt, ReceiptKey, TrustSummary, VerifyResult, RequestDetail, RequestFilters, RequestPage, Overview, PolicyVersion, PrincipalSummary, SearchRequest, SearchResponse, SessionInfo, UsageSummary,
 } from './types'
 
 export const api = {
@@ -12,6 +12,7 @@ export const api = {
   signOut: async () => { await request<void>('/v1/session', { method: 'DELETE' }) },
   health: () => get<HealthResponse>('/v1/health'),
   config: () => get<PlatformConfig>('/v1/config'),
+  modules: () => get<ModuleList>('/v1/system/modules'),
 
   // Console reads
   decisions: (filters: DecisionFilters, cursor?: string, limit = 50) =>

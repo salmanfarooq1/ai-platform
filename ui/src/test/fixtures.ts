@@ -20,6 +20,8 @@ export function detail(over: Partial<DecisionDetail> = {}): DecisionDetail {
   const base = decision()
   return {
     ...base,
+    record_version: 2,
+    extensions: {},
     tenant: { id: 'ten-1', slug: 'northwind' },
     input_sha256: 'a'.repeat(64),
     trace: [
