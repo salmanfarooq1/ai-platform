@@ -1,40 +1,26 @@
 # Sprint 014: Reference company. Requirements
 
-Platform and docs, Kernel. One fictional distributor used by every showcase, test and eval from here on, plus the M0 journey script.
+Re-planned 2026-11-02: see `planning/program/sprint-map.md`.
 
-Source: old 015, plus new scope (client-shaped variants, cloud showcase).
+Platform pillar, Kernel. This sprint provides personas and the local M0 showcase.
 
 ## Scope
-1. **A fictional distributor**, with functional names only (no real brands).
-   - Finance: invoices, ledger, budgets. CRM: accounts, contacts (with PII), opportunities. HR: salaries (restricted).
-   - Documents: invoice and contract PDFs generated from the data, and a written data policy in plain language.
-2. **Deterministic generators** in `data/reference-company/`.
-   - `generate.py --size small|medium --seed 42 --out DIR`: CSV per table, PDFs and `manifest.json` (file, rows, SHA-256). Sizes: small (50 accounts, 1,000 invoices, 40 employees) and medium (2,000 accounts, 100,000 invoices, 400 employees).
-   - Tables: `fin_invoices`, `fin_invoice_lines`, `fin_ledger_entries`, `fin_budgets`, `crm_accounts`, `crm_contacts`, `crm_opportunities`, `hr_employees`, `hr_salaries`.
-   - A data dictionary with a classification per column (`public`, `internal`, `pii`, `restricted`). `checksums.json` holds the expected hash per size and seed.
-   - Safe values only: emails on `example.com`, `.org` and `.net`, a reserved phone range, `TEST-` tax and bank ids. `deny_list.txt` names brands and real domains that must never appear.
-3. **Client-shaped variant (new).**
-   - `generate.py --schema FILE` emits the same kind of data in the shape of a client's schema file (tables, columns, types, keys). Faker (MIT) fills the values and keeps keys consistent.
-   - The schema file is a small documented JSON format. A client's real data never enters the repo.
-   - SDV is rejected (Business Source License).
-4. **Source database with a change generator.**
-   - Postgres `refco_source` in compose profile `lake`, seeded by `load_source.py`. Read-only role `refco_reader`.
-   - `change_generator.py --seed S --steps N` makes a fixed run of inserts, updates and deletes for the stream tests of 022.
-5. **Personas and keys.**
-   - Producer, steward, consumer (analyst), operator, auditor, agent developer. One JSON file each, with scopes and a tenant policy.
-   - `scripts/showcase/setup_personas.sh` creates tenant `refco` through `scripts/admin/identity.py`. Keys go to a git-ignored `.showcase/keys.env`, never to logs.
-6. **Showcase skeleton for M0.**
-   - `scripts/showcase/m0.sh` and `ui/e2e/showcase-m0.spec.ts`: a policy leaves out the local chat model, the consumer is denied, the auditor checks the receipt (model name and digest, signature), and `ENABLED_MODULES=gateway` shows `agents` off.
-   - The cloud steps (`poc up`, backup, `poc down`, restore) are added by 015. Until then they print SKIP, never PASS.
-   - `docs/showcase.md` lists the journeys per milestone (M0, MG, MD, MA, ME).
-
+1. **Personas and keys.** Create producer, steward, consumer, operator, auditor and agent-developer personas. Each persona lists implemented credential scopes and named tenant-wide journey policies. Do not imply per-persona policies or future grant enforcement.
+   - Reuse an explicitly verified fixture-owned tenant, including the default seeded tenant in single-tenant mode. Never create a tenant.
+   - Create and reuse credentials through the identity admin seam. Write keys atomically to private, git-ignored `.showcase/keys.env` with mode 0600 in a private directory. Reject symlinks and foreign ownership. Reruns validate and reuse keys. Missing, revoked or mismatched keys stop; replacement is explicit.
+   - Keep only principal ids, key prefixes and desired-scope hashes in a separate manifest. Exclude private setup state from Docker/build contexts and evidence.
+2. **Local M0 showcase.** `scripts/showcase/m0.sh` runs against the local stack. It sets a journey baseline policy, denies a consumer search because the local chat model is omitted, and confirms zero inference. The denial relies on the Sprint 013 admission check and asserts that the Ollama request count does not change. The auditor verifies the deny receipt offline, including model identity and signature.
+   - Start an owned API process with `ENABLED_MODULES=gateway`. Show that agents are off. The agent-developer credential proves the recorded `module_disabled` response. A recognized scoped credential reads Modules through `system.read`.
+   - Restore the baseline as a new policy version only if the current head is still the journey's own version. Never delete history or overwrite a concurrent change.
+   - `ui/e2e/showcase-m0.spec.ts` uses its own Playwright project, seed and API server. It does not change policy under other browser workers.
 ## Out of scope
-- Loading data into the lakehouse (022) and the stream setup (022).
-- Any route, migration or new UI page.
-- Real client data, or a client's secrets.
+- Reference data generators, PDFs, client-schema variants, source database, change generator and checksums. Sprint 021 owns them.
+- Cloud lifecycle steps. Sprint 015 is local only.
+- Any route, platform migration or new UI page.
+- Real client data or client secrets.
 
 ## Nav placement
-No UI change. The Playwright test uses existing pages (Decisions, Platform > Modules).
+No UI change. The Playwright test uses the existing Decisions and Platform > Modules pages.
 
 ## Questions this sprint closes
-- None from the open list. The persona policy question goes to `planning/QUESTIONS.md`.
+- None.

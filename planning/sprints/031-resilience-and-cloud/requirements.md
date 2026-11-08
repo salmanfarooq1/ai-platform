@@ -4,6 +4,8 @@ Platform (Kernel). A real deployment survives a failure within stated targets, k
 
 Source: new scope (enterprise-gaps-how and cloud-terraform-portability research notes, bundle A). It builds on the 015 POC lifecycle.
 
+Depends on: 030.
+
 ## Scope
 1. **Targets and drills.**
    - Stated RPO and RTO per deployment shape. The proposed targets are RPO 0 and RTO under 2 minutes for the database on a managed zone-redundant service or CloudNativePG with synchronous replication, and RPO under 24 hours for the single-VM POC shape.
@@ -29,6 +31,12 @@ Source: new scope (enterprise-gaps-how and cloud-terraform-portability research 
    - RLS and our migrations are tested on each managed Postgres.
    - One Helm chart (`deploy/helm/gap`) with values per cloud. Plain HCL, run by OpenTofu and tested with Terraform too.
 6. **Upgrades.** The 015 "upgrade from previous release" job also runs against the Helm install and a managed database. ADR-0034.
+7. **Cloud track from 015.**
+   - Define the OpenTofu interface and reusable modules in `infra.yml`. Build the first cloud VM module.
+   - Provide a Caddy TLS edge and a remote Compose bundle for the VM.
+   - Use SSH with strict host-key checking.
+   - Add drill and upgrade workflows, including an upgrade-from-previous-release job.
+8. **Items moved from 017.** Add the local TSA, per-tenant transparency log, PKCS#11 and cloud KMS signing adapters, and the live KMS check.
 
 ## Out of scope
 - Multi-region active-active. FIPS 140-3 crypto.

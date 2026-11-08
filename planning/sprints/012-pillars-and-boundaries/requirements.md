@@ -2,7 +2,7 @@
 
 All pillars. Infrastructure plus a small UI change. Evidence core, cross-module ports, module registry with the three pillars, decision record v2, the default deploy shape, and the milestone journeys.
 
-Source: old 013, plus new scope (owner direction 2026-10-11: three pillars, single-tenant per deploy).
+Source: old 013, plus owner direction on three pillars and single-tenant deployment. The current-code readiness decisions and exact port contracts are in `architect-disposition.md`; read it with this pack.
 
 ## Scope
 1. Evidence core.
@@ -10,12 +10,12 @@ Source: old 013, plus new scope (owner direction 2026-10-11: three pillars, sing
    - `enforce()` still fails closed when the sink write fails. No behaviour change.
 2. Cross-module ports in `ports/`.
    - `DecisionSink`, `EvidenceLookup`, `DataAccess`, `LineageEmitter`.
-   - Each has a no-op adapter and a contract suite (real and no-op where both exist).
+   - Each has a contract suite. Evidence core always uses real recording and lookup, including with M2 off; a synthetic unavailable sink only tests failure. DataAccess and LineageEmitter have no-op adapters until their real producers arrive.
 3. Boundaries.
    - import-linter contracts in CI: modules import only the kernel and `ports/`; no module imports another module.
    - `ENABLED_MODULES`, validated in `core/settings.py`, and a module registry that registers routes, workers and nav.
-   - `GET /v1/system/modules`. A disabled module answers `module_disabled` (new reason code).
-   - The UI nav hides the groups of disabled modules.
+   - `GET /v1/system/modules`, governed by new metadata-only `system.read` for every recognized credential scope. A disabled module answers `module_disabled` (new reason code).
+   - The sidebar and command palette share session-keyed nav that hides disabled modules; optional entries stay hidden while metadata is unavailable.
 4. Decision record v2.
    - `record_version` and one canonical serialisation, with an extensible `extensions` map hashed in a fixed order.
    - Old records verify unchanged.
@@ -31,7 +31,7 @@ Source: old 013, plus new scope (owner direction 2026-10-11: three pillars, sing
    - `GET /v1/system/modules` returns it, and Platform > Modules groups by it. Editions stay as they are.
 7. **Deploy shape** (new).
    - The setting `DEPLOY_SHAPE=single_tenant|multi_tenant` defaults to `single_tenant`. RLS and every tenant check stay on in both shapes.
-   - In `single_tenant`, startup refuses a second tenant unless `DEPLOY_SHAPE` is changed, and the UI hides tenant switching. `multi_tenant` behaves as today.
+   - In `single_tenant`, startup refuses a database with multiple tenants and the owner CLI serializes count/create to refuse a second tenant. There is no current tenant switcher; preserve the identity display. `multi_tenant` behaves as today.
    - Later sprints use it: for example, 021 creates one DuckLake catalog in `single_tenant`.
 8. **Milestone journeys** (new).
    - The showcase skeleton from 014 uses the new milestones: `m0`, `mg`, `md`, `ma` and `me`.
@@ -39,7 +39,7 @@ Source: old 013, plus new scope (owner direction 2026-10-11: three pillars, sing
 9. **ADR-0013** also records the three gateway deployment modes (embedded, sidecar, standalone proxy) as the target. 016 builds them.
 
 ## Out of scope
-- Any real `DataAccess` or `LineageEmitter` adapter (021, 025). Splitting the repo into installable packages (032).
+- Any real `DataAccess` adapter (021) or lineage store (025). The 012 no-op lineage emitter drops/counts only; 022 adds a durable tenant-scoped spool before production emitters ship. Splitting the repo into installable packages (032).
 - New receipt formats (017). Model digest extension (013).
 - The gateway service and proxy modes (016).
 - Changed from old 013: pillars, the deploy shape and the journey names are new.

@@ -27,7 +27,7 @@ Source: old 017, old 018, old 019, old 020, plus new scope (integration-data-con
    - `dbt-core==1.12.5` with `dbt-duckdb==1.11.0` runs as a `dbt_run` job, as a worker subprocess.
    - Generated projects only: no user SQL, macros or Python models. Typed template parameters. Vendored packages, with `dbt deps` offline.
    - Short-lived generated profiles. Incremental models take the writer lock.
-   - The OpenLineage dbt spike goes through the `LineageEmitter` port, spooled until 025. `DO_NOT_TRACK=1`.
+   - Before the first production emitter, replace the 012 drop/count no-op with a durable tenant-scoped spool behind `LineageEmitter`, committed with the producer transaction. Add its forward migration, RLS/grants, event-id idempotency and restart/replay tests. The OpenLineage dbt spike goes through that port, spooled until 025 consumes it. `DO_NOT_TRACK=1`.
 6. **Client streams and CDC** (optional profile `streams`; from old 020).
    - Two inputs: the client's own Kafka topics (SASL, ACLs, our consumer group), and CDC from a client Postgres through Debezium Server or Kafka Connect (`quay.io/debezium/connect:3.6.2.Final`, port 8083 never published, secrets through a config provider).
    - Our sink keeps the old 020 design:

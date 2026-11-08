@@ -4,6 +4,8 @@ Agents pillar (M3), with the Gateway (M1). One registry holds our agents, the cl
 
 Source: old 037, old 039, the tracing part of old 044, plus new scope (gateway-proxy-and-agents and data-pillar-retrieval-memory research notes).
 
+Depends on: 027.
+
 ## Scope
 1. **One registry for every agent kind** (extends the 016 registry).
    - Kinds: ours, client and external. Each has an owner, an agent id form (client metadata URL, SPIFFE id or card digest), allowed tools, an autonomy tier and the stopped flag.
@@ -15,11 +17,13 @@ Source: old 037, old 039, the tracing part of old 044, plus new scope (gateway-p
    - The caller must be registered and approved.
    - Cards are signed (JWS) and verified against the key pinned in the registry. The card digest goes on every decision.
    - The platform publishes its own signed card at `/.well-known/agent-card.json` (rule 9).
+   - Delegation tickets are signed and only narrow scope and depth. Support revocation.
 3. **Tracing.**
    - The OTel collector (`otel/opentelemetry-collector-contrib:0.161.0`, profile `observability`).
    - OTel GenAI agent spans (`invoke_agent`, `chat`, `execute_tool`) behind the opt-in flag, with the conventions version pinned.
    - Every gateway span carries `decision_id`, and job spans continue the request trace.
    - Redaction: no prompt, answer, document or SQL text by default, in the app and again in the collector.
+   - Propagate W3C trace context to the sandbox and tools, with one span per gateway stage.
 4. **Runtime monitoring and breakers.**
    - Loop detection and budget breakers per run trip automatically and stop the run. Thresholds are placeholders.
    - Anomaly alerts: denial spikes, cost spikes, new tools, and an agent calling outside its usual pattern.
@@ -34,6 +38,10 @@ Source: old 037, old 039, the tracing part of old 044, plus new scope (gateway-p
    - Tiers tighten automatically on guardrail hits, cost anomalies or eval regressions. Each change is a signed policy-change event. Loosening is a recorded human action.
    - Incident log in the EU AI Act Art. 73 shape. The deadlines are settings with placeholder defaults; 030 checks them.
 7. **ADRs.** ADR-0026 (A2A, cards, registry) and ADR-0028 (memory and autonomy).
+8. **Items moved from 016.**
+   - Spike on agentgateway as an optional data plane with `authorize()` as its external authorizer. Cache keys include every property used by the decision. Timeout, error and engine-down cases deny; otherwise keep the ASGI proxy as the data plane.
+   - Compose (`internal: true`), Kubernetes NetworkPolicy and Cilium FQDN egress templates allow only the gateway, DNS and named services. A canary call from the agent network to an external address must fail. Record that external agents are governed by owning their tool endpoint.
+   - Keep an allow-listed private MCP registry with signed manifests in the `server.json` shape. Deny unapproved entries, invalid signatures and registry URLs that fail the egress check.
 
 ## Out of scope
 - Outbound A2A calls from our agents to outside agents.

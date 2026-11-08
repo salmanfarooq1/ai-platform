@@ -1,0 +1,19 @@
+# Ollama digest spike (Architect, 2026-10-28)
+Runtime: ollama/ollama:0.40.7 (pinned digest from docker-compose.yml), compose project ai-platform, CPU only.
+Models pulled: qwen3:0.6b sha256:7df6b6e09427a769808717c0a93cadc4ae99ed4eb8bf5ca557c90846becea435
+               nomic-embed-text:v1.5 sha256:0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f
+
+1. Digest reference works on every API used by the platform:
+   /api/generate  model "sha256:<hex>", "sha256-<hex>" and bare "<hex>"   -> answers
+   /api/chat      model "sha256:<hex>"                                    -> answers
+   /api/embed     model "sha256:<hex>" (nomic)                            -> 768-dim vector
+   /v1/chat/completions (OpenAI-compatible) "sha256:<hex>"                -> answers
+2. Unknown digest: {"error":"model 'sha256:000…' not found"} (no fallback to any alias).
+3. LiteLLM (locked version in this repo) passes the digest through unchanged:
+   acompletion("ollama/sha256:<hex>"), acompletion("ollama_chat/sha256:<hex>"), aembedding("ollama/sha256:<hex>") -> ok, dim 768.
+4. Read-only model store (volume mounted :ro): serving by digest works; mutation fails at the filesystem:
+   /api/pull   -> "read-only file system"
+   /api/copy   -> HTTP 500 "read-only file system"
+   /api/delete -> HTTP 500 "read-only file system"
+   /api/tags afterwards unchanged.
+Conclusion: bind every local attempt to the locked digest reference, and serve from a read-only store after the init job.
