@@ -1,0 +1,166 @@
+........................................................................ [  7%]
+........................................................................ [ 15%]
+..F..F.F.F...........................................................FFF [ 23%]
+........................................................................ [ 30%]
+........................................................................ [ 38%]
+........................................................................ [ 46%]
+........................................................................ [ 53%]
+.........F........................................F..F..F.F............. [ 61%]
+............................................................F........... [ 69%]
+...................................F.................................... [ 77%]
+........................................................................ [ 84%]
+........................................................................ [ 92%]
+................................................................F......  [100%]
+=================================== FAILURES ===================================
+___________________ test_every_generated_block_is_up_to_date ___________________
+tests/unit/test_docs_generated.py:36: in test_every_generated_block_is_up_to_date
+    assert not stale, f"out of date: {stale}. Run: poetry run python scripts/docs/generate.py"
+E   AssertionError: out of date: ['docs/configuration.md']. Run: poetry run python scripts/docs/generate.py
+E   assert not ['docs/configuration.md']
+____ test_every_setting_has_a_description_and_is_in_the_configuration_table ____
+tests/unit/test_docs_generated.py:60: in test_every_setting_has_a_description_and_is_in_the_configuration_table
+    assert f"| `{name.upper()}` |" in table, f"{name} is missing from docs/configuration.md"
+E   AssertionError: deploy_shape is missing from docs/configuration.md
+E   assert '| `DEPLOY_SHAPE` |' in '# Configuration\n\nFor anyone who runs the platform. It lists every setting, what it does, its default, and whether i... `OTEL_SERVICE_NAME` | `ai-platform-api` | no | Service name on exported traces. |\n<!-- END GENERATED: settings -->\n'
+____________________ test_no_setting_falls_outside_a_group _____________________
+tests/unit/test_docs_generated.py:74: in test_no_setting_falls_outside_a_group
+    assert "### Other" not in gen.settings_block()
+E   AssertionError: assert '### Other' not in '### Mode an... required. |'
+E     
+E     '### Other' is contained here:
+E       races. |
+E       
+E       ### Other
+E       
+E       | Setting | Default | Secret | Purpose |...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+______ test_the_event_catalogue_lists_the_data_fields_of_the_real_events _______
+tests/unit/test_docs_generated.py:89: in test_the_event_catalogue_lists_the_data_fields_of_the_real_events
+    decision = decision_event(uuid4(), ctx.principal.tenant_id, ctx, Action(ActionKind.KB_READ, "legal"), Decision(True, "allow", "allowed"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: decision_event() takes 2 positional arguments but 5 were given
+__ test_the_default_boundary_is_what_scopes_grant_over_the_platform_defaults ___
+tests/unit/test_gateway_boundary.py:93: in test_the_default_boundary_is_what_scopes_grant_over_the_platform_defaults
+    assert boundary.actions == {"kb.read", "model.invoke", "tool.call", "feedback.write"}
+E   AssertionError: assert frozenset({'f... 'tool.call'}) == {'feedback.wr..., 'tool.call'}
+E     
+E     Extra items in the left set:
+E     'system.read'
+E     Use -v to get more diff
+___ test_a_policy_narrows_resources_but_cannot_grant_actions_the_scopes_lack ___
+tests/unit/test_gateway_boundary.py:104: in test_a_policy_narrows_resources_but_cannot_grant_actions_the_scopes_lack
+    assert boundary.actions == {"kb.read", "tool.call", "analytics.read"}
+E   AssertionError: assert frozenset({'a... 'tool.call'}) == {'analytics.r..., 'tool.call'}
+E     
+E     Extra items in the left set:
+E     'system.read'
+E     Use -v to get more diff
+________ test_unknown_scopes_grant_nothing_and_admin_grants_everything _________
+tests/unit/test_gateway_boundary.py:114: in test_unknown_scopes_grant_nothing_and_admin_grants_everything
+    assert build_boundary(make_principal(("admin",)), None).actions == {
+E   AssertionError: assert frozenset({'a....write', ...}) == {'agent.run',...b.write', ...}
+E     
+E     Extra items in the left set:
+E     'system.read'
+E     Use -v to get more diff
+______________________ test_sprint_010_adds_no_migration _______________________
+tests/unit/test_kafka_units.py:122: in test_sprint_010_adds_no_migration
+    assert heads == ["0010"] or [h.split("_")[0] for h in heads] == ["0010"]
+E   AssertionError: assert (['0011'] == ['0010']
+E     
+E     At index 0 diff: '0011' != '0010'
+E     Use -v to get more diff or ['0011'] == ['0010']
+E     
+E     At index 0 diff: '0011' != '0010'
+E     Use -v to get more diff)
+__________________________ test_list_namespaces_tool ___________________________
+tests/unit/test_mcp_tools.py:52: in test_list_namespaces_tool
+    result = await list_namespaces()
+             ^^^^^^^^^^^^^^^^^^^^^^^
+api/mcp/tools.py:49: in list_namespaces
+    ctx = await gate(Action(ActionKind.TOOL_CALL, "list_namespaces"), Action(ActionKind.KB_READ))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+api/mcp/context.py:60: in gate
+    GatewayRuntime(pool, adapters.cache, decisions=adapters.decisions,
+                                                   ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decisions'
+_____________________ test_search_documents_blocked_query ______________________
+tests/unit/test_mcp_tools.py:90: in test_search_documents_blocked_query
+    result = await search_documents(query=long_query, namespace="default")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+api/mcp/tools.py:85: in search_documents
+    await gate(
+api/mcp/context.py:60: in gate
+    GatewayRuntime(pool, adapters.cache, decisions=adapters.decisions,
+                                                   ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decisions'
+_____ test_multi_namespace_defaults_to_all_of_the_tenants_knowledge_bases ______
+tests/unit/test_mcp_tools.py:127: in test_multi_namespace_defaults_to_all_of_the_tenants_knowledge_bases
+    await multi_namespace_search(query="test")
+api/mcp/tools.py:170: in multi_namespace_search
+    ctx = await gate(Action(ActionKind.TOOL_CALL, "multi_namespace_search"), Action(ActionKind.KB_READ))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+api/mcp/context.py:60: in gate
+    GatewayRuntime(pool, adapters.cache, decisions=adapters.decisions,
+                                                   ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decisions'
+______ test_mcp_tools_pass_the_scope_check_with_the_right_scope_or_admin _______
+tests/unit/test_mcp_tools.py:175: in test_mcp_tools_pass_the_scope_check_with_the_right_scope_or_admin
+    assert json.loads(await list_namespaces()) == {}
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+api/mcp/tools.py:49: in list_namespaces
+    ctx = await gate(Action(ActionKind.TOOL_CALL, "list_namespaces"), Action(ActionKind.KB_READ))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+api/mcp/context.py:60: in gate
+    GatewayRuntime(pool, adapters.cache, decisions=adapters.decisions,
+                                                   ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decisions'
+_ test_every_emitted_reason_code_has_a_catalogue_entry[gateway/module_stage.py] _
+tests/unit/test_reason_catalogue.py:63: in test_every_emitted_reason_code_has_a_catalogue_entry
+    assert not missing, f"{path.relative_to(ROOT)} emits reason codes with no entry in gateway/reasons.py: {missing}"
+E   AssertionError: gateway/module_stage.py emits reason codes with no entry in gateway/reasons.py: ['module_disabled']
+E   assert not ['module_disabled']
+______ test_an_override_replaces_one_port_and_the_real_one_is_never_built ______
+tests/unit/test_registry.py:45: in test_an_override_replaces_one_port_and_the_real_one_is_never_built
+    adapters = build_adapters(settings(), overrides={"llm": fake_llm, "chat": fake_llm, "knowledge": store, "cache": cache,
+adapters/registry.py:126: in build_adapters
+    decisions=pick("decisions", decisions),
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+adapters/registry.py:82: in pick
+    return overrides[name] if name in overrides else build()
+                                                     ^^^^^^^
+adapters/registry.py:108: in decisions
+    raise ValueError("the decision sink needs a pool")
+E   ValueError: the decision sink needs a pool
+_____ test_audit_read_scope_grants_only_audit_read_and_admin_grants_it_too _____
+tests/unit/test_web_edge_unit.py:86: in test_audit_read_scope_grants_only_audit_read_and_admin_grants_it_too
+    assert SCOPE_ACTIONS[Scope.AUDIT_READ.value] == frozenset({"audit.read"})
+E   AssertionError: assert frozenset({'a...system.read'}) == frozenset({'audit.read'})
+E     
+E     Extra items in the left set:
+E     'system.read'
+E     Use -v to get more diff
+=============================== warnings summary ===============================
+tests/unit/test_eval_gate.py::test_the_suite_scores_what_the_baseline_says
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_docs_generated.py::test_every_generated_block_is_up_to_date
+FAILED tests/unit/test_docs_generated.py::test_every_setting_has_a_description_and_is_in_the_configuration_table
+FAILED tests/unit/test_docs_generated.py::test_no_setting_falls_outside_a_group
+FAILED tests/unit/test_docs_generated.py::test_the_event_catalogue_lists_the_data_fields_of_the_real_events
+FAILED tests/unit/test_gateway_boundary.py::test_the_default_boundary_is_what_scopes_grant_over_the_platform_defaults
+FAILED tests/unit/test_gateway_boundary.py::test_a_policy_narrows_resources_but_cannot_grant_actions_the_scopes_lack
+FAILED tests/unit/test_gateway_boundary.py::test_unknown_scopes_grant_nothing_and_admin_grants_everything
+FAILED tests/unit/test_kafka_units.py::test_sprint_010_adds_no_migration - As...
+FAILED tests/unit/test_mcp_tools.py::test_list_namespaces_tool - AttributeErr...
+FAILED tests/unit/test_mcp_tools.py::test_search_documents_blocked_query - At...
+FAILED tests/unit/test_mcp_tools.py::test_multi_namespace_defaults_to_all_of_the_tenants_knowledge_bases
+FAILED tests/unit/test_mcp_tools.py::test_mcp_tools_pass_the_scope_check_with_the_right_scope_or_admin
+FAILED tests/unit/test_reason_catalogue.py::test_every_emitted_reason_code_has_a_catalogue_entry[gateway/module_stage.py]
+FAILED tests/unit/test_registry.py::test_an_override_replaces_one_port_and_the_real_one_is_never_built
+FAILED tests/unit/test_web_edge_unit.py::test_audit_read_scope_grants_only_audit_read_and_admin_grants_it_too
+15 failed, 920 passed, 852 deselected, 1 warning in 54.51s

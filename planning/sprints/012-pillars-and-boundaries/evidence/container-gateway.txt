@@ -1,0 +1,38 @@
+# Container proof: Gateway-only application image (Sprint 012, test 5.5, A3)
+date: 2026-11-06T06:55:10Z
+image: ai-platform-app:012-proof sha256:e23590ffd6405fd2f0f63d95725be313197125f63f1e3fc4770f37ac4dcac3e6
+built from: the 012 worktree Dockerfile (runtime stage), started with ENABLED_MODULES=gateway, MODE=local, default DEPLOY_SHAPE
+database: throwaway gap_proof012_89020b (alembic upgrade head ran inside the container at start)
+
+## evidence package is in the image
+/app/evidence
+import evidence: ok
+
+
+## GET /v1/health
+{"status":"degraded","db":"ok","redis":"ok","embedding":"error: litellm.APIConnectionError: OllamaException - Cannot connect to host localhost:11434 ssl:<ssl.SSLContext object at 0x7217cbebbb60> [Connect call failed ('127.0.0.1', 11434)]","version":"0.4.0","mode":"local","uptime_seconds":18,"stale_vectors":0}
+status 200
+
+## GET /v1/system/modules
+{"edition":"Gateway","deploy_shape":"single_tenant","modules":[{"name":"gateway","label":"Gateway","pillar":"gateway","description":"Control access to data and record each decision.","enabled":true,"nav_group":"Governance","always_on":true},{"name":"evidence","label":"Evidence","pillar":"gateway","description":"View signed records that explain how decisions were made.","enabled":false,"nav_group":"Evidence","always_on":false},{"name":"agents","label":"Agents","pillar":"agents","description":"Ask questions and run governed agents against business data.","enabled":false,"nav_group":"Workspace","always_on":false},{"name":"data","label":"Data","pillar":"data","description":"Upload, organize and search business documents.","enabled":false,"nav_group":"Data","always_on":false},{"name":"lineage","label":"Lineage","pillar":"data","description":"Trace where data came from and how it changed.","enabled":false,"nav_group":"Data","always_on":false}]}
+status 200
+
+## GET /v1/documents?namespace=default (allowed call)
+status 200
+
+## POST /v1/agent/query
+{"error":{"code":"module_disabled","message":"module_disabled","request_id":"6fa41fa31c784fe9b98ef9c61786f980"}}
+status 404
+
+## POST /v1/agent/query without credentials
+status 401
+
+## decision rows written by the container
+system.read|allow|allowed|2
+kb.read|allow|allowed|2
+agent.run|deny|module_disabled|2
+
+## migration head
+0011
+
+note: health is 200 with "degraded" because the container has no route to a local embedding model; db and redis are ok. The module_disabled deny is recorded before any agent code runs.

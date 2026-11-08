@@ -1,0 +1,24 @@
+{
+  "tool": "import-linter 2.15 + grimp 3.17",
+  "cases": [
+    {
+      "case": "public-api",
+      "exit_code": 0,
+      "expected": 0,
+      "pass": true
+    },
+    {
+      "case": "direct-internal",
+      "exit_code": 1,
+      "expected": 1,
+      "pass": true
+    },
+    {
+      "case": "package-internal",
+      "exit_code": 1,
+      "expected": 1,
+      "pass": true
+    }
+  ],
+  "all_pass": true
+}

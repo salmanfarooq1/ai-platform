@@ -1,0 +1,11 @@
+
+---------
+Contracts
+---------
+
+Analyzed 4 files, 2 dependencies.
+---------------------------------
+
+Agent imports gateway public API KEPT
+
+Contracts: 1 kept, 0 broken.

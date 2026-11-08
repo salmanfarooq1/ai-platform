@@ -1,0 +1,106 @@
+{
+  "moved_module_checks": [
+    {
+      "module": "record",
+      "mechanical_move_ast_equal": true
+    },
+    {
+      "module": "chain",
+      "mechanical_move_ast_equal": true
+    },
+    {
+      "module": "receipts",
+      "mechanical_move_ast_equal": true
+    }
+  ],
+  "test_assertion_counts": [
+    {
+      "path": "tests/e2e/test_receipts.py",
+      "before_assertions": 55,
+      "after_assertions": 55
+    },
+    {
+      "path": "tests/e2e/test_sandbox_runs.py",
+      "before_assertions": 107,
+      "after_assertions": 107
+    },
+    {
+      "path": "tests/import_lint.py",
+      "before_assertions": 0,
+      "after_assertions": 0
+    },
+    {
+      "path": "tests/integration/test_gateway.py",
+      "before_assertions": 44,
+      "after_assertions": 44
+    },
+    {
+      "path": "tests/integration/test_migration_0009.py",
+      "before_assertions": 13,
+      "after_assertions": 13
+    },
+    {
+      "path": "tests/integration/test_retention.py",
+      "before_assertions": 50,
+      "after_assertions": 50
+    },
+    {
+      "path": "tests/trust_helpers.py",
+      "before_assertions": 0,
+      "after_assertions": 0
+    },
+    {
+      "path": "tests/unit/conftest.py",
+      "before_assertions": 0,
+      "after_assertions": 0
+    },
+    {
+      "path": "tests/unit/test_decision_event.py",
+      "before_assertions": 5,
+      "after_assertions": 5
+    },
+    {
+      "path": "tests/unit/test_docs_generated.py",
+      "before_assertions": 17,
+      "after_assertions": 17
+    },
+    {
+      "path": "tests/unit/test_gateway_enforce.py",
+      "before_assertions": 51,
+      "after_assertions": 51
+    },
+    {
+      "path": "tests/unit/test_reason_catalogue.py",
+      "before_assertions": 7,
+      "after_assertions": 7
+    }
+  ],
+  "product_delta_paths": [
+    "api/main.py",
+    "api/routers/receipts.py",
+    "evidence/__init__.py",
+    "evidence/chain.py",
+    "evidence/receipts.py",
+    "evidence/record.py",
+    "gateway/chain.py",
+    "gateway/enforce.py",
+    "gateway/receipts.py",
+    "gateway/record.py",
+    "tests/e2e/test_receipts.py",
+    "tests/e2e/test_sandbox_runs.py",
+    "tests/import_lint.py",
+    "tests/integration/test_gateway.py",
+    "tests/integration/test_migration_0009.py",
+    "tests/integration/test_retention.py",
+    "tests/trust_helpers.py",
+    "tests/unit/conftest.py",
+    "tests/unit/test_decision_event.py",
+    "tests/unit/test_docs_generated.py",
+    "tests/unit/test_gateway_enforce.py",
+    "tests/unit/test_reason_catalogue.py",
+    "workers/context.py",
+    "workers/handlers/purge.py"
+  ],
+  "source_root": "/home/ubuntu/ai-platform-sprints/012-pillars-and-boundaries",
+  "prerequisite": "011-accepted-v3"
+}

@@ -1,0 +1,17 @@
+{
+  "baseline_cases": 1729,
+  "checkpoint_cases": 1730,
+  "normalized_missing": [],
+  "normalized_added": [
+    "tests.unit.test_reason_catalogue.test_every_emitted_reason_code_has_a_catalogue_entry[evidence/__init__.py]"
+  ],
+  "normalizations": [
+    "2 existing generated console UUID parameters",
+    "3 explicit moved reason-scanner paths"
+  ],
+  "unit_passed": 885,
+  "integration_e2e_passed": 835,
+  "allowed_skips": 10,
+  "retained_assertions": true,
+  "mypy_files": 148
+}

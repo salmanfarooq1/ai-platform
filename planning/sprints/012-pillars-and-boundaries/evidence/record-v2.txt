@@ -1,0 +1,7 @@
+Commands: source /home/ubuntu/ai-platform/scratch/env012.sh; export TEST_DATABASE_ADMIN_URL DATABASE_URL MIGRATION_DATABASE_URL REDIS_URL TEST_REDIS_URL; "$POETRY" run pytest -q -p no:cacheprovider tests/integration/test_migration_record_v2.py tests/integration/test_record_v2.py; unset database URLs; "$POETRY" run pytest -q -p no:cacheprovider tests/unit/test_record_canonical.py -k "extension_order_does_not_change_hash or legacy_unicode_timezone_and_row_hash_preserve_captured_bytes or versions_verify_with_the_same_checks_online_and_offline"
+Date: 2026-11-06
+
+.....                                                                    [100%]
+5 passed in 48.23s
+....                                                                     [100%]
+4 passed, 27 deselected in 10.52s

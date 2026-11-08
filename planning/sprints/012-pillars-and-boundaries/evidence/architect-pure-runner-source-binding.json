@@ -1,0 +1,1777 @@
+{
+  "source": "/home/ubuntu/ai-platform-sprints/012-pillars-and-boundaries",
+  "frozen_runner": "/home/ubuntu/ai-platform-sprints/012-pillars-and-boundaries/scratch/pure-workspace",
+  "files": [
+    {
+      "path": "adapters/__init__.py",
+      "worktree_sha256": "89463e45237d2726975daf4bf021043237071b2cde943f957d1351bff91a59a6",
+      "runner_sha256": "89463e45237d2726975daf4bf021043237071b2cde943f957d1351bff91a59a6",
+      "equal": true
+    },
+    {
+      "path": "adapters/inprocess_events.py",
+      "worktree_sha256": "98f5493ca33ad204321b11538ba0b77e7054cb24ac764d386d1c709f6188b730",
+      "runner_sha256": "98f5493ca33ad204321b11538ba0b77e7054cb24ac764d386d1c709f6188b730",
+      "equal": true
+    },
+    {
+      "path": "adapters/inprocess_runtime.py",
+      "worktree_sha256": "510021acaab74b4a31a29d9f5c5cde34066a8f3f3116a777a247ef16d0efd44c",
+      "runner_sha256": "510021acaab74b4a31a29d9f5c5cde34066a8f3f3116a777a247ef16d0efd44c",
+      "equal": true
+    },
+    {
+      "path": "adapters/job_runtime.py",
+      "worktree_sha256": "422f1dec111d7cd7e0c2e6aa263a5eaf2e45f67df2bc04dda01d74c98f9564db",
+      "runner_sha256": "422f1dec111d7cd7e0c2e6aa263a5eaf2e45f67df2bc04dda01d74c98f9564db",
+      "equal": true
+    },
+    {
+      "path": "adapters/kafka_event_bus.py",
+      "worktree_sha256": "5e3f9b03a274495b7cbef3a6dc04f686d5261a52c75b77dd6c4b7af91654921f",
+      "runner_sha256": "5e3f9b03a274495b7cbef3a6dc04f686d5261a52c75b77dd6c4b7af91654921f",
+      "equal": true
+    },
+    {
+      "path": "adapters/litellm_chat.py",
+      "worktree_sha256": "37ed54fcacf600810adc14d9d4afdfc5ba1a2b5b0d07031f9e5bae48807be7f4",
+      "runner_sha256": "37ed54fcacf600810adc14d9d4afdfc5ba1a2b5b0d07031f9e5bae48807be7f4",
+      "equal": true
+    },
+    {
+      "path": "adapters/litellm_embeddings.py",
+      "worktree_sha256": "89a760239d73bcaa41b4e624e9c407c899c8b67eea133bb370a1c488c093dfca",
+      "runner_sha256": "89a760239d73bcaa41b4e624e9c407c899c8b67eea133bb370a1c488c093dfca",
+      "equal": true
+    },
+    {
+      "path": "adapters/litellm_llm.py",
+      "worktree_sha256": "6349e3dba448ecf3505c356171d041eddb9912b53ff6890ad5889136f2efb6df",
+      "runner_sha256": "6349e3dba448ecf3505c356171d041eddb9912b53ff6890ad5889136f2efb6df",
+      "equal": true
+    },
+    {
+      "path": "adapters/local_object_store.py",
+      "worktree_sha256": "c14aa36fe882f8868751ae031ac708bdb10285d11f71b8d54b3efe47a89643da",
+      "runner_sha256": "c14aa36fe882f8868751ae031ac708bdb10285d11f71b8d54b3efe47a89643da",
+      "equal": true
+    },
+    {
+      "path": "adapters/openshell_driver.py",
+      "worktree_sha256": "b801b3ac1d8c2cdda9bf018ca277768eb7b2d36c05245eeea1d3da296357b1de",
+      "runner_sha256": "b801b3ac1d8c2cdda9bf018ca277768eb7b2d36c05245eeea1d3da296357b1de",
+      "equal": true
+    },
+    {
+      "path": "adapters/openshell_events.py",
+      "worktree_sha256": "8715323059dc0a0aad5ad84f2e472ecb22490f4b69d195db93a1df2f51cc415c",
+      "runner_sha256": "8715323059dc0a0aad5ad84f2e472ecb22490f4b69d195db93a1df2f51cc415c",
+      "equal": true
+    },
+    {
+      "path": "adapters/openshell_runtime.py",
+      "worktree_sha256": "85c064d3194bf761d6fe3b5573b05f4528042c94c6c72bfc51906040370e43a5",
+      "runner_sha256": "85c064d3194bf761d6fe3b5573b05f4528042c94c6c72bfc51906040370e43a5",
+      "equal": true
+    },
+    {
+      "path": "adapters/pg_knowledge.py",
+      "worktree_sha256": "ecab274804e3f7094c55422c4cbcd8e3fb56d1855a6cd6485f74ffe91beb3d59",
+      "runner_sha256": "ecab274804e3f7094c55422c4cbcd8e3fb56d1855a6cd6485f74ffe91beb3d59",
+      "equal": true
+    },
+    {
+      "path": "adapters/pg_outbox_events.py",
+      "worktree_sha256": "d49ba9268548b8212c8a48cd5c51a6562cd2e565fb197b8827f9823b84a912f5",
+      "runner_sha256": "d49ba9268548b8212c8a48cd5c51a6562cd2e565fb197b8827f9823b84a912f5",
+      "equal": true
+    },
+    {
+      "path": "adapters/redis_cache.py",
+      "worktree_sha256": "ce9c15162aea684ed809db31d6350da2680a61f1195adeee0d19ccf4de9660d9",
+      "runner_sha256": "ce9c15162aea684ed809db31d6350da2680a61f1195adeee0d19ccf4de9660d9",
+      "equal": true
+    },
+    {
+      "path": "adapters/registry.py",
+      "worktree_sha256": "3185a82bc5d58c1f76b39070ed87f75b3654c4bff5f9bcb1f6af90006546e473",
+      "runner_sha256": "3185a82bc5d58c1f76b39070ed87f75b3654c4bff5f9bcb1f6af90006546e473",
+      "equal": true
+    },
+    {
+      "path": "adapters/s3_object_store.py",
+      "worktree_sha256": "1d79cad83007ed1b2d92f67dd57d8d61ebef9a28dd9fce747fdc8bd738783402",
+      "runner_sha256": "1d79cad83007ed1b2d92f67dd57d8d61ebef9a28dd9fce747fdc8bd738783402",
+      "equal": true
+    },
+    {
+      "path": "adapters/sandbox_events.py",
+      "worktree_sha256": "ba700f2b12bd838e7573e05d1e58b9096eed6ea2cfdb8abd4f2c7602307d323b",
+      "runner_sha256": "ba700f2b12bd838e7573e05d1e58b9096eed6ea2cfdb8abd4f2c7602307d323b",
+      "equal": true
+    },
+    {
+      "path": "alembic.ini",
+      "worktree_sha256": "3b51450ea7b0a5e06ab40f985eceb6ff4302f69f01b0100ee876170fe6907ac4",
+      "runner_sha256": "3b51450ea7b0a5e06ab40f985eceb6ff4302f69f01b0100ee876170fe6907ac4",
+      "equal": true
+    },
+    {
+      "path": "api/__init__.py",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "runner_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "equal": true
+    },
+    {
+      "path": "api/agent/__init__.py",
+      "worktree_sha256": "763bc96bb4b070a853d7aecb2d6649a6a65e0a5fc6bc235b2e86a62abfe4b11f",
+      "runner_sha256": "763bc96bb4b070a853d7aecb2d6649a6a65e0a5fc6bc235b2e86a62abfe4b11f",
+      "equal": true
+    },
+    {
+      "path": "api/agent/graph.py",
+      "worktree_sha256": "c61b47953d6ba093d35ecae02cf921f086775da08d3e2cb0944fbc11abcf2752",
+      "runner_sha256": "c61b47953d6ba093d35ecae02cf921f086775da08d3e2cb0944fbc11abcf2752",
+      "equal": true
+    },
+    {
+      "path": "api/agent/models.py",
+      "worktree_sha256": "9615c77fc741788a4c17fe7c0fb64b74d5f19d947a62f70f47b2f5f280c03004",
+      "runner_sha256": "9615c77fc741788a4c17fe7c0fb64b74d5f19d947a62f70f47b2f5f280c03004",
+      "equal": true
+    },
+    {
+      "path": "api/agent/response.py",
+      "worktree_sha256": "35d50aff4fceb80001cd794ab269b403105710bff135a3b9853ff7dfc7f87f68",
+      "runner_sha256": "35d50aff4fceb80001cd794ab269b403105710bff135a3b9853ff7dfc7f87f68",
+      "equal": true
+    },
+    {
+      "path": "api/agent/router.py",
+      "worktree_sha256": "5ac52e0011560383ac14fa7ecaf84f7beef64a970f0cd02afffff5df2cb4fbe6",
+      "runner_sha256": "5ac52e0011560383ac14fa7ecaf84f7beef64a970f0cd02afffff5df2cb4fbe6",
+      "equal": true
+    },
+    {
+      "path": "api/agent/runner.py",
+      "worktree_sha256": "b761dd9bb37cf7711bf87973aeb0a905183255b1136376004bb031af961e9ada",
+      "runner_sha256": "b761dd9bb37cf7711bf87973aeb0a905183255b1136376004bb031af961e9ada",
+      "equal": true
+    },
+    {
+      "path": "api/agent/schemas.py",
+      "worktree_sha256": "c09a0b3a74a64d3e7aae539b0b45c4c6c7d4e694518e4a44d5e41c259913975f",
+      "runner_sha256": "c09a0b3a74a64d3e7aae539b0b45c4c6c7d4e694518e4a44d5e41c259913975f",
+      "equal": true
+    },
+    {
+      "path": "api/agent/tools.py",
+      "worktree_sha256": "478cb157d24455b3e8a7b299074a750f5d59a3921d87d804a241372dc4f17f7e",
+      "runner_sha256": "478cb157d24455b3e8a7b299074a750f5d59a3921d87d804a241372dc4f17f7e",
+      "equal": true
+    },
+    {
+      "path": "api/auth.py",
+      "worktree_sha256": "7843600eb696c881d01af04e7f902f9ea25ab4ba137322abaae17c473c5b4e16",
+      "runner_sha256": "7843600eb696c881d01af04e7f902f9ea25ab4ba137322abaae17c473c5b4e16",
+      "equal": true
+    },
+    {
+      "path": "api/dependencies.py",
+      "worktree_sha256": "edaa69a5301a78bfbb288558cc28a29a5a7db09db8fdeeb9d64eb454866763b6",
+      "runner_sha256": "edaa69a5301a78bfbb288558cc28a29a5a7db09db8fdeeb9d64eb454866763b6",
+      "equal": true
+    },
+    {
+      "path": "api/errors.py",
+      "worktree_sha256": "23f287abc131781b09d112fa682308583d34a9e30f5811045ad8038a1f46db22",
+      "runner_sha256": "23f287abc131781b09d112fa682308583d34a9e30f5811045ad8038a1f46db22",
+      "equal": true
+    },
+    {
+      "path": "api/gateway_deps.py",
+      "worktree_sha256": "4730bfda4294c07b966c63d9802cf804a6c5b3a0c966048f5e9205a0afb7ab16",
+      "runner_sha256": "4730bfda4294c07b966c63d9802cf804a6c5b3a0c966048f5e9205a0afb7ab16",
+      "equal": true
+    },
+    {
+      "path": "api/main.py",
+      "worktree_sha256": "93d175710f5d4245ea3d5665cc1d18558a4a426a84c84110ed669cfa22cc5f75",
+      "runner_sha256": "93d175710f5d4245ea3d5665cc1d18558a4a426a84c84110ed669cfa22cc5f75",
+      "equal": true
+    },
+    {
+      "path": "api/mcp/__init__.py",
+      "worktree_sha256": "9cc35ab7208ecce83f9249f912a904d0e477cbfec9705503572c37aadcdd4fd6",
+      "runner_sha256": "9cc35ab7208ecce83f9249f912a904d0e477cbfec9705503572c37aadcdd4fd6",
+      "equal": true
+    },
+    {
+      "path": "api/mcp/context.py",
+      "worktree_sha256": "8868e26e4a5edc810ea81265de9e56b208183cd06b633f0e7459d027a2df9273",
+      "runner_sha256": "8868e26e4a5edc810ea81265de9e56b208183cd06b633f0e7459d027a2df9273",
+      "equal": true
+    },
+    {
+      "path": "api/mcp/prompts.py",
+      "worktree_sha256": "c0b5d67ef3eed15970de4837ca3a297cddf5c57055048934bce6efebcfa7f65c",
+      "runner_sha256": "c0b5d67ef3eed15970de4837ca3a297cddf5c57055048934bce6efebcfa7f65c",
+      "equal": true
+    },
+    {
+      "path": "api/mcp/resources.py",
+      "worktree_sha256": "cacd25f4a1f1ec20c30c04817a5574e0e939fe89be3d44cbfa477d9079a75ed9",
+      "runner_sha256": "cacd25f4a1f1ec20c30c04817a5574e0e939fe89be3d44cbfa477d9079a75ed9",
+      "equal": true
+    },
+    {
+      "path": "api/mcp/server.py",
+      "worktree_sha256": "8201a7f95132b3c7075260dac6d125d3641fa7aef8d42b6dc00cddc5a6b3e6a7",
+      "runner_sha256": "8201a7f95132b3c7075260dac6d125d3641fa7aef8d42b6dc00cddc5a6b3e6a7",
+      "equal": true
+    },
+    {
+      "path": "api/mcp/tools.py",
+      "worktree_sha256": "83d17f053c94b046597b644af5cb28561fbe0a134a2cf5f623ce09219cc37452",
+      "runner_sha256": "83d17f053c94b046597b644af5cb28561fbe0a134a2cf5f623ce09219cc37452",
+      "equal": true
+    },
+    {
+      "path": "api/mcp/transport.py",
+      "worktree_sha256": "bdefd6a3cc0eaee86ae5f883b47fbf038caa0bc2a0d6b23a8b3dc229b30a3eae",
+      "runner_sha256": "bdefd6a3cc0eaee86ae5f883b47fbf038caa0bc2a0d6b23a8b3dc229b30a3eae",
+      "equal": true
+    },
+    {
+      "path": "api/middleware/__init__.py",
+      "worktree_sha256": "27e18c16fcb9999bb1c1434481a64109960733c36041251c79a655a0fe7afdfe",
+      "runner_sha256": "27e18c16fcb9999bb1c1434481a64109960733c36041251c79a655a0fe7afdfe",
+      "equal": true
+    },
+    {
+      "path": "api/middleware/auth.py",
+      "worktree_sha256": "5962d5250d7b3e5c35387d525f1e72e88c4d6f4e7733d4a59adf4bc8ff40e28b",
+      "runner_sha256": "5962d5250d7b3e5c35387d525f1e72e88c4d6f4e7733d4a59adf4bc8ff40e28b",
+      "equal": true
+    },
+    {
+      "path": "api/middleware/finops.py",
+      "worktree_sha256": "846595ff6f63f57d20fc9381dc7a7fd772d69cd60e3da0ff592141548ddf6fb1",
+      "runner_sha256": "846595ff6f63f57d20fc9381dc7a7fd772d69cd60e3da0ff592141548ddf6fb1",
+      "equal": true
+    },
+    {
+      "path": "api/middleware/logging.py",
+      "worktree_sha256": "e6101146b5a58b8139d5a2f8f2cad54573dc7eadbc7e1e5f58cfbdc305bc7774",
+      "runner_sha256": "e6101146b5a58b8139d5a2f8f2cad54573dc7eadbc7e1e5f58cfbdc305bc7774",
+      "equal": true
+    },
+    {
+      "path": "api/middleware/metrics.py",
+      "worktree_sha256": "168405121dc64e22a1f0202c389c88dbf1ef0984e6f4108b76fb5f62e325585f",
+      "runner_sha256": "168405121dc64e22a1f0202c389c88dbf1ef0984e6f4108b76fb5f62e325585f",
+      "equal": true
+    },
+    {
+      "path": "api/models/__init__.py",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "runner_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "equal": true
+    },
+    {
+      "path": "api/models/console.py",
+      "worktree_sha256": "7626815e9e52795ae176f8399afaa8dc520c759b7b4acf9aefd5017dc99f5bae",
+      "runner_sha256": "7626815e9e52795ae176f8399afaa8dc520c759b7b4acf9aefd5017dc99f5bae",
+      "equal": true
+    },
+    {
+      "path": "api/models/jobs.py",
+      "worktree_sha256": "4ef41650b6cd8b43f3b04c0eaaf255f9dbc226ce0ee68947ff3cd98737d6763c",
+      "runner_sha256": "4ef41650b6cd8b43f3b04c0eaaf255f9dbc226ce0ee68947ff3cd98737d6763c",
+      "equal": true
+    },
+    {
+      "path": "api/models/schemas.py",
+      "worktree_sha256": "ad7ab177e55595fd4cf2434a7149c1a09f326aae8400e21bb261acecee7e7fba",
+      "runner_sha256": "ad7ab177e55595fd4cf2434a7149c1a09f326aae8400e21bb261acecee7e7fba",
+      "equal": true
+    },
+    {
+      "path": "api/models/trust.py",
+      "worktree_sha256": "f93030bb0b6bf63074c9f513ad54a85beb46dbb54a409d251a73f1492fc1aa78",
+      "runner_sha256": "f93030bb0b6bf63074c9f513ad54a85beb46dbb54a409d251a73f1492fc1aa78",
+      "equal": true
+    },
+    {
+      "path": "api/observability.py",
+      "worktree_sha256": "00b84b966c260ce000f19b0789e918919360ddb66aeef84d557d9dfa64e8764a",
+      "runner_sha256": "00b84b966c260ce000f19b0789e918919360ddb66aeef84d557d9dfa64e8764a",
+      "equal": true
+    },
+    {
+      "path": "api/openapi.py",
+      "worktree_sha256": "5a999c6f328ef2ef6af2655ea38538fce1b9a88175c2cc982414df877eef12a9",
+      "runner_sha256": "5a999c6f328ef2ef6af2655ea38538fce1b9a88175c2cc982414df877eef12a9",
+      "equal": true
+    },
+    {
+      "path": "api/routers/__init__.py",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "runner_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "equal": true
+    },
+    {
+      "path": "api/routers/analytics.py",
+      "worktree_sha256": "0f57301ade6d40457dc94e4f6356d35ccdef4428ec9f3ea91d5c740005849f28",
+      "runner_sha256": "0f57301ade6d40457dc94e4f6356d35ccdef4428ec9f3ea91d5c740005849f28",
+      "equal": true
+    },
+    {
+      "path": "api/routers/config.py",
+      "worktree_sha256": "c553f55a76e2bd752efb0106e1dbac3b9ad83fd715208d654c7a552cbafc89a4",
+      "runner_sha256": "c553f55a76e2bd752efb0106e1dbac3b9ad83fd715208d654c7a552cbafc89a4",
+      "equal": true
+    },
+    {
+      "path": "api/routers/console.py",
+      "worktree_sha256": "d931298b35cfb966f1d66981c9c77a1bdcc2dbb253a1a9cb9f6c8cf854430e53",
+      "runner_sha256": "d931298b35cfb966f1d66981c9c77a1bdcc2dbb253a1a9cb9f6c8cf854430e53",
+      "equal": true
+    },
+    {
+      "path": "api/routers/docs.py",
+      "worktree_sha256": "66ad3f15ef7844612e5cd2dc2aa920758ff8134e0e17f7c5a70b83a4364ee58a",
+      "runner_sha256": "66ad3f15ef7844612e5cd2dc2aa920758ff8134e0e17f7c5a70b83a4364ee58a",
+      "equal": true
+    },
+    {
+      "path": "api/routers/feedback.py",
+      "worktree_sha256": "bbe9732f01ddb9c168609da61de3c6a8a07eb356f73bb751c0da8748744ce065",
+      "runner_sha256": "bbe9732f01ddb9c168609da61de3c6a8a07eb356f73bb751c0da8748744ce065",
+      "equal": true
+    },
+    {
+      "path": "api/routers/health.py",
+      "worktree_sha256": "d49982abf1064af5e291dfab415dfe92ea7fd45a22bd02b85e8f5eed8f76edab",
+      "runner_sha256": "d49982abf1064af5e291dfab415dfe92ea7fd45a22bd02b85e8f5eed8f76edab",
+      "equal": true
+    },
+    {
+      "path": "api/routers/ingest.py",
+      "worktree_sha256": "97ae8ca1b9e1a21f62d620b17b77411f9346c2fdbe031663d888b667962224ce",
+      "runner_sha256": "97ae8ca1b9e1a21f62d620b17b77411f9346c2fdbe031663d888b667962224ce",
+      "equal": true
+    },
+    {
+      "path": "api/routers/jobs.py",
+      "worktree_sha256": "e8e6f753565ef95167f3d302aa6e16ebd2bdc62c7f8194d7c8976c8365e3ab2c",
+      "runner_sha256": "e8e6f753565ef95167f3d302aa6e16ebd2bdc62c7f8194d7c8976c8365e3ab2c",
+      "equal": true
+    },
+    {
+      "path": "api/routers/receipts.py",
+      "worktree_sha256": "080651499dcfec0284d86e73091efa5205c66b8377b914b293cc6b4caaefd7b3",
+      "runner_sha256": "080651499dcfec0284d86e73091efa5205c66b8377b914b293cc6b4caaefd7b3",
+      "equal": true
+    },
+    {
+      "path": "api/routers/sandbox.py",
+      "worktree_sha256": "605c0c256c6800b4557fb9554499ebd63bd9b4ea5130a4b14aeda4d5db7ffa82",
+      "runner_sha256": "605c0c256c6800b4557fb9554499ebd63bd9b4ea5130a4b14aeda4d5db7ffa82",
+      "equal": true
+    },
+    {
+      "path": "api/routers/search.py",
+      "worktree_sha256": "934d1c906fb86ec9c0a93dbc2c4967d269012728dcd12f94baf703f4864bba3f",
+      "runner_sha256": "934d1c906fb86ec9c0a93dbc2c4967d269012728dcd12f94baf703f4864bba3f",
+      "equal": true
+    },
+    {
+      "path": "api/routers/trust.py",
+      "worktree_sha256": "e1457336ae5ec58b4922c735bed0de830fe5cd433403d54520f8dc7020b3482c",
+      "runner_sha256": "e1457336ae5ec58b4922c735bed0de830fe5cd433403d54520f8dc7020b3482c",
+      "equal": true
+    },
+    {
+      "path": "api/services/cache.py",
+      "worktree_sha256": "55f88253498f88e1d08e2d76a43f74a32902b72f931b5c7c70aa435b0e843da0",
+      "runner_sha256": "55f88253498f88e1d08e2d76a43f74a32902b72f931b5c7c70aa435b0e843da0",
+      "equal": true
+    },
+    {
+      "path": "api/services/cursor.py",
+      "worktree_sha256": "83b35d6514c103e51afcd34fd8a97044582b0a7e43a8cb3037f73c27fb3b63ac",
+      "runner_sha256": "83b35d6514c103e51afcd34fd8a97044582b0a7e43a8cb3037f73c27fb3b63ac",
+      "equal": true
+    },
+    {
+      "path": "api/services/embedding.py",
+      "worktree_sha256": "03d3381621cfd1cef81992d7e19ddc6421b57bc1a7eaf13468e13f71b7c4f5d4",
+      "runner_sha256": "03d3381621cfd1cef81992d7e19ddc6421b57bc1a7eaf13468e13f71b7c4f5d4",
+      "equal": true
+    },
+    {
+      "path": "api/services/guardrails.py",
+      "worktree_sha256": "b73715836fb14e6d60ca1e28516be3b02377455a6f795bbc48409e7d8d00dcf0",
+      "runner_sha256": "b73715836fb14e6d60ca1e28516be3b02377455a6f795bbc48409e7d8d00dcf0",
+      "equal": true
+    },
+    {
+      "path": "api/services/llm.py",
+      "worktree_sha256": "64ebbc1007df11ad8fdb47007c87f782b4c255dd13d5f436a241718ef1072c73",
+      "runner_sha256": "64ebbc1007df11ad8fdb47007c87f782b4c255dd13d5f436a241718ef1072c73",
+      "equal": true
+    },
+    {
+      "path": "api/services/retriever.py",
+      "worktree_sha256": "1f915750a19484d99e5408236c3e9a4a34faceb897fdba1bf050bf962a52138b",
+      "runner_sha256": "1f915750a19484d99e5408236c3e9a4a34faceb897fdba1bf050bf962a52138b",
+      "equal": true
+    },
+    {
+      "path": "api/services/run_status.py",
+      "worktree_sha256": "1754d63a5d25f1e26a5126c063944d0915b85bf4177530b4f983f765ad2fdf2f",
+      "runner_sha256": "1754d63a5d25f1e26a5126c063944d0915b85bf4177530b4f983f765ad2fdf2f",
+      "equal": true
+    },
+    {
+      "path": "api/services/usage.py",
+      "worktree_sha256": "5fb7731e7ab40ae43180823d8d3e8333f5583627523e308d5c8c74e06c968a8f",
+      "runner_sha256": "5fb7731e7ab40ae43180823d8d3e8333f5583627523e308d5c8c74e06c968a8f",
+      "equal": true
+    },
+    {
+      "path": "api/versioning.py",
+      "worktree_sha256": "b353244447e0c894a64202f60e92c1bf498a012b981e89ae2471016ce813a04c",
+      "runner_sha256": "b353244447e0c894a64202f60e92c1bf498a012b981e89ae2471016ce813a04c",
+      "equal": true
+    },
+    {
+      "path": "api/web_edge/__init__.py",
+      "worktree_sha256": "84576c72a3964d212007f29c9552db04e32758cc87b718156c92e269e9817601",
+      "runner_sha256": "84576c72a3964d212007f29c9552db04e32758cc87b718156c92e269e9817601",
+      "equal": true
+    },
+    {
+      "path": "api/web_edge/auth.py",
+      "worktree_sha256": "dd56fe45d243101c240b78d19ecec2f09bf31a6bce7faec846816ff4a693b1b1",
+      "runner_sha256": "dd56fe45d243101c240b78d19ecec2f09bf31a6bce7faec846816ff4a693b1b1",
+      "equal": true
+    },
+    {
+      "path": "api/web_edge/routes.py",
+      "worktree_sha256": "3d3c73e2629229f358cd08000a7fa859c4bc633f526f80a0c56d782d387ba2f0",
+      "runner_sha256": "3d3c73e2629229f358cd08000a7fa859c4bc633f526f80a0c56d782d387ba2f0",
+      "equal": true
+    },
+    {
+      "path": "api/web_edge/session.py",
+      "worktree_sha256": "672de79f96f261d445b05dac3f2adcaa0d2ceb66e5bde2d06acd651629ca0a10",
+      "runner_sha256": "672de79f96f261d445b05dac3f2adcaa0d2ceb66e5bde2d06acd651629ca0a10",
+      "equal": true
+    },
+    {
+      "path": "config.py",
+      "worktree_sha256": "4000698674b0330b7b50f9a8d4d5e2ad82581cb6ce82f19f0421027ce386cf7f",
+      "runner_sha256": "4000698674b0330b7b50f9a8d4d5e2ad82581cb6ce82f19f0421027ce386cf7f",
+      "equal": true
+    },
+    {
+      "path": "core/__init__.py",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "runner_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "equal": true
+    },
+    {
+      "path": "core/clients/__init__.py",
+      "worktree_sha256": "204819eb106543609a68f082a4e69b5251474c1bde638f0642231ce43c06d673",
+      "runner_sha256": "204819eb106543609a68f082a4e69b5251474c1bde638f0642231ce43c06d673",
+      "equal": true
+    },
+    {
+      "path": "core/clients/async_http_client.py",
+      "worktree_sha256": "d3260e771e8e13e89018ce871fe32347abd2b38c741a71e608776097397160f6",
+      "runner_sha256": "d3260e771e8e13e89018ce871fe32347abd2b38c741a71e608776097397160f6",
+      "equal": true
+    },
+    {
+      "path": "core/database/__init__.py",
+      "worktree_sha256": "8382371cc602278f75f75584fefb66087364597460ea2432f82a79d29c7cecae",
+      "runner_sha256": "8382371cc602278f75f75584fefb66087364597460ea2432f82a79d29c7cecae",
+      "equal": true
+    },
+    {
+      "path": "core/database/guard.py",
+      "worktree_sha256": "852ec622a4aa7afb6e7643a097920110ed12533e0ae03529489848a7ea7ec420",
+      "runner_sha256": "852ec622a4aa7afb6e7643a097920110ed12533e0ae03529489848a7ea7ec420",
+      "equal": true
+    },
+    {
+      "path": "core/database/jobs.py",
+      "worktree_sha256": "70b45e89bcdc855e2c6424d954080c0e1f583da9b02107f4dd5e1e1d95e95348",
+      "runner_sha256": "70b45e89bcdc855e2c6424d954080c0e1f583da9b02107f4dd5e1e1d95e95348",
+      "equal": true
+    },
+    {
+      "path": "core/database/pool.py",
+      "worktree_sha256": "00bdf5dd80c7f60d970daddf0c3808949fe122846edc1e69b54b84e6ebc71a90",
+      "runner_sha256": "00bdf5dd80c7f60d970daddf0c3808949fe122846edc1e69b54b84e6ebc71a90",
+      "equal": true
+    },
+    {
+      "path": "core/database/tenant.py",
+      "worktree_sha256": "f4673eff2f5aad4b244a8d6558f26607fc67fc70d73444cdbca342cc6ab3f63e",
+      "runner_sha256": "f4673eff2f5aad4b244a8d6558f26607fc67fc70d73444cdbca342cc6ab3f63e",
+      "equal": true
+    },
+    {
+      "path": "core/identity/__init__.py",
+      "worktree_sha256": "3b7ba5b66a8a7065b4c311b98d8cf2f9a2c4ca35b6606e41525e9d8332b42816",
+      "runner_sha256": "3b7ba5b66a8a7065b4c311b98d8cf2f9a2c4ca35b6606e41525e9d8332b42816",
+      "equal": true
+    },
+    {
+      "path": "core/identity/admin.py",
+      "worktree_sha256": "181c130fd7e25531805f23e023e22fa6dab9bd59c0c30fe097a3d789afb7f154",
+      "runner_sha256": "181c130fd7e25531805f23e023e22fa6dab9bd59c0c30fe097a3d789afb7f154",
+      "equal": true
+    },
+    {
+      "path": "core/identity/jwt.py",
+      "worktree_sha256": "0e03efb8b47f2222f57f30034f85540f09d5d2e4327a7a80597cf1559bfd0db9",
+      "runner_sha256": "0e03efb8b47f2222f57f30034f85540f09d5d2e4327a7a80597cf1559bfd0db9",
+      "equal": true
+    },
+    {
+      "path": "core/identity/keys.py",
+      "worktree_sha256": "56c62dfc9df857adad272213a6fb07e6477d20339b4110215a144ab389c09893",
+      "runner_sha256": "56c62dfc9df857adad272213a6fb07e6477d20339b4110215a144ab389c09893",
+      "equal": true
+    },
+    {
+      "path": "core/identity/models.py",
+      "worktree_sha256": "d0bc2b4d47a4b44c3ccef4bbb72133c206e131817d13f82b811a86fd96540ed2",
+      "runner_sha256": "d0bc2b4d47a4b44c3ccef4bbb72133c206e131817d13f82b811a86fd96540ed2",
+      "equal": true
+    },
+    {
+      "path": "core/identity/run_tokens.py",
+      "worktree_sha256": "d5546b5f6152c008e85ec9bfee3df98d4259f198a9d114050d267939c9e0d179",
+      "runner_sha256": "d5546b5f6152c008e85ec9bfee3df98d4259f198a9d114050d267939c9e0d179",
+      "equal": true
+    },
+    {
+      "path": "core/identity/store.py",
+      "worktree_sha256": "6da0ca8aba9c5cf1f64ddc36aee15c9a4e9da84954ee0454640d7d592d4f322f",
+      "runner_sha256": "6da0ca8aba9c5cf1f64ddc36aee15c9a4e9da84954ee0454640d7d592d4f322f",
+      "equal": true
+    },
+    {
+      "path": "core/ingestion/__init__.py",
+      "worktree_sha256": "2a144461a75d9d7127b268558fda0a6a0b01b02be6fc2773fdaaa1ebef70eec4",
+      "runner_sha256": "2a144461a75d9d7127b268558fda0a6a0b01b02be6fc2773fdaaa1ebef70eec4",
+      "equal": true
+    },
+    {
+      "path": "core/ingestion/chunkers.py",
+      "worktree_sha256": "ec829b0e0d2a30939233628c0491f2097c9e9d367730f28e5651317c292f0d99",
+      "runner_sha256": "ec829b0e0d2a30939233628c0491f2097c9e9d367730f28e5651317c292f0d99",
+      "equal": true
+    },
+    {
+      "path": "core/ingestion/embedders.py",
+      "worktree_sha256": "f888516f6e74159e44412c003045b08f5538fd8066d720d11c8a883d7874b8cc",
+      "runner_sha256": "f888516f6e74159e44412c003045b08f5538fd8066d720d11c8a883d7874b8cc",
+      "equal": true
+    },
+    {
+      "path": "core/ingestion/lifecycle.py",
+      "worktree_sha256": "e19bee130f04ce2d497044a76b7c9566da6a1061555338136abad23d28fce229",
+      "runner_sha256": "e19bee130f04ce2d497044a76b7c9566da6a1061555338136abad23d28fce229",
+      "equal": true
+    },
+    {
+      "path": "core/ingestion/processors.py",
+      "worktree_sha256": "34b116d2a77fe954f51a9b2487c15eeba590fd134aa75b11106bddca1d2978cf",
+      "runner_sha256": "34b116d2a77fe954f51a9b2487c15eeba590fd134aa75b11106bddca1d2978cf",
+      "equal": true
+    },
+    {
+      "path": "core/ingestion/readers.py",
+      "worktree_sha256": "0944da7222b8f0855c36ba7587fbd1419185bd3b9515cb0538bb045c8beae5c9",
+      "runner_sha256": "0944da7222b8f0855c36ba7587fbd1419185bd3b9515cb0538bb045c8beae5c9",
+      "equal": true
+    },
+    {
+      "path": "core/metrics.py",
+      "worktree_sha256": "bb3d283963e4a1a8b7ec326e0006fff93ac02c14aeb20d2ef8ec076b2484ad5c",
+      "runner_sha256": "bb3d283963e4a1a8b7ec326e0006fff93ac02c14aeb20d2ef8ec076b2484ad5c",
+      "equal": true
+    },
+    {
+      "path": "core/pipeline/__init__.py",
+      "worktree_sha256": "31142774cc00d7182cb7000cbec203babfef4b4348cecc1f91839de05293b957",
+      "runner_sha256": "31142774cc00d7182cb7000cbec203babfef4b4348cecc1f91839de05293b957",
+      "equal": true
+    },
+    {
+      "path": "core/pipeline/async_ingest.py",
+      "worktree_sha256": "4bfae38b0755c1fbb3a8aef51073972dcc1a5ea6192db3229c34dfefeade95b8",
+      "runner_sha256": "4bfae38b0755c1fbb3a8aef51073972dcc1a5ea6192db3229c34dfefeade95b8",
+      "equal": true
+    },
+    {
+      "path": "core/pipeline/db_ingest.py",
+      "worktree_sha256": "ff726f58c853137758438013c5ad346ce4c9a39453163f6c09cfdf820a243e9a",
+      "runner_sha256": "ff726f58c853137758438013c5ad346ce4c9a39453163f6c09cfdf820a243e9a",
+      "equal": true
+    },
+    {
+      "path": "core/pricing.py",
+      "worktree_sha256": "c46e7490fba9c1b8fec98b3b361d881a3127f3adf25fd8e8cfea523983b27d16",
+      "runner_sha256": "c46e7490fba9c1b8fec98b3b361d881a3127f3adf25fd8e8cfea523983b27d16",
+      "equal": true
+    },
+    {
+      "path": "core/processing/__init__.py",
+      "worktree_sha256": "ace8a80d6f1a6b4f9b5598ecfc98b120520d20b91d8a046c590f33a2a4b7d226",
+      "runner_sha256": "ace8a80d6f1a6b4f9b5598ecfc98b120520d20b91d8a046c590f33a2a4b7d226",
+      "equal": true
+    },
+    {
+      "path": "core/processing/cpu_offload.py",
+      "worktree_sha256": "34de4849dfb61dfb19c712c282a71cb98970ada4af89051af4ca35d2c7db7bdf",
+      "runner_sha256": "34de4849dfb61dfb19c712c282a71cb98970ada4af89051af4ca35d2c7db7bdf",
+      "equal": true
+    },
+    {
+      "path": "core/processing/pipeline.py",
+      "worktree_sha256": "5a40a378d33d1033ae9b09116cf82dd41f4491faf75f04704f66344fc5eb3120",
+      "runner_sha256": "5a40a378d33d1033ae9b09116cf82dd41f4491faf75f04704f66344fc5eb3120",
+      "equal": true
+    },
+    {
+      "path": "core/settings.py",
+      "worktree_sha256": "36c9d5ad1f4d556c4952ce5513fc17952cd88f6af32e12ed0bb8fadb78a07467",
+      "runner_sha256": "36c9d5ad1f4d556c4952ce5513fc17952cd88f6af32e12ed0bb8fadb78a07467",
+      "equal": true
+    },
+    {
+      "path": "evidence/__init__.py",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "runner_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "equal": true
+    },
+    {
+      "path": "evidence/chain.py",
+      "worktree_sha256": "5d7be6a07b09a1e4296a03beb3412f5e4eb20d7e265d02b8599937689ab023df",
+      "runner_sha256": "5d7be6a07b09a1e4296a03beb3412f5e4eb20d7e265d02b8599937689ab023df",
+      "equal": true
+    },
+    {
+      "path": "evidence/receipts.py",
+      "worktree_sha256": "1b64f656d14a033198ebcae9c6b16d6f5201a71dfacc835c7834ac79895cc145",
+      "runner_sha256": "1b64f656d14a033198ebcae9c6b16d6f5201a71dfacc835c7834ac79895cc145",
+      "equal": true
+    },
+    {
+      "path": "evidence/record.py",
+      "worktree_sha256": "afe53017ac9a2b7d7f9d1d1c7f350572104ae2b7df932ef8cb4aa8e3e347e927",
+      "runner_sha256": "afe53017ac9a2b7d7f9d1d1c7f350572104ae2b7df932ef8cb4aa8e3e347e927",
+      "equal": true
+    },
+    {
+      "path": "gateway/__init__.py",
+      "worktree_sha256": "5e3667a1d6a51817b2b49096dd8c96ae015d7d52a16a55699374ca1d0c480cad",
+      "runner_sha256": "5e3667a1d6a51817b2b49096dd8c96ae015d7d52a16a55699374ca1d0c480cad",
+      "equal": true
+    },
+    {
+      "path": "gateway/admin.py",
+      "worktree_sha256": "aa566719a231c45cb5340dde47e084f6141819ca41691a81b92f3bfc2df62552",
+      "runner_sha256": "aa566719a231c45cb5340dde47e084f6141819ca41691a81b92f3bfc2df62552",
+      "equal": true
+    },
+    {
+      "path": "gateway/boundary.py",
+      "worktree_sha256": "e14add8606ba051c78813c3a8ee38119f74ef2b554c524d132ec28dfb68f9b78",
+      "runner_sha256": "e14add8606ba051c78813c3a8ee38119f74ef2b554c524d132ec28dfb68f9b78",
+      "equal": true
+    },
+    {
+      "path": "gateway/context.py",
+      "worktree_sha256": "6193be79df77b447b67b083a04a36b02e49f8c0c4f0c63670a1ad64d5e813677",
+      "runner_sha256": "6193be79df77b447b67b083a04a36b02e49f8c0c4f0c63670a1ad64d5e813677",
+      "equal": true
+    },
+    {
+      "path": "gateway/enforce.py",
+      "worktree_sha256": "ef49fa939cfcb67d2b9e4f636f3a07f678cdf717f1a18ffed073ad002827f6ed",
+      "runner_sha256": "ef49fa939cfcb67d2b9e4f636f3a07f678cdf717f1a18ffed073ad002827f6ed",
+      "equal": true
+    },
+    {
+      "path": "gateway/estimate.py",
+      "worktree_sha256": "1df31b2cb510d5015a8a7bd592f2b535a193f0dbcfbfc048cd9e676fa248eaee",
+      "runner_sha256": "1df31b2cb510d5015a8a7bd592f2b535a193f0dbcfbfc048cd9e676fa248eaee",
+      "equal": true
+    },
+    {
+      "path": "gateway/guardrails.py",
+      "worktree_sha256": "f2046262ee508fc3c8f7495f1b5ef4c998dc16391bdb405d3fb89c0d48245698",
+      "runner_sha256": "f2046262ee508fc3c8f7495f1b5ef4c998dc16391bdb405d3fb89c0d48245698",
+      "equal": true
+    },
+    {
+      "path": "gateway/limits.py",
+      "worktree_sha256": "3e438ae67c3b55d5e52d0cf8bde1639af40e816c49b939cf4ebfe4eff60f667c",
+      "runner_sha256": "3e438ae67c3b55d5e52d0cf8bde1639af40e816c49b939cf4ebfe4eff60f667c",
+      "equal": true
+    },
+    {
+      "path": "gateway/policy.py",
+      "worktree_sha256": "2e9a9d5a4e6c5b5615afc97fd01640f319517e71db19785ced1ccfe526e2e185",
+      "runner_sha256": "2e9a9d5a4e6c5b5615afc97fd01640f319517e71db19785ced1ccfe526e2e185",
+      "equal": true
+    },
+    {
+      "path": "gateway/reasons.py",
+      "worktree_sha256": "fa26e5b5f790071c374c61d816ff85683c30c397b5d377e931dbabb3a63cdf88",
+      "runner_sha256": "fa26e5b5f790071c374c61d816ff85683c30c397b5d377e931dbabb3a63cdf88",
+      "equal": true
+    },
+    {
+      "path": "gateway/stages.py",
+      "worktree_sha256": "c994ec0ef1ae5c5c8442b1ad57d8049e64220d7cfdbe2f3b42f33f6793a12ef2",
+      "runner_sha256": "c994ec0ef1ae5c5c8442b1ad57d8049e64220d7cfdbe2f3b42f33f6793a12ef2",
+      "equal": true
+    },
+    {
+      "path": "gateway/types.py",
+      "worktree_sha256": "30e7313eda1f9b9347e48a7d79dc15f80a4879df12abd9641c8c439be4e16e2a",
+      "runner_sha256": "30e7313eda1f9b9347e48a7d79dc15f80a4879df12abd9641c8c439be4e16e2a",
+      "equal": true
+    },
+    {
+      "path": "migrations/env.py",
+      "worktree_sha256": "a5880e9536570a23efaac3c8b28734e93a3ad2fed11c41a75a7fb34536be58ad",
+      "runner_sha256": "a5880e9536570a23efaac3c8b28734e93a3ad2fed11c41a75a7fb34536be58ad",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0001_baseline.py",
+      "worktree_sha256": "b8a4acfff0a42ee04fe2997469d89163fa0f6d616ca9ee870f6d3c340432e72e",
+      "runner_sha256": "b8a4acfff0a42ee04fe2997469d89163fa0f6d616ca9ee870f6d3c340432e72e",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0002_identity_tenancy.py",
+      "worktree_sha256": "70183627f28ae3337b97360b98f5c1fe7a611390c613c00ab4a1ed7df268b631",
+      "runner_sha256": "70183627f28ae3337b97360b98f5c1fe7a611390c613c00ab4a1ed7df268b631",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0003_auth_lookup_principal.py",
+      "worktree_sha256": "7a90754d231ff326c5e16f67420b45530effeba93e65e05fd904f2a52c453e95",
+      "runner_sha256": "7a90754d231ff326c5e16f67420b45530effeba93e65e05fd904f2a52c453e95",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0004_restrict_app_role.py",
+      "worktree_sha256": "959755df3bb85603a51048615fd6f282bd2280e09a3fdfc71a28908314c11bf7",
+      "runner_sha256": "959755df3bb85603a51048615fd6f282bd2280e09a3fdfc71a28908314c11bf7",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0005_gateway.py",
+      "worktree_sha256": "c394886d08300595e37467e0c4fb60445253a7877afde5f846f5821102e24f95",
+      "runner_sha256": "c394886d08300595e37467e0c4fb60445253a7877afde5f846f5821102e24f95",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0006_preview_principal_lookup.py",
+      "worktree_sha256": "9239375560f54338cb995c0795651115887cd47833cb1bae8c82641623e57906",
+      "runner_sha256": "9239375560f54338cb995c0795651115887cd47833cb1bae8c82641623e57906",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0007_embedding_provenance.py",
+      "worktree_sha256": "62bac7c6a9defdc45a3fd9128a1c7b1fbfc2e1a201b5269efd25583dde00ea8a",
+      "runner_sha256": "62bac7c6a9defdc45a3fd9128a1c7b1fbfc2e1a201b5269efd25583dde00ea8a",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0008_jobs_outbox.py",
+      "worktree_sha256": "173e86067f1df6a36655a0c057564b69a43f853e05e940a9c90c31406677b16c",
+      "runner_sha256": "173e86067f1df6a36655a0c057564b69a43f853e05e940a9c90c31406677b16c",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0009_trust_baseline.py",
+      "worktree_sha256": "22ccbaed211556a45a2289f5b7bbd75ef014c9be38cb368c16105f3d606a5eb6",
+      "runner_sha256": "22ccbaed211556a45a2289f5b7bbd75ef014c9be38cb368c16105f3d606a5eb6",
+      "equal": true
+    },
+    {
+      "path": "migrations/versions/0010_sandbox_events_run_tokens.py",
+      "worktree_sha256": "e94f7ad1fc511ac3d44a823d15c08b54a7f1d70fdf748a0b8906fe32a3f613ee",
+      "runner_sha256": "e94f7ad1fc511ac3d44a823d15c08b54a7f1d70fdf748a0b8906fe32a3f613ee",
+      "equal": true
+    },
+    {
+      "path": "ports/__init__.py",
+      "worktree_sha256": "d98de3da9a55241df106ff53cc6c825ca5da770f5336fac9ff0bd9b38666ba95",
+      "runner_sha256": "d98de3da9a55241df106ff53cc6c825ca5da770f5336fac9ff0bd9b38666ba95",
+      "equal": true
+    },
+    {
+      "path": "ports/bundle.py",
+      "worktree_sha256": "809222c97d3cff03a1943b45b7f77a62b8535bb30b0158f4ec87b911f2f24e1b",
+      "runner_sha256": "809222c97d3cff03a1943b45b7f77a62b8535bb30b0158f4ec87b911f2f24e1b",
+      "equal": true
+    },
+    {
+      "path": "ports/cache.py",
+      "worktree_sha256": "f569b5583fc83c930963ea6819d427542df656cff25829a5ee97ac49893cd53f",
+      "runner_sha256": "f569b5583fc83c930963ea6819d427542df656cff25829a5ee97ac49893cd53f",
+      "equal": true
+    },
+    {
+      "path": "ports/embeddings.py",
+      "worktree_sha256": "0703e4ff715150357adab44bcba29a6a83b258ce0309ebb7d22fa8e461027d3c",
+      "runner_sha256": "0703e4ff715150357adab44bcba29a6a83b258ce0309ebb7d22fa8e461027d3c",
+      "equal": true
+    },
+    {
+      "path": "ports/events.py",
+      "worktree_sha256": "c615bd2592a4a5a5b7a68295a3ace475631efc807adab11cd6e29a481ed80000",
+      "runner_sha256": "c615bd2592a4a5a5b7a68295a3ace475631efc807adab11cd6e29a481ed80000",
+      "equal": true
+    },
+    {
+      "path": "ports/knowledge.py",
+      "worktree_sha256": "7427a0d41c3670210747af19b183acd95364d80e7138a8488bf0ee52035ddca9",
+      "runner_sha256": "7427a0d41c3670210747af19b183acd95364d80e7138a8488bf0ee52035ddca9",
+      "equal": true
+    },
+    {
+      "path": "ports/llm.py",
+      "worktree_sha256": "aec6aa7e9d6af8d7902e502f5508f1624c84d84d839b1ba2a4bd16494fb99c05",
+      "runner_sha256": "aec6aa7e9d6af8d7902e502f5508f1624c84d84d839b1ba2a4bd16494fb99c05",
+      "equal": true
+    },
+    {
+      "path": "ports/objects.py",
+      "worktree_sha256": "c6f0d3c360b212191caceaa471c45d6c7c811e8c92fe87901cc7176db10483ba",
+      "runner_sha256": "c6f0d3c360b212191caceaa471c45d6c7c811e8c92fe87901cc7176db10483ba",
+      "equal": true
+    },
+    {
+      "path": "ports/runtime.py",
+      "worktree_sha256": "d92fb4fa51f4681aab59886d210510e1a8065eb74618515b964d80509720a46b",
+      "runner_sha256": "d92fb4fa51f4681aab59886d210510e1a8065eb74618515b964d80509720a46b",
+      "equal": true
+    },
+    {
+      "path": "ports/sandbox.py",
+      "worktree_sha256": "699f6baf8461b3bcd1c26ca14c974c3ec15a84be00c0552d697c1a4a740974ec",
+      "runner_sha256": "699f6baf8461b3bcd1c26ca14c974c3ec15a84be00c0552d697c1a4a740974ec",
+      "equal": true
+    },
+    {
+      "path": "pyproject.toml",
+      "worktree_sha256": "988e18e2d9823d69881776e80fc76158a1f45b5888a2fae2e4fcf2c2d9fff6e4",
+      "runner_sha256": "988e18e2d9823d69881776e80fc76158a1f45b5888a2fae2e4fcf2c2d9fff6e4",
+      "equal": true
+    },
+    {
+      "path": "sandbox_agent/__init__.py",
+      "worktree_sha256": "2ddcf4c0ac59b3ec649c27ca16dff91613f5ff184895f2363e98221eb07dfc38",
+      "runner_sha256": "2ddcf4c0ac59b3ec649c27ca16dff91613f5ff184895f2363e98221eb07dfc38",
+      "equal": true
+    },
+    {
+      "path": "sandbox_agent/entry.py",
+      "worktree_sha256": "ad60f52c3a11be049b58ecbca9f2788506e5dfc6f844cdd9b8722faf268d4398",
+      "runner_sha256": "ad60f52c3a11be049b58ecbca9f2788506e5dfc6f844cdd9b8722faf268d4398",
+      "equal": true
+    },
+    {
+      "path": "tests/conftest.py",
+      "worktree_sha256": "1fd17f63e1854f84dd1ecec186d3ce4edac55cc8f69a41d7018f9c483fe16e63",
+      "runner_sha256": "1fd17f63e1854f84dd1ecec186d3ce4edac55cc8f69a41d7018f9c483fe16e63",
+      "equal": true
+    },
+    {
+      "path": "tests/contracts/conftest.py",
+      "worktree_sha256": "cd637fb63acff26bcfd4fa126952fda19f6521acda9edb4e9e4d53257d4fd7aa",
+      "runner_sha256": "cd637fb63acff26bcfd4fa126952fda19f6521acda9edb4e9e4d53257d4fd7aa",
+      "equal": true
+    },
+    {
+      "path": "tests/contracts/test_agent_runtime_contract.py",
+      "worktree_sha256": "bc936ea3cc50ba8279dac452808cc74bf718cb1b2417c6c283a20b4d669180bc",
+      "runner_sha256": "bc936ea3cc50ba8279dac452808cc74bf718cb1b2417c6c283a20b4d669180bc",
+      "equal": true
+    },
+    {
+      "path": "tests/contracts/test_cache_contract.py",
+      "worktree_sha256": "1d6fb23ecf2c55541aaf822e067eb85bb4af947b12e1e310a29530b462acdd6e",
+      "runner_sha256": "1d6fb23ecf2c55541aaf822e067eb85bb4af947b12e1e310a29530b462acdd6e",
+      "equal": true
+    },
+    {
+      "path": "tests/contracts/test_embeddings_contract.py",
+      "worktree_sha256": "b9dd7133534e4f2619ae37541c179f17b47f64c47691b525c93af171a0855028",
+      "runner_sha256": "b9dd7133534e4f2619ae37541c179f17b47f64c47691b525c93af171a0855028",
+      "equal": true
+    },
+    {
+      "path": "tests/contracts/test_event_bus_contract.py",
+      "worktree_sha256": "ac69a98114fb1d3c191ad04544b4b191202c16b8b29af5504c6c6ea343178cfa",
+      "runner_sha256": "ac69a98114fb1d3c191ad04544b4b191202c16b8b29af5504c6c6ea343178cfa",
+      "equal": true
+    },
+    {
+      "path": "tests/contracts/test_knowledge_store_contract.py",
+      "worktree_sha256": "4caddb14ff42a5444f9c0f22beb97fe5537271e290db24616babae0009f679ba",
+      "runner_sha256": "4caddb14ff42a5444f9c0f22beb97fe5537271e290db24616babae0009f679ba",
+      "equal": true
+    },
+    {
+      "path": "tests/contracts/test_llm_contract.py",
+      "worktree_sha256": "36965adc15cb1ac94103f8263cc8709d385bf6427368905fe39b9e5115249e69",
+      "runner_sha256": "36965adc15cb1ac94103f8263cc8709d385bf6427368905fe39b9e5115249e69",
+      "equal": true
+    },
+    {
+      "path": "tests/contracts/test_object_store_contract.py",
+      "worktree_sha256": "28c5c9897817620564fa22f3c6cc9e11180b3e71ac7b576b1a62ac202ef8e6d7",
+      "runner_sha256": "28c5c9897817620564fa22f3c6cc9e11180b3e71ac7b576b1a62ac202ef8e6d7",
+      "equal": true
+    },
+    {
+      "path": "tests/contracts/test_sandbox_driver_contract.py",
+      "worktree_sha256": "568dd930228351f7be97058aef2819da64f7c8ea902c84255f3a5b148d33381a",
+      "runner_sha256": "568dd930228351f7be97058aef2819da64f7c8ea902c84255f3a5b148d33381a",
+      "equal": true
+    },
+    {
+      "path": "tests/db_fixtures.py",
+      "worktree_sha256": "5a2d80fc28fcc3ecd504399510ba58d240f0f9460bcc50458318afa227d817d1",
+      "runner_sha256": "5a2d80fc28fcc3ecd504399510ba58d240f0f9460bcc50458318afa227d817d1",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/conftest.py",
+      "worktree_sha256": "09beaaf6c2170a991a6665747b7faaaaac69ac237b503fbbe96421cd1d338d65",
+      "runner_sha256": "09beaaf6c2170a991a6665747b7faaaaac69ac237b503fbbe96421cd1d338d65",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_agent_worker.py",
+      "worktree_sha256": "c18da2a3c7127a5a6b309a5258c21a0f0a0e537cd8e36c15780ba7885a0759dd",
+      "runner_sha256": "c18da2a3c7127a5a6b309a5258c21a0f0a0e537cd8e36c15780ba7885a0759dd",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_console_api.py",
+      "worktree_sha256": "f5090cd66419766b7021b673283a3b07bf2c7598656c9d0f70efa7a620529837",
+      "runner_sha256": "f5090cd66419766b7021b673283a3b07bf2c7598656c9d0f70efa7a620529837",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_console_requests_api.py",
+      "worktree_sha256": "a6c3cabcadb9cd1cd3cfed0647e198d7ab4781e0e221e860d1aa2c4b4a83ebd7",
+      "runner_sha256": "a6c3cabcadb9cd1cd3cfed0647e198d7ab4781e0e221e860d1aa2c4b4a83ebd7",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_cost_cap.py",
+      "worktree_sha256": "481e3525928f9eb134c85a40b68bff9177f0442354bf60b0c472a4d3b3542b85",
+      "runner_sha256": "481e3525928f9eb134c85a40b68bff9177f0442354bf60b0c472a4d3b3542b85",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_errors_and_headers.py",
+      "worktree_sha256": "6f6213e80ba6b3b38fa508e24feed9af62ae91b1ae486184a839ff6bce48461c",
+      "runner_sha256": "6f6213e80ba6b3b38fa508e24feed9af62ae91b1ae486184a839ff6bce48461c",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_gateway_e2e.py",
+      "worktree_sha256": "ce127905ab9ddc5348c0b332f0904e3fd39126c86993b2bb94273a7098ec4e42",
+      "runner_sha256": "ce127905ab9ddc5348c0b332f0904e3fd39126c86993b2bb94273a7098ec4e42",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_gateway_followups.py",
+      "worktree_sha256": "e04bc9131f8b233b4d5e5b10433f58029d717fe10c4c28703fcb0ca096a42596",
+      "runner_sha256": "e04bc9131f8b233b4d5e5b10433f58029d717fe10c4c28703fcb0ca096a42596",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_ingest_jobs.py",
+      "worktree_sha256": "dca95f1099c46a97f7823c1ebd58060fa43bb0cb55718d564c3c5dee64a778f0",
+      "runner_sha256": "dca95f1099c46a97f7823c1ebd58060fa43bb0cb55718d564c3c5dee64a778f0",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_kafka_flow.py",
+      "worktree_sha256": "407ec354a120cf5c1cc25527fa9e9c653456b0a312ae780a007899165ba6b7d0",
+      "runner_sha256": "407ec354a120cf5c1cc25527fa9e9c653456b0a312ae780a007899165ba6b7d0",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_mcp.py",
+      "worktree_sha256": "c932cc64752c1834e7d3e1ccbfca7b6f30e194312f81b98f21c56eea51a5af02",
+      "runner_sha256": "c932cc64752c1834e7d3e1ccbfca7b6f30e194312f81b98f21c56eea51a5af02",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_metrics.py",
+      "worktree_sha256": "353b40892594ad8a000fd3af61bd5992e53ea044fe307f583218b678e7b05076",
+      "runner_sha256": "353b40892594ad8a000fd3af61bd5992e53ea044fe307f583218b678e7b05076",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_network_guard_e2e.py",
+      "worktree_sha256": "33852a68fbb8fd8b0cb26e26a5044975244fba1597bc7c366bb88a5290cf0e75",
+      "runner_sha256": "33852a68fbb8fd8b0cb26e26a5044975244fba1597bc7c366bb88a5290cf0e75",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_ports_e2e.py",
+      "worktree_sha256": "2363353e72d60d4db4f849c9ab2f9d2103a016cdc40ceab5f20f7902add184b1",
+      "runner_sha256": "2363353e72d60d4db4f849c9ab2f9d2103a016cdc40ceab5f20f7902add184b1",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_receipts.py",
+      "worktree_sha256": "44d43c914f580400bb5c95874471028b8c2b3c9a2a01ce0faf2830fc7623d7c2",
+      "runner_sha256": "44d43c914f580400bb5c95874471028b8c2b3c9a2a01ce0faf2830fc7623d7c2",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_sandbox_runs.py",
+      "worktree_sha256": "f90df26b0073924431868cecd0dc225de696f04b81b5cf60827b0e75606dc870",
+      "runner_sha256": "f90df26b0073924431868cecd0dc225de696f04b81b5cf60827b0e75606dc870",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_search_flow.py",
+      "worktree_sha256": "0478cda8d8682f841ba404e1829ef4b5ba611cba873104ee91ea7ef85164716e",
+      "runner_sha256": "0478cda8d8682f841ba404e1829ef4b5ba611cba873104ee91ea7ef85164716e",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_startup_guard_e2e.py",
+      "worktree_sha256": "292a26c7129e0d6e5d444e84d5660ed06041e677d9563589105ee563985d5c28",
+      "runner_sha256": "292a26c7129e0d6e5d444e84d5660ed06041e677d9563589105ee563985d5c28",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_tenancy.py",
+      "worktree_sha256": "cb621ca0b5b3067e15d0668a30c16d853ff880035530254784ffbd774fafeed8",
+      "runner_sha256": "cb621ca0b5b3067e15d0668a30c16d853ff880035530254784ffbd774fafeed8",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_trust_summary.py",
+      "worktree_sha256": "50fea0422cb51f1f164cb77387703ad9d85d6b1871f91d3bb4acca98f5a901c5",
+      "runner_sha256": "50fea0422cb51f1f164cb77387703ad9d85d6b1871f91d3bb4acca98f5a901c5",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/test_web_edge.py",
+      "worktree_sha256": "1b3b5f4a545dd2ecf76e9c92b99e9d73ee709e13d12179d38b2e32f824ec1d90",
+      "runner_sha256": "1b3b5f4a545dd2ecf76e9c92b99e9d73ee709e13d12179d38b2e32f824ec1d90",
+      "equal": true
+    },
+    {
+      "path": "tests/e2e/web_helpers.py",
+      "worktree_sha256": "5c76fa06f531949c653aed9f0cb0064be73d57435e2d6e0e601d244f7b672fff",
+      "runner_sha256": "5c76fa06f531949c653aed9f0cb0064be73d57435e2d6e0e601d244f7b672fff",
+      "equal": true
+    },
+    {
+      "path": "tests/fake_kafka.py",
+      "worktree_sha256": "a74d8864ad1f0cf1a950c20377fbc3d7c2fe9e7c99c2ea6f23c235dd78ac0a7a",
+      "runner_sha256": "a74d8864ad1f0cf1a950c20377fbc3d7c2fe9e7c99c2ea6f23c235dd78ac0a7a",
+      "equal": true
+    },
+    {
+      "path": "tests/fake_sandbox.py",
+      "worktree_sha256": "c756d88af35f71086ce978d4795265ff72b0fc389172d31dad2b7bc9fbd80c15",
+      "runner_sha256": "c756d88af35f71086ce978d4795265ff72b0fc389172d31dad2b7bc9fbd80c15",
+      "equal": true
+    },
+    {
+      "path": "tests/fakes.py",
+      "worktree_sha256": "6cce4b0651bc56da4bc75aa0a6c14c50bc397af445098fb6e59b11f46db17d11",
+      "runner_sha256": "6cce4b0651bc56da4bc75aa0a6c14c50bc397af445098fb6e59b11f46db17d11",
+      "equal": true
+    },
+    {
+      "path": "tests/gate_lint.py",
+      "worktree_sha256": "6f9008004acf00466412ddd2dc5b6b73b6623e347d9bce642c36e188bdff779a",
+      "runner_sha256": "6f9008004acf00466412ddd2dc5b6b73b6623e347d9bce642c36e188bdff779a",
+      "equal": true
+    },
+    {
+      "path": "tests/gateway_helpers.py",
+      "worktree_sha256": "18f65daaeef19f568629bdfb4ea7e14b1bf2d226e736099229011f29a973d9d4",
+      "runner_sha256": "18f65daaeef19f568629bdfb4ea7e14b1bf2d226e736099229011f29a973d9d4",
+      "equal": true
+    },
+    {
+      "path": "tests/harness.py",
+      "worktree_sha256": "51eee0d18694573b7ff0f6ff5f54c763444f4eca47ee31b881b3e9ff3b987bd3",
+      "runner_sha256": "51eee0d18694573b7ff0f6ff5f54c763444f4eca47ee31b881b3e9ff3b987bd3",
+      "equal": true
+    },
+    {
+      "path": "tests/import_lint.py",
+      "worktree_sha256": "6cc28544fdbf95bba94f197dac6d77a4ee2bf6f70a16a96df3cb21b7913f8ad5",
+      "runner_sha256": "6cc28544fdbf95bba94f197dac6d77a4ee2bf6f70a16a96df3cb21b7913f8ad5",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/conftest.py",
+      "worktree_sha256": "d64f394b9e4ad07a392a9397350625dbaa503d08965e24255cbdac9b6614a6ee",
+      "runner_sha256": "d64f394b9e4ad07a392a9397350625dbaa503d08965e24255cbdac9b6614a6ee",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_admin_cli.py",
+      "worktree_sha256": "76abe2b9eb6dfa58506c27ad6e99c0ff9df4e83ab9ea26386a04da78a4e78a67",
+      "runner_sha256": "76abe2b9eb6dfa58506c27ad6e99c0ff9df4e83ab9ea26386a04da78a4e78a67",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_app_role_privileges.py",
+      "worktree_sha256": "d08ff312877eedbbfbe2884319d5990229b5aa7268218bf5fd0a748dc26122dc",
+      "runner_sha256": "d08ff312877eedbbfbe2884319d5990229b5aa7268218bf5fd0a748dc26122dc",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_audit_scope_cli.py",
+      "worktree_sha256": "837cc0d60048b26e93d3c0e32e849d4cb08f5b905f1d178b75d7337980492e43",
+      "runner_sha256": "837cc0d60048b26e93d3c0e32e849d4cb08f5b905f1d178b75d7337980492e43",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_cache_tenancy.py",
+      "worktree_sha256": "6bf5275900dfc8ad9c5cb89ecfc1853fe4669c8a62f67c720d6c3bb5db621bcd",
+      "runner_sha256": "6bf5275900dfc8ad9c5cb89ecfc1853fe4669c8a62f67c720d6c3bb5db621bcd",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_gateway.py",
+      "worktree_sha256": "781d681cfe4e4dfaf2d6e800823ed78b42747ecf5014140e5462c7ef1df87f90",
+      "runner_sha256": "781d681cfe4e4dfaf2d6e800823ed78b42747ecf5014140e5462c7ef1df87f90",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_gateway_migration_and_cli.py",
+      "worktree_sha256": "314ea453cfefce1e145d9df3361872c938882b1da123c9c69673148733fac4af",
+      "runner_sha256": "314ea453cfefce1e145d9df3361872c938882b1da123c9c69673148733fac4af",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_identity_store.py",
+      "worktree_sha256": "7fb54d0e65bec718479facdd311a8600b9e2f57961337ce68098f14476902f33",
+      "runner_sha256": "7fb54d0e65bec718479facdd311a8600b9e2f57961337ce68098f14476902f33",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_ingestion_lifecycle.py",
+      "worktree_sha256": "57d08da078221db8feb1af72154daaec6a797a475d387fe9e7fd862de0d4f379",
+      "runner_sha256": "57d08da078221db8feb1af72154daaec6a797a475d387fe9e7fd862de0d4f379",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_jobs.py",
+      "worktree_sha256": "d15075af79a3263cbe3909cacb769d975563e398da09282010ad19083f64a4a8",
+      "runner_sha256": "d15075af79a3263cbe3909cacb769d975563e398da09282010ad19083f64a4a8",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_kafka_bus.py",
+      "worktree_sha256": "1d1e995bfe37411a78d9cfb7fb53ed5f757a9f4f2041ce8d578e26639cbb204c",
+      "runner_sha256": "1d1e995bfe37411a78d9cfb7fb53ed5f757a9f4f2041ce8d578e26639cbb204c",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_migration_0007.py",
+      "worktree_sha256": "372b7d1874b2a6ed12c4f7033292ba4c21b14271d6006a72d20e8f021db68479",
+      "runner_sha256": "372b7d1874b2a6ed12c4f7033292ba4c21b14271d6006a72d20e8f021db68479",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_migration_0008.py",
+      "worktree_sha256": "e8b24a783ffa721e3d2bba968368c0aedaad21c372b93faf9e7606e91dc0109d",
+      "runner_sha256": "e8b24a783ffa721e3d2bba968368c0aedaad21c372b93faf9e7606e91dc0109d",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_migration_0009.py",
+      "worktree_sha256": "abcf7e68727282f1a660605197408be47168b342b2d24ef590bbc4e8eb2290e2",
+      "runner_sha256": "abcf7e68727282f1a660605197408be47168b342b2d24ef590bbc4e8eb2290e2",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_migration_0010.py",
+      "worktree_sha256": "6d885a89daa30c6e834a2f59567ba52788442151cf2d0f7c5ebd6af96ff991e8",
+      "runner_sha256": "6d885a89daa30c6e834a2f59567ba52788442151cf2d0f7c5ebd6af96ff991e8",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_migrations.py",
+      "worktree_sha256": "dde31f92b1192bc61fa39195bbe023217b625b24731919823b6ce27c9a70a897",
+      "runner_sha256": "dde31f92b1192bc61fa39195bbe023217b625b24731919823b6ce27c9a70a897",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_network_guard_integration.py",
+      "worktree_sha256": "4408fe34908f04471f5f79de797a45e2d8811b807aef7929c043509a4aee8686",
+      "runner_sha256": "4408fe34908f04471f5f79de797a45e2d8811b807aef7929c043509a4aee8686",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_openshell_runtime.py",
+      "worktree_sha256": "d7d9751a9936c3c77dabd44e8114486b8f4c115c036278bc6d8728d7a826abae",
+      "runner_sha256": "d7d9751a9936c3c77dabd44e8114486b8f4c115c036278bc6d8728d7a826abae",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_outbox.py",
+      "worktree_sha256": "485a1ae1e329c15e0bb20e971bfb4d83d43fc364087fce794e372622fc8dafbb",
+      "runner_sha256": "485a1ae1e329c15e0bb20e971bfb4d83d43fc364087fce794e372622fc8dafbb",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_retention.py",
+      "worktree_sha256": "1e285810d8e1a64409f369deb7c379f6cf99bc11b7442574e99e42d7fb2cca97",
+      "runner_sha256": "1e285810d8e1a64409f369deb7c379f6cf99bc11b7442574e99e42d7fb2cca97",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_retrieval.py",
+      "worktree_sha256": "1c9cef854de20949a099681b69afadc753449df8a720bf3023cadd9c76e03c94",
+      "runner_sha256": "1c9cef854de20949a099681b69afadc753449df8a720bf3023cadd9c76e03c94",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_rls.py",
+      "worktree_sha256": "25fde26ded53c7e0eb7eb55a25592e0c7df1b1508528a418556426bea87dd5f8",
+      "runner_sha256": "25fde26ded53c7e0eb7eb55a25592e0c7df1b1508528a418556426bea87dd5f8",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_run_tokens.py",
+      "worktree_sha256": "b3ef2269cd6e5cf5f40a1880a5643a5d4995b979e95dea2da70d7dc2c748f4e9",
+      "runner_sha256": "b3ef2269cd6e5cf5f40a1880a5643a5d4995b979e95dea2da70d7dc2c748f4e9",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_startup_guard.py",
+      "worktree_sha256": "7c6f33b6f6c7912501b4ab9607e0c3c3b24a82bbfa7ec0fcfcce75b5210b3e79",
+      "runner_sha256": "7c6f33b6f6c7912501b4ab9607e0c3c3b24a82bbfa7ec0fcfcce75b5210b3e79",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_tool_argument_deny.py",
+      "worktree_sha256": "e4c59c1feeaa2d1b7f47379d2003f2017c78a3c17bcddbaa3454dc8d0ecfd41d",
+      "runner_sha256": "e4c59c1feeaa2d1b7f47379d2003f2017c78a3c17bcddbaa3454dc8d0ecfd41d",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_usage_feedback.py",
+      "worktree_sha256": "a2ebcee08a54d26376ec564f84207ca31a539b5967acf98b13932b7efeb1d5a5",
+      "runner_sha256": "a2ebcee08a54d26376ec564f84207ca31a539b5967acf98b13932b7efeb1d5a5",
+      "equal": true
+    },
+    {
+      "path": "tests/integration/test_worker_process.py",
+      "worktree_sha256": "21ff32eba37e78cb592a019b4e12a2ac5ab563caaa3ba710bd74162a66517a63",
+      "runner_sha256": "21ff32eba37e78cb592a019b4e12a2ac5ab563caaa3ba710bd74162a66517a63",
+      "equal": true
+    },
+    {
+      "path": "tests/jobs_helpers.py",
+      "worktree_sha256": "4e06a555786c46166f426ea2a276103fb979c7e0de8bc419f67147bd33f75a63",
+      "runner_sha256": "4e06a555786c46166f426ea2a276103fb979c7e0de8bc419f67147bd33f75a63",
+      "equal": true
+    },
+    {
+      "path": "tests/kafka_helpers.py",
+      "worktree_sha256": "f2c53f10306f1dcabe97c1bdcc37e100a199cf9b83b29a6e6b81694584a42926",
+      "runner_sha256": "f2c53f10306f1dcabe97c1bdcc37e100a199cf9b83b29a6e6b81694584a42926",
+      "equal": true
+    },
+    {
+      "path": "tests/support/__init__.py",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "runner_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "equal": true
+    },
+    {
+      "path": "tests/support/crash_worker.py",
+      "worktree_sha256": "b507e6a528372566b9f830e7d347bfa938d99a3d7f0f5793a4cba50e4f22439e",
+      "runner_sha256": "b507e6a528372566b9f830e7d347bfa938d99a3d7f0f5793a4cba50e4f22439e",
+      "equal": true
+    },
+    {
+      "path": "tests/support/openshell_stub.py",
+      "worktree_sha256": "e0767b0ddff0985e673f7b0db62d4f70a0a4547503ae4b4f0bab80c4c58afbcb",
+      "runner_sha256": "e0767b0ddff0985e673f7b0db62d4f70a0a4547503ae4b4f0bab80c4c58afbcb",
+      "equal": true
+    },
+    {
+      "path": "tests/trust_helpers.py",
+      "worktree_sha256": "d187faba064a0abb59b0486c353c9af9bf47cd9310a0092e9a3a1ba67fffe5da",
+      "runner_sha256": "d187faba064a0abb59b0486c353c9af9bf47cd9310a0092e9a3a1ba67fffe5da",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/conftest.py",
+      "worktree_sha256": "90777977afbe1b54660573d72aaeaef1909f36bf0ab4c869e526a8f18e7b55ea",
+      "runner_sha256": "90777977afbe1b54660573d72aaeaef1909f36bf0ab4c869e526a8f18e7b55ea",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_agent_halt.py",
+      "worktree_sha256": "e84852c6673b7ffc48cbdd6bf5d0cdc8b4b2fc7aaf041d5ab9854273273e6b89",
+      "runner_sha256": "e84852c6673b7ffc48cbdd6bf5d0cdc8b4b2fc7aaf041d5ab9854273273e6b89",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_agent_tools.py",
+      "worktree_sha256": "55d49d73324f2243a05e650567d96f43f84a2e9cf0eb624c6ac7e029640e3327",
+      "runner_sha256": "55d49d73324f2243a05e650567d96f43f84a2e9cf0eb624c6ac7e029640e3327",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_artifact_licences.py",
+      "worktree_sha256": "0fe940714a6f1ebf7c0b6ba9d5add9c9ce30ed8cf5bf0ebccc6f6d66fc93ef5a",
+      "runner_sha256": "0fe940714a6f1ebf7c0b6ba9d5add9c9ce30ed8cf5bf0ebccc6f6d66fc93ef5a",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_auth.py",
+      "worktree_sha256": "d5ae8b8bda767b6a3db79cf62ac008944fe38a51a751489b6f5c67d72847f36b",
+      "runner_sha256": "d5ae8b8bda767b6a3db79cf62ac008944fe38a51a751489b6f5c67d72847f36b",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_cache_keys.py",
+      "worktree_sha256": "e12a3715a40d9595aa6cfd0ab43d0173eaa92ecd5b640af5ef407c094fa579c8",
+      "runner_sha256": "e12a3715a40d9595aa6cfd0ab43d0173eaa92ecd5b640af5ef407c094fa579c8",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_check_skips.py",
+      "worktree_sha256": "3134971838fe50ceec2d1573463730ecadee5f4c0570a3fc1a41e5e396271797",
+      "runner_sha256": "3134971838fe50ceec2d1573463730ecadee5f4c0570a3fc1a41e5e396271797",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_ci_env.py",
+      "worktree_sha256": "b8aa39ecc9a6e5b790d064eab0cc403f0892f64468e1a8d3f768c8a38547e662",
+      "runner_sha256": "b8aa39ecc9a6e5b790d064eab0cc403f0892f64468e1a8d3f768c8a38547e662",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_compose.py",
+      "worktree_sha256": "caceb8a1934e13e7c7670cd158dbab9e4ba816c46b7074d2bc47358db700a442",
+      "runner_sha256": "caceb8a1934e13e7c7670cd158dbab9e4ba816c46b7074d2bc47358db700a442",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_config_mode.py",
+      "worktree_sha256": "daa624135b108c8e204cafa23b64a90ef68c73790ef7b7c44d731072a3aa44e6",
+      "runner_sha256": "daa624135b108c8e204cafa23b64a90ef68c73790ef7b7c44d731072a3aa44e6",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_cost_stage.py",
+      "worktree_sha256": "c389ba84df9b21b8d0c2b9082248c5fd0a1488205f07fb660b8fae0ad0bf5b67",
+      "runner_sha256": "c389ba84df9b21b8d0c2b9082248c5fd0a1488205f07fb660b8fae0ad0bf5b67",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_cursor.py",
+      "worktree_sha256": "f3b9ee5fa2f32b8cac870ea7df0eae90c2011fa28d6cf5cc7152e5f91e16b0db",
+      "runner_sha256": "f3b9ee5fa2f32b8cac870ea7df0eae90c2011fa28d6cf5cc7152e5f91e16b0db",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_decision_event.py",
+      "worktree_sha256": "c13da70acb2618b63b815f6d93197c0fbd2fb97cf84a49c056078e8916cdb901",
+      "runner_sha256": "c13da70acb2618b63b815f6d93197c0fbd2fb97cf84a49c056078e8916cdb901",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_docs_generated.py",
+      "worktree_sha256": "4326e15ce78e0603e1cd77824c65566dd898d152a655ed9bd08f3a7464b7017e",
+      "runner_sha256": "4326e15ce78e0603e1cd77824c65566dd898d152a655ed9bd08f3a7464b7017e",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_docs_links.py",
+      "worktree_sha256": "3223a6ed65a0a354cc8713b17d5319101158100c27881f45f7f17926731526bc",
+      "runner_sha256": "3223a6ed65a0a354cc8713b17d5319101158100c27881f45f7f17926731526bc",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_embedding_adapter.py",
+      "worktree_sha256": "239a7308f6a4d6ea470d3b6f48e655faae4828c7407a1ccd715fe4bc8305cf9f",
+      "runner_sha256": "239a7308f6a4d6ea470d3b6f48e655faae4828c7407a1ccd715fe4bc8305cf9f",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_errors.py",
+      "worktree_sha256": "d65e43c95c1c235ae9bb1529fe90044c13e312f0a39b81dbddabc3a8ec427e88",
+      "runner_sha256": "d65e43c95c1c235ae9bb1529fe90044c13e312f0a39b81dbddabc3a8ec427e88",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_eval_gate.py",
+      "worktree_sha256": "9032c369ae98cccc6e2fed0cc56e973750f9c0a6174196fa2d683a77d6723524",
+      "runner_sha256": "9032c369ae98cccc6e2fed0cc56e973750f9c0a6174196fa2d683a77d6723524",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_finops.py",
+      "worktree_sha256": "4c65bbfcedf1b584b32a52a5b021d7b41f0489e8a8ed96e959b5fe3937734f69",
+      "runner_sha256": "4c65bbfcedf1b584b32a52a5b021d7b41f0489e8a8ed96e959b5fe3937734f69",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_gateway_boundary.py",
+      "worktree_sha256": "1d83697dcaa9fd2bdd0bd80fefdb0325da95bfb31de00e07bec1f0521450fe30",
+      "runner_sha256": "1d83697dcaa9fd2bdd0bd80fefdb0325da95bfb31de00e07bec1f0521450fe30",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_gateway_enforce.py",
+      "worktree_sha256": "3d4ffcb2186385424140d1127845a955de6f387897d9f2ca85a4fade94d77726",
+      "runner_sha256": "3d4ffcb2186385424140d1127845a955de6f387897d9f2ca85a4fade94d77726",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_gateway_gate_calls.py",
+      "worktree_sha256": "1a6031222ffc82342c24d5b536fc3c5e9a2ac27f18856f93813509cd935d4ee6",
+      "runner_sha256": "1a6031222ffc82342c24d5b536fc3c5e9a2ac27f18856f93813509cd935d4ee6",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_gateway_import_lint.py",
+      "worktree_sha256": "e01de114152eb21112566120bb8700d06d5a44406ffcfe598c56f2b14fac8e84",
+      "runner_sha256": "e01de114152eb21112566120bb8700d06d5a44406ffcfe598c56f2b14fac8e84",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_gateway_packaging.py",
+      "worktree_sha256": "fd7bf3276d8e95da11e3d67890b9deb847ae7ee5b1033e8e6f52140869583033",
+      "runner_sha256": "fd7bf3276d8e95da11e3d67890b9deb847ae7ee5b1033e8e6f52140869583033",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_gateway_policy.py",
+      "worktree_sha256": "c4a984a7c33bfce5d4b1a471ecfc461ce1294745b7e5ebe47efe2f05054396ec",
+      "runner_sha256": "c4a984a7c33bfce5d4b1a471ecfc461ce1294745b7e5ebe47efe2f05054396ec",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_guardrails.py",
+      "worktree_sha256": "b85472fb503f7a64f02eb3b81771eb400dc721e1720d80dd7dbc32a4cd198f0e",
+      "runner_sha256": "b85472fb503f7a64f02eb3b81771eb400dc721e1720d80dd7dbc32a4cd198f0e",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_identity_keys.py",
+      "worktree_sha256": "412358aefd99028aad5c1a45fd01f600487eafff8527991331e9a8976e239ac3",
+      "runner_sha256": "412358aefd99028aad5c1a45fd01f600487eafff8527991331e9a8976e239ac3",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_import_lint_ports.py",
+      "worktree_sha256": "2a3592ef4aceb61f9183e4e560af2a2a83a8d7781f98a112343529aba3b76132",
+      "runner_sha256": "2a3592ef4aceb61f9183e4e560af2a2a83a8d7781f98a112343529aba3b76132",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_jobs_units.py",
+      "worktree_sha256": "03a097bb60e7291d9882fd7dbd0e565ddb656af69278ef369b1c7e02c6824b8d",
+      "runner_sha256": "03a097bb60e7291d9882fd7dbd0e565ddb656af69278ef369b1c7e02c6824b8d",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_jwt.py",
+      "worktree_sha256": "2847cdeb6346ef7a8164a39d53305fea56394798c633302b01d95dafc3df017c",
+      "runner_sha256": "2847cdeb6346ef7a8164a39d53305fea56394798c633302b01d95dafc3df017c",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_kafka_units.py",
+      "worktree_sha256": "e5a1735c696273aa472dc383384989ec0403ac3ab8a11b5d05b6a0863840d68d",
+      "runner_sha256": "e5a1735c696273aa472dc383384989ec0403ac3ab8a11b5d05b6a0863840d68d",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_licence_gate.py",
+      "worktree_sha256": "c1824664c40f73aed68bb8ea45f31f3965d335d2537cddf379f27171916ecda2",
+      "runner_sha256": "c1824664c40f73aed68bb8ea45f31f3965d335d2537cddf379f27171916ecda2",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_lifecycle.py",
+      "worktree_sha256": "1b612a2cfece9a65f7ac09d039119a92a15d81dbd4eaac38696ba1471bef01fc",
+      "runner_sha256": "1b612a2cfece9a65f7ac09d039119a92a15d81dbd4eaac38696ba1471bef01fc",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_llm.py",
+      "worktree_sha256": "5ce8370decc026f7de894810c292d4707f53e2730b28586ab14afd4d56f7942a",
+      "runner_sha256": "5ce8370decc026f7de894810c292d4707f53e2730b28586ab14afd4d56f7942a",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_mcp_compat.py",
+      "worktree_sha256": "69981ca1fc0357db4edae05a7e247c1d2fcd681f9c74ff1e3f60288cc0f78258",
+      "runner_sha256": "69981ca1fc0357db4edae05a7e247c1d2fcd681f9c74ff1e3f60288cc0f78258",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_mcp_tools.py",
+      "worktree_sha256": "c010c11ac9c50ee72898145a4bfc09a20ff65a74a5f61ba4ba16b16b50c53898",
+      "runner_sha256": "c010c11ac9c50ee72898145a4bfc09a20ff65a74a5f61ba4ba16b16b50c53898",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_middleware_paths.py",
+      "worktree_sha256": "e4f10e8a8ce8010d39e3b851f60de58fc6ccf6b99b98bdf7baac4dd3ea830ef0",
+      "runner_sha256": "e4f10e8a8ce8010d39e3b851f60de58fc6ccf6b99b98bdf7baac4dd3ea830ef0",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_network_guard.py",
+      "worktree_sha256": "d40c8e32bc51cbe8fd8c7dec05a6185e7717e4999eac4c344b6e6256065467ff",
+      "runner_sha256": "d40c8e32bc51cbe8fd8c7dec05a6185e7717e4999eac4c344b6e6256065467ff",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_observability.py",
+      "worktree_sha256": "84aad2a1ff16b100b3a1514769bba6e52d12787aea20fc96ebe10023dff45f32",
+      "runner_sha256": "84aad2a1ff16b100b3a1514769bba6e52d12787aea20fc96ebe10023dff45f32",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_observability_profile.py",
+      "worktree_sha256": "117de9ce49b202eb24175e17f03a19e42461ef584d2f5e0b7ada59ce54f30ab8",
+      "runner_sha256": "117de9ce49b202eb24175e17f03a19e42461ef584d2f5e0b7ada59ce54f30ab8",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_openapi_snapshot.py",
+      "worktree_sha256": "deab050ec0da7f2c8a2064a49ef84b1f510fb976e688ef366b7712d94cdff8ec",
+      "runner_sha256": "deab050ec0da7f2c8a2064a49ef84b1f510fb976e688ef366b7712d94cdff8ec",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_openshell_driver.py",
+      "worktree_sha256": "e2782000cbf165b0a7cc10f4b638bfbf1f2dcf9ba19ee8ce79240f5ad822f305",
+      "runner_sha256": "e2782000cbf165b0a7cc10f4b638bfbf1f2dcf9ba19ee8ce79240f5ad822f305",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_preflight.py",
+      "worktree_sha256": "f03f24386fcbd2e2cf89278542b691f300e098fc4c3ebe9db938380abe12869e",
+      "runner_sha256": "f03f24386fcbd2e2cf89278542b691f300e098fc4c3ebe9db938380abe12869e",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_pricing_and_labels.py",
+      "worktree_sha256": "3ab9bcc4f0aa59efcbe0d133cfe10d437b9a318450745200f23d602ec0240580",
+      "runner_sha256": "3ab9bcc4f0aa59efcbe0d133cfe10d437b9a318450745200f23d602ec0240580",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_reason_catalogue.py",
+      "worktree_sha256": "db41b505860ee3225861d636e6fa8df16bd12e00cba1594d943139e3ee92a63e",
+      "runner_sha256": "db41b505860ee3225861d636e6fa8df16bd12e00cba1594d943139e3ee92a63e",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_registry.py",
+      "worktree_sha256": "8e38f625a2d5c2d0f090f21d8429e6b30ac58c715767ff68142c94987756208b",
+      "runner_sha256": "8e38f625a2d5c2d0f090f21d8429e6b30ac58c715767ff68142c94987756208b",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_retriever.py",
+      "worktree_sha256": "7fafec067156a76ffcb772fdd9606326ddf9a4cd53063b99daa5762b54f65f83",
+      "runner_sha256": "7fafec067156a76ffcb772fdd9606326ddf9a4cd53063b99daa5762b54f65f83",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_route_tenant_inputs.py",
+      "worktree_sha256": "2d81c99bef45d960ecf05eef38af9b667c20202adc915f7b9a0e6b590cb99622",
+      "runner_sha256": "2d81c99bef45d960ecf05eef38af9b667c20202adc915f7b9a0e6b590cb99622",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_sandbox_qa_fixes.py",
+      "worktree_sha256": "f6cfe45faca05252c5812fb9d27f8be3cb674a3212cf3b50beb571bd1978f3c2",
+      "runner_sha256": "f6cfe45faca05252c5812fb9d27f8be3cb674a3212cf3b50beb571bd1978f3c2",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_sandbox_units.py",
+      "worktree_sha256": "1c1b7d8d8dee513ab8f9d86663912f2c381c65df9ce1f251c166efe309615e28",
+      "runner_sha256": "1c1b7d8d8dee513ab8f9d86663912f2c381c65df9ce1f251c166efe309615e28",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_search_route.py",
+      "worktree_sha256": "540d99d399c9b43627ce165afbb38043abdd5c1ab2b566f8b8c3cb5d718ed45d",
+      "runner_sha256": "540d99d399c9b43627ce165afbb38043abdd5c1ab2b566f8b8c3cb5d718ed45d",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_settings.py",
+      "worktree_sha256": "2cd4e74ce4f27a88bd5218c7a7fd6e284f3c7d4a94ad942b27fc94bcfa6855d8",
+      "runner_sha256": "2cd4e74ce4f27a88bd5218c7a7fd6e284f3c7d4a94ad942b27fc94bcfa6855d8",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_supply_chain_controls.py",
+      "worktree_sha256": "8f7322b9e771898c885d3e22371e0bca82e2396eba52404fc19afa28b4401d96",
+      "runner_sha256": "8f7322b9e771898c885d3e22371e0bca82e2396eba52404fc19afa28b4401d96",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_tenant_connection.py",
+      "worktree_sha256": "94dbde4cd7857e3f199d81531c3661d17820a6cab5307232277f3ea10af6adec",
+      "runner_sha256": "94dbde4cd7857e3f199d81531c3661d17820a6cab5307232277f3ea10af6adec",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_tool_arguments.py",
+      "worktree_sha256": "a0a884527783229589f7bc7731a6c6c5a3b722edf06f5fd4fcfe4304c5401ca6",
+      "runner_sha256": "a0a884527783229589f7bc7731a6c6c5a3b722edf06f5fd4fcfe4304c5401ca6",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_typing_fixes.py",
+      "worktree_sha256": "9bd52af68def9b7ead52b09ba265dc315f7aa80cfbde21d401bf7e75a4727120",
+      "runner_sha256": "9bd52af68def9b7ead52b09ba265dc315f7aa80cfbde21d401bf7e75a4727120",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_ui_proxy_config.py",
+      "worktree_sha256": "ce8469e964f9ea3577b61e40af28f6706581dc17993d725e6cdfdb5ad16998b4",
+      "runner_sha256": "ce8469e964f9ea3577b61e40af28f6706581dc17993d725e6cdfdb5ad16998b4",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_usage.py",
+      "worktree_sha256": "996567d17865b03ba2984d5a7a89cefe8f6e567879a4552090c6b560ddaf7d48",
+      "runner_sha256": "996567d17865b03ba2984d5a7a89cefe8f6e567879a4552090c6b560ddaf7d48",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_valkey_cache.py",
+      "worktree_sha256": "c39e8f4197826907e6b576c38cbbf173cb66c98bf0c56917008f3831ae9bd0a1",
+      "runner_sha256": "c39e8f4197826907e6b576c38cbbf173cb66c98bf0c56917008f3831ae9bd0a1",
+      "equal": true
+    },
+    {
+      "path": "tests/unit/test_web_edge_unit.py",
+      "worktree_sha256": "db510a0e6ef5d4901b4076b7e58af861f34306e4e49bb0f839b39554e2ec240f",
+      "runner_sha256": "db510a0e6ef5d4901b4076b7e58af861f34306e4e49bb0f839b39554e2ec240f",
+      "equal": true
+    },
+    {
+      "path": "ui/nginx.conf",
+      "worktree_sha256": "083d384d4bcc4148e12e89cfbb8149fec76f14041bd286932a2ed83c1c1151d5",
+      "runner_sha256": "083d384d4bcc4148e12e89cfbb8149fec76f14041bd286932a2ed83c1c1151d5",
+      "equal": true
+    },
+    {
+      "path": "workers/__init__.py",
+      "worktree_sha256": "90723b7f11af766965048da7649f189a07939c9d2ae0311e5d44acf1183042ec",
+      "runner_sha256": "90723b7f11af766965048da7649f189a07939c9d2ae0311e5d44acf1183042ec",
+      "equal": true
+    },
+    {
+      "path": "workers/__main__.py",
+      "worktree_sha256": "6a2aaf375906cab95fe7375234e7eda7bd681d2f18ed085e2b202559e6e6f7a2",
+      "runner_sha256": "6a2aaf375906cab95fe7375234e7eda7bd681d2f18ed085e2b202559e6e6f7a2",
+      "equal": true
+    },
+    {
+      "path": "workers/context.py",
+      "worktree_sha256": "6b35f2a8ec070e526c2951aace13b4b7f04e705e87700134203de87c143fc1c1",
+      "runner_sha256": "6b35f2a8ec070e526c2951aace13b4b7f04e705e87700134203de87c143fc1c1",
+      "equal": true
+    },
+    {
+      "path": "workers/embedded.py",
+      "worktree_sha256": "a5e9da1ca97896d565bd2016cf1c0df9b866506cff2efc220847b28917a46766",
+      "runner_sha256": "a5e9da1ca97896d565bd2016cf1c0df9b866506cff2efc220847b28917a46766",
+      "equal": true
+    },
+    {
+      "path": "workers/handlers/__init__.py",
+      "worktree_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "runner_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "equal": true
+    },
+    {
+      "path": "workers/handlers/agent_run.py",
+      "worktree_sha256": "389bb51a12bce3decc18000904f63be12036b6ab4677ab80932a2b097b229dd2",
+      "runner_sha256": "389bb51a12bce3decc18000904f63be12036b6ab4677ab80932a2b097b229dd2",
+      "equal": true
+    },
+    {
+      "path": "workers/handlers/ingest.py",
+      "worktree_sha256": "9f62a2118c8ec3b5bd11791dfaab8e718dddf6773e46d7ee63f83458ca49027c",
+      "runner_sha256": "9f62a2118c8ec3b5bd11791dfaab8e718dddf6773e46d7ee63f83458ca49027c",
+      "equal": true
+    },
+    {
+      "path": "workers/handlers/purge.py",
+      "worktree_sha256": "3cd7e110ad6a920a093a64742101fc886c789d400bb442d15451f913184b35bf",
+      "runner_sha256": "3cd7e110ad6a920a093a64742101fc886c789d400bb442d15451f913184b35bf",
+      "equal": true
+    },
+    {
+      "path": "workers/loop.py",
+      "worktree_sha256": "d665ec894794cc0b0004150b3db40749ba3a1fb874dc7bea77783045332e1ff0",
+      "runner_sha256": "d665ec894794cc0b0004150b3db40749ba3a1fb874dc7bea77783045332e1ff0",
+      "equal": true
+    },
+    {
+      "path": "workers/metrics_server.py",
+      "worktree_sha256": "52914397916988e07dd6e9c2ac263c91744a427991291a74e620c284883365ec",
+      "runner_sha256": "52914397916988e07dd6e9c2ac263c91744a427991291a74e620c284883365ec",
+      "equal": true
+    },
+    {
+      "path": "workers/scheduler.py",
+      "worktree_sha256": "2f83305ad0ccd2c0e710e9bb91176d5aee9fc18f9d4b464e9dde2e6dfca3d06c",
+      "runner_sha256": "2f83305ad0ccd2c0e710e9bb91176d5aee9fc18f9d4b464e9dde2e6dfca3d06c",
+      "equal": true
+    },
+    {
+      "path": "workers/types.py",
+      "worktree_sha256": "b7511d62e70d95359ebf9155084235902ce99a85f5334f695a0c79e287d2de3c",
+      "runner_sha256": "b7511d62e70d95359ebf9155084235902ce99a85f5334f695a0c79e287d2de3c",
+      "equal": true
+    }
+  ],
+  "all_equal": true
+}

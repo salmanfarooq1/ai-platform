@@ -1,0 +1,6 @@
+# Architect run, 2026-11-06T07:08:49Z, outside the builder sandbox, with the local env012 variables set
+$ poetry run pytest -m unit -q -p no:cacheprovider
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+990 passed, 881 deselected, 1 warning in 72.69s (0:01:12)

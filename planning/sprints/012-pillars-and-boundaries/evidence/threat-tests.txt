@@ -1,0 +1,6 @@
+Commands: source /home/ubuntu/ai-platform/scratch/env012.sh; export live-tier URLs; "$POETRY" run pytest -q -p no:cacheprovider tests/unit/test_record_canonical.py tests/unit/test_evidence_ports.py tests/contracts/test_decision_sink_contract.py tests/unit/test_gateway_enforce.py tests/unit/test_import_contracts.py tests/integration/test_migration_record_v2.py tests/integration/test_module_disabled.py tests/integration/test_deploy_shape.py
+Date: 2026-11-06
+
+........................................................................ [ 59%]
+.................................................                        [100%]
+121 passed in 38.54s

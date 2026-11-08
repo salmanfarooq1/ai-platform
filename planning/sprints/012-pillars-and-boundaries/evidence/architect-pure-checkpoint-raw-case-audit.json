@@ -1,0 +1,28 @@
+{
+  "baseline_cases": 1729,
+  "checkpoint_cases": 1730,
+  "missing_raw_ids": [
+    "tests.e2e.test_console_api.test_a_missing_audit_read_scope_gives_403_and_a_deny_row[/v1/decisions/24952641-3828-4068-83a8-900f81ae2dac-decisions]",
+    "tests.e2e.test_console_api.test_each_read_writes_an_audit_read_allow_row[/v1/decisions/24952641-3828-4068-83a8-900f81ae2dac-decisions]",
+    "tests.unit.test_reason_catalogue.test_every_emitted_reason_code_has_a_catalogue_entry[gateway/chain.py]",
+    "tests.unit.test_reason_catalogue.test_every_emitted_reason_code_has_a_catalogue_entry[gateway/receipts.py]",
+    "tests.unit.test_reason_catalogue.test_every_emitted_reason_code_has_a_catalogue_entry[gateway/record.py]"
+  ],
+  "added_raw_ids": [
+    "tests.e2e.test_console_api.test_a_missing_audit_read_scope_gives_403_and_a_deny_row[/v1/decisions/7a306fde-1a5c-4ac5-bb34-4bcf75721d8a-decisions]",
+    "tests.e2e.test_console_api.test_each_read_writes_an_audit_read_allow_row[/v1/decisions/7a306fde-1a5c-4ac5-bb34-4bcf75721d8a-decisions]",
+    "tests.unit.test_reason_catalogue.test_every_emitted_reason_code_has_a_catalogue_entry[evidence/__init__.py]",
+    "tests.unit.test_reason_catalogue.test_every_emitted_reason_code_has_a_catalogue_entry[evidence/chain.py]",
+    "tests.unit.test_reason_catalogue.test_every_emitted_reason_code_has_a_catalogue_entry[evidence/receipts.py]",
+    "tests.unit.test_reason_catalogue.test_every_emitted_reason_code_has_a_catalogue_entry[evidence/record.py]"
+  ],
+  "latest_outcomes": {
+    "pass": 1720,
+    "skip": 10
+  },
+  "failures": [],
+  "evidence_commands": [
+    "frozen runner: full pytest; original unit missing executable failures preserved",
+    "host: full pytest -m unit; all885pass"
+  ]
+}

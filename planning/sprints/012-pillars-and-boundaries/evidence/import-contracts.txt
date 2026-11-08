@@ -1,0 +1,75 @@
+Commands: source /home/ubuntu/ai-platform/scratch/env012.sh; "$POETRY" run lint-imports; "$POETRY" run pytest -q -p no:cacheprovider tests/unit/test_import_contracts.py; copy pyproject.toml and import packages to a temporary tree, append `from gateway.policy import evaluate` to api/agent/graph.py, run `"$POETRY" run lint-imports` in that tree, confirm non-zero and the contract violation, remove the temporary tree
+Date: 2026-11-06
+
+
+╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+ ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+ ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+  └──▶║║                    ▲ 
+      ╚╝────────────────────┘
+
+
+---------
+Contracts
+---------
+
+Analyzed 155 files, 474 dependencies.
+-------------------------------------
+
+ports imports no platform package KEPT
+core imports no module package KEPT
+evidence does not import gateway, api or workers KEPT
+gateway does not import evidence, api or workers KEPT
+agent and MCP code do not import evidence KEPT
+agent and MCP code use only the gateway package API KEPT
+
+Contracts: 6 kept, 0 broken.
+.....                                                                    [100%]
+5 passed in 5.13s
+
+--- Temporary seeded violation (expected lint-imports failure) ---
+Command: /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-Iq6y1kNi-py3.11/bin/lint-imports (temporary tree with seeded import)
+Seeded command exit code: 1 (expected non-zero)
+
+╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+ ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+ ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+  └──▶║║                    ▲ 
+      ╚╝────────────────────┘
+
+
+---------
+Contracts
+---------
+
+Analyzed 155 files, 475 dependencies.
+-------------------------------------
+
+ports imports no platform package KEPT
+core imports no module package KEPT
+evidence does not import gateway, api or workers KEPT
+gateway does not import evidence, api or workers KEPT
+agent and MCP code do not import evidence KEPT
+agent and MCP code use only the gateway package API BROKEN
+
+Contracts: 5 kept, 1 broken.
+
+
+----------------
+Broken contracts
+----------------
+
+agent and MCP code use only the gateway package API
+---------------------------------------------------
+
+api.agent is not allowed to import gateway.policy:
+
+-   api.agent.graph -> gateway.policy (l.336)
+
+

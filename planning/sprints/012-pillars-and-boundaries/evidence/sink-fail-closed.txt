@@ -1,0 +1,9 @@
+Commands: source /home/ubuntu/ai-platform/scratch/env012.sh; unset TEST_DATABASE_ADMIN_URL DATABASE_URL MIGRATION_DATABASE_URL REDIS_URL TEST_REDIS_URL; "$POETRY" run pytest -q -p no:cacheprovider tests/contracts/test_decision_sink_contract.py::test_sink_write_failure_is_propagated tests/unit/test_gateway_enforce.py -k 'sink_write_failure_is_propagated or failed_decision_write_on_an_allow_becomes_a_deny_decision_unrecorded or failed_write_on_a_deny_leaves_the_original_deny'; source /home/ubuntu/ai-platform/scratch/env012.sh; export TEST_DATABASE_ADMIN_URL DATABASE_URL MIGRATION_DATABASE_URL REDIS_URL TEST_REDIS_URL; "$POETRY" run pytest -q -p no:cacheprovider tests/contracts/test_evidence_lookup_contract.py
+Date: 2026-11-06
+
+...                                                                      [100%]
+3 passed, 63 deselected in 5.27s
+
+--- PgEvidenceLookup contract (real adapter and no-op fixture) ---
+....                                                                     [100%]
+4 passed in 4.59s

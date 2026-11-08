@@ -1,0 +1,23 @@
+{
+  "source_junit": "/home/ubuntu/ai-platform-sprints/012-pillars-and-boundaries/scratch/pure-workspace/planning/sprints/012-pillars-and-boundaries/evidence/after-move.xml",
+  "tiers": {
+    "integration/e2e": {
+      "passed": 835,
+      "skipped": 10
+    },
+    "unit": {
+      "passed": 877,
+      "failed": 8
+    }
+  },
+  "failed_cases": [
+    "tests.unit.test_compose.test_compose_profiles_render_with_loopback_ports[]",
+    "tests.unit.test_compose.test_compose_profiles_render_with_loopback_ports[models]",
+    "tests.unit.test_compose.test_compose_profiles_render_with_loopback_ports[streams]",
+    "tests.unit.test_compose.test_compose_profiles_render_with_loopback_ports[lake]",
+    "tests.unit.test_compose.test_compose_profiles_render_with_loopback_ports[observability]",
+    "tests.unit.test_docs_links.test_git_ignored_paths_are_skipped",
+    "tests.unit.test_licence_gate.test_licence_fixture[non_osi-1]",
+    "tests.unit.test_licence_gate.test_licence_fixture[mit-0]"
+  ]
+}

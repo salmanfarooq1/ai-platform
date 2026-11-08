@@ -1,0 +1,7 @@
+Commands: source /home/ubuntu/ai-platform/scratch/env012.sh; export TEST_DATABASE_ADMIN_URL DATABASE_URL MIGRATION_DATABASE_URL REDIS_URL TEST_REDIS_URL; "$POETRY" run pytest -q -p no:cacheprovider tests/integration/test_module_disabled.py; unset database URLs; "$POETRY" run pytest -q -p no:cacheprovider tests/unit/test_action_module_map.py::test_every_action_kind_maps_to_module tests/unit/test_worker_handlers.py -k "gateway_edition_registers_ingest_and_purge_only or agents_edition_adds_agent_run or worker_context_imports_no_agent_code"
+Date: 2026-11-06
+
+....                                                                     [100%]
+4 passed in 12.71s
+...                                                                      [100%]
+3 passed, 1 deselected in 12.09s

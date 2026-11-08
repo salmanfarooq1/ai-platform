@@ -1,0 +1,60 @@
+Commands: source /home/ubuntu/ai-platform/scratch/env012.sh; export TEST_DATABASE_ADMIN_URL DATABASE_URL MIGRATION_DATABASE_URL REDIS_URL TEST_REDIS_URL; scripts/ci/edition_smoke.sh; sed -n 1,140p .github/workflows/editions.yml; "$POETRY" run pytest -q -p no:cacheprovider tests/unit/test_editions_workflow.py tests/unit/test_compose.py::test_runtime_image_copies_evidence
+Date: 2026-11-06
+
+Smoke edition: Gateway (gateway)
+.                                                                        [100%]
+1 passed in 14.87s
+Smoke edition: Assurance (evidence,gateway)
+.                                                                        [100%]
+1 passed in 16.32s
+Smoke edition: Agents (agents,gateway)
+.                                                                        [100%]
+1 passed in 42.12s
+Smoke edition: Data (data,gateway,lineage)
+.                                                                        [100%]
+1 passed in 15.98s
+Smoke edition: Full (agents,data,evidence,gateway,lineage)
+.                                                                        [100%]
+1 passed in 91.35s (0:01:31)
+
+--- editions workflow ---
+name: Edition smoke
+'on':
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: [Gateway, Assurance, Agents, Data, Full]
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.7-pg16-trixie@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: [5432:5432]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 10
+      valkey:
+        image: valkey/valkey-bundle:9.1.3@sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660
+        ports: [6379:6379]
+        options: --health-cmd "valkey-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      DATABASE_URL: postgresql://gap_app:gap_app@localhost:5432/rag_platform
+      MIGRATION_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rag_platform
+      REDIS_URL: redis://localhost:6379/0
+      TEST_REDIS_URL: redis://localhost:6379/0
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+      with:
+        groups: dev
+    - name: Set up database
+      run: scripts/setup_db.sh
+    - name: Smoke edition
+      run: scripts/ci/edition_smoke.sh '${{ matrix.edition }}'
+..                                                                       [100%]
+2 passed in 11.12s
