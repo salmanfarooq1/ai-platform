@@ -1,0 +1,51 @@
+# package|version|SPDX expression|source checked|reason
+# npm entries use npm: before the package name and are never Python exclusions.
+# Add only after reviewing the exact release's licence. Never allow a non-OSI licence, except PSF-2.0 for an exact package and version (owner decision D2, 2026-10-24).
+jinja2|3.1.6|BSD-3-Clause|https://pypi.org/project/jinja2/3.1.6/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+pyyaml|6.0.3|MIT|https://pypi.org/project/pyyaml/6.0.3/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+aiohappyeyeballs|2.6.1|PSF-2.0|https://pypi.org/project/aiohappyeyeballs/2.6.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+typing-extensions|4.15.0|PSF-2.0|https://pypi.org/project/typing-extensions/4.15.0/#files|Python Software Foundation licence (permissive, not OSI-listed in SPDX). Allowed for this exact release under owner decision D2.
+aiosignal|1.4.0|Apache-2.0|https://pypi.org/project/aiosignal/1.4.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+annotated-types|0.7.0|MIT|https://pypi.org/project/annotated-types/0.7.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+asgiref|3.12.1|BSD-3-Clause|https://pypi.org/project/asgiref/3.12.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+async-timeout|5.0.1|Apache-2.0|https://pypi.org/project/async-timeout/5.0.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+beautifulsoup4|4.15.0|MIT|https://pypi.org/project/beautifulsoup4/4.15.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+certifi|2026.10.19|MPL-2.0|https://pypi.org/project/certifi/2026.10.19/#files|Hash-verified release wheel contains MPL-2.0; classifier label is non-SPDX. See evidence/rework-certifi-wheel.txt.
+distro|1.9.0|Apache-2.0|https://pypi.org/project/distro/1.9.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+fastuuid|0.14.0|BSD-3-Clause|https://pypi.org/project/fastuuid/0.14.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+groq|1.5.0|Apache-2.0|https://pypi.org/project/groq/1.5.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+h11|0.16.0|MIT|https://pypi.org/project/h11/0.16.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+hiredis|3.4.0|MIT|https://pypi.org/project/hiredis/3.4.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+httpx|0.28.1|BSD-3-Clause|https://pypi.org/project/httpx/0.28.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+huggingface-hub|1.16.1|Apache-2.0|https://pypi.org/project/huggingface-hub/1.16.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+hyperframe|6.1.0|MIT|https://pypi.org/project/hyperframe/6.1.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+jmespath|1.1.0|MIT|https://pypi.org/project/jmespath/1.1.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+jsonpatch|1.33|BSD-3-Clause|https://pypi.org/project/jsonpatch/1.33/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+jsonpointer|3.1.1|BSD-3-Clause|https://pypi.org/project/jsonpointer/3.1.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+langchain-core|1.6.6|MIT|https://pypi.org/project/langchain-core/1.6.6/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+langchain-litellm|0.7.2|MIT|https://pypi.org/project/langchain-litellm/0.7.2/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+langchain-protocol|0.0.18|MIT|https://pypi.org/project/langchain-protocol/0.0.18/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+markdown-it-py|4.2.0|MIT|https://pypi.org/project/markdown-it-py/4.2.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+mcp|2.2.0|MIT|https://pypi.org/project/mcp/2.2.0/#files|Hash-verified release wheel contains MIT; classifier label is non-SPDX. See evidence/rework-mcp-wheel.txt.
+mcp-types|2.2.0|MIT|https://pypi.org/project/mcp-types/2.2.0/#files|Hash-verified release wheel contains MIT; classifier label is non-SPDX. See evidence/rework-mcp-types-wheel.txt.
+mdurl|0.1.2|MIT|https://pypi.org/project/mdurl/0.1.2/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+multidict|6.7.1|Apache-2.0|https://pypi.org/project/multidict/6.7.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+openai|2.43.0|Apache-2.0|https://pypi.org/project/openai/2.43.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+propcache|0.4.1|Apache-2.0|https://pypi.org/project/propcache/0.4.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+protobuf|7.36.2|BSD-3-Clause|https://pypi.org/project/protobuf/7.36.2/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+psycopg2-binary|2.9.11|LGPL-3.0-or-later|https://pypi.org/project/psycopg2-binary/2.9.11/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+python-dateutil|2.9.0.post0|Apache-2.0 OR BSD-3-Clause|https://pypi.org/project/python-dateutil/2.9.0.post0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+requests|2.34.2|Apache-2.0|https://pypi.org/project/requests/2.34.2/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+requests-toolbelt|1.0.0|Apache-2.0|https://pypi.org/project/requests-toolbelt/1.0.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+rich|14.3.4|MIT|https://pypi.org/project/rich/14.3.4/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+s3transfer|0.19.2|Apache-2.0|https://pypi.org/project/s3transfer/0.19.2/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+shellingham|1.5.4|ISC|https://pypi.org/project/shellingham/1.5.4/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+six|1.17.0|MIT|https://pypi.org/project/six/1.17.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+sniffio|1.3.1|Apache-2.0 OR MIT|https://pypi.org/project/sniffio/1.3.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+tenacity|9.1.4|Apache-2.0|https://pypi.org/project/tenacity/9.1.4/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+tiktoken|0.13.0|MIT|https://pypi.org/project/tiktoken/0.13.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+tokenizers|0.22.2|Apache-2.0|https://github.com/huggingface/tokenizers/blob/v0.22.2/LICENSE|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+websockets|15.0.1|BSD-3-Clause|https://pypi.org/project/websockets/15.0.1/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+yarl|1.22.0|Apache-2.0|https://pypi.org/project/yarl/1.22.0/#files|Reviewed release licence; pip metadata uses a non-SPDX label. See evidence/licence-review.txt and licence-details.txt.
+npm:geist|1.7.2|OFL-1.1|https://registry.npmjs.org/geist/-/geist-1.7.2.tgz|Reviewed LICENSE.txt and package licence field; the checker guesses MIT but the bundled font licence is SIL OFL 1.1 (OSI approved).
+npm:webgl-constants|1.1.1|MIT|https://registry.npmjs.org/webgl-constants/-/webgl-constants-1.1.1.tgz|Reviewed LICENSE: MIT grant; checker marks the metadata as inferred MIT*.

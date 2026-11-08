@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Live check of the `observability` compose profile (Sprint 008, A6): Prometheus scrapes the API and Grafana serves the
 # provisioned dashboard. Needs docker, the Prometheus and Grafana images (pulled on first use) and a running Postgres and
-# Redis (`docker compose up -d postgres redis`). It starts the end-to-end API (fake providers, throwaway database) on
+# Redis (`docker compose up -d postgres valkey`). It starts the end-to-end API (fake providers, throwaway database) on
 # :8000, so nothing else may be listening there. Prints each check and exits 1 on the first failure. Writes no secret.
 set -u
 cd "$(dirname "$0")/../.."

@@ -1,0 +1,32 @@
+name: Python environment
+description: Pinned Poetry and cached project virtualenv
+inputs:
+  groups:
+    description: Comma separated dependency groups, or main for runtime only
+    default: dev
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
+        pipx install poetry==2.3.3
+        pipx inject poetry poetry-plugin-export==1.10.1
+        poetry config virtualenvs.in-project true
+    - uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-python3.11-${{ inputs.groups }}-${{ hashFiles('poetry.lock') }}
+    - shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        INSTALL_GROUPS: ${{ inputs.groups }}
+      run: |
+        if [[ "$INSTALL_GROUPS" == main ]]; then
+          poetry install --only main
+        else
+          poetry install --only "main,$INSTALL_GROUPS"
+        fi

@@ -8,6 +8,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 dependencies = [
+    "anyio (==4.14.2)",
+    "certifi (==2026.10.19)",
     "aiohttp (>=3.13.3,<4.0.0)",
     "numpy (>=2.4.2,<3.0.0)",
     "psycopg2-binary (>=2.9.11,<3.0.0)",
@@ -18,14 +20,14 @@ dependencies = [
     "uvicorn (>=0.49.0,<0.50.0)",
     "python-multipart (>=0.0.32,<0.0.33)",
     "litellm (>=1.89.2,<2.0.0)",
-    "redis[hiredis] (>=8.0.1,<9.0.0)",
+    "redis[hiredis] (==8.1.0)",
     "groq (>=1.5.0,<2.0.0)",
     "requests (>=2.34.2,<3.0.0)",
     "beautifulsoup4 (>=4.15.0,<5.0.0)",
     "langgraph (>=1.2.0,<2.0.0)",
     "langchain-core (>=1.4.0,<2.0.0)",
     "langchain-litellm (>=0.7.0,<0.8.0)",
-    "mcp (>=2.0.0,<3.0.0)",
+    "mcp (==2.2.0)",
     "pydantic-settings (>=2.15.0,<3.0.0)",
     "alembic (>=1.20.0,<2.0.0)",
     "opentelemetry-sdk (>=1.45.0,<2.0.0)",
@@ -60,6 +62,11 @@ labs = [
     "deepeval (>=4.0.8,<5.0.0)",
 ]
 
+supply-chain = [
+    "pip-licenses (==5.5.5)",
+    "cyclonedx-bom (==7.5.0)",
+]
+
 dev = [
     "pytest (>=9.1.1,<10.0.0)",
     "pytest-asyncio (>=1.4.0,<2.0.0)",
@@ -81,7 +88,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 # The deepeval pytest plugin (labs group) replaces pytest's skip summary with its own rich
 # output, which crashes on skip reasons that contain brackets. The tests do not use it.
-addopts = "-p no:deepeval"
+addopts = "-p no:deepeval --tb=short"
 markers = [
     "unit: fast, isolated tests with no external dependencies",
     "integration: tests against a real test database/Redis instance",

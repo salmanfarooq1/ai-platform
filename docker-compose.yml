@@ -1,40 +1,57 @@
 services:
   postgres:
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:0.8.7-pg16-trixie@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
     container_name: postgres
+    # An init as PID 1 reaps processes that `docker exec` and the healthcheck leave behind. Without it the
+    # postmaster is PID 1, adopts them, and treats one that dies as a crashed backend (full crash recovery).
+    init: true
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
     environment:
-      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
       APP_DB_PASSWORD: "${APP_DB_PASSWORD:-gap_app}"
     volumes:
-      - "pgdata:/var/lib/postgresql/data"
+      - "pgdata_trixie:/var/lib/postgresql/data"
       - "./docker/postgres-init:/docker-entrypoint-initdb.d:ro"
+      - "./docker/postgres-health.sh:/usr/local/bin/platform-postgres-health:ro"
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/platform-postgres-health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    restart: unless-stopped
 
-  redis:
-    image: redis/redis-stack-server:latest    
-    container_name: redis
+  valkey:
+    image: valkey/valkey-bundle:9.1.3@sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660
     ports:
-      - "6379:6379"
+      - "127.0.0.1:${VALKEY_HOST_PORT:-6379}:6379"
     volumes:
-      - "redis_data:/data"
+      - "valkey_data:/data"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
 
   # Runs the jobs (ingestion, agent runs) and relays the outbox. Same image as the API (the Dockerfile), another command.
   # The API answers 202 for an ingest and waits for a worker for an agent run, so run one when you run the API:
-  #   docker compose up -d postgres redis worker      (or `poetry run python -m workers` on the host)
+  #   docker compose up -d postgres valkey worker      (or `poetry run python -m workers` on the host)
   # Needs the migrated database (`scripts/setup_db.sh`). Model keys come from the environment, as for the API.
   worker:
     build: .
-    image: gap-platform
     container_name: worker
     command: ["python", "-m", "workers", "--concurrency", "2"]
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
     environment:
       MODE: "local"
       DATABASE_URL: "postgresql://gap_app:${APP_DB_PASSWORD:-gap_app}@postgres:5432/rag_platform"
-      REDIS_URL: "redis://redis:6379"
+      REDIS_URL: "redis://valkey:6379"
       OBJECT_STORE_DIR: "/data/objects"
       WORKER_HEALTH_FILE: "/tmp/worker-health"
       WORKER_METRICS_PORT: "9100"  # the worker's own series, for the `observability` profile (not published to the host)
@@ -57,7 +74,7 @@ services:
   # are bound to localhost only. Set GRAFANA_ADMIN_PASSWORD to change the local admin password.
   prometheus:
     profiles: ["observability"]
-    image: prom/prometheus:v3.5.0
+    image: prom/prometheus:v3.15.1@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
     container_name: prometheus
     ports:
       - "127.0.0.1:9090:9090"
@@ -66,14 +83,20 @@ services:
     volumes:
       - "./docker/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
       - "prometheus_data:/prometheus"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
 
   grafana:
     profiles: ["observability"]
-    image: grafana/grafana:12.0.2
+    image: grafana/grafana:13.2.4-distroless-slim@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b
     container_name: grafana
     depends_on:
-      - prometheus
+      prometheus:
+        condition: service_healthy
     ports:
       - "127.0.0.1:3000:3000"
     environment:
@@ -86,69 +109,136 @@ services:
     volumes:
       - "./docker/observability/grafana/provisioning:/etc/grafana/provisioning:ro"
       - "./docker/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro"
-      - "grafana_data:/var/lib/grafana"
+      - "grafana_data_v13:/var/lib/grafana"
     restart: unless-stopped
 
   ollama:
-    image: ollama/ollama
+    profiles: ["models"]
+    image: ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
     container_name: ollama
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
+    environment:
+      OLLAMA_NO_CLOUD: "1"
+      OLLAMA_NOPRUNE: "1"
     volumes:
-      - "ollama_data:/root/.ollama"
-
-  # Optional Kafka, behind a profile (Sprint 010, ADR-0008):  docker compose --profile kafka up -d redpanda kafka-topics
-  # One Redpanda node, for local work and `scripts/verify/kafka.sh`. It is not a production broker. The host connects at
-  # localhost:19092 (KAFKA_BOOTSTRAP=localhost:19092); other containers use redpanda:9092. Then set EVENT_BUS=kafka.
-  redpanda:
-    profiles: ["kafka"]
-    image: redpandadata/redpanda:v24.2.7
-    container_name: redpanda
-    command:
-      - redpanda
-      - start
-      - --mode=dev-container
-      - --smp=1
-      - --memory=1G
-      - --reserve-memory=0M
-      - --overprovisioned
-      - --node-id=0
-      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
-      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
-    ports:
-      - "127.0.0.1:19092:19092"
+      - "ollama_data_v0407:/root/.ollama"
     healthcheck:
-      test: ["CMD-SHELL", "rpk cluster info -X brokers=localhost:9092 >/dev/null 2>&1"]
-      interval: 5s
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
       timeout: 5s
-      retries: 24
-      start_period: 10s
+      retries: 12
     restart: unless-stopped
 
-  # Creates the topics once and exits: one per event type (key = tenant id, so 3 partitions) and its dead-letter topic.
-  kafka-topics:
-    profiles: ["kafka"]
-    image: redpandadata/redpanda:v24.2.7
-    container_name: kafka-topics
+  ollama-pull:
+    profiles: ["models"]
+    image: ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
     depends_on:
-      redpanda:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+    command: ["pull", "nomic-embed-text:v1.5"]
+    restart: "no"
+
+  # Optional single-node KRaft broker. EVENT_BUS remains outbox unless explicitly changed.
+  kafka:
+    profiles: ["streams"]
+    image: apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+    ports:
+      - "127.0.0.1:19092:19092"
+    environment:
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_LISTENERS: "INTERNAL://:9092,CONTROLLER://:9093,EXTERNAL://:19092"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:9092,EXTERNAL://localhost:19092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: "168"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_HEAP_OPTS: "-Xms256m -Xmx512m"
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+    volumes:
+      - "kafka_data:/var/lib/kafka/data"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 30s
+      retries: 24
+      start_period: 15s
+    restart: unless-stopped
+
+  kafka-topics:
+    profiles: ["streams"]
+    image: apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+    depends_on:
+      kafka:
         condition: service_healthy
     restart: "no"
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
-        set -e
+        set -euo pipefail
         for topic in platform.gateway.decision platform.ingest.completed platform.gateway.purge; do
           for name in "$$topic" "$$topic.dlq"; do
-            rpk topic create "$$name" -p 3 -r 1 -X brokers=redpanda:9092 || true
+            /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic "$$name" --partitions 3 --replication-factor 1 --config retention.ms=604800000
           done
         done
-        rpk topic list -X brokers=redpanda:9092
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list
+
+  seaweedfs:
+    profiles: ["lake"]
+    image: chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882
+    command: ["server", "-s3", "-s3.config=/etc/seaweedfs/s3.json", "-ip=seaweedfs", "-ip.bind=0.0.0.0", "-volume.max=16", "-master.volumeSizeLimitMB=1024"]
+    ports:
+      - "127.0.0.1:8333:8333"
+    environment:
+      S3_ACCESS_KEY_ID: "${S3_ACCESS_KEY_ID:-gap_local_only_access}"
+      S3_SECRET_ACCESS_KEY: "${S3_SECRET_ACCESS_KEY:-gap_local_only_secret}"
+    volumes:
+      - "seaweedfs_data:/data"
+      - "./docker/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "8333"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 10s
+    restart: unless-stopped
+
+  seaweedfs-init:
+    profiles: ["lake"]
+    image: chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+    environment:
+      S3_BUCKET: "${S3_BUCKET:-gap-local}"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        case "$$S3_BUCKET" in *[!a-z0-9.-]*|"") echo "Invalid S3_BUCKET" >&2; exit 1 ;; esac
+        printf 'fs.configure -locationPrefix=/buckets/ -volumeGrowthCount=1 -apply\ns3.bucket.create -name=%s -owner=platform-local\n' "$$S3_BUCKET" | weed shell -master=seaweedfs:9333 -filer=seaweedfs:8888
+    restart: "no"
 
 volumes:
   objects:
   pgdata:
-  redis_data:
+  pgdata_trixie:
+  redis_data:  # Retained for manual rollback; never mounted by Valkey.
+  valkey_data:
+  kafka_data:
+  seaweedfs_data:
   ollama_data:
+  ollama_data_v0407:
   prometheus_data:
-  grafana_data:
+  grafana_data:  # Retained for rollback; the upgraded image uses a separate volume.
+  grafana_data_v13:

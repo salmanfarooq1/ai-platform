@@ -3,3 +3,12 @@
 38480b326bf05b6de05bdbb041d7b57f8b19a146:planning/sprints/005-frontend-foundation/evidence/frontend-typecheck.txt:generic-api-key:8
 # A Kafka record from a test run (tenant UUID and event id), recorded as test evidence, not a credential.
 3c9b55da447ad561c5d9198cf7e6e6125b32846f:planning/sprints/010-kafka-event-bus/evidence/runbook-commands.txt:generic-api-key:7
+# Public key prefixes only; the corresponding secret key is redacted in the evidence.
+8707435e07a9bd9cc15b18e8a51aaf1dd4b979cb:planning/sprints/003-identity-tenancy/evidence/admin-cli.txt:generic-api-key:8
+8707435e07a9bd9cc15b18e8a51aaf1dd4b979cb:planning/sprints/003-identity-tenancy/evidence/qa-rls-admin-cli.txt:generic-api-key:3
+8707435e07a9bd9cc15b18e8a51aaf1dd4b979cb:planning/sprints/003-identity-tenancy/evidence/qa-rls-admin-cli.txt:generic-api-key:90
+# Unsigned alg=none JWT rejection fixture, followed by HTTP 401; not an accepted credential.
+8707435e07a9bd9cc15b18e8a51aaf1dd4b979cb:planning/sprints/003-identity-tenancy/evidence/qa-attacks.txt:jwt:116
+# Numeric chunk_size=1200 examples in module docstrings, not credentials.
+4531488ecfb3989cc846d943ebd82d3e8f647bc6:core/ingestion/chunkers.py:generic-api-key:18
+b232c9b4e3b739e40e2f540d4aebf7304fa2b0a3:scripts/lab_4.4_hybrid_chunking_strategy.py:generic-api-key:18

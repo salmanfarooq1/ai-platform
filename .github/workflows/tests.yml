@@ -1,195 +1,195 @@
 name: Tests
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.scope.outputs.backend }}
+      frontend: ${{ steps.scope.outputs.frontend }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: ./.github/actions/setup
+      with:
+        groups: main
+    - id: scope
+      name: Decide required checks
+      working-directory: .
+      env:
+        CHANGE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+      run: poetry run python scripts/ci/change_scope.py
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install Poetry
-        run: pipx install poetry
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry
-          key: poetry-${{ hashFiles('poetry.lock') }}
-          restore-keys: poetry-
-      - name: Install dependencies
-        run: poetry install --with dev
-      - name: Lint with ruff
-        run: poetry run ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e scripts/docs
-      - name: No schema DDL outside migrations/ (strict rule 7)
-        # Fails on CREATE TABLE or ALTER TABLE in .py/.sql files outside migrations/.
-        # Exemptions (exact, documented in the script): the frozen legacy schema fixture and scripts/labs/.
-        run: scripts/check_no_ddl.sh
-
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+      with:
+        groups: dev,supply-chain
+    - name: Lint with ruff
+      run: poetry run ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e scripts/docs scripts/supply_chain
+        scripts/ci
+    - name: No schema DDL outside migrations/ (strict rule 7)
+      run: scripts/check_no_ddl.sh
   secret-scan:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read   # gitleaks-action lists the pull request's commits
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Scan history for secrets (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: ./.github/actions/setup
+      with:
+        groups: dev,supply-chain
+    - name: Install checksum-verified scanners
+      working-directory: .
+      run: 'scripts/supply_chain/install_scanners.sh "$RUNNER_TEMP/scanners"
 
+        echo "$RUNNER_TEMP/scanners" >> "$GITHUB_PATH"'
+    - name: Verify secret metadata exceptions
+      run: python scripts/supply_chain/check_secret_controls.py
+    - name: Scan full history
+      working-directory: .
+      run: gitleaks git --redact --no-banner .
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install Poetry
-        run: pipx install poetry
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry
-          key: poetry-${{ hashFiles('poetry.lock') }}
-          restore-keys: poetry-
-      - name: Install dependencies
-        run: poetry install --with dev
-      - name: Type check with mypy
-        run: poetry run mypy
-
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+      with:
+        groups: dev,supply-chain
+    - name: Type check with mypy
+      run: poetry run mypy
   eval-gate:
-    # The eval regression gate (Sprint 008): a fixed suite with the fake LLM, compared to scripts/eval/baseline.json.
-    # No key, no network, no cost. It fails the build when a score drops by more than the baseline's tolerance. The run
-    # with real providers is scripts/eval/run_real.py, a manual script that CI never runs.
     runs-on: ubuntu-latest
-    needs: lint
+    needs:
+    - lint
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install Poetry
-        run: pipx install poetry
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry
-          key: poetry-${{ hashFiles('poetry.lock') }}
-          restore-keys: poetry-
-      - name: Install dependencies
-        run: poetry install --with dev
-      - name: Run the eval gate
-        run: poetry run python scripts/eval/run_gate.py
-
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+      with:
+        groups: dev,supply-chain
+    - name: Run the eval gate
+      run: poetry run python scripts/eval/run_gate.py
   unit-tests:
     runs-on: ubuntu-latest
-    needs: lint
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install Poetry
-        run: pipx install poetry
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry
-          key: poetry-${{ hashFiles('poetry.lock') }}
-          restore-keys: poetry-
-      - name: Install dependencies
-        run: poetry install --with dev
-      - name: Run unit tests (includes the OpenAPI snapshot check)
-        # If it fails after an intended API change, run: poetry run python scripts/update_openapi.py
-        run: poetry run pytest -m unit -v --cov=api --cov=core --cov-report=term-missing
-
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+      with:
+        groups: dev,supply-chain
+    - name: Run unit tests (includes the OpenAPI snapshot check)
+      run: poetry run pytest -m unit -v --cov=api --cov=core --cov-report=term-missing
   integration-e2e-tests:
     runs-on: ubuntu-latest
-    needs: lint
+    needs:
+    - changes
+    - lint
     services:
       postgres:
-        image: pgvector/pgvector:pg16
+        image: pgvector/pgvector:0.8.7-pg16-trixie@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
         env:
           POSTGRES_PASSWORD: postgres
         ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 10
-      redis:
-        image: redis/redis-stack-server:latest
+        - 5432:5432
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 10
+      valkey:
+        image: valkey/valkey-bundle:9.1.3@sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660
         ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 10
+        - 6379:6379
+        options: --health-cmd "valkey-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install Poetry
-        run: pipx install poetry
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry
-          key: poetry-${{ hashFiles('poetry.lock') }}
-          restore-keys: poetry-
-      - name: Install dependencies
-        run: poetry install --with dev
-      - name: Run integration and e2e tests (none may be skipped)
-        # The tests skip when Postgres or Redis is unreachable, so a skip here means the service containers are
-        # broken. The only allowed skips are the 10 live-MinIO runs of the object store contract
-        # (scripts/verify/minio.sh). scripts/check_skips.py reads the JUnit report and fails on any other skip,
-        # and on any count other than 10.
-        run: |
-          poetry run pytest -m "integration or e2e" -v -rs --junitxml=pytest-int-e2e.xml
-          poetry run python scripts/check_skips.py pytest-int-e2e.xml --expect 10
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+      with:
+        groups: dev,supply-chain
+    - name: Run integration and e2e tests (none may be skipped)
+      run: 'poetry run pytest -m "integration or e2e" -v -rs --junitxml=pytest-int-e2e.xml
 
+        poetry run python scripts/check_skips.py pytest-int-e2e.xml
+
+        '
+    if: ${{ needs.changes.outputs.backend == 'true' }}
   migration-check:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: pgvector/pgvector:pg16
+        image: pgvector/pgvector:0.8.7-pg16-trixie@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: rag_platform
         ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 10
+        - 5432:5432
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 10
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rag_platform
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install Poetry
-        run: pipx install poetry
-      - name: Install dependencies
-        run: poetry install --only main
-      - name: Upgrade an empty database to head
-        run: poetry run alembic upgrade head
-      - name: Upgrading again is a no-op
-        run: poetry run alembic upgrade head
-      - name: Database is at the single head revision
-        run: |
-          poetry run alembic heads | tee heads.txt
-          test "$(grep -c '(head)' heads.txt)" = "1"
-          poetry run alembic current | grep "(head)"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup
+      with:
+        groups: main
+    - name: Upgrade an empty database to head
+      run: poetry run alembic upgrade head
+    - name: Upgrading again is a no-op
+      run: poetry run alembic upgrade head
+    - name: Database is at the single head revision
+      run: 'poetry run alembic heads | tee heads.txt
+
+        test "$(grep -c ''(head)'' heads.txt)" = "1"
+
+        poetry run alembic current | grep "(head)"
+
+        '
+    needs:
+    - changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+  supply-chain:
+    runs-on: ubuntu-latest
+    needs: changes
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Validate change scope
+      env:
+        SCOPE_RESULT: ${{ needs.changes.result }}
+        BACKEND_SCOPE: ${{ needs.changes.outputs.backend }}
+        FRONTEND_SCOPE: ${{ needs.changes.outputs.frontend }}
+      run: |
+        test "$SCOPE_RESULT" = success
+        [[ "$BACKEND_SCOPE" == true || "$BACKEND_SCOPE" == false ]]
+        [[ "$FRONTEND_SCOPE" == true || "$FRONTEND_SCOPE" == false ]]
+    - uses: ./.github/actions/setup
+      with:
+        groups: dev,supply-chain
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: npm
+        cache-dependency-path: ui/package-lock.json
+    - run: npm ci
+      working-directory: ui
+    - name: Run independent supply-chain checks
+      id: checks
+      env:
+        SKIP_IMAGE_SCAN: ${{ needs.changes.outputs.backend != 'true' && needs.changes.outputs.frontend != 'true' }}
+      run: scripts/supply_chain/run_checks.sh
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() && steps.checks.outcome != 'skipped' && steps.checks.outcome != '' }}
+      with:
+        name: sbom
+        path: |
+          sbom/*.cdx.json
+          sbom/checks/
+        if-no-files-found: error
+'on':
+  push:
+    branches:
+    - main
+  pull_request: null
+env:
+  DEEPEVAL_TELEMETRY_OPT_OUT: 'YES'
+  DO_NOT_TRACK: '1'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

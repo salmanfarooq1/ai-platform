@@ -1,19 +1,21 @@
 # ============================================================================
 # Stage 1: Builder — install Poetry, resolve deps, build the virtualenv
 # ============================================================================
-FROM python:3.11-slim-bookworm AS builder
+FROM python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89 AS builder
 
 # Poetry needs these env vars to behave correctly in CI/Docker:
 #   POETRY_NO_INTERACTION: never prompt for input
 #   POETRY_VIRTUALENVS_IN_PROJECT: create .venv inside the project dir
 #     (so we can COPY it to the runtime stage without guessing the path)
 ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_REQUESTS_TIMEOUT=120 \
+    POETRY_INSTALLER_MAX_WORKERS=4
 
 # Install Poetry. pipx is the recommended way to install Poetry globally
 # without polluting the project's virtualenv.
 RUN pip install --no-cache-dir pipx && \
-    pipx install poetry
+    pipx install poetry==2.3.3
 
 # Make pipx-installed binaries available on PATH
 ENV PATH="/root/.local/bin:$PATH"
@@ -32,7 +34,8 @@ COPY pyproject.toml poetry.lock ./
 # reranker (needed when MODE=prod). Leave it false for public-preview/free-tier builds,
 # where FEATURES["reranker_enabled"] is off anyway and the extra ~3GB is dead weight.
 ARG INCLUDE_RERANK=false
-RUN if [ "$INCLUDE_RERANK" = "true" ]; then \
+RUN --mount=type=cache,id=gap-poetry,target=/root/.cache/pypoetry \
+    if [ "$INCLUDE_RERANK" = "true" ]; then \
         poetry install --only main,rerank --no-root; \
     else \
         poetry install --only main --no-root; \
@@ -45,7 +48,7 @@ COPY . .
 # ============================================================================
 # Stage 2: Runtime — lean image with only the virtualenv and app code
 # ============================================================================
-FROM python:3.11-slim-bookworm AS runtime
+FROM python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89 AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1

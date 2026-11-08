@@ -1,0 +1,56 @@
+# Exact metadata exceptions; all default secret rules remain enabled.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "Public member checksums from the exact audited NumPy artifact; other values remain scanned"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(^|/)(scripts/supply_chain/numpy-2\.4\.2-cp311-linux-x86_64\.json|planning/sprints/011-baseline-and-stack/evidence/(architect-)?numpy-audit/numpy-upstream-wheel-members\.json)$''']
+regexes = [
+  '^17fe235bc5f971805bce9730b5eca69289d39afce028a636906ac717502d9eb2$',
+  '^260b8e85e2294969e6f6ebe5adf75964934e7f43f721712a41cd77c26c5a7821$',
+  '^3d9d84cd2f69ab89cb65102fbd448e6f629ee69ee96f8bb83f81ca2d1663b2dc$',
+  '^5cf47325b50803e6b255024a3b17893919feb5871a99d8fd1a4c3659019164f7$',
+  '^6eb1c2cf9ca1d65d0e6fe6afb9ae3f695df8ce985e2fb3d3cfaec02d3dd5db6d$',
+  '^80442c35808725d1941e03416d76379486a9d942edc894e7e6742aca0b0e2088$',
+  '^8080fb346c1053712145567744c4024019c5053a73dff46a8e66c77770544be2$',
+  '^9dd045e706dd77b17cff35af479d8c0ced109b5e7f3eb0820654a4e1d932e05f$',
+  '^9fafca6fdf12cafb11fd7eecb62340e95b86a7f7395b57b87cc55c25d3b4c22b$',
+  '^a16296d32192f7129c2d99c7d9079e8b1301708ef874d21cc19af46f01a60d53$',
+  '^a51d29559854c5a0a972dabb14e585480188fe068b744f8d580c93f7a7165998$',
+  '^b021f86f2fb8e815d314e1a3443ad5b148cd02bd0b87cd4ea3bb0335bac6b45d$',
+  '^b0780ed83c411fd706b3286608a0888f2574d391b06f64701f24b1fd075912c6$',
+  '^be6fe14d10a37a62346cd87a3c962557d490840950bdbe42d4658c1a01a9aa35$',
+  '^c15fdd8cfed308994db915b3c4c52d5327350aa186568a6e18fa91f4750a6a4d$',
+  '^ce6ec789062aca14aa165dc9586ece2e1130f891843eaefeefea968575aa559f$',
+  '^d3266b25c40427a3021c9227424e533fdfea678b7b11f06ea0b389df822525de$',
+  '^d6ae08e7da5d90298c84b7189e037f5f04273e82e60c4a35b931a786b2d18c37$',
+  '^ec2f8d9dd23651b4ad3465db8606d63a6afdb4b0317d0bf0d737fb67bc394859$',
+  '^ef99f3fedfa305d8ca8a6ea3f965bb5ac0f6acf9c9fca43eceb45488fde75627$',
+  '^fb90e29fb6256354d4eed5070f6a7efc3493c460690ec59835e4fd58ec06867a$',
+]
+
+[[rules.allowlists]]
+description = "Literal environment-variable names in captured live-service skip reasons, never their values"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(^|/)planning/sprints/011-baseline-and-stack/evidence/(?:finish\-integration\-capture\-interrupted\.xml|finish\-integration\-final\.xml|finish\-integration\-first\.xml|finish\-integration\-green\.txt|finish\-integration\-interrupted\.xml|finish\-integration\-verified\.xml|finish\-integration\.txt)$''']
+regexes = ['^S3_LIVE_(BUCKET|ENDPOINT)$']
+
+[[rules.allowlists]]
+description = "Already reviewed public key prefixes and numeric chunk examples rendered in scanner triage"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(^|/)planning/sprints/011-baseline-and-stack/evidence/gitleaks-triage\.txt$''']
+regexes = ['^prefix=[a-z0-9]{8}$', '^chunk_size=1200$']
+
+[[rules.allowlists]]
+description = "Public OpenAPI checksum recorded by the source-scope check"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(^|/)planning/sprints/011-baseline-and-stack/evidence/rework-source-scope\.txt$''']
+regexes = ['^00f8870c6b404b53ce229a853e3bae5ff42c41c5e564fd2389c42b80e0c0f39c$']
