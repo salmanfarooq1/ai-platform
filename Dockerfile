@@ -64,6 +64,7 @@ COPY --from=builder /app/.venv .venv
 COPY --from=builder /app/api api/
 COPY --from=builder /app/core core/
 COPY --from=builder /app/gateway gateway/
+COPY --from=builder /app/evidence evidence/
 COPY --from=builder /app/ports ports/
 COPY --from=builder /app/adapters adapters/
 COPY --from=builder /app/workers workers/

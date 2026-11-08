@@ -26,8 +26,10 @@ jobs:
       with:
         groups: dev,supply-chain
     - name: Lint with ruff
-      run: poetry run ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e scripts/docs scripts/supply_chain
+      run: poetry run ruff check api core gateway evidence ports adapters workers sandbox_agent tests scripts/e2e scripts/docs scripts/supply_chain
         scripts/ci
+    - name: Check import contracts
+      run: poetry run lint-imports
     - name: No schema DDL outside migrations/ (strict rule 7)
       run: scripts/check_no_ddl.sh
   secret-scan:

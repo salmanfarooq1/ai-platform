@@ -80,6 +80,7 @@ dev = [
     "hypothesis (>=6.168.3,<7.0.0)",
     # The eval regression gate (scripts/eval/, Sprint 008) runs in CI, so DeepEval is a dev dependency as well as a labs one.
     "deepeval (>=4.0.8,<5.0.0)",
+    "import-linter (==2.15)",
 ]
 
 [tool.pytest.ini_options]
@@ -93,10 +94,11 @@ markers = [
     "unit: fast, isolated tests with no external dependencies",
     "integration: tests against a real test database/Redis instance",
     "e2e: full-stack tests that exercise the API end-to-end",
+    "edition_smoke: boots one edition and runs its smoke set",
 ]
 
 [tool.coverage.run]
-source = ["api", "core", "gateway", "ports", "adapters", "workers"]
+source = ["api", "core", "gateway", "evidence", "ports", "adapters", "workers"]
 omit = ["*/tests/*"]
 
 [tool.ruff]
@@ -110,7 +112,7 @@ ignore = ["E501"]  # line length handled by formatter, not linter
 
 [tool.mypy]
 python_version = "3.11"
-files = ["api", "core", "gateway", "ports", "adapters", "workers", "sandbox_agent", "config.py"]
+files = ["api", "core", "gateway", "evidence", "ports", "adapters", "workers", "sandbox_agent", "config.py"]
 ignore_missing_imports = true
 warn_unused_ignores = true
 check_untyped_defs = true
@@ -125,7 +127,7 @@ exclude = ["^migrations/"]
 # Strict for the new modules (Sprint 002), and for the ports and adapters (Sprint 006: they are the contracts).
 # Everything else is non-strict for now.
 [[tool.mypy.overrides]]
-module = ["core.settings", "api.errors", "api.observability", "api.versioning", "ports", "ports.*", "adapters", "adapters.*", "sandbox_agent", "sandbox_agent.*"]
+module = ["core.settings", "api.errors", "api.observability", "api.versioning", "ports", "ports.*", "evidence", "evidence.*", "adapters", "adapters.*", "sandbox_agent", "sandbox_agent.*"]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 disallow_any_generics = true
@@ -133,6 +135,53 @@ disallow_untyped_calls = true
 disallow_untyped_decorators = true
 warn_return_any = true
 no_implicit_reexport = true
+
+[tool.importlinter]
+root_packages = ["api", "core", "gateway", "evidence", "ports", "adapters", "workers", "sandbox_agent"]
+
+[[tool.importlinter.contracts]]
+id = "ports-pure"
+name = "ports imports no platform package"
+type = "forbidden"
+source_modules = ["ports"]
+forbidden_modules = ["api", "core", "gateway", "evidence", "adapters", "workers", "sandbox_agent"]
+
+[[tool.importlinter.contracts]]
+id = "core-no-modules"
+name = "core imports no module package"
+type = "forbidden"
+source_modules = ["core"]
+forbidden_modules = ["api", "gateway", "evidence", "adapters", "workers", "sandbox_agent"]
+
+[[tool.importlinter.contracts]]
+id = "evidence-independent"
+name = "evidence does not import gateway, api or workers"
+type = "forbidden"
+source_modules = ["evidence"]
+forbidden_modules = ["gateway", "api", "workers"]
+
+[[tool.importlinter.contracts]]
+id = "gateway-independent"
+name = "gateway does not import evidence, api or workers"
+type = "forbidden"
+source_modules = ["gateway"]
+forbidden_modules = ["evidence", "api", "workers"]
+
+[[tool.importlinter.contracts]]
+id = "agents-no-evidence"
+name = "agent and MCP code do not import evidence"
+type = "forbidden"
+source_modules = ["api.agent", "api.mcp", "sandbox_agent"]
+forbidden_modules = ["evidence"]
+
+# Add every gateway/*.py module here except gateway/__init__.py and gateway/enforce.py.
+[[tool.importlinter.contracts]]
+id = "agents-gateway-api-only"
+name = "agent and MCP code use only the gateway package API"
+type = "forbidden"
+source_modules = ["api.agent", "api.mcp", "sandbox_agent"]
+forbidden_modules = ["gateway.admin", "gateway.boundary", "gateway.context", "gateway.estimate", "gateway.guardrails", "gateway.limits", "gateway.module_stage", "gateway.policy", "gateway.reasons", "gateway.stages", "gateway.types"]
+allow_indirect_imports = true
 
 [tool.poetry]
 # An application, not a library: Poetry manages the dependencies and does not install the project itself.
