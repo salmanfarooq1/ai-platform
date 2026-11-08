@@ -32,5 +32,19 @@
       "Bash(dropdb:*)",
       "Bash(poetry run alembic downgrade:*)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|compact|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat \"$CLAUDE_PROJECT_DIR/planning/MAP.md\" 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

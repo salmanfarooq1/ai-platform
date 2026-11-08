@@ -1,6 +1,6 @@
 # Stack: pinned, open source, local
 
-Checked on 2026-10-08 against PyPI, Docker Hub, Quay, the Ollama registry, Hugging Face and the projects' own release notes. A pin is a release at least two weeks old, unless a security fix needs a newer one. **UNV** means not verified yet. The Builder of the sprint that adds a component re-checks it and saves the result in `evidence/pins.txt`. Images are pinned by digest from Sprint 011.
+Checked on 2026-11-02 against the Sprint 012 Compose and Poetry lock pins, plus the sources noted below. A pin is a release at least two weeks old, unless a security fix needs a newer one. **UNV** means not verified yet. The Builder of the sprint that adds a component re-checks it and saves the result in `evidence/pins.txt`. Images are pinned by digest from Sprint 011.
 
 ## Runtime
 | Component | Pin | Licence | Note |
@@ -17,8 +17,8 @@ Checked on 2026-10-08 against PyPI, Docker Hub, Quay, the Ollama registry, Huggi
 | redis-py | — | `redis==8.1.0` | MIT | 011 | Works with Valkey. |
 | Kafka | Redpanda `v24.2.7` | `apache/kafka:4.3.1` | Apache-2.0 | 011 | Redpanda is BSL. KRaft only. Profile renamed `streams` (optional). |
 | Object store (dev) | MinIO in the verify script | `chrislusf/seaweedfs:4.47` | Apache-2.0 | 011 | MinIO is archived. Test presigned URLs with boto3. `check_skips.py` moves to an allowlist file. |
-| Prometheus | `v3.5.0` | `prom/prometheus:v3.14.0` | Apache-2.0 | 011 | |
-| Grafana | `12.0.2` | `grafana/grafana:13.2.2` | AGPL-3.0 | 011 | Unmodified, optional profile only. |
+| Prometheus | `v3.5.0` | `prom/prometheus:v3.15.1` | Apache-2.0 | 011 | |
+| Grafana | `12.0.2` | `grafana/grafana:13.2.4-distroless-slim` | AGPL-3.0 | 011 | Unmodified, optional profile only. |
 | MCP SDK | `mcp >=2,<3` | `mcp==2.2.0` | MIT | 011 | Supports protocol 2026-07-28. |
 | aiokafka | `0.14.0` | `0.14.0` | Apache-2.0 | — | |
 | OpenShell | 0.1.2 | 0.1.2, re-checked per sprint | Apache-2.0 | — | Alpha. Telemetry off. OpenShell-Community was archived on 2026-10-07. |
@@ -26,11 +26,13 @@ Checked on 2026-10-08 against PyPI, Docker Hub, Quay, the Ollama registry, Huggi
 ## Models (Sprint 013)
 | Use | Default on CPU | With a GPU (8 GB+) | Size | Licence |
 |---|---|---|---|---|
-| Runtime | `ollama/ollama:0.34.4` | same | — | MIT |
+| Runtime | `ollama/ollama:0.40.7` | same | — | MIT |
 | Chat and agents | `qwen3:4b-instruct-2507-q4_K_M` (no thinking mode) | `qwen3:8b` | 2.5 / 5.2 GB | Apache-2.0 |
 | Routing, small tasks, nightly smoke | `qwen3:1.7b` (CI nightly: `qwen3:0.6b`) | — | 1.4 / 0.5 GB | Apache-2.0 |
 | Embeddings | `nomic-embed-text:v1.5` (768 dims, matches `VECTOR(768)`) | same | 0.27 GB | Apache-2.0 |
-| Guard model (019) | `granite3-guardian:2b` (official Ollama library) | `granite3-guardian:8b` | 2.7 / 5.8 GB | Apache-2.0 |
+| Guard model (019) | Select Granite Guardian 3.3 or 4.1 | — | Re-check at sprint start | Apache-2.0 |
+
+The 019 Builder confirms the official Ollama library tag and supply-chain rule before pinning the selected guard model.
 
 - `models.lock` lists each model's digest, licence and source. No SBOM tool covers weights.
 - Ollama settings: `OLLAMA_MAX_LOADED_MODELS=2`, `OLLAMA_NUM_PARALLEL=1`, `num_ctx=8192`, `OLLAMA_KEEP_ALIVE` set.
@@ -43,7 +45,7 @@ Checked on 2026-10-08 against PyPI, Docker Hub, Quay, the Ollama registry, Huggi
 |---|---|---|---|---|
 | DuckDB | `duckdb==1.5.5` | 2026-07-22 | MIT | 021 |
 | DuckLake | spec 1.0, extension bundled in the image | 2026-04-13 | MIT | 021 |
-| sqlglot (SQL parse and rewrite) | UNV pin | — | MIT | 024 |
+| sqlglot (SQL parse and rewrite) | UNV pin | — | MIT | 021 |
 | dbt-core / dbt-duckdb | `1.12.5` / `1.11.0` | 2026-09-15 / 2026-08-07 | Apache-2.0 | 022 |
 | OpenLineage | `openlineage-python==1.53.0`, `openlineage-dbt==1.53.0` | 2026-09-01 | Apache-2.0 | 022, 025 |
 | Debezium | `quay.io/debezium/connect:3.6.2.Final` | 2026-09-18 | Apache-2.0 | 022 |
@@ -58,20 +60,23 @@ Checked on 2026-10-08 against PyPI, Docker Hub, Quay, the Ollama registry, Huggi
 | garak / PyRIT (red team) | `garak==0.17.0` / `pyrit==1.1.0`, in a separate venv or container outside the main lock (they pull torch and hosted-model SDKs) | 2026-09-09 / 2026-09-04 | Apache-2.0 / MIT | 027 |
 | LangGraph / langchain-core (already in the platform) | keep the current lock; do not take releases younger than two weeks | — | MIT | 027 |
 | agentgateway (spike only) | UNV pin | — | Apache-2.0 | 028 |
-| python-pkcs11 / SoftHSM2 (CI only) | `0.10.0` / distro package | — | MIT / BSD-2 | 017 |
-| OpenTelemetry Python SDK and instrumentations | UNV pins, one compatible set | — | Apache-2.0 | 030 |
+| python-pkcs11 / SoftHSM2 (CI only) | `0.10.0` / distro package | — | MIT / BSD-2 | 031 |
+| OpenTelemetry Python SDK and instrumentations | UNV pins, one compatible set | — | Apache-2.0 | 028 |
 | spaCy model for Presidio | `en_core_web_lg`, version matched to spaCy, pre-fetched | — | MIT | 019 |
 | Docling | `docling==2.130.0`, models pre-fetched | 2026-09-22 | MIT | 026 |
 | Docling weights | layout model `docling-layout-heron` (Apache-2.0). TableFormer weights are tagged both CDLA-Permissive-2.0 and Apache-2.0; we use them under Apache-2.0 and record it in the 026 ADR, else table structure is off. | — | Apache-2.0 | 026 |
-| OPA | `openpolicyagent/opa:1.20.2-static` | 2026-09-03 | Apache-2.0 | 018 |
+| OPA | `openpolicyagent/opa:1.20.2-static` | 2026-09-03 | Apache-2.0 | 030 |
 | a2a-sdk | `1.1.5` | 2026-09-21 | Apache-2.0 | 028 |
-| Keycloak | `quay.io/keycloak/keycloak:26.7.4`. RFC 8693 delegation (`actor_token`, nested `act`) is a preview feature (`--features=token-exchange-delegation`). The 020 spike tests it. Decided 2026-10-11: platform-minted delegation tokens are the default; no preview features in the default stack. | 2026-09-16 | Apache-2.0 | 020 |
+| Keycloak | `quay.io/keycloak/keycloak:26.7.4`. RFC 8693 delegation (`actor_token`, nested `act`) is a preview feature (`--features=token-exchange-delegation`). The 030 spike checks it. Decided 2026-10-11: platform-minted delegation tokens are the default; no preview features in the default stack. | 2026-09-16 | Apache-2.0 | 020 |
 | py-spiffe (optional) | `spiffe==0.3.2` (re-check age at sprint start) | 2026-10-01 | Apache-2.0 | 020 |
 | Presidio | `presidio-analyzer==2.2.364`, `presidio-anonymizer==2.2.364`, spaCy model pre-fetched | 2026-07-22 | MIT | 019 |
 | COSE | `cwt==3.3.0`, or `cbor2==6.1.5` + `cryptography` (pycose is stale since 2023) | 2026-07 / 2026-10 | MIT | 017 |
-| Timestamp authority | `ghcr.io/sigstore/timestamp-server:v2.1.0` (≥2.0.6 for GHSA-xm5m-wgh2-rrg3; date UNV) | UNV | Apache-2.0 | 017 |
-| rfc3161-client | `1.0.9` | 2026-09-14 | Apache-2.0 | 017 |
-| OTel Collector | `otel/opentelemetry-collector-contrib:0.161.0` | 2026-09-16 | Apache-2.0 | 030 |
+| Timestamp authority | `ghcr.io/sigstore/timestamp-server:v2.1.0` (≥2.0.6 for GHSA-xm5m-wgh2-rrg3; date UNV) | UNV | Apache-2.0 | 031 |
+| rfc3161-client | `1.0.9` | 2026-09-14 | Apache-2.0 | 031 |
+| OTel Collector | `otel/opentelemetry-collector-contrib:0.161.0` | 2026-09-16 | Apache-2.0 | 028 |
+| restic | `0.19.1` | — | BSD-2-Clause | 015 |
+| rclone | `1.75.2` | — | MIT | 015 |
+| OpenTofu | `1.12.9` | — | MPL-2.0 | 031 |
 
 ## Added 2026-10-11 (integration first, cloud path, enterprise gaps)
 Not checked against registries yet. Each is **UNV** until the sprint that adds it records the pin, release date and licence in `evidence/pins.txt`. The licences below come from the 2026-10-11 research (`review.md`).
@@ -84,14 +89,14 @@ Not checked against registries yet. Each is **UNV** until the sprint that adds i
 | Apicurio Registry (optional) | Schema registry for client streams | Apache-2.0 | 022 |
 | Valentine, bdikit (Magneto) | Schema matching for integration agents | Apache-2.0 (re-check) | 027 |
 | OpenMetadata / DataHub import | We call the client's catalog API; we run neither server | — | 023, 025 |
-| agentgateway | Optional proxy data plane; our engine is the external authorizer | Apache-2.0 (LF AAIF) | 016 (spike) |
-| OpenTofu | Infrastructure as code, one module per cloud. Plain HCL, so Terraform users can run it too. | MPL-2.0 | 015, 031 |
+| agentgateway | Optional proxy data plane; our engine is the external authorizer | Apache-2.0 (LF AAIF) | 028 (spike) |
+| OpenTofu | Infrastructure as code, one module per cloud. Plain HCL. | MPL-2.0 | 031 |
 | OpenBao + External Secrets Operator | Secrets manager and Kubernetes sync | MPL-2.0 / Apache-2.0 | 031 |
 | Keycloak 26.8.x | SCIM 2.0 supported and on by default from 26.8.0 (2026-10-01; inbound only). Replaces the 26.7.4 pin when 020 starts. | Apache-2.0 | 020 |
 | pg_textsearch | True BM25 inside Postgres. Check it builds for our Postgres version. | PostgreSQL | 026 |
 | RAGAS, TruLens | Retrieval and grounding evals | Apache-2.0 / MIT | 026 |
 | Faker | Synthetic rows from a client schema (reference company variants) | MIT | 014 |
-| LiteLLM | Already in the platform. One source reports a licence change and a March 2026 PyPI incident. Both unverified. 011 checks the licence of the exact version we use and its supply chain. | MIT (to verify) | 011 |
+| LiteLLM | Locked at `1.103.2`; MIT licence verified. The March 2026 PyPI incident affected versions `1.82.7` and `1.82.8`; neither is in the lock. | MIT | 011 |
 
 ## CI and supply chain tools (Sprint 011)
 | Tool | Pin | Licence | Use |
@@ -144,7 +149,7 @@ Not checked against registries yet. Each is **UNV** until the sprint that adds i
 | `streams` | Kafka, Debezium (optional) | ~1.5 GB |
 | `policy` | OPA | ~0.1 GB |
 | `identity` | Keycloak | ~1 GB |
-| `guard` | Presidio guard service (~0.6 GB) plus the guard model 2B in Ollama (~2.7 GB). `OLLAMA_MAX_LOADED_MODELS=3` in this profile only. | ~3.3 GB |
+| `guard` | Presidio guard service plus the selected 019 guard model. Measure the model's memory at sprint start. `OLLAMA_MAX_LOADED_MODELS=3` in this profile only. | To measure |
 | `mail` | Mailpit (local mail catcher) | ~0.05 GB |
 | `trust` | timestamp authority | ~0.1 GB |
 | `observability` | OTel collector, Prometheus, Grafana | ~0.8 GB |
@@ -153,7 +158,7 @@ Not checked against registries yet. Each is **UNV** until the sprint that adds i
 
 The normal working set (`core`, `models`, `lake`, `policy`) is about 7.5 GB.
 
-Peak per showcase journey, inside `memory=12GB`. These are the old journey names; 012 redefines the journeys for the new milestones, and each sprint measures them. Demos may run on a cloud VM (015), where this limit does not apply.
+Peak per showcase journey, inside `memory=12GB`. These are the old journey names; 012 redefines the journeys for the new milestones, and each sprint measures them. The cloud track (031) may run on a VM, where this limit does not apply.
 | Journey | Profiles | Estimate |
 |---|---|---|
 | `m0.sh` | core, models | ~6 GB |

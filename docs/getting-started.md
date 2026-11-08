@@ -4,7 +4,7 @@ For a developer who is new to the repository. It covers running the platform loc
 
 ## Prerequisites
 - Python 3.11 and Poetry
-- Docker with Compose. On Windows, use Docker Desktop with the WSL 2 backend.
+- Docker Engine (moby) inside Linux or WSL 2 with Compose, or Podman with its Compose provider. Docker Desktop is proprietary and is not the supported runtime.
 - Node 22 and npm, for the UI
 - For answers from a model: either Ollama running locally (the `local` mode default for embeddings is `ollama/nomic-embed-text`) or a provider key. [configuration.md](configuration.md) lists the model settings.
 
@@ -12,7 +12,8 @@ For a developer who is new to the repository. It covers running the platform loc
 
 ```bash
 poetry install --with dev
-docker compose up -d postgres redis
+scripts/preflight.sh
+docker compose up -d postgres valkey
 bash scripts/setup_db.sh
 ```
 
@@ -91,12 +92,35 @@ Vite forwards `/v1` to the API on port 8000. Open the workspace and sign in with
 poetry run ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e scripts/verify scripts/eval scripts/docs
 poetry run mypy
 bash scripts/check_no_ddl.sh
-poetry run pytest -q                           # needs the Postgres and Redis from step 1
+poetry run pytest -q                           # needs the Postgres and Valkey from step 1
 cd ui && npm run tokens:check && npm run lint && npx tsc --noEmit && npm test -- --run && npm run build
 cd ui && npx playwright test                   # starts its own API with test models; run `npx playwright install chromium` once first
 ```
 
-Tests never call a real model: models and embeddings are replaced with fakes. Some contract tests need a live MinIO and are skipped without one. [CONTRIBUTING.md](../CONTRIBUTING.md) explains the test tiers.
+Tests never call a real model: models and embeddings are replaced with fakes. Ten contract cases need a live SeaweedFS S3 endpoint and are skipped without one; `scripts/verify/seaweedfs.sh` runs them and signed URL checks. [CONTRIBUTING.md](../CONTRIBUTING.md) explains the test tiers.
+
+## Linux and WSL runtime
+
+Keep the repository on the WSL ext4 filesystem, such as `~/ai-platform`, with LF line endings. Install Docker Engine inside the distro, or use Podman with its `podman-docker` compatibility CLI and a Compose provider for the documented commands. Enable the daemon before running `scripts/preflight.sh`. On Windows, put this in `%UserProfile%/.wslconfig`, then restart WSL:
+
+```ini
+[wsl2]
+memory=12GB
+
+[experimental]
+autoMemoryReclaim=gradual
+```
+
+Preflight checks the engine, available memory for `COMPOSE_PROFILES`, host/container clock agreement and ports 5432, 6379, 8000 and 5173. A busy port is accepted only when its container belongs to `COMPOSE_PROJECT_NAME` (the repository directory name by default). Selected profiles add their published ports to the same check. It reports Docker Desktop and fails on unavailable engines, insufficient memory, clock drift or another project's listener. For an isolated stack, explicitly set `PREFLIGHT_PORTS` to its comma-separated ports. `CONTAINER_ENGINE=podman` selects Podman; the container clock check may pull the same pinned Valkey image used by Compose.
+
+Start the pinned Ollama image, then fetch the embedding model:
+```bash
+docker compose --profile models up -d --wait ollama
+docker compose --profile models run --rm ollama-pull
+```
+The model service uses the separate `ollama_data_v0407` volume. Existing installations should follow the backup and verification steps in [the local model runtime transition](ollama-upgrade.md) before switching from `ollama_data`. Hosted providers can be used without that profile.
+
+Existing Postgres data requires the [logical upgrade procedure](postgres-upgrade.md) before using the new image. Valkey uses a fresh `valkey_data` volume; the old `redis_data` volume is retained and never reused. Cache loss leaves Postgres data intact. Remove an old cache volume only after verifying its contents are disposable, using its exact project-qualified name.
 
 ## Next
 - How the parts fit: [architecture.md](architecture.md)

@@ -8,7 +8,7 @@ It is for the people accountable for AI agents (team leads, owners, risk owners)
 - **One gateway for every call.** The gateway checks the caller, the tenant's policy, input guardrails, the rate limit, the token budget and a daily cost cap, in that order. If any check cannot run, the call is denied.
 - **A record of every decision.** Each call writes a decision record with the verdict, the reason, the policy version and a SHA-256 of the input. The input text is never stored. Records form a hash chain per tenant and can be verified as signed receipts.
 - **Tenant isolation in the database.** Postgres row-level security keeps tenants apart. The tenant always comes from the credential.
-- **Governed answers and agents.** Hybrid search over documents (keyword and vector) and a LangGraph agent that checks its own answers. Both act only through the gateway. Agent runs can execute inside an OpenShell sandbox.
+- **Governed answers and agents.** Hybrid search over documents (keyword search with Postgres full-text ranking and vector similarity) and a LangGraph agent that checks its own answers. Both act only through the gateway. Agent runs can execute inside an OpenShell sandbox.
 - **Durable work.** Ingestion and agent runs are jobs on a Postgres queue, run by workers. Events go out through a transactional outbox, in-process or to Kafka.
 - **A console and a workspace.** Overview, requests, decisions, policies, keys, usage, agent runs and trust, plus Ask, Library and History.
 
@@ -23,7 +23,7 @@ It is for the people accountable for AI agents (team leads, owners, risk owners)
         |                       |  decision record + outbox row         |
         +-----------------------|---------------------------------------+
                                 v
-   Postgres (pgvector, RLS, jobs, outbox, decisions)    Redis (cache, limits)
+   Postgres (pgvector, RLS, jobs, outbox, decisions)    Valkey (cache, limits)
                                 |
         workers: ingest, agent runs (in-process or OpenShell sandbox),
                  retention purge, outbox relay -> in-process bus or Kafka
@@ -35,7 +35,7 @@ The full picture is in [docs/architecture.md](docs/architecture.md).
 
 ```bash
 poetry install --with dev
-docker compose up -d postgres redis
+docker compose up -d postgres valkey
 scripts/setup_db.sh
 poetry run uvicorn api.main:app --reload       # API on :8000
 poetry run python -m workers                   # worker, in a second terminal

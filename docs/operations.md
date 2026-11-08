@@ -4,7 +4,7 @@ For the person who runs the platform day to day. It covers health, metrics, keys
 
 ## Health
 - **`GET /health`** (also at `/v1/health`) needs no key. It reports `db`, `redis` and `embedding` (each `ok` or an error), the `mode`, the `version` and `stale_vectors`. `status` is `ok` only when all three are `ok`.
-- **What a failure means.** If Redis or the database is down, governed calls answer `503 dependency_unavailable`, and nothing runs without its decision record. If the embedding model is unreachable, searches and ingestion fail while the rest of the API works.
+- **What a failure means.** If Valkey or the database is down, governed calls answer `503 dependency_unavailable`, and nothing runs without its decision record. If the embedding model is unreachable, searches and ingestion fail while the rest of the API works.
 - **Workers** keep `WORKER_HEALTH_FILE` fresh while they run.
 - **Logs** are JSON lines with `request_id`, `trace_id`, `tenant_id` and `principal_id`. Input text and secrets are never logged. Follow one request with its `request_id`, which every error body and response header also carries.
 
@@ -79,13 +79,15 @@ request -> decision + outbox row (one Postgres transaction)
 
 **Run it locally**
 ```bash
-docker compose --profile kafka up -d redpanda        # one node, localhost:19092
-docker compose --profile kafka up kafka-topics       # creates the topics with 3 partitions, then exits
+docker compose --profile streams up -d kafka        # one node, localhost:19092
+docker compose --profile streams run --rm kafka-topics       # creates the topics with 3 partitions, then exits
 EVENT_BUS=kafka KAFKA_BOOTSTRAP=localhost:19092 poetry run python -m workers
-docker exec redpanda rpk topic consume platform.gateway.decision -n 3
+docker compose --profile streams exec kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic platform.gateway.decision --max-messages 3
 ```
 
-Stop it with `docker compose --profile kafka rm -sf kafka-topics redpanda`.
+Stop it with `docker compose --profile streams stop kafka`.
+
+Topic initialization creates the three platform topics and their `.dlq` topics with three partitions, replication factor one and `retention.ms=604800000` (seven days). This is broker retention, separate from durable decision retention in Postgres. Re-running initialization is idempotent. The local profile uses plaintext listeners; SASL/TLS and ACLs need a separately secured deployment. Host clients use `KAFKA_BOOTSTRAP=localhost:19092`; containers use `kafka:9092`.
 
 **How it behaves**
 - **Kafka is never reached inside a request.** If Kafka is down, events wait in the outbox and the relay retries them. After `OUTBOX_MAX_ATTEMPTS` a row is left for an operator.
@@ -93,9 +95,23 @@ Stop it with `docker compose --profile kafka rm -sf kafka-topics redpanda`.
 - **Duplicates.** Delivery is at least once. Consumers must dedupe by CloudEvent id: use `IdempotentConsumer` or `KafkaEventBus.consume`, which record ids in `processed_events`.
 - **Failed handling.** A failed handler, dead-letter send or commit rewinds the consumer to that record, so nothing is skipped.
 - **Dead letters.** A record in `<topic>.dlq` has these headers: `x-error` (the exception class), `x-error-code` (`handler_failed` or `decode_failed`), `x-original-topic`, `x-original-partition`, `x-original-offset` and `x-attempts`. The error message is left out because it may hold input. Look in the consumer log by event id. Fix the cause, then publish the record to its topic again. Consumers that already handled it skip it.
-- **Lag.** `rpk group describe <group>` shows consumer lag, and `outbox_lag_seconds` shows the outbox side.
+- **Lag.** `docker compose --profile streams exec kafka /opt/kafka/bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group <group>` shows consumer lag, and `outbox_lag_seconds` shows the outbox side.
 - **Switching back.** Set `EVENT_BUS=outbox` and restart the relay. No migration is needed.
 - **Supported setup.** One broker. `aiokafka` is pinned in `pyproject.toml`. The producer uses `acks=all` and is idempotent. SASL settings come from the environment and are never logged.
+
+Grafana upgrades use a new volume and the [stopped-state clone procedure](grafana-upgrade.md), preserving the previous volume for rollback.
+
+## Valkey and local S3
+
+Valkey Search stores only derived responses, session state and shared governance counters. Response-cache lookup/write failures degrade to a miss or an uncached response. Rate, token-budget and daily-cost stages keep failing closed with `503 dependency_unavailable` if the shared store is unavailable; no process-local counters replace them. The public health field and setting remain `redis` and `REDIS_URL` for compatibility.
+
+The lake profile uses the upstream SeaweedFS image pinned by tag and digest in `docker-compose.yml`. Start the endpoint before running its bucket-init job.
+```bash
+docker compose --profile lake up -d --wait seaweedfs
+```
+This starts the loopback S3 endpoint on port 8333. Set `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` and `S3_BUCKET`, then run `docker compose --profile lake run --rm seaweedfs-init`. The mounted IAM configuration expands environment placeholders, so credentials are not stored in it. The init job limits per-bucket volume growth to one and creates the configured bucket. Data and filer metadata live in `seaweedfs_data`. The local principal is shared; per-tenant S3 identities are outside this setup.
+
+For live verification, set `S3_LIVE_ENDPOINT`, `S3_LIVE_ACCESS_KEY`, `S3_LIVE_SECRET_KEY` and `S3_LIVE_BUCKET`, then run `scripts/verify/seaweedfs.sh`. It checks content-addressed reads/writes, invalid keys, missing objects, repeat writes and boto3 SigV4 signed GET/PUT. Signed URLs and credentials are never printed.
 
 ## Sandboxed runs (OpenShell)
 With `AGENT_RUNTIME=openshell`, each agent run executes inside an [OpenShell](https://github.com/NVIDIA/OpenShell) sandbox (Apache-2.0), version 0.1.2 with the Docker driver.
@@ -165,8 +181,8 @@ These check the platform against real services that the test suite replaces with
 
 | Script | Checks |
 |---|---|
-| `scripts/verify/minio.sh` | The object store contract against a live MinIO |
-| `scripts/verify/kafka.sh` | The Kafka adapter, ordering, dead letters and relay restart against a live broker. It starts the `kafka` profile, or uses `KAFKA_BOOTSTRAP` |
+| `scripts/verify/seaweedfs.sh` | The live SeaweedFS S3 contract and boto3 signed GET/PUT |
+| `scripts/verify/kafka.sh` | The Kafka adapter, ordering, dead letters and relay restart against a live broker. It starts the `streams` profile, or uses `KAFKA_BOOTSTRAP` |
 | `scripts/verify/openshell.sh` | Sandboxed runs end to end: allowed task, blocked provider call, refused read, limits, argument deny |
 | `scripts/verify/observability.sh` | Prometheus scrapes the API, and Grafana serves the dashboard |
 | `scripts/verify/receipt.py` | A receipt verifies offline |
@@ -182,8 +198,8 @@ These check the platform against real services that the test suite replaces with
 |---|---|
 | The API stops at start with a settings error | A required value is missing or wrong. The message names the variable ([configuration.md](configuration.md)) |
 | The API refuses to start as the database owner | `DATABASE_URL` must be the `gap_app` role |
-| The API does not start, with an unknown `FT.CREATE` command | Redis has no RediSearch module |
-| `503 dependency_unavailable` | Redis or the database is unreachable. Check `/health` |
+| The API does not start, with an unknown `FT.CREATE` command | The cache service has no compatible search module |
+| `503 dependency_unavailable` | Valkey or the database is unreachable. Check `/health` |
 | `503 decision_unrecorded` | The decision record could not be written, so the call did not run. Check the database and the logs for the request id |
 | `429 cost_cap_exceeded` or `daily_token_budget_exceeded` | The tenant reached its daily limit. It resets at midnight UTC, or raise the platform value |
 | An ingest stays `queued` | No worker is running |

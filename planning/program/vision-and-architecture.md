@@ -16,7 +16,7 @@ Proof from source row to agent answer: every answer can be traced back to the da
   - evidence packs mapped to the EU AI Act
   - dashboards and reports where every number has a receipt, read under the viewer's own grants
 - Table stakes by 2027 (we need them, they do not set us apart): MCP and A2A support, OTel GenAI traces, OIDC for agents, PII guardrails, budgets, a sandboxed runtime, audit logs.
-- Dates to confirm before relying on them: the EU AI Act high-risk duties move to 2 Dec 2027 under the Digital Omnibus. Sprint 030 checks the adopted text on EUR-Lex.
+- The Digital Omnibus on AI is law: Regulation (EU) 2026/1744, published in the Official Journal on 24 July 2026. Annex III applies from 2 December 2027 and Annex I from 2 August 2028. Article 50 applies from 2 August 2026. Sprint 019 includes its content-disclosure requirement. [Official text](https://eur-lex.europa.eu/eli/reg/2026/1744/oj).
 
 ## Three pillars and integration first (owner direction, 2026-10-11)
 | Pillar | What it covers | Modules |
@@ -42,7 +42,7 @@ Proof from source row to agent answer: every answer can be traced back to the da
 |---|---|---|
 | Embedded | Our own agents and services, in process | `enforce()` as today |
 | Sidecar | Client agents in their cluster | The `authorize()` service next to the agent |
-| Standalone proxy | External agents, shared tools, LLM traffic | A proxy for MCP, the OpenAI-style API and A2A, with agentgateway as an optional data plane calling our engine. Our engine is the only decision maker and record writer in every mode. |
+| Standalone proxy | External agents, shared tools, LLM traffic | A proxy for MCP, the OpenAI-style API and A2A. Our engine is the only decision maker and record writer in every mode. The optional agentgateway data-plane spike is in 028. |
 
 **Data access adapters** (021). All of them sit behind `DataAccess`, take the same compiled grant and return the same receipt fields:
 | Adapter | Engine | Use |
@@ -57,7 +57,7 @@ The gateway always rewrites the SQL first. Engine or native policies are defence
 **Deployment shape.**
 - Single-tenant per deploy is the default. Each client gets its own install, and RLS stays as defence in depth.
 - Multi-tenant is supported for a hosted offering.
-- Local Compose is the development and demo vehicle. Real deployments run on cloud with one OpenTofu module per cloud (015, 031) and the same core.
+- Local Compose is the development and proof-of-concept vehicle. Real deployments run on cloud with one OpenTofu module per cloud (031) and the same core.
 
 ## Modules, editions and cross-module ports
 The code today is layered (`core/`, `gateway/`, `api/`, `workers/`), not split by module. Sprint 012 draws the boundaries before the data plane adds a lot of code.
@@ -67,7 +67,7 @@ The code today is layered (`core/`, `gateway/`, `api/`, `workers/`), not split b
 | **Kernel** (platform) | Postgres, Valkey, object store, event bus, workers, identity, telemetry, model access, settings | `core/`, `adapters/`, `ports/`, `workers/` |
 | **M1 Gateway** | `enforce()`, policy, guardrails, approvals, protocol front | `gateway/` |
 | **Evidence core** (ships with M1) | decision records, hash chain, current receipts | `evidence/` (split out of `gateway/` in 012) |
-| **M2 Evidence** (upgrade) | COSE receipts, transparency log, timestamping, evidence packs, compliance mapping | `evidence/` extensions |
+| **M2 Evidence** (upgrade) | COSE receipts and external anchoring (017), evidence packs and mappings (030), local transparency log and timestamp authority (031) | `evidence/` extensions |
 | **M3 Agent Runtime** | agents, sandboxes, MCP server, memory | `api/agent/`, `sandbox_agent/`, `runtime/` |
 | **M4 Data Plane** | lakehouse, pipelines, products, quality, grants, semantic layer | `dataplane/` (new in 021) |
 | **M5 Lineage** | lineage store and graph | `lineage/` (new in 025) |
@@ -79,16 +79,16 @@ The gateway cannot ship without the evidence core: `enforce()` fails closed when
 | Port | Used by | Real adapter | No-op adapter (module off) |
 |---|---|---|---|
 | `DecisionSink` | M1 | Evidence core | none: the gateway always has it |
-| `EvidenceLookup` | M5, UI | Evidence core | returns "not linked" |
+| `EvidenceLookup` | M5, UI | Evidence core, always on | contract fixture only; unknown/foreign ids return "not linked" |
 | `DataAccess` | M3, M6 | M4 query path | denies with `module_disabled` |
-| `LineageEmitter` | M3, M4, M6 | M5 store | spools events, counts them |
+| `LineageEmitter` | M3, M4, M6 | M5 store | 012 drops/counts before producers; 022 adds durable spool, consumed in 025 |
 | `LineageLookup` | M4, M6 | M5 store (025) | returns "not linked" |
 | `QueryEngine` | M4 | DuckDB | — (internal to M4) |
-| `PolicyEngine` | M1 | Python engine, OPA (018) | — |
+| `PolicyEngine` | M1 | Python engine (018), OPA (030) | — |
 
 `DataAccess` grows by sprint (methods listed in `conventions.md`). `ReportDelivery` (029) is a provider port inside M6, not a cross-module port. The inbox is part of the kernel.
 
-Rules: modules import only the kernel and `ports/`. Import-linter contracts in CI enforce this from Sprint 013. `ENABLED_MODULES` selects modules. Disabled modules hide their navigation group and return `module_disabled` on their routes.
+Rules: modules import only the kernel and `ports/`. Import-linter contracts in CI enforce this from Sprint 012. The gateway package API is the explicit public exception; its internals remain private. `ENABLED_MODULES` selects modules. Disabled modules hide their navigation group and return `module_disabled` on their routes.
 
 ### Editions (functional labels)
 | Edition | Modules |
@@ -99,7 +99,7 @@ Rules: modules import only the kernel and `ports/`. Import-linter contracts in C
 | Data | Gateway + M4 + M5 + M6 |
 | Full | everything |
 
-A CI matrix boots each edition and runs its smoke tests every sprint from 013.
+A CI matrix boots each edition and runs its smoke tests every sprint from 012.
 
 ## Target request path (ask-your-data)
 1. A user asks a question. The tenant comes from the credential.
@@ -111,7 +111,7 @@ A CI matrix boots each edition and runs its smoke tests every sprint from 013.
 7. The `DataAccess` adapter runs it: DuckDB on a client source read in place, DuckLake, or Trino. It uses a locked connection and pins a snapshot or time-travel id wherever the source has one.
 8. Output passes guardrails. Links and images are stripped. A tainted session loses tools that can send data out.
 9. The model writes the answer through `model.invoke` (a local model by default).
-10. The receipt names the SQL hash, metric ids, snapshot id, result hash, withheld columns, policy bundle hash and model digest. The chain head is timestamped. A lineage event links source, pipeline, snapshot, run and answer.
+10. The receipt names the SQL hash, metric ids, snapshot id, result hash, withheld columns, policy package hash and model digest. The chain head is externally anchored (017) and timestamped (031). A lineage event links source, pipeline, snapshot, run and answer.
 
 ## Lakehouse design (from the security and data reviews)
 - **One DuckLake catalog per tenant** (multi-tenant deploys; a single-tenant deploy has one). Each tenant has its own metadata schema in the `lakehouse` database, its own data path prefix, and its own SeaweedFS identity limited to that prefix. A connection attaches only the caller's tenant catalog.
@@ -143,7 +143,7 @@ These extend the 15 strict rules. Each is confirmed in the ADR named.
 6. **Open by default, the client's choice of model and cloud.** The default stack uses only OSI licences, checked in CI. Hosted models (013), managed cloud services (031) and external anchors (017) are adapters the client chooses. One external anchor is on by default for client installs. (ADR-0014, revised)
 7. **Decision records are versioned.** From 012, every record has a `record_version` and a canonical form, so later sprints add fields without changing the chain rules. (ADR-0013)
 8. **A threat model per sprint.** Every pack has `threat-model.md`. QA signs it off.
-9. **Standard discovery paths are the one exception to `/v1`.** Read-only, public discovery documents that a standard requires may live under `/.well-known/`: OAuth protected resource metadata (RFC 9728, 016), AuthZEN discovery (018) and the A2A Agent Card (028). They hold no tenant data and need no credential. Everything else stays under `/v1`. The first sprint that adds one (018) records this in `DECISIONS.md` and in `docs/architecture.md`.
+9. **Standard discovery paths are the one exception to `/v1`.** Read-only, public discovery documents that a standard requires may live under `/.well-known/`: OAuth protected resource metadata (RFC 9728, 016), AuthZEN discovery (018) and the A2A Agent Card (028). They hold no tenant data and need no credential. Everything else stays under `/v1`. The first sprint that adds one (016) records this in `DECISIONS.md` and in `docs/architecture.md`.
 10. **People and agents read through the same governed metric path.** Dashboards, reports and alerts render under the reader's own grants, never with the author's or a service identity. (ADR-0031)
 11. **No route around the gateway.** Every agent, ours or not, reaches tools, models and data only through the gateway. Each deployment mode states how other routes are closed, and a canary test proves it. (ADR-0023, revised)
 12. **Integrate before we ingest.** Read client data in place when we can. Copy into the lakehouse only what must be held, and say why in the pipeline definition. (ADR-0015, revised)
@@ -160,16 +160,16 @@ These extend the 15 strict rules. Each is confirmed in the ADR named.
 | 0019 | Access grants, purpose and query rewriting | 024 |
 | 0020 | Lineage model and agent facets | 025 |
 | 0021 | Semantic layer first, parsed and guarded SQL second | 025 |
-| 0022 | OPA behind the policy seam, three outcomes, replayable decisions | 018 |
-| 0023 | Gateway service, deployment modes, MCP 2026-07-28 front and the private registry | 016 |
+| 0022 | Versioned policy package, three outcomes, replayable decisions | 018 |
+| 0023 | Gateway service, deployment modes, MCP 2026-07-28 front and upstream proxy | 016 |
 | 0024 | Human approvals bound to the action hash | 019 |
 | 0025 | External identity provider and delegation | 020 |
 | 0026 | A2A v1.0 and signed Agent Cards | 028 |
 | 0027 | Guardrail models | 019 |
 | 0028 | Governed agent memory and autonomy tiers | 028 |
 | 0029 | Receipts v2: COSE, SCITT shape, key management | 017 |
-| 0030 | Local transparency log and timestamping | 017 |
+| 0030 | External receipt anchoring | 017 |
 | 0031 | Governed business intelligence on the semantic layer | 029 |
-| 0032 | Cloud deployment and the POC lifecycle (OpenTofu, Compose bundle, backups) | 015 |
+| 0032 | Local POC lifecycle, Compose bundle and backups | 015 |
 | 0033 | Documents, retrieval and grounding | 026 |
-| 0034 | Resilience, encryption at rest and keys | 031 |
+| 0034 | Resilience, encryption at rest, keys, local transparency log and timestamping | 031 |

@@ -21,6 +21,11 @@ Rules:
 - Merge with a merge commit, so each sprint keeps its commit blocks. Delete the branch after merge.
 - The plan branch PR excludes stray untracked files at the repo root (old plan files from the abandoned deploy branch).
 
+### Autonomous local implementation before human landing
+The owner's autonomous-delivery instruction permits an isolated local worktree per sprint after the previous sprint's evidence is accepted, while its human commits are pending. Preserve the accepted prerequisite filesystem snapshot and a per-sprint change manifest; copy only reviewed source/planning inputs, excluding secrets, generated dependency trees and unrelated root files. Each worktree uses its own `sprint/NNN-slug` branch. This is an exception to the previous-merge prerequisite for local implementation only. It creates no model-authored commits or merges. Reports identify the prerequisite snapshot and give the human the reconciliation and commit steps for sequential landing. Pull requests, rebases, merges and release tags retain the normal human workflow above.
+
+Local acceptance requires captured passing checks on that exact source snapshot and validation of the CI configuration that runs those checks. It never asserts a remote workflow ran on uncommitted files. Required remote CI on the human-committed diff remains a separate human landing gate before merge; record it as pending until it actually runs. This separates local successor implementation from landing without deleting, skipping or weakening any test or release check.
+
 ## Commit blocks inside a sprint
 Use the blocks that apply, in this order. Merge small neighbouring blocks. Past sprints used three to five blocks, which is fine. Each block should pass lint and tests on its own where possible.
 

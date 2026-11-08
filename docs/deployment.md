@@ -1,18 +1,20 @@
 # Deployment
 
-For the person who deploys or upgrades the platform. It covers the images, the database roles and migrations, the signing key, workers, the optional compose profiles, the hosted setup and the upgrade steps. Every setting is in [configuration.md](configuration.md).
+For local deployment and upgrade work. It covers the images, database roles and migrations, signing keys, workers, the optional Compose profiles and upgrade steps. Every setting is in [configuration.md](configuration.md).
+
+`docker-compose.yml` is the sole active root Compose launcher and describes the local stack. Hosting is parked in [planning questions](../planning/QUESTIONS.md#parked-hosting); Sprint 015 will define the future deployment bundle. No production Compose launcher is supported by this guide.
 
 ## What runs
 
 | Component | Image or command | Needs |
 |---|---|---|
-| API | `Dockerfile`, which runs `alembic upgrade head` and then uvicorn on port 8000 | Postgres 16 with pgvector, Redis with RediSearch |
+| API | `Dockerfile`, which runs `alembic upgrade head` and then uvicorn on port 8000 | Postgres 16 with pgvector, Valkey Search |
 | Worker | the same image, `python -m workers` | the same stores, plus the object store the API uses |
 | UI | `ui/Dockerfile.ui`, a static build served by nginx on port 80 | the API under the same site |
 | Postgres | `pgvector/pgvector` for pg16 in compose | the `vector` extension |
-| Redis | `redis/redis-stack-server` in compose | the RediSearch module. Without it the API does not start |
+| Valkey | `valkey/valkey-bundle` in compose | valkey-search; the Redis wire protocol keeps the existing cache port |
 
-The API and workers are stateless. Run as many as needed: workers share the queue safely, and API processes share Postgres and Redis.
+The API and workers are stateless. Run as many as needed: workers share the queue safely, and API processes share Postgres and Valkey.
 
 ## Images
 
@@ -88,29 +90,26 @@ EMBEDDED_WORKERS=1 EMBEDDED_RELAY=true uvicorn api.main:app     # inside the API
 
 | Command | Starts |
 |---|---|
-| `docker compose up -d postgres redis` | the stores |
+| `docker compose up -d postgres valkey` | the stores |
 | `docker compose up -d worker` | a worker |
-| `docker compose up -d ollama` | a local Ollama for local embeddings and models |
+| `docker compose --profile models up -d --wait ollama`, then `run --rm ollama-pull` | a local Ollama for local embeddings and models |
 | `docker compose --profile observability up -d` | Prometheus and Grafana with the provisioned dashboard, on localhost |
-| `docker compose --profile kafka up -d redpanda` and `up kafka-topics` | a single-node Kafka-compatible broker and its topics |
+| `docker compose --profile streams up -d --wait kafka`, then `run --rm kafka-topics` | Apache Kafka in single-node KRaft mode and its topics |
+| `docker compose --profile lake up -d --wait seaweedfs`, then `run --rm seaweedfs-init` | the local S3 endpoint and the bucket named by `S3_BUCKET` |
+
+Kafka, SeaweedFS and Ollama use upstream images pinned by tag and digest in `docker-compose.yml`. The image scan pulls and scans those exact artifacts; review any optional-profile critical findings through `scripts/supply_chain/image-exceptions.txt`. The supply-chain check builds the application and UI images and scans them alongside every digest-pinned Compose image. Existing Ollama stores follow [ollama-upgrade.md](ollama-upgrade.md); Compose keeps the original `ollama_data` and uses `ollama_data_v0407` for the reviewed runtime.
+
+Every published port is bound to `127.0.0.1`. The default set is Postgres, Valkey and the worker; Kafka, object storage, local models and observability are optional. The worker waits for healthy stores, and each init job waits for its service. S3 credentials come from `S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY`; named local-only defaults support a fresh local setup. Override them for any shared installation.
+
+Existing Grafana volumes follow [grafana-upgrade.md](grafana-upgrade.md). Compose uses `grafana_data_v13` for the upgraded image and preserves `grafana_data`; clone stopped complete state before upgrading an existing installation.
+
+Existing Postgres volumes follow [postgres-upgrade.md](postgres-upgrade.md). Compose uses `pgdata_trixie`, preserves `pgdata`, and rejects mismatched collations in its healthcheck. Valkey uses `valkey_data` and leaves `redis_data` untouched.
 
 Never use `docker compose down -v` to stop a profile. It also removes the Postgres volume.
 
-## Hosted setup
+## Hosting (parked)
 
-`render.yaml` describes a hosted setup on Render: the API service (Docker, `/health` check) and the UI service. Values marked `sync: false` are entered as secrets in the dashboard. To deploy:
-1. Back up the database.
-2. Create the `gap_app` role. Set `MIGRATION_DATABASE_URL` to the owner and `DATABASE_URL` to `gap_app`.
-3. Set `MODE=public-preview`, `REDIS_URL`, `RECEIPT_SIGNING_KEY` and the model keys.
-4. Deploy the API. Its start command applies the migrations.
-5. Run a worker (`EMBEDDED_WORKERS=1` on a single-service plan).
-6. For a read-only preview: create a principal and a key with `query kb:read agent`, and set `PREVIEW_PRINCIPAL_ID` to that principal.
-7. Check: `/health` shows `db`, `redis` and `embedding` as `ok`. `/v1/documents` without a key gives `401`, and with a key gives the documents.
-
-Notes for hosted stores:
-- **Neon's pooled endpoint.** It works because the pool disables asyncpg's prepared-statement cache.
-- **Redis.** It must include RediSearch (Redis Cloud does; Upstash does not).
-- **Free instances.** Some free tiers stop idle instances, so the first request after a pause is slow.
+No hosted deployment steps are currently supported. The earlier hosted setup remains in the historical planning records; resolve the open items under [Parked: hosting](../planning/QUESTIONS.md#parked-hosting) before Sprint 015 defines a deployment bundle.
 
 ## Upgrading
 1. Back up the database.

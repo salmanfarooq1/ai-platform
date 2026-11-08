@@ -46,7 +46,7 @@ This table is generated from `core/settings.py` by `scripts/docs/generate.py`. D
 | `MODE` | `local` | no | Deployment mode: `local`, `public-preview` or `prod`. It picks the model defaults and which values are required. |
 | `DATABASE_URL` | unset | yes | Postgres URL the app connects with. It must be a role that is neither superuser nor BYPASSRLS. Required outside local mode; local mode defaults to the `gap_app` role of the compose Postgres. |
 | `MIGRATION_DATABASE_URL` | unset | yes | Postgres URL of the owner role, used by Alembic and `scripts/admin/identity.py`. Falls back to `DATABASE_URL`; local mode defaults to the compose superuser. |
-| `REDIS_URL` | unset | yes | Redis URL. The server needs the RediSearch module. Required outside local mode; local mode defaults to `redis://localhost:6379`. |
+| `REDIS_URL` | unset | yes | Valkey or Redis URL. The server needs a search module (valkey-search). Required outside local mode; local mode defaults to `redis://localhost:6379`. |
 
 ### Models and embeddings
 

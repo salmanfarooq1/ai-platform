@@ -29,6 +29,7 @@ All notable changes, newest first, in the [Keep a Changelog](https://keepachange
 - **Documentation** in one standard set: getting started, architecture, configuration, deployment, operations, API, contracts and security. Reference tables are generated from the code.
 
 ### Changed
+- **Infrastructure baseline.** Valkey Search replaces Redis Stack; optional Apache Kafka and SeaweedFS replace Redpanda and MinIO. Pinned security builds, loopback-only ports, health/preflight controls and explicit old-store backup/restore paths accompany the stack. CI gates complete dependency inventories, hash exports, validated SBOMs, immutable image scans and exact skips. The unchanged OSI gate passes with an exact-artifact NumPy audit, original local font assets and native landing motion. MCP 2.2 preserves governed denial codes and masks private errors. Final local validation: 1719 backend passes, 10 allowed skips, 138 added cases and none removed; 207 UI units and 82 browser tests; all 12 final image scans pass. No new route or schema. Required remote CI remains pending human landing.
 - `POST /v1/ingest` answers `202` with a job instead of the ingest result. `POST /v1/agent/query` may answer `202` with an `execution_id`.
 - A worker must run for ingestion and agent runs. Use `python -m workers`, the compose `worker` service, or `EMBEDDED_WORKERS=1`.
 - `RECEIPT_SIGNING_KEY` is required outside `local` mode. The API and workers must share it.

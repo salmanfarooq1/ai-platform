@@ -2,14 +2,11 @@
 
 | # | Risk | Effect | Mitigation |
 |---|---|---|---|
-| R1 | The hosted service still has `MODE=demo` after the rename | The service fails at startup (by design) | Set `MODE=public-preview` before or with the deploy (runbook, Q2) |
-| R2 | The first Alembic migration runs against the live Neon database | Data loss or downtime | A baseline migration that matches the current schema exactly, a backup or Neon branch first, and an additive-only first step (Q4) |
-| R3 | Adding row-level security and `tenant_id` breaks existing queries | Empty results or errors on the live preview | Backfill with a default tenant, keep the policies permissive until the app sets the tenant, and run integration tests before enabling |
-| R4 | The scope of the vision is too wide | Every layer ends up half-built | Thin walking skeletons, one sprint per layer, with acceptance checks as the gate |
-| R5 | Free-tier limits (512MB RAM, cold starts, Neon compute hours) | Slow or failing preview | Keep the reranker off in `public-preview`, keep-awake is a Phase 1 item, measure memory each sprint |
-| R6 | CI is red on `main` because of the 33 existing lint errors | New lint failures get hidden | Closed in Sprint 002: `ruff check` is clean (`DECISIONS.md`) |
-| R7 | Cheaper Builder models drift from the brief | Scope creep, weakened tests | Precise briefs, a QA review, and the Architect re-runs the checks |
-| R8 | Docker is unavailable in some environments | Integration tests never run | Integration tests skip cleanly, and CI runs them with service containers |
+| R1 | One maintainer carries the program | Work or review can stall | Keep work packages small, record decisions and make sprint status visible |
+| R2 | Builders produce uneven results on wide packages | Defects or scope drift reach review late | Split packages by concern; Architect checks paths and facts, then independently reviews each result |
+| R3 | OpenShell 0.1.x is alpha and has one vendor | A change or discontinuation can block agent execution | Before 027, add a fallback sandbox driver such as gVisor or rootless containers with seccomp |
+| R4 | The per-tenant decision-chain lock may cap throughput | Gateway latency or throughput misses the product target | Measure in 013; decide sharding or batched linking in 016 if the benchmark is below target; fail closed |
+| R5 | Sprint 013 starts before prerequisites are landed | Builders work against unapproved interfaces | Land 011 and 012 before 013 builders start |
 
 ## From Sprint 003 QA
 - **The preview key is shared.** Every public visitor uses one principal, so one visitor can use up the rate limit and the tenant's token budget for everyone. This is accepted for the preview. The fix is per-visitor keys or an IP limit at the proxy.

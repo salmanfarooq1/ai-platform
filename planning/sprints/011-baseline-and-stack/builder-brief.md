@@ -1,9 +1,9 @@
 # Sprint 011: Builder brief
-You are the Builder for Sprint 011 in /home/ubuntu/ai-platform, on branch `sprint/011-baseline-and-stack`. The work is infrastructure only: planning files, settings, CI, supply chain, compose, CI services, the cache adapter and verify scripts. There is no API, schema or UI change.
+You are the Builder for Sprint 011 in /home/ubuntu/ai-platform, on branch `sprint/011-baseline-and-stack`, created locally from `planning/sprint-plans` (`git switch planning/sprint-plans && git switch -c sprint/011-baseline-and-stack`). Everything is local: do not pull, push or switch to `main`, and leave untracked files at the repo root alone. The work covers infrastructure plus the bounded MCP compatibility and font/animation dependency changes selected in `architect-disposition.md`. There is no route or API contract change; only the documented cache fallback may require a migration.
 
 Work autonomously. The stop conditions are in AGENTS.md: a strict-rule or blueprint conflict, a destructive action, a missing secret, or spending money. When one happens, log it in `planning/QUESTIONS.md` and `build-log.md`, skip only that item, and finish the rest.
 
-This sprint has two parts. Finish part a, run every check green, and write the part-a section of `report.md`. Only then start part b. If the run must stop between parts, part a stands on its own.
+This sprint has two parts. Follow `architect-disposition.md`: replacement work may proceed while superseded dependency gates are red. Record part-a results honestly, then complete part b and run every check against the final stack. All gates must pass before sprint acceptance or Sprint 012 implementation. The bounded UI licence migration and exact-artifact audit in that disposition are selected scope amendments.
 
 ## Read first
 - `AGENTS.md`, `planning/STATE.md`, `planning/DECISIONS.md` (top section: Program 2 direction).
@@ -101,12 +101,18 @@ Write `report.md` with:
 - measured memory per new service
 - the LiteLLM result
 - deviations from the blueprint, and open questions (also in `planning/QUESTIONS.md`)
-- proposed commit blocks per `planning/program/branching-and-commits.md`, each with its `git add` paths:
+- proposed commit blocks per `planning/program/branching-and-commits.md`, each with its `git add` paths. Messages are plain and functional (`type(scope): summary`), with no framing words:
   - code: `core/settings.py`, `scripts/docs/`, `scripts/check_skips.py`, `adapters/redis_cache.py`, `fix(core)` and `feat(adapters)`
   - tests: `test(ci)` and `test(adapters)`
   - ops: `.github/`, `docker-compose.yml`, `Dockerfile`, `scripts/`, `requirements/`, `ci(ops)` and `chore(ops)`
   - docs: `docs(ops)`
   - planning: `planning/` and `CHANGELOG.md`, `docs(planning)`
-- then the commands `git push -u origin sprint/011-baseline-and-stack` and `gh pr create --base main`.
+- no push or pull request commands. The owner pushes after the Architect's review.
 
 Update `planning/STATE.md` and `CHANGELOG.md`. Do not commit.
+
+## Selected MCP compatibility amendment
+The Architect review authorizes only the expected-error compatibility work for MCP 2.2.0 inside `api/mcp/`. Translate known `GatewayDenied` results to the SDK expected tool/resource error types using controlled reason codes. Preserve route shapes, schemas, denial reasons, gateway enforcement and input-guardrail JSON. Unexpected exceptions must retain SDK masking and must not expose exception text in responses or application logs. Add a sentinel-secret regression and retain the existing policy-denial and concurrent-reply assertions. This bounded amendment does not authorize a transport redesign, UI changes or part b.
+
+## Template location clarification
+Keep the reusable template in this sprint as `threat-model-template.md`. This reconciles the shared-template request with the owner's folder restriction; do not modify `_template` or any other sprint folder.

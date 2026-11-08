@@ -1,6 +1,6 @@
 # Sprint 011: Baseline and stack. Requirements
 
-Platform (Kernel). Infrastructure only: planning files, settings, CI, supply chain, compose, CI services, the cache adapter and verify scripts. No API, schema or UI change. This is a two-part sprint: part a covers items 1–6, part b covers items 7–11. Each part ends green.
+Platform (Kernel). Infrastructure and bounded dependency cleanup: planning files, settings, CI, supply chain, compose, CI services, the cache adapter and verify scripts. No route or schema change. The selected MCP compatibility and UI licence amendments are defined below. Part a covers items 1–6 and part b items 7–11; all checks must pass on the final stack before acceptance. Replacement work may proceed while the superseded dependency gates are red, as specified in `architect-disposition.md`.
 
 Source: old 011, old 012, plus new scope (five-direction review: LiteLLM check, keyword-search naming, Kafka optional).
 
@@ -17,7 +17,7 @@ Source: old 011, old 012, plus new scope (five-direction review: LiteLLM check, 
    - `tests/unit/test_docs_links.py` fails when the git-ignored `docs/learning_docs/` exists. `scripts/docs/check_links.py` skips git-ignored paths.
 3. **Pins.**
    - Poetry 2.3.3 in CI and in `AGENTS.md`. `mcp==2.2.0`.
-   - `pgvector/pgvector:0.8.7-pg16`, `prom/prometheus:v3.14.0`, `grafana/grafana:13.2.2`, `ollama/ollama:0.34.4`. Every image by digest.
+   - Baseline versions: `pgvector/pgvector:0.8.7-pg16`, `prom/prometheus:v3.14.0`, `grafana/grafana:13.2.2`, `ollama/ollama:0.34.4`. Verified compatible security replacements follow `architect-disposition.md`. Every external base/runtime image is pinned by digest. A build-only security image requires hash-pinned inputs, captured output identity/SBOM and the same final scan/contracts in CI.
    - A pin younger than two weeks at sprint start is replaced by the previous release (decided 2026-10-11).
    - `scripts/check_skips.py` reads an allowlist file instead of hard-coding the MinIO class.
 4. **Supply chain.**
@@ -32,7 +32,7 @@ Source: old 011, old 012, plus new scope (five-direction review: LiteLLM check, 
 6. **CI hygiene and templates.**
    - `concurrency` with `cancel-in-progress`, path filters, a `.venv` cache, one composite setup action.
    - Extend `.github/pull_request_template.md`: threat model, licence gate, memory, test delta.
-   - Add `planning/sprints/_template/threat-model.md`.
+   - Keep the reusable template at `planning/sprints/011-baseline-and-stack/threat-model-template.md`; promotion to the shared template folder is outside this sprint's folder boundary.
    - Telemetry off in CI: `DEEPEVAL_TELEMETRY_OPT_OUT`, `DO_NOT_TRACK=1`.
 
 ### Part b: open-source stack
@@ -66,11 +66,11 @@ Source: old 011, old 012, plus new scope (five-direction review: LiteLLM check, 
 ## Out of scope
 - Model defaults, `models.lock` and hosted providers (013).
 - Kafka SASL, ACLs, Debezium and any Kafka consumer (022). Per-tenant SeaweedFS identities (021).
-- Any route, migration or UI change.
+- Any route or migration change, except the documented cache fallback migration; UI changes outside the bounded licence migration.
 - Changed from old 011 and 012: the two sprints are one. The Kafka profile is named `streams` and is optional. The LiteLLM check and the naming fix are new.
 
 ## Nav placement
-No UI change.
+No navigation change. The licence migration preserves existing landing behavior and fonts.
 
 ## Questions this sprint closes
 - Q1: the WSL notes are written in `docs/getting-started.md`.
@@ -79,3 +79,9 @@ No UI change.
 - Q45: topic retention defaults are written in `docs/operations.md` and set by the topic job.
 - Q46: the Kafka setting names are confirmed against the new profile.
 - Q20: only if the stale-vector count is touched while moving to Valkey. Otherwise it stays open.
+
+## Selected MCP compatibility amendment
+The Architect review authorizes the expected-error compatibility work for MCP 2.2.0 inside `api/mcp/`. Translate known `GatewayDenied` results to the SDK expected tool/resource error types using controlled reason codes. Preserve route shapes, schemas, denial reasons, gateway enforcement and input-guardrail JSON. Unexpected exceptions must retain SDK masking and must not expose exception text in responses or application logs. Add a sentinel-secret regression and retain the existing policy-denial and concurrent-reply assertions. No transport redesign.
+
+## Selected dependency and sequencing amendments
+`architect-disposition.md` selects the proposed byte-preserving font/landing dependency migration, exact-artifact NumPy audit, compatible fixed image assessment and replacement-first work order. It also retires the obsolete, unreferenced production Compose launcher verbatim into history and rejects unregistered active root Compose files. Hosting remains parked until the new 015 bundle. The OSI-only policy, original assertions, critical-scan threshold and final acceptance checks are unchanged. `licence-remediation.md` defines the UI source boundary. Full UI checks and all browser cases run after this migration.

@@ -2,12 +2,28 @@
 
 An index, one line per decision, newest first. The reasoning lives in `docs/adr/` and, for Decisions 1 to 30, in `planning/history/ARCHITECTURE_LOG.md`. This file only points to it. Log entries may carry the date they were recorded.
 
+## 2026-11-02 re-plan (owner)
+- Re-plan for the earliest sellable gateway: M0 stays local, and the gateway sprint order is 016, 019, 020, 017, 018.
+- Land 011 and 012 before builders start on 013.
+- Put gateway breadth in the sprint that owns it; move later-stage work into MG or the cloud track as listed in `planning/program/sprint-map.md`.
+
+## Autonomous continuation: final 011 review (2026-10-22)
+- Accept Sprint 011 for isolated local successor implementation after final captured backend, UI, static/docs, licence, image and scanner-control checks. Actual remote CI remains a human landing gate; no model commits, pushes or merges.
+- Every sprint delivers its applicable UI with backend/contracts and browser evidence. `planning/program/ui-delivery.md` maps the remaining scope; the release accessibility audit does not defer accessible implementation.
+- Retain all default secret detectors. Exact public checksum/name metadata may be excepted only with both path and value constraints and a seeded CLI regression proving adjacent credentials still fail. Existing reviewed history fingerprints remain unchanged.
+
 ## Program 2 direction (owner, 2026-10-11)
+- **Builder model routing (owner, 2026-10-21).** Use economical models for dedicated Builders with explicit bounded instructions. The Architect owns complex debugging, cross-cutting decisions, security judgments and final acceptance; Builder reports are independently verified.
+- **Sprint 012 readiness (Architect, 2026-10-21).** Principal precedes module; evidence recording/lookup stay real in every edition. Disabled jobs are filtered at claim and expired-lease maintenance. Single-tenant startup and serialized owner creation retain RLS. Exact ports, v1/v2 canonical fields and the 022 durable lineage-spool prerequisite are recorded in `sprints/012-pillars-and-boundaries/architect-disposition.md`.
+- **Module metadata authority (Architect, 2026-10-21).** Sprint 012 adds system.read for platform metadata, granted by recognized existing scopes, without widening KB/model/audit actions. Sidebar and palette share session-keyed module filtering. A kb:read-only metadata gate would break valid agent/auditor navigation.
+- **Autonomous delivery (owner, 2026-10-21).** The Architect delegates implementation to a dedicated Builder per sprint, independently reviews its contract/result, and advances on evidenced acceptance. Human-only commits, pushes and merges remain binding. Isolated local worktrees and preserved prerequisite snapshots allow implementation to continue before human landing; the human later reconciles and commits the per-sprint snapshots in order.
+- **Sprint 011 continuation (Architect, 2026-10-21).** Select bounded font/animation dependency cleanup and exact-artifact NumPy audit without changing OSI policy. Allow part-b replacements while temporary dependency gates are red; all final gates remain mandatory before acceptance and Sprint 012 implementation. Same-Postgres-major image base changes require isolated data/collation checks. `sprints/011-baseline-and-stack/architect-disposition.md`.
+- **Security image builds (Architect, 2026-10-21).** A build-only service may use a reviewed security recipe with digest-pinned bases and hash-pinned source/package inputs; record output identity/SBOM and run the same full image scan/contracts locally and in CI. No registry publishing or scan exception is required. Exact conditions: Sprint 011 `architect-disposition.md` item 5.
 - **Three pillars.** Gateway (security; mature on its own: identity, policy, guardrails, approvals, evidence, receipts), Data (storage, warehouse, streaming, BI, retrieval, memory, citations) and Agents (execution and monitoring). The modules M1–M6 map onto them.
 - **Integration first.** Clients connect their own agents, data sources, event streams and warehouses through existing connectors. Our own agents, client agents and external agents are all governed the same way through the gateway. Integration agents inspect new connections and suggest fixes. Rejected: replacing the client's stack.
-- **The local stack is the POC/MVP vehicle.** Real deployments run on cloud, with one Terraform module per cloud and the same core. POCs and portfolio projects run on cloud trial accounts, stay portable, and start and stop on demand.
-- **Delegation tokens are platform-minted by default (036).** Keycloak issues them only if the spike passes and nested delegation is no longer a preview feature. Preview features never run in the default stack.
-- **Docling weights: Apache-2.0 only (030).** TableFormer is taken under Apache-2.0. If that does not hold, table structure is off.
+- **The local stack is the POC/MVP vehicle.** Real deployments run on cloud, with one OpenTofu module per cloud and the same core. POCs and portfolio projects run on cloud trial accounts, stay portable, and start and stop on demand.
+- **Delegation tokens are platform-minted by default (020).** Keycloak issues them only if the spike passes and nested delegation is no longer a preview feature. Preview features never run in the default stack.
+- **Docling weights: Apache-2.0 only (026).** TableFormer is taken under Apache-2.0. If that does not hold, table structure is off.
 - **Pins younger than two weeks at sprint start are replaced by the previous release.** The only exception is a security fix, noted in `evidence/pins.txt`.
 - **SCIM 2.0 provisioning and SIEM export are added to the plan.**
 - **Wording.** "Built on open-source components, no third-party licence fees." Our own code is private.

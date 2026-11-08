@@ -9,14 +9,14 @@ For engineers who build on or change the platform. It describes the system as it
             |  cookie session                  |  API key or JWT
             v                                  v
    +--------------------- the platform ----------------------+
-   |  API (FastAPI, /v1)   workers   Postgres   Redis         |
+   |  API (FastAPI, /v1)   workers   Postgres   Valkey         |
    +---------------------------------------------------------+
             |                    |                  |
    model providers        object store        event consumers
    (LiteLLM)              (local disk or S3)   (in-process or Kafka)
 ```
 
-The platform is a modular monolith ([ADR-0001](adr/0001-modular-monolith.md)). The API and the workers run the same code and image, with different entry points. Postgres is the source of truth ([ADR-0002](adr/0002-postgres-source-of-truth.md)). Redis holds caches, rate and budget counters and web sessions, all of which can be rebuilt.
+The platform is a modular monolith ([ADR-0001](adr/0001-modular-monolith.md)). The API and the workers run the same code and image, with different entry points. Postgres is the source of truth ([ADR-0002](adr/0002-postgres-source-of-truth.md)). Valkey holds caches, rate and budget counters and web sessions, all of which can be rebuilt.
 
 ## 2. Rules every change keeps
 1. **Identity from a verified credential only.** Tenant and principal never come from a header, body or query.
@@ -57,7 +57,7 @@ The port interfaces are listed in [contracts/ports.md](contracts/ports.md). Impo
 2. **Auth** accepts a bearer API key, a JWT or a web session cookie, and puts a frozen `Principal` (id, tenant, kind, scopes) on the request. Without a valid credential the answer is `401`. Public paths are `/`, `/health`, `/v1/health` and the OpenAPI docs. Signing in (`POST /v1/session` and `/v1/session/preview`) needs no prior credential. `/metrics` is open only when `METRICS_PUBLIC` is true, and otherwise needs `admin`.
 3. **The route** declares its scope and reads the tenant only from the principal.
 4. **`gateway.enforce()`** runs for every model, tool and knowledge-base call. It is described in the next section.
-5. **The work** runs through ports: retrieval in Postgres, completion through LiteLLM, cache in Redis.
+5. **The work** runs through ports: retrieval in Postgres, completion through LiteLLM, cache in Valkey.
 6. **The response** carries the request id. Errors use one format: `{"error": {"code", "message", "request_id"}}`.
 
 ## 5. The gateway
@@ -70,9 +70,9 @@ The port interfaces are listed in [contracts/ports.md](contracts/ports.md). Impo
 | `boundary` | The action fits the execution boundary: the knowledge bases, tools and models the request may use, and its tool-call count |
 | `policy` | The tenant's active policy allows it: knowledge bases, tools, models, limits and tool argument schemas |
 | `guardrails` | Input length and blocked terms |
-| `rate` | The per-principal rate limit (Redis) |
-| `budget` | The tenant's daily token budget (Redis) |
-| `cost` | The tenant's daily cost cap in USD (Redis) |
+| `rate` | The per-principal rate limit (Valkey) |
+| `budget` | The tenant's daily token budget (Valkey) |
+| `cost` | The tenant's daily cost cap in USD (Valkey) |
 
 Any exception inside a stage is a deny. An action has a kind (`kb.read`, `kb.write`, `model.invoke`, `tool.call`, `agent.run`, `feedback.write`, `analytics.read` or `audit.read`), a resource and the SHA-256 of its input. Every reason a stage can give is in the reason catalogue (`gateway/reasons.py`), with a plain sentence and the policy field it points to. The table is in [api/README.md](api/README.md#reason-codes).
 
@@ -101,8 +101,8 @@ The data model is defined by the migrations in `migrations/versions/` ([ADR-0003
 
 ## 8. Retrieval and the agent
 
-- **Search** is hybrid: BM25 full-text search and pgvector similarity, merged with reciprocal rank fusion. An optional cross-encoder reranker runs where the image includes it. Answers carry citations and a confidence level, and a low score refuses to answer.
-- **Caches:** an exact-match cache and a semantic cache in Redis, keyed by tenant and embedding model.
+- **Search** is hybrid: keyword search (Postgres full-text `ts_rank`) and pgvector similarity, merged with reciprocal rank fusion. An optional cross-encoder reranker runs where the image includes it. The names `bm25_only` and `bm25_score` remain compatibility values; this ranking is not true BM25. Answers carry citations and a confidence level, and a low score refuses to answer.
+- **Caches:** an exact-match cache and a semantic cache in Valkey, keyed by tenant and embedding model.
 - **The agent** is a LangGraph graph with a retrieve tool and a verify loop. Every model and tool call goes through the gateway, with the run's boundary.
 - **MCP:** the same tools and resources are served over MCP (`/v1/mcp/sse`, `/v1/mcp/messages`), with the same credential and the same gateway.
 

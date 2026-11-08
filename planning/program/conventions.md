@@ -2,6 +2,9 @@
 
 One list of names that every sprint pack uses. If a pack and this file disagree, this file wins. A Builder who must change a name records it here in the same pull request.
 
+## Complete sprint delivery
+Every sprint includes the applicable UI in the same sprint as its backend and contracts. The Architect identifies affected pages, navigation, forms, decisions, receipts and operator journeys before assigning the Builder. Ship their real API integration, permissions, loading/empty/error states, keyboard/reduced-motion behavior and an end-to-end journey within that sprint. Do not defer applicable UI to a later polish sprint. Infrastructure-only work may need no new page; record that assessment and verify any existing UI journey it changes or restores. Acceptance requires both backend and applicable UI evidence.
+
 ## Scripts and checks
 | What | Name | Created in |
 |---|---|---|
@@ -17,7 +20,7 @@ One list of names that every sprint pack uses. If a pack and this file disagree,
 | Showcase journeys | `scripts/showcase/<milestone>.sh` and `ui/e2e/showcase-<milestone>.spec.ts` | 014 onward |
 
 ## Modules and editions
-- `ENABLED_MODULES` values: `gateway`, `evidence`, `agents`, `data`, `lineage`, `insights`, or `all`. `insights` needs `data`; startup refuses it alone. The `insights` value and the Data edition's `insights` part start in 028. `gateway` is always on.
+- `ENABLED_MODULES` values: `gateway`, `evidence`, `agents`, `data`, `lineage`, `insights`, or `all`. `insights` needs `data`; startup refuses it alone. The `insights` value and the Data edition's `insights` part start in 029. Before then Data is `gateway,data,lineage`. `gateway` is always on.
 - Editions: Gateway (`gateway`), Assurance (`gateway,evidence`), Agents (`gateway,agents`), Data (`gateway,data,lineage,insights`), Full (`all`).
 - Packages: `evidence/` (012), `dataplane/` (021), `lineage/` (025), `insights/` (029). Other modules may import the `gateway` package API (`gateway/__init__.py`) but not its internals.
 
@@ -34,17 +37,20 @@ New in program 2:
 | `approvals:decide` | Decide runtime action approvals | 019 |
 | `policy:write` | Publish and test policies (today `admin`) | 018 |
 
-`GET /v1/system/modules` uses `kb:read`, as `/v1/config` does.
+`GET /v1/system/modules` uses metadata-only `system.read` (012), granted by each recognized existing scope and enforced after scope-union authentication. It grants no KB/model/audit operation; empty/unknown scopes remain denied.
 
 ## Action kinds (gateway)
 Existing: `kb.read`, `kb.write`, `model.invoke`, `tool.call`, `agent.run`, `feedback.write`, `analytics.read`, `audit.read`.
 
-New: `data.read` (021), `data.write` (022), `data.extract` (024), `product.certify` (023, used by 023 for certification and by 029 for metrics), `access.request`, `access.approve`, `access.revoke` (024), `lineage.read` (025), `dashboard.write` (029), `report.write`, `report.deliver` (029), `approval.decide` (019), `agent.stop`, `agent.override` (019), `memory.write`, `memory.read` (028), `evidence.export` (030).
+New: `system.read` (012, platform metadata only), `data.read` (021), `data.write` (022), `data.extract` (024), `product.certify` (023, used by 023 for certification and by 029 for metrics), `access.request`, `access.approve`, `access.revoke` (024), `lineage.read` (025), `dashboard.write` (029), `report.write`, `report.deliver` (029), `approval.decide` (019), `agent.stop`, `agent.override` (019), `memory.write`, `memory.read` (028), `evidence.export` (030).
 
 Also added by their sprints: `document.review` (026), `session.create` (020), `delegation.exchange` (020), `a2a.call` (028), `output.check` (019), `autonomy.change`, `incident.update` (028), `evidence.pack`, `evidence.system.update` (030), `evidence.assessment.upload` (030), `observability.read` (030).
 
-Stage pipeline order (first deny wins). Existing stages are kept; new ones slot in as shown:
-`module` (012) → `principal` → `boundary` → `policy` → `purpose` (018) → `query` (024) → `duties` (023, extended in 024; also reports `certification_blocked`) → `grant` (024) → `taint` (027) → `guardrails` → `pii` and `guard` (019) → `rate` → `budget` → `cost`. Two more stages: `approval` (019) is called from the `policy` stage for any action whose verdict is `approval_required`, and checks a bound approval at execution. For `surface` `dashboard`, `report` or `alert`, `approval_required` becomes a withheld tile and no approval row. `peer` (028) runs after `boundary` and before `policy`, for A2A calls only. `duties` is extended in 019 to `approval.decide` (self-approval is `separation_of_duties`).
+Stage pipeline order (first deny wins). Sprint 013 order is `principal` → `module` → `boundary` → `model` → `policy` → `guardrails` → `rate` → `budget` → `cost`. The `model` stage follows `boundary` so a caller without scope is denied first. Later sprint stages slot into this order: `peer` (028) after `boundary`; `purpose` (018), `query` (024), `duties` (023, extended in 024; also reports `certification_blocked`), `grant` (024), `taint` (027), and `pii` and `guard` (019) before `rate`. `approval` (019) is called from `policy` for actions whose verdict is `approval_required` and checks a bound approval at execution. For `surface` `dashboard`, `report` or `alert`, `approval_required` becomes a withheld tile and no approval row. `duties` is extended in 019 to `approval.decide` (self-approval is `separation_of_duties`).
+
+Principal precedes module so missing credentials/scopes keep their existing 401/403 behavior before an authenticated disabled-module denial.
+
+The one accepted exception to "every call recorded" (015): during maintenance capture, non-health requests receive 503 `maintenance` before `enforce()` and write no decision row, because the database is being captured. Turning maintenance on and off is itself a recorded decision.
 
 The ask-your-data answer has no action kind of its own. Its receipt fields ride on the answer step's `model.invoke` decision (request path step 9).
 
@@ -54,6 +60,8 @@ The `module` stage (012) needs each action kind's module. Each sprint registers 
 ### Decision record v2 extensions
 | Extension | Fields | Added in |
 |---|---|---|
+| `model` | name, provider, source, digest or provider model id, processing scope, route fingerprint, phase | 013 |
+| `stages` | ordered stage, status, reason and duration entries for every decision | 013 |
 | `data` | `snapshot_id` | 021 |
 | `data` (more) | `quality_evaluation_id` | 023 |
 | `access` | request id, grant id | 024 |
@@ -61,10 +69,12 @@ The `module` stage (012) needs each action kind's module. Each sprint registers 
 | `query` (more) | `metric_ids`, `estimate_rows` | 025 |
 | `insight` | `dashboard_id`, `dashboard_version`, `tile_id`, `view_id` | 029 |
 | `on_behalf` | `initiator`, `subscription_id`, `job_id` | 029 |
-Later sprints add their own extension and list it here.
+For `model`, the closed schema fields are `name`, `provider`, `source`, exactly one of `digest` or `provider_model_id`, `processing_scope`, `route` and `phase` (`admission` or `attempt`). For `stages`, each entry is `{stage, status, reason, duration_us}`. Status is `passed`, `denied`, `skipped` or `not_reached`. Later sprints add their own extension and list it here.
+
+Sprint 013 reason codes: `model_breaker_open` (model), `model_concurrency_limit` (rate), `data_use_not_allowed` (policy), and `verifier_must_be_local` (policy).
 
 ### Ports
-`DataAccess` grows by sprint: `read` (012 skeleton, 021 adapter), `current_snapshot` (021, one tenant catalog snapshot id), `extract` (024), `list_metrics`, `describe_metric`, `query_metric(..., snapshot_id, purpose, surface)` (025), `metric_catalog` (029), `submit_write` (026). `LineageLookup` (`upstream`, `downstream`) comes in 025. Each change extends the port's contract suite on both adapters.
+`DataAccess` grows by sprint: `read` (012 skeleton, 021 adapter), `current_snapshot` (021, one tenant catalog snapshot id), `extract` (024), `list_metrics`, `describe_metric`, `query_metric(..., snapshot_id, purpose, surface)` (025), `metric_catalog` (029), `submit_write` (026). `LineageLookup` (`upstream`, `downstream`) comes in 025. Each change extends the port's contract suite on both adapters. `DecisionSink` and `EvidenceLookup` are always real in production, including with M2 off. The 012 no-op `LineageEmitter` drops/counts only; 022 introduces a durable tenant-scoped spool before production emitters ship, and 025 consumes it.
 
 ## Events and jobs
 - CloudEvent types: `platform.<area>.<thing>.<past-verb>.v1`, for example `platform.data.snapshot.committed.v1` (022), `platform.insights.report.delivered.v1` (029). Kafka topic names drop the `.v1`.

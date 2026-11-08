@@ -6,7 +6,7 @@
 - **Settings:** `_load_env_files` calls `load_dotenv(..., override=False)` for `.env.local` and for `.env`. Order of precedence: real environment, then `.env.local`, then `.env`. Which file is read stays the same (`.env.local` if present, else `.env`).
 - **Data:** no migration.
 - **Gateway and events:** no change.
-- **UI:** no change. The UI checks still run.
+- **UI:** select only the licence-remediation boundary: retain exact font assets/notices, replace the font wrapper and GSAP landing consumers with native browser behavior, and preserve the visual and reduced-motion contracts. No route, copy, layout, token or console feature change. Full UI checks run after the migration.
 - **Pins:**
   - `pyproject.toml`: `mcp==2.2.0`, then `poetry lock` with Poetry 2.3.3.
   - `docker-compose.yml`, both workflows and the `Dockerfile` base image: pinned tag plus `@sha256:` digest. Pins, digests and release dates are saved in `evidence/pins.txt`.
@@ -41,7 +41,7 @@
   - Workflow-level env: `DEEPEVAL_TELEMETRY_OPT_OUT=YES`, `DO_NOT_TRACK=1`.
 - **Templates:**
   - `.github/pull_request_template.md` adds: acceptance table, threat model signed off, licence gate, memory measured for new services, test delta against the baseline, migrations listed.
-  - `planning/sprints/_template/threat-model.md` copies the shape in `planning/program/sprint-template.md`.
+  - `planning/sprints/011-baseline-and-stack/threat-model-template.md` copies the shape in `planning/program/sprint-template.md`. The corrective handoff reconciles its location with the prohibition on changing other sprint folders; shared-template promotion is outside this scope.
 
 ## Part b: open-source stack
 - **Ports and adapters:**
@@ -102,3 +102,9 @@
 - `AGENTS.md` (Poetry 2.3.3, stack, scope list, licence gate command), `CONTRIBUTING.md` (licence gate, SBOM, how to add an exception).
 - `docs/getting-started.md` (WSL notes, Q1, Docker Engine or Podman, `.wslconfig`, preflight), `docs/deployment.md` (profiles), `docs/operations.md` (Valkey, Kafka as optional, SeaweedFS, topic retention), `docs/configuration.md` (regenerated), `docs/architecture.md` (keyword search).
 - `planning/DECISIONS.md` (Q36), `planning/STATE.md`, `CHANGELOG.md`.
+
+## Selected MCP compatibility amendment
+The Architect review authorizes the expected-error compatibility work for MCP 2.2.0 inside `api/mcp/`. Translate known `GatewayDenied` results to the SDK expected tool/resource error types using controlled reason codes. Preserve route shapes, schemas, denial reasons, gateway enforcement and input-guardrail JSON. Unexpected exceptions must retain SDK masking and must not expose exception text in responses or application logs. Add a sentinel-secret regression and retain the existing policy-denial and concurrent-reply assertions. No transport redesign.
+
+## Autonomous continuation amendment
+`architect-disposition.md` governs the bounded UI migration, artifact audit and compatible security-image work. Replacements may be implemented before the temporary part-a dependency failures are resolved. Keep those failures recorded and all acceptance boxes truthful. All final gates still pass before Sprint 011 acceptance or Sprint 012 implementation. An artifact correction must bind the exact audited distribution and preserve provenance/notices; it cannot waive a non-OSI component that actually ships.

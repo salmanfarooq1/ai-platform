@@ -31,7 +31,7 @@
   - **Not covered:** `scripts/labs/` holds historical lab scripts. They are outside the import lint and may import providers directly.
   - **Why identity stays:** `core/identity/store.py` authenticates a credential before any tenant is known, through `SECURITY DEFINER` functions. It is not a tenant-scoped store, so it is not a `KnowledgeStore`, and a port for it would add a layer with no second implementation. It stays where it is, behind the `Authenticator` seam.
   - **Not moved:** the usage, feedback, analytics, console and MCP ingestion-status queries still run through `tenant_connection(DbPool, tenant)` in their routers. They read `usage_log`, `feedback` and `gateway_decisions`, which are not knowledge data. They import no driver.
-- **Contract tests (tests/contracts/).** One suite per port runs against every adapter: real and fake must pass the same file. The object store suite also runs against a live MinIO when the environment has one (`scripts/verify/minio.sh`).
+- **Contract tests (tests/contracts/).** One suite per port runs against every adapter: real and fake must pass the same file. The object store suite also runs against a live SeaweedFS S3 endpoint when configured (`scripts/verify/seaweedfs.sh`).
 - **Embedding provenance.** Every chunk records `embedding_model` and `embedding_dim` (migration `0007`, not null). Search, text and vector, only reads rows of the query's model and dimension. Rows of another model are stale: they are ignored, never matched wrongly, and counted in `/v1/health` as `stale_vectors`. The exact cache key and the semantic cache entries carry the embedding model too.
 - **Embedding fallback.** `EMBED_FALLBACK_MODELS` is an ordered list. If the primary fails the next is tried. A provider whose vectors have another width than `EMBEDDING_DIM` is refused, logged at error level and skipped. If none works the call raises, so ingestion and search deny rather than store or compare wrong vectors. Rows made by a fallback say so in `embedding_model`.
 
@@ -45,3 +45,7 @@
 - **LiteLLM strings everywhere (status quo):** they lock call sites to one library and make faking harder.
 - **A heavy framework abstraction or a plugin system:** more surface than needed. One registry, built from settings.
 - **Hiding the SQL of every table behind a port:** deferred; only the knowledge data moved.
+
+## Clarification recorded 2026-10-21
+
+`KnowledgeStore.search_bm25` uses Postgres full-text `ts_rank` ranking. It is keyword search, not true BM25. The port and public `bm25_only` and `bm25_score` names remain for compatibility. Valkey Search replaces the local Redis Stack implementation behind the existing `CachePort`.

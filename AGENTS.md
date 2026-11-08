@@ -12,7 +12,8 @@ This is the Governed Agent Platform: governed agents on business data. It is a P
 The system and its strict rules are described in `docs/architecture.md`.
 
 ## Stack
-- **Backend:** Python 3.11, Poetry 2, FastAPI with async `asyncpg`, Postgres 16 with pgvector, Redis, LiteLLM, LangGraph, MCP.
+- **Backend:** Python 3.11, Poetry 2.3.3, FastAPI with async `asyncpg`, Postgres 16 with pgvector, Valkey Search, LiteLLM, LangGraph, MCP.
+- **Stack:** Valkey, optional Apache Kafka (`streams`), SeaweedFS (`lake`), and local or hosted models (`models`). Service security rebuilds use pinned inputs and are scanned as final artifacts.
 - **UI:** Vite with React 18 and TypeScript (strict), Tailwind and shadcn/ui, TanStack Query, in `ui/`. Playwright tests are in `ui/e2e/`.
 - **Hosting:** Render free tier (`render.yaml`). The database is Neon Postgres.
 - **Modes:** the `MODE` env var is `local`, `public-preview` or `prod`.
@@ -31,15 +32,18 @@ The system and its strict rules are described in `docs/architecture.md`.
 | `ui/` | Web UI. Design rules are in `docs/design/` (index: `docs/design/README.md`). Tokens are data: `ui/tokens/tokens.json` |
 | `scripts/` | Labs (`scripts/labs/`), corpus building (`scripts/corpus/`), eval scripts (not shipped). `scripts/admin/` is the identity CLI |
 | `docs/` | Product docs: `getting-started.md`, `architecture.md`, `configuration.md`, `deployment.md`, `operations.md`, `api/`, `contracts/`, `adr/`, `design/`. Generated tables: `scripts/docs/generate.py` |
-| `planning/` | `STATE`, `DECISIONS`, `DOMAIN`, `RISKS`, `QUESTIONS`, `ROADMAP`, `sprints/NNN-slug/` |
+| `planning/` | `MAP`, `STATE` (pointer to `MAP`), `DECISIONS`, `DOMAIN`, `RISKS`, `QUESTIONS`, `ROADMAP`, `sprints/NNN-slug/` |
 
 Operating files: `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `.editorconfig`, `.gitattributes`, `.github/pull_request_template.md`, `.claude/settings.json`.
+
+## Commit scopes
+`api`, `ui`, `db`, `core`, `adapters`, `ops`, `ci`, `adr`, `planning`, `gateway`, `evidence`, `agents`, `sandbox`, `events`, `jobs`, `models`, `lake`, `pipelines`, `cdc`, `products`, `quality`, `access`, `lineage`, `semantic`, `insights`, `documents`, `policy`, `approvals`, `identity`, `protocols`, `guardrails`, `memory`, `receipts`, `observability`, `packaging`.
 
 ## Commands
 Verified in a Linux container (see `planning/QUESTIONS.md` Q1 for WSL).
 ```bash
 poetry install --with dev                 # setup (add --with rerank for the cross-encoder)
-docker compose up -d postgres redis       # local stack (also creates the app login role gap_app; ollama is optional)
+docker compose up -d postgres valkey       # local stack (also creates the app login role gap_app; ollama is optional)
 scripts/setup_db.sh                       # create rag_platform if missing, migrate as the owner role, grant gap_app
 poetry run alembic upgrade head           # migrate only (runs as MIGRATION_DATABASE_URL, falls back to DATABASE_URL)
 poetry run python scripts/admin/identity.py --help   # tenants, principals, API keys (the key is printed once), set-policy / show-policy
@@ -47,13 +51,14 @@ poetry run uvicorn api.main:app --reload  # run API on :8000 (product routes are
 poetry run python -m workers              # run a worker: ingestion and agent runs need one (or `docker compose up -d worker`, or EMBEDDED_WORKERS=1)
 cd ui && npm ci && npm run dev            # run UI on :5173 (Vite proxies /v1 to :8000)
 poetry run pytest -m unit -q              # unit tests (no external services)
-poetry run pytest -m "integration or e2e" -q -rs  # real Postgres + Redis, fake LLM; skips with a reason if they are down
+poetry run pytest -m "integration or e2e" -q -rs  # real Postgres + Valkey, fake LLM; skips with a reason if they are down
 poetry run ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e   # lint
 poetry run mypy                           # typecheck (api/ core/ gateway/ ports/ adapters/ workers/ sandbox_agent/ config.py; strict for ports/, adapters/ and sandbox_agent/)
 poetry run python scripts/update_openapi.py  # refresh docs/api/openapi.json after an intended API change (unit test fails on drift)
 scripts/check_no_ddl.sh                   # no CREATE/ALTER TABLE outside migrations/
+scripts/supply_chain/licence_gate.sh      # OSI licence gate (install --with supply-chain)
 cd ui && npm run tokens:check && npm run lint && npm run typecheck && npm test -- --run && npm run build && npm run chunk-report && npm run copy-check   # UI checks
-cd ui && npm run e2e                      # Playwright against the real API with fakes (needs postgres and redis)
+cd ui && npm run e2e                      # Playwright against the real API with fakes (needs postgres and valkey)
 ```
 - **Typecheck:** `poetry run mypy`, configured in `pyproject.toml`. Strict for `core/settings.py`, `api/errors.py`, `api/observability.py`, `api/versioning.py`, non-strict elsewhere.
 - **Schema:** Alembic only (`migrations/`, forward-only). Add a migration for any schema change; never edit `0001` or `0002`. Migrations run as the owner role (`MIGRATION_DATABASE_URL`); the app runs as `gap_app` (`DATABASE_URL`).
@@ -66,11 +71,11 @@ cd ui && npm run e2e                      # Playwright against the real API with
 - **Sandboxed runs (Sprint 009, ADR-0009):** `AGENT_RUNTIME=openshell` makes a worker run each agent run in an OpenShell sandbox behind the `SandboxDriver` port (`ports/sandbox.py`; the SDK is imported only in `adapters/openshell_driver.py`). The sandbox's one network route is the gateway: the agent in it (`sandbox_agent/`) calls `/v1/sandbox/runs/{execution_id}/...` with a run token (bound to one run, hash stored, short-lived, valid on no other route). A policy's `tool_arguments` (a JSON Schema per tool) are checked in the policy stage (`tool_argument_not_allowed`). Sandbox events go to `sandbox_events` and are merged with the run's decisions in `GET /v1/agent/runs/{execution_id}`. Tests use `tests/fake_sandbox.py` (not a recording of a real run); `scripts/verify/openshell.sh` runs A2 to A5 on a real gateway (`docs/operations.md`).
 - **Jobs and the outbox:** `POST /v1/ingest` answers 202 with a job; a worker ingests. Agent runs are jobs behind the `AgentRuntime` port (`/v1/agent/query` waits `AGENT_SYNC_WAIT_SECONDS`, then 202). Workers claim with `SKIP LOCKED` through a narrow SECURITY DEFINER function and then work under `tenant_connection`. The default event bus is the outbox: events commit with the change, a relay publishes them at least once, consumers dedupe by event id (ADR-0008, ADR-0011).
 - **API:** every product route is under `/v1`. Only `/` and `/health` are unversioned. Errors are always `{"error": {"code", "message", "request_id"}}`. 401 = no or bad credential, 403 = missing scope, 404 `kb_not_found` = unknown or foreign knowledge base (same body for both).
-- **Tests:** the integration and e2e tiers need `docker compose up -d postgres redis`. They create a throwaway database, connect as `gap_app`, use fake LLM and embeddings (`tests/fakes.py`, fake adapters put behind the ports through the registry), and a guard fixture blocks any real network call. `tests/contracts/` runs one suite per port against every adapter; the live MinIO run is `scripts/verify/minio.sh` (skipped, with a reason, when no MinIO is configured). The `tenants` fixture gives two tenants with keys of different scopes.
+- **Tests:** the integration and e2e tiers need `docker compose up -d postgres valkey`. They create a throwaway database, connect as `gap_app`, use fake LLM and embeddings (`tests/fakes.py`, fake adapters put behind the ports through the registry), and a guard fixture blocks any real network call. `tests/contracts/` runs one suite per port against every adapter; the live SeaweedFS run is `scripts/verify/seaweedfs.sh` (skipped, with a reason, when no live S3 endpoint is configured). The `tenants` fixture gives two tenants with keys of different scopes.
 
 ## Read order
 1. `AGENTS.md`
-2. `planning/STATE.md`
+2. `planning/MAP.md`: the North Star, the feature map, the milestones, agreed decisions and what is happening now. It wins over any older plan.
 3. `planning/DECISIONS.md`
 4. The active sprint pack in `planning/sprints/NNN-slug/`.
 
@@ -93,6 +98,7 @@ The 15 strict rules are in `docs/architecture.md` section 2. Never break one. If
 
 ## Builder autonomy policy
 The Builder works continuously until the sprint is complete. It never pauses to ask for review.
+- **Finish before ending the turn.** Answer progress questions briefly while continuing the work. Do not end with a status-only reply while authorized work or checks remain. Collect long-running results and finish the report before handing off; documented hard stops still require finishing unaffected work.
 - **Write the plan down, then start.** Put a short plan in `build-log.md` and begin straight away.
 - **Fix problems yourself.** Failing tests, import errors, Docker or port issues, missing packages, environment setup and WSL paths are part of the job.
 - **Log as you go.** Append short entries to `build-log.md`: what you did, what broke, how you fixed it.
@@ -109,5 +115,5 @@ A sprint is complete when:
 - Every check in `acceptance.md` has evidence in `evidence/`. This must be captured command output, not hand-written.
 - Lint, typecheck and tests pass with no new failures.
 - Docs are updated in lockstep (see `CONTRIBUTING.md`).
-- `planning/STATE.md` and `CHANGELOG.md` are updated.
+- `planning/MAP.md` (within its size limit) and `CHANGELOG.md` are updated.
 - `report.md` lists the proposed commits.
