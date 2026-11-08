@@ -18,6 +18,7 @@ from ports import Embeddings, KnowledgeStore
 class RetrieverConfig:
     top_k: int = 5
     rrf_k: int = 60
+    # Compatibility names: the keyword leg uses Postgres full-text ts_rank ranking.
     bm25_weight: float = 0.4
     vector_weight: float = 0.6
     mode: str = "hybrid"

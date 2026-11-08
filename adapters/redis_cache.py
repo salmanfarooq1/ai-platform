@@ -1,4 +1,4 @@
-"""Cache and counters on Redis Stack (moved from `api/services/cache.py`, behaviour unchanged).
+"""Cache and counters on Valkey Search, using the Redis wire protocol.
 
 Covers the exact and semantic response cache, the rate limit and daily budget counters, and web sessions.
 Every `redis.RedisError` becomes `CacheUnavailable`, so callers never see the SDK.
@@ -91,8 +91,6 @@ class RedisCache:
                 "TYPE", "FLOAT32",
                 "DIM", str(self._dim),
                 "DISTANCE_METRIC", "COSINE",
-            "response", "TEXT",
-            "query", "TEXT",
             "tenant_id", "TAG",
             "embedding_model", "TAG",
             "namespace", "TAG",
@@ -116,14 +114,14 @@ class RedisCache:
             await self._ft_create()
             logger.info("[cache] Semantic cache index created")
         except ResponseError as e:
-            if "Index already exists" in str(e):
-                info = await self._client.execute_command("FT.INFO", SEMANTIC_INDEX)
+            if "already exists" in str(e).lower():
+                info = await _guard(lambda: self._client.execute_command("FT.INFO", SEMANTIC_INDEX))
                 if "tenant_id" in str(info) and "embedding_model" in str(info):
                     logger.debug("[cache] Semantic cache index already exists, skipping (idempotent)")
                 else:
                     logger.warning("[cache] Semantic cache index lacks a field the queries filter on; recreating it")
-                    await self._client.execute_command("FT.DROPINDEX", SEMANTIC_INDEX)
-                    await self._ft_create()
+                    await _guard(lambda: self._client.execute_command("FT.DROPINDEX", SEMANTIC_INDEX))
+                    await _guard(self._ft_create)
             else:
                 # Real Redis misconfiguration: wrong DIM, unsupported Redis version, etc.
                 logger.error(f"[cache] Unexpected error creating semantic cache index: {e}")
@@ -172,7 +170,6 @@ class RedisCache:
             filter_query,
             "PARAMS", "2", "vec", vec_bytes,
             "RETURN", "3", "response", "score", "query",
-            "SORTBY", "score",
             "DIALECT", "2",
         ))
 

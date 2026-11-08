@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     )
     redis_url: str | None = Field(
         default=None,
-        description="Redis URL. The server needs the RediSearch module. Required outside local mode; local mode defaults to `redis://localhost:6379`.",
+        description="Valkey or Redis URL. The server needs a search module (valkey-search). Required outside local mode; local mode defaults to `redis://localhost:6379`.",
         json_schema_extra={"secret": True},
     )
 
@@ -423,12 +423,12 @@ class Settings(BaseSettings):
 
 
 def _load_env_files() -> None:
-    """Load `.env.local` if present, otherwise `.env` (same precedence as before)."""
+    """Load the selected file without replacing real environment values."""
     env_local = Path(".env.local")
     if env_local.exists():
-        load_dotenv(dotenv_path=".env.local", override=True)
+        load_dotenv(dotenv_path=".env.local", override=False)
     else:
-        load_dotenv()
+        load_dotenv(override=False)
 
 
 @lru_cache(maxsize=1)

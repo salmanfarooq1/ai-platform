@@ -14,7 +14,9 @@ Files checked: README.md, CONTRIBUTING.md, SECURITY.md, CHANGELOG.md and every M
 - Generated blocks (`<!-- BEGIN GENERATED: ... -->`) hold values taken from the code, so they are skipped.
 - Code spans in `docs/adr/` are not checked as paths: an ADR records the code as it was when it was decided.
 """
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -32,9 +34,35 @@ _CODE = re.compile(r"`([^`\n]+)`")
 _PATHLIKE = re.compile(r"^[\w.\-/]+$")
 
 
-def doc_files(root: Path = ROOT) -> list[Path]:
-    files = [root / name for name in TOP_LEVEL if (root / name).exists()]
-    files += sorted((root / "docs").rglob("*.md"))
+def _ignored_paths(root: Path) -> set[Path]:
+    """Ask git once per check. Outside a checkout, ignore nothing."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "--others", "--ignored", "--exclude-standard", "--directory", "-z"],
+            capture_output=True, check=False,
+        )
+    except FileNotFoundError:
+        return set()
+    if result.returncode:
+        return set()
+    return {root / os.fsdecode(name).rstrip("/") for name in result.stdout.split(b"\0") if name}
+
+
+def _walk(root: Path, ignored: set[Path]):
+    skip = {"node_modules", ".git", ".venv", "__pycache__", "dist"}
+    for base, dirs, files in os.walk(root):
+        parent = Path(base)
+        dirs[:] = [d for d in dirs if d not in skip and parent / d not in ignored]
+        for name in dirs + files:
+            path = parent / name
+            if path not in ignored:
+                yield path
+
+
+def doc_files(root: Path = ROOT, ignored: set[Path] | None = None) -> list[Path]:
+    ignored = _ignored_paths(root) if ignored is None else ignored
+    files = [root / name for name in TOP_LEVEL if (root / name).exists() and root / name not in ignored]
+    files += sorted(p for p in _walk(root, ignored) if p.suffix == ".md" and p.is_relative_to(root / "docs"))
     return files
 
 
@@ -55,17 +83,16 @@ def _looks_like_path(span: str, root: Path) -> bool:
     return span.endswith(EXTENSIONS)
 
 
-def _known_names(root: Path) -> set[str]:
-    skip = {"node_modules", ".git", ".venv", "__pycache__", "dist"}
-    return {p.name for p in root.rglob("*") if not skip.intersection(p.relative_to(root).parts)}
+def _known_names(root: Path, ignored: set[Path] | None = None) -> set[str]:
+    return {p.name for p in _walk(root, _ignored_paths(root) if ignored is None else ignored)}
 
 
-def check_file(path: Path, root: Path = ROOT) -> list[str]:
+def check_file(path: Path, root: Path = ROOT, names: set[str] | None = None) -> list[str]:
     """Problems found in one file, as `file: what` lines."""
     text = _strip(path.read_text())
     rel = path.relative_to(root)
     problems: list[str] = []
-    names = _known_names(root)
+    names = _known_names(root) if names is None else names
     for target in _LINK.findall(text):
         if _is_url(target) or target.startswith("#"):
             continue
@@ -85,18 +112,21 @@ def check_file(path: Path, root: Path = ROOT) -> list[str]:
     return problems
 
 
-def check(root: Path = ROOT) -> list[str]:
+def check(root: Path = ROOT, ignored: set[Path] | None = None) -> list[str]:
     problems: list[str] = []
-    for path in doc_files(root):
-        problems += check_file(path, root)
+    ignored = _ignored_paths(root) if ignored is None else ignored
+    names = _known_names(root, ignored)
+    for path in doc_files(root, ignored):
+        problems += check_file(path, root, names)
     return problems
 
 
 def main() -> int:
-    problems = check()
+    ignored = _ignored_paths(ROOT)
+    problems = check(ROOT, ignored)
     for line in problems:
         print(line)
-    print(f"{len(doc_files())} files checked, {len(problems)} problem(s)")
+    print(f"{len(doc_files(ROOT, ignored))} files checked, {len(problems)} problem(s)")
     return 1 if problems else 0
 
 

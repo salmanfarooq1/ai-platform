@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-"""Fail unless every skip in a pytest JUnit XML report is the live-MinIO skip of the object store contract.
+"""Require the exact skips in tests/skip_allowlist.json.
 
-Usage: scripts/check_skips.py REPORT.xml [--expect N]
-
-An allowed skip has all three of:
-  - a test in tests/contracts/test_object_store_contract.py (JUnit classname `tests.contracts.test_object_store_contract`),
-  - the `minio` parameter (`test_x[minio...]`),
-  - the reason `live MinIO not available`.
-Any other skip fails. With --expect N the number of skips must be exactly N, so a changed pattern fails too.
+Usage: scripts/check_skips.py REPORT.xml [--allowlist PATH]
+The optional legacy --expect must agree with the allowlist; it cannot override it.
 """
+import argparse
+import json
 import sys
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
-ALLOWED_CLASS = "tests.contracts.test_object_store_contract"
-ALLOWED_REASON = "live MinIO not available"
+DEFAULT_ALLOWLIST = Path(__file__).resolve().parents[1] / "tests" / "skip_allowlist.json"
 
 
 def skips(report: str) -> list[tuple[str, str, str]]:
@@ -26,31 +23,53 @@ def skips(report: str) -> list[tuple[str, str, str]]:
     return found
 
 
-def is_allowed(classname: str, name: str, reason: str) -> bool:
-    return classname == ALLOWED_CLASS and "[minio" in name and reason.startswith(ALLOWED_REASON)
-
-
-def check(report: str, expect: int | None = None) -> list[str]:
-    """The problems found, empty when the report is clean."""
-    found = skips(report)
-    problems = [f"unexpected skip: {c}::{n} ({r})" for c, n, r in found if not is_allowed(c, n, r)]
-    if expect is not None and len(found) != expect:
-        problems.append(f"expected exactly {expect} live-MinIO skips, found {len(found)} skips")
+def check(report: str, expect: int | None = None, *, allowlist: Path = DEFAULT_ALLOWLIST) -> list[str]:
+    """Missing files, ambiguous matches, unknown skips and count drift all fail."""
+    try:
+        entries = json.loads(allowlist.read_text())
+        if not isinstance(entries, list):
+            raise ValueError("allowlist must be a list")
+        for entry in entries:
+            if not isinstance(entry, dict) or set(entry) != {"classname", "name_contains", "reason_prefix", "count", "why"}:
+                raise ValueError("invalid allowlist entry fields")
+            if any(not isinstance(entry[k], str) or not entry[k].strip() for k in ("classname", "name_contains", "reason_prefix", "why")):
+                raise ValueError("entry strings must be nonempty")
+            if type(entry["count"]) is not int or entry["count"] < 1:
+                raise ValueError("entry count must be a positive integer")
+        found = skips(report)
+    except (OSError, ValueError, ET.ParseError) as exc:
+        return [f"skip check failed: {exc}"]
+    expected = sum(e["count"] for e in entries)
+    problems = []
+    if expect is not None and expect != expected:
+        problems.append(f"--expect {expect} disagrees with allowlist count {expected}")
+    counts = [0] * len(entries)
+    for classname, name, reason in found:
+        matches = [i for i, e in enumerate(entries) if classname == e["classname"] and e["name_contains"] in name and reason.startswith(e["reason_prefix"])]
+        if len(matches) != 1:
+            problems.append(f"unexpected or ambiguous skip: {classname}::{name} ({reason})")
+        else:
+            counts[matches[0]] += 1
+    for entry, count in zip(entries, counts):
+        if count != entry["count"]:
+            problems.append(f"expected exactly {entry['count']} skips for {entry['classname']} {entry['name_contains']}, found {count}")
+    if len(found) != expected:
+        problems.append(f"expected exactly {expected} total skips, found {len(found)}")
     return problems
 
 
 def main(argv: list[str]) -> int:
-    if not argv or argv[0].startswith("-"):
-        print(__doc__)
-        return 2
-    expect = int(argv[argv.index("--expect") + 1]) if "--expect" in argv else None
-    problems = check(argv[0], expect)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("report")
+    parser.add_argument("--allowlist", type=Path, default=DEFAULT_ALLOWLIST)
+    parser.add_argument("--expect", type=int, help=argparse.SUPPRESS)
+    args = parser.parse_args(argv)
+    problems = check(args.report, args.expect, allowlist=args.allowlist)
     for problem in problems:
         print(problem)
     if problems:
-        print("Integration/e2e tests were skipped. Failing the job.")
         return 1
-    print(f"skip check ok: {len(skips(argv[0]))} allowed live-MinIO skips")
+    print(f"skip check ok: {len(skips(args.report))} allowed skips")
     return 0
 
 

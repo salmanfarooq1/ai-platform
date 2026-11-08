@@ -21,9 +21,8 @@ from core.identity.models import Scope
 from gateway import Action, ActionKind, GatewayDenied
 from gateway.estimate import estimate_tokens
 
-logger = logging.getLogger("api.mcp.tools")
-
 MAX_CHUNK_PREVIEW_LENGTH = 800
+logger = logging.getLogger(__name__)
 
 
 _UNAUTHENTICATED = json.dumps({"error": "unauthenticated", "reason": "No authenticated principal in this MCP session"})
@@ -53,9 +52,9 @@ async def list_namespaces() -> str:
     visible = ctx.boundary.visible_kbs()
     try:
         return json.dumps({k: v for k, v in (await adapters.knowledge.list_knowledge_bases(tenant_id)).items() if visible is None or k in visible}, indent=2)
-    except Exception as e:
-        logger.error("[mcp/list_namespaces] %s", e)
-        return json.dumps({"error": str(e)})
+    except Exception as exc:
+        logger.warning("MCP tool %s failed with %s", "list_namespaces", type(exc).__name__)
+        raise RuntimeError("MCP operation failed") from None
 
 
 @mcp.tool()
@@ -142,9 +141,9 @@ async def search_documents(
 
         return json.dumps({"count": len(results), "chunks": results}, indent=2)
 
-    except Exception as e:
-        logger.error("[mcp/search] %s", e)
-        return json.dumps({"error": str(e)})
+    except Exception as exc:
+        logger.warning("MCP tool %s failed with %s", "search_documents", type(exc).__name__)
+        raise RuntimeError("MCP operation failed") from None
 
 
 @mcp.tool()
@@ -253,9 +252,9 @@ async def get_ingestion_status(
         )
         return result.model_dump_json(indent=2)
 
-    except Exception as e:
-        logger.error("[mcp/ingestion_status] %s", e)
-        return json.dumps({"error": str(e)})
+    except Exception as exc:
+        logger.warning("MCP tool %s failed with %s", "get_document_status", type(exc).__name__)
+        raise RuntimeError("MCP operation failed") from None
 
 
 @mcp.tool()
@@ -313,6 +312,6 @@ async def get_cost_summary(
 
         return json.dumps({"days": d, "breakdown": result}, indent=2)
 
-    except Exception as e:
-        logger.error("[mcp/cost_summary] %s", e)
-        return json.dumps({"error": str(e)})
+    except Exception as exc:
+        logger.warning("MCP tool %s failed with %s", "get_cost_summary", type(exc).__name__)
+        raise RuntimeError("MCP operation failed") from None

@@ -15,7 +15,7 @@ from core.database.tenant import tenant_connection
 from core.identity.models import Scope
 from gateway import Action, ActionKind
 
-logger = logging.getLogger("api.mcp.resources")
+logger = logging.getLogger(__name__)
 
 
 @mcp.resource("rag://config/namespaces")
@@ -33,9 +33,9 @@ async def resource_namespaces() -> str:
     try:
         knowledge_bases = await adapters.knowledge.list_knowledge_bases(tenant_id)
         return json.dumps({slug: description for slug, description in knowledge_bases.items() if visible is None or slug in visible}, indent=2)
-    except Exception as e:
-        logger.error("[mcp/resource_namespaces] %s", e)
-        return json.dumps({"error": str(e)})
+    except Exception as exc:
+        logger.warning("MCP resource %s failed with %s", "resource_namespaces", type(exc).__name__)
+        raise RuntimeError("MCP operation failed") from None
 
 
 @mcp.resource("rag://config/features")
@@ -79,6 +79,6 @@ async def resource_document(namespace: str, document_id: str) -> str:
         ]
         return json.dumps({"document_id": document_id, "namespace": namespace, "chunks": chunks}, indent=2)
 
-    except Exception as e:
-        logger.error("[mcp/resource_document] %s", e)
-        return json.dumps({"error": str(e)})
+    except Exception as exc:
+        logger.warning("MCP resource %s failed with %s", "resource_document", type(exc).__name__)
+        raise RuntimeError("MCP operation failed") from None

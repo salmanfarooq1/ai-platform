@@ -43,6 +43,7 @@ class PgKnowledgeStore:
     async def search_bm25(
         self, tenant_id: UUID, query: str, namespace: str, limit: int, *, embedding_model: str, embedding_dim: int
     ) -> list[Hit]:
+        # Compatibility name: this is Postgres full-text ts_rank, not true BM25.
         word_count = len(query.split())
         use_or_mode = word_count >= BM25_OR_THRESHOLD
 
@@ -80,7 +81,7 @@ class PgKnowledgeStore:
                 "document_id": r["document_id"],
                 "content": r["content"],
                 "metadata": meta,
-                "bm25_score": r["bm25_score"],
+                "bm25_score": r["bm25_score"],  # Public compatibility key for ts_rank.
                 "source_filename": meta.get("source_filename"),
             })
         return results
