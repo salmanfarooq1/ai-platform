@@ -32,6 +32,7 @@ import binascii
 import hashlib
 import json
 import sys
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -40,9 +41,28 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 ALG = "Ed25519"
+RECORD_FIELDS = (
+    "id", "tenant_id", "principal_id", "request_id", "action", "resource", "outcome", "stage", "reason",
+    "policy_version", "input_sha256", "execution_id", "created_at",
+)
 
 
-# ----------------------------------------------------------------------------- the same rules as gateway/chain.py
+# ----------------------------------------------------------------------------- the same rules as evidence/chain.py
+
+def _versioned(record: dict[str, Any], version: Any, extensions: Any) -> dict[str, Any]:
+    if type(version) is not int or version not in (1, 2):
+        raise ValueError("unsupported decision record version")
+    if not isinstance(extensions, Mapping):
+        raise ValueError("extensions must be a JSON object")
+    if version == 1 and extensions:
+        raise ValueError("version 1 cannot carry unsigned extensions")
+    # The reviewed registry is empty in Sprint 012, in both the server and this
+    # standalone verifier. A later registered schema must update both verifiers.
+    if extensions:
+        raise ValueError("extension key is not registered")
+    if version == 2:
+        record.update(record_version=2, extensions={})
+    return record
 
 def format_time(value: Any) -> str:
     moment = value if isinstance(value, datetime) else datetime.fromisoformat(str(value).replace("Z", "+00:00"))
@@ -58,7 +78,7 @@ def _text(value: Any) -> str | None:
 def decision_record(decision: dict[str, Any]) -> dict[str, Any]:
     """The record that is hashed, from a receipt's `decision` object (the console's decision detail)."""
     principal = decision.get("principal")
-    return {
+    record = {
         "id": str(decision["id"]), "tenant_id": str(decision["tenant"]["id"]),
         "principal_id": _text((principal or {}).get("id")), "request_id": decision["request_id"],
         "action": decision["action"], "resource": decision.get("resource"), "outcome": decision["outcome"],
@@ -66,6 +86,20 @@ def decision_record(decision: dict[str, Any]) -> dict[str, Any]:
         "input_sha256": decision.get("input_sha256"), "execution_id": _text(decision.get("execution_id")),
         "created_at": format_time(decision["created_at"]),
     }
+    return _versioned(record, decision.get("record_version", 1), decision.get("extensions", {}))
+
+
+def normalize_record(value: Mapping[str, Any]) -> dict[str, Any]:
+    """Project the signed fields rather than hashing API defaults into old rows."""
+    if set(value) - {*RECORD_FIELDS, "record_version", "extensions"}:
+        raise ValueError("unsupported canonical decision field")
+    record = {key: value[key] for key in RECORD_FIELDS}
+    for key in ("id", "tenant_id"):
+        record[key] = str(record[key])
+    for key in ("principal_id", "execution_id"):
+        record[key] = _text(record[key])
+    record["created_at"] = format_time(record["created_at"])
+    return _versioned(record, value.get("record_version", 1), value.get("extensions", {}))
 
 
 def canonical_json(value: Any) -> str:
@@ -96,7 +130,7 @@ def verify_receipt(receipt: dict[str, Any], keys: dict[str, bytes]) -> list[tupl
             "decision": record,
         })
         prev_hash, row_hash, parsed = str(chain["prev_hash"]), str(chain["row_hash"]), True
-    except (KeyError, TypeError, ValueError, AttributeError):
+    except (KeyError, TypeError, ValueError, AttributeError, RecursionError):
         record, rebuilt, prev_hash, row_hash, parsed = {}, "", "", "", False
     alg = receipt.get("alg")
     checks.append(("alg", alg == ALG, f"algorithm {alg}" if alg == ALG else f"algorithm {alg!r} is not {ALG}"))
@@ -113,10 +147,13 @@ def verify_receipt(receipt: dict[str, Any], keys: dict[str, bytes]) -> list[tupl
             Ed25519PublicKey.from_public_bytes(raw).verify(
                 base64.b64decode(str(receipt.get("signature")), validate=True), canonical.encode("utf-8"))
             ok, detail = True, "the signature is valid"
-        except (InvalidSignature, binascii.Error, ValueError):
+        except (InvalidSignature, binascii.Error, ValueError, TypeError):
             detail = "the signature does not match the signed text"
     checks.append(("signature", ok, detail))
-    hash_ok = parsed and row_hash_of(record, prev_hash) == row_hash
+    try:
+        hash_ok = parsed and row_hash_of(record, prev_hash) == row_hash
+    except (TypeError, ValueError):
+        hash_ok = False
     checks.append(("row_hash", hash_ok, "the row hash is the hash of the decision and the previous hash" if hash_ok
                    else "the row hash does not match the decision and the previous hash"))
     return checks
@@ -182,11 +219,14 @@ def verify_chain(export: dict[str, Any], keys: dict[str, bytes] | None = None) -
     previous = rows[0]
     for row in rows:
         position = int(row["position"])
-        record = dict(row["decision"])
-        record["created_at"] = format_time(record["created_at"])
-        if str(record.get("tenant_id")) != tenant:
-            bad_hash.append(f"position {position}: the decision belongs to another tenant")
-        if row_hash_of(record, row["prev_hash"]) != row["row_hash"]:
+        try:
+            record = normalize_record(row["decision"])
+            if str(record.get("tenant_id")) != tenant:
+                bad_hash.append(f"position {position}: the decision belongs to another tenant")
+            hash_ok = row_hash_of(record, row["prev_hash"]) == row["row_hash"]
+        except (KeyError, TypeError, ValueError, AttributeError, RecursionError):
+            hash_ok = False
+        if not hash_ok:
             bad_hash.append(f"position {position}: the row hash does not match its record")
         if row is not rows[0]:
             if position != int(previous["position"]) + 1:
@@ -213,15 +253,16 @@ def export_from_database(dsn: str, tenant: str) -> dict[str, Any]:
             checkpoints = [{"position": p, "row_hash": h, "reason": r, "signature": sg, "key_id": k} for p, h, r, sg, k in cur.fetchall()]
             cur.execute(
                 "SELECT chain_position, prev_hash, row_hash, id, tenant_id, principal_id, request_id, action, resource, outcome, "
-                "stage, reason, policy_version, input_hash, execution_id, created_at FROM gateway_decisions "
+                "stage, reason, policy_version, input_hash, execution_id, created_at, record_version, extensions FROM gateway_decisions "
                 "WHERE tenant_id = %s AND chain_position IS NOT NULL ORDER BY chain_position", (tenant,))
             rows = []
             for (position, prev_hash, row_hash, did, tid, pid, rid, action, resource, outcome, stage, reason, version,
-                 input_hash, execution_id, created_at) in cur.fetchall():
-                rows.append({"position": position, "prev_hash": prev_hash, "row_hash": row_hash, "decision": {
+                 input_hash, execution_id, created_at, record_version, extensions) in cur.fetchall():
+                rows.append({"position": position, "prev_hash": prev_hash, "row_hash": row_hash, "decision": normalize_record({
                     "id": str(did), "tenant_id": str(tid), "principal_id": _text(pid), "request_id": rid, "action": action,
                     "resource": resource, "outcome": outcome, "stage": stage, "reason": reason, "policy_version": version,
-                    "input_sha256": input_hash, "execution_id": _text(execution_id), "created_at": format_time(created_at)}})
+                    "input_sha256": input_hash, "execution_id": _text(execution_id), "created_at": format_time(created_at),
+                    "record_version": record_version, "extensions": extensions})})
     finally:
         conn.close()
     return {"tenant_id": tenant, "checkpoints": checkpoints, "rows": rows}

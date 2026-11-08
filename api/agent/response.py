@@ -17,9 +17,8 @@ from api.services.usage import record_usage as log_usage
 from config import MODEL_PRICING
 from core.database.tenant import DbPool, tenant_connection
 from core.pricing import rates_for
-from gateway import EnforcementContext, GatewayRuntime
-from gateway.limits import record_cost
-from gateway.limits import record_usage as book_tokens
+from gateway import EnforcementContext, GatewayRuntime, record_cost
+from gateway import record_usage as book_tokens
 
 logger = logging.getLogger("api.agent.response")
 

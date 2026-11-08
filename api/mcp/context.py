@@ -57,7 +57,9 @@ async def gate(*actions: Action) -> EnforcementContext:
     if principal is None or pool is None or adapters is None:
         raise RuntimeError("gate() needs a session principal, a pool and adapters")  # callers check them first
     ctx = await build_context(
-        GatewayRuntime(pool, adapters.cache, adapters.events), principal, current_request_id(), current_trace_id())
+        GatewayRuntime(pool, adapters.cache, decisions=adapters.decisions,
+                       enabled_modules=mcp._dependency_overrides.get("app_context", {}).get("enabled_modules", frozenset()),
+                       events=adapters.events), principal, current_request_id(), current_trace_id())
     for action in actions:
         await require(ctx, action)
     return ctx

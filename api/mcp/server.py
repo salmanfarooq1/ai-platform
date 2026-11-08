@@ -12,8 +12,7 @@ from typing import Any
 from mcp.server import MCPServer
 from mcp.server.mcpserver.exceptions import ResourceError, ToolError
 
-from gateway import GatewayDenied
-from gateway.reasons import REASONS
+from gateway import REASONS, GatewayDenied
 
 
 def _expected_errors(fn: Callable[..., Awaitable[Any]], error_type: type[ToolError] | type[ResourceError]):

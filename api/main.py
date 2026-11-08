@@ -5,18 +5,14 @@ from typing import Any
 
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.routing import Route
 
 from adapters.registry import build_adapters
-from api.agent.graph import build_agent_graph
-from api.agent.router import router as agent_router
-from api.agent.runner import make_agent_runner
 from api.errors import register_exception_handlers
-from api.mcp.transport import handle_messages, handle_sse, init_mcp_context
 from api.middleware.auth import AuthMiddleware
 from api.middleware.finops import FinOpsMiddleware
 from api.middleware.logging import LatencyMiddleware, LoggingMiddleware, RequestIDMiddleware
 from api.middleware.metrics import MetricsMiddleware
+from api.module_routes import mount_optional_routes
 from api.observability import setup_logging, setup_tracing
 from api.routers.analytics import router as analytics_router
 from api.routers.config import router as config_router
@@ -27,21 +23,21 @@ from api.routers.health import router as health_router
 from api.routers.ingest import router as ingest_router
 from api.routers.jobs import router as jobs_router
 from api.routers.receipts import router as receipts_router
-from api.routers.sandbox import router as sandbox_router
 from api.routers.search import router as search_router
+from api.routers.system import router as system_router
 from api.routers.trust import metrics_router
 from api.routers.trust import router as trust_router
 from api.versioning import API_PREFIX
 from api.web_edge.routes import router as session_router
 from config import MODEL_PRICING
 from core.database.pool import create_pool
+from core.identity.deploy_shape import assert_deploy_shape
 from core.identity.jwt import JwtVerifier
 from core.pricing import check_priced
 from core.settings import get_settings
+from evidence.receipts import keyring_from_settings
 from gateway import GatewayRuntime
-from gateway.receipts import keyring_from_settings
 from ports import SandboxDriver
-from workers.embedded import start_embedded
 
 setup_logging()
 logger = logging.getLogger("api.main")
@@ -58,30 +54,41 @@ def _lifespan(
         # A hosted mode refuses to start when a model it may call has no price (an unpriced model would dodge the cost cap).
         check_priced(MODEL_PRICING, settings.mode, [settings.llm_model, settings.embed_model, *settings.embed_fallbacks])
         app.state.db_pool = await create_pool()
+        await assert_deploy_shape(app.state.db_pool, settings.deploy_shape)
         app.state.jwt_verifier = JwtVerifier.from_settings(settings)
         # The composition root: one adapter per port, built from Settings (adapters/registry.py). The runtime's
         # runner reads the agent graph from app.state, because the graph itself is built from these adapters.
-        app.state.adapters = build_adapters(
-            settings, pool=app.state.db_pool, agent_runner=make_agent_runner(lambda: app.state.agent_graph),
-            overrides=adapter_overrides,
-        )
+        runner = None
+        if "agents" in settings.enabled_module_names:
+            from api.agent.runner import make_agent_runner
+
+            runner = make_agent_runner(lambda: app.state.agent_graph)
+        app.state.adapters = build_adapters(settings, pool=app.state.db_pool, agent_runner=runner, overrides=adapter_overrides)
         adapters = app.state.adapters
-        app.state.agent_graph = build_agent_graph(adapters)
+        app.state.agent_graph = None
+        if "agents" in settings.enabled_module_names:
+            from api.agent.graph import build_agent_graph
+            from api.mcp.transport import init_mcp_context
+
+            app.state.agent_graph = build_agent_graph(adapters)
+            init_mcp_context(app.state.db_pool, adapters, settings.enabled_module_names)
         app.state.receipt_keys = keyring_from_settings(settings)
-        app.state.gateway_runtime = GatewayRuntime(pool=app.state.db_pool, cache=adapters.cache, events=adapters.events)
+        app.state.gateway_runtime = GatewayRuntime(pool=app.state.db_pool, cache=adapters.cache, decisions=adapters.decisions, enabled_modules=settings.enabled_module_names, events=adapters.events)
+        app.state.deploy_shape = settings.deploy_shape
         await adapters.cache.ensure_semantic_index()
-        init_mcp_context(app.state.db_pool, adapters)
         # One-process hosting and tests: workers and the outbox relay inside this process (EMBEDDED_WORKERS).
         n_workers = settings.embedded_workers if embedded_workers is None else embedded_workers
         with_relay = settings.embedded_relay if embedded_relay is None else embedded_relay
         embedded = app.state.embedded = None
         if n_workers > 0 or with_relay:
+            from workers.embedded import start_embedded
+
             embedded = start_embedded(
                 settings, app.state.db_pool, adapters, app.state.gateway_runtime, app.state.agent_graph,
                 workers=n_workers, relay=with_relay, keyring=app.state.receipt_keys, sandbox_driver=sandbox_driver,
             )
             app.state.embedded = embedded
-        logger.info("startup complete: DB pool, adapters, agent graph, semantic cache, MCP context ready")
+        logger.info("startup complete: enabled modules %s", ",".join(sorted(settings.enabled_module_names)))
 
         yield
 
@@ -163,7 +170,6 @@ def create_app(
     v1.include_router(ingest_router)
     v1.include_router(jobs_router)
     v1.include_router(search_router)
-    v1.include_router(agent_router)
     v1.include_router(config_router)
     v1.include_router(analytics_router)
     v1.include_router(docs_router)
@@ -172,16 +178,12 @@ def create_app(
     v1.include_router(console_router)
     v1.include_router(receipts_router)
     v1.include_router(trust_router)
-    v1.include_router(sandbox_router)
+    v1.include_router(system_router)
     app.include_router(v1)
     app.include_router(metrics_router)  # `/metrics`, unversioned like `/health`: Prometheus expects it there
-
-    # SseServerTransport.handle_post_message is a raw ASGI app, not a FastAPI
-    # endpoint function. It must be mounted directly, not registered as an
-    # APIRouter route. app.mount() hands the matching requests directly to the
-    # ASGI callable, bypassing FastAPI's request/response lifecycle entirely.
-    app.mount(f"{API_PREFIX}/mcp/messages", handle_messages)
-    app.router.routes.append(Route(f"{API_PREFIX}/mcp/sse", endpoint=handle_sse, methods=["GET"]))
+    app.state.enabled_modules = settings.enabled_module_names
+    app.state.deploy_shape = settings.deploy_shape
+    mount_optional_routes(app, settings.enabled_module_names)
 
     # Last: OpenTelemetry wraps the whole app. No exporter unless OTEL_EXPORTER_OTLP_ENDPOINT is set.
     setup_tracing(app)

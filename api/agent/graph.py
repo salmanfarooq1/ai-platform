@@ -19,8 +19,7 @@ from langgraph.prebuilt import ToolNode
 from api.agent.models import AGENT_MAX_TOKENS, VERIFIER_MAX_TOKENS
 from api.agent.tools import gateway_from_config, make_list_namespaces_tool, make_retrieve_tool
 from config import FEATURES, LLM_CONFIG
-from gateway import Action, ActionKind, EnforcementContext, enforce
-from gateway.estimate import estimate_tokens
+from gateway import Action, ActionKind, EnforcementContext, enforce, estimate_tokens
 from ports import Adapters
 
 logger = logging.getLogger("api.agent.graph")

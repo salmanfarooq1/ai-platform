@@ -14,6 +14,7 @@ from adapters.registry import build_adapters
 from api.observability import setup_logging
 from config import MODEL_PRICING
 from core.database.pool import create_pool
+from core.identity.deploy_shape import assert_deploy_shape
 from core.pricing import check_priced
 from core.settings import get_settings
 from gateway import GatewayRuntime
@@ -29,8 +30,9 @@ async def main(concurrency: int | None, relay_enabled: bool) -> int:
     slots = concurrency or settings.worker_concurrency
     check_priced(MODEL_PRICING, settings.mode, [settings.llm_model, settings.embed_model, *settings.embed_fallbacks])
     pool = await create_pool()
+    await assert_deploy_shape(pool, settings.deploy_shape)
     adapters = build_adapters(settings, pool=pool)
-    gateway_runtime = GatewayRuntime(pool=pool, cache=adapters.cache, events=adapters.events)
+    gateway_runtime = GatewayRuntime(pool=pool, cache=adapters.cache, decisions=adapters.decisions, enabled_modules=settings.enabled_module_names, events=adapters.events)
     await adapters.cache.ensure_semantic_index()
     handlers = build_handlers(adapters, pool, gateway_runtime, settings=settings)
     worker = make_worker(settings, pool, handlers, adapters.events, health_file=settings.worker_health_file)

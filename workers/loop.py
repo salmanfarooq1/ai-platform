@@ -103,7 +103,7 @@ class Worker:
     async def _slot(self, slot_id: str) -> None:
         while not self._stopping.is_set():
             try:
-                claimed = await jobs.claim(self._pool, slot_id, self._lease)
+                claimed = await jobs.claim(self._pool, slot_id, self._lease, tuple(sorted(self._handlers)))
             except Exception:
                 logger.error("job claim failed, retrying", exc_info=True)
                 await self._sleep(max(self._poll, 1.0))

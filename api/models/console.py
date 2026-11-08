@@ -1,6 +1,6 @@
 """Response models of the governance console endpoints (all read-only, tenant-scoped, `audit:read`)."""
 from datetime import date, datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -40,6 +40,8 @@ class DecisionSummary(BaseModel):
 class DecisionDetail(DecisionSummary):
     tenant: TenantRef
     input_sha256: str | None
+    record_version: int
+    extensions: dict[str, Any]
     # Every decision with the same request_id, oldest first, at most 200.
     trace: list[DecisionSummary]
 

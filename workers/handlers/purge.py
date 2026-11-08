@@ -12,7 +12,7 @@ from collections.abc import Callable
 
 from core.database.jobs import JobRow
 from core.database.tenant import tenant_connection
-from gateway.receipts import checkpoint_text
+from evidence.receipts import checkpoint_text
 from ports import DECISIONS_PURGED, CloudEvent, EventBus
 from workers.types import Handler, JobContext, JobOutput
 

@@ -12,8 +12,6 @@ the MCP endpoints are raw ASGI apps: the session needs `query` or `kb:read` here
 import logging
 
 from fastapi import Request
-from mcp.server.auth.middleware.bearer_auth import AuthenticatedUser
-from mcp.server.auth.provider import AccessToken
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from api.auth import record_run_token_denial
@@ -126,7 +124,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
             # The MCP SSE transport binds a session to the credential that opened it and answers 404 to
             # any other caller of that session. It reads `scope["user"]` for that. The token itself is
             # deliberately not carried over: the principal and tenant ids identify the credential.
-            request.scope["user"] = AuthenticatedUser(AccessToken(
-                token="", client_id=str(principal.id), subject=str(principal.tenant_id), scopes=sorted(principal.scopes),
-            ))
+            runtime = getattr(request.app.state, "gateway_runtime", None)
+            if runtime is not None and "agents" in runtime.enabled_modules and getattr(request.app.state, "mcp_mounted", False):
+                from mcp.server.auth.middleware.bearer_auth import AuthenticatedUser
+                from mcp.server.auth.provider import AccessToken
+
+                request.scope["user"] = AuthenticatedUser(AccessToken(
+                    token="", client_id=str(principal.id), subject=str(principal.tenant_id), scopes=sorted(principal.scopes),
+                ))
         return await call_next(request)

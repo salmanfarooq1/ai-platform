@@ -18,8 +18,7 @@ from api.services.retriever import RetrieverConfig, retrieve
 from config import FEATURES, LLM_CONFIG
 from core.database.tenant import tenant_connection
 from core.identity.models import Scope
-from gateway import Action, ActionKind, GatewayDenied
-from gateway.estimate import estimate_tokens
+from gateway import Action, ActionKind, GatewayDenied, estimate_tokens
 
 MAX_CHUNK_PREVIEW_LENGTH = 800
 logger = logging.getLogger(__name__)

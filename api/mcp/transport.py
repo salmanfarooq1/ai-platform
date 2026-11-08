@@ -29,8 +29,7 @@ from api.observability import current_request_id, current_trace_id
 from api.versioning import API_PREFIX
 from core.database.tenant import DbPool
 from core.identity.models import Principal
-from gateway import Action, ActionKind, Decision, GatewayRuntime, build_context, enforce
-from gateway.limits import LIMITED_PATHS
+from gateway import LIMITED_PATHS, Action, ActionKind, Decision, GatewayRuntime, build_context, enforce
 from ports import Adapters
 
 logger = logging.getLogger("api.mcp.transport")
@@ -38,13 +37,13 @@ logger = logging.getLogger("api.mcp.transport")
 sse_transport = SseServerTransport(f"{API_PREFIX}/mcp/messages/")
 
 
-def init_mcp_context(pool: DbPool, adapters: Adapters) -> None:
+def init_mcp_context(pool: DbPool, adapters: Adapters, enabled_modules: frozenset[str]) -> None:
     """Inject shared app resources into MCP server context.
 
     Called once during FastAPI lifespan startup, after the DB pool and the ports are created. Tools read
     from this dict via mcp._dependency_overrides["app_context"].
     """
-    mcp._dependency_overrides["app_context"] = {"pool": pool, "adapters": adapters}
+    mcp._dependency_overrides["app_context"] = {"pool": pool, "adapters": adapters, "enabled_modules": enabled_modules}
     logger.info("[mcp] Context initialized with DB pool and adapters")
 
 
@@ -80,7 +79,8 @@ class SseApp:
             return
         # Opening a session counts against the principal's rate limit, as it did in the middleware.
         ctx = await build_context(
-            GatewayRuntime(pool, adapters.cache, adapters.events), principal, current_request_id(), current_trace_id(),
+            GatewayRuntime(pool, adapters.cache, decisions=adapters.decisions, enabled_modules=mcp._dependency_overrides["app_context"]["enabled_modules"], events=adapters.events), principal, current_request_id(), current_trace_id(),
+            required_module="agents",
         )
         decision = await enforce(ctx, Action(ActionKind.KB_READ, rate=scope.get("path") in LIMITED_PATHS))
         if not decision.allowed:

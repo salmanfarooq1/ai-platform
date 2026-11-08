@@ -16,9 +16,9 @@ from api.models.trust import Receipt, ReceiptChain, ReceiptKey, VerifyCheck, Ver
 from api.routers.console import fetch_decision_detail, get_db_pool
 from core.database.tenant import DbPool, tenant_connection
 from core.identity.models import Principal, Scope
+from evidence.chain import compute_row_hash
+from evidence.receipts import Keyring, record_of, sign_receipt, verify_receipt
 from gateway import Action, ActionKind, EnforcementContext, require
-from gateway.chain import compute_row_hash
-from gateway.receipts import Keyring, record_of, sign_receipt, verify_receipt
 
 router = APIRouter(tags=["receipts"])
 logger = logging.getLogger("api.receipts")

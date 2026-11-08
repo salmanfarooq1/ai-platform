@@ -1,7 +1,7 @@
 #!/bin/bash
 # Strict rule 7: schema changes only through migrations.
 # Fails if CREATE TABLE or ALTER TABLE appears in a .py or .sql file outside migrations/.
-# Scanned: api/ core/ workers/ config.py tests/ scripts/ under the given root (default: repo root).
+# Scanned: every shipped Python package plus tests/ and scripts/ under the given root (default: repo root).
 # Allowed (exact paths, relative to the root):
 #   - tests/integration/fixtures/legacy_schema.sql: a frozen copy of the pre-Alembic schema,
 #     used only to prove the baseline migration matches it.
@@ -12,7 +12,7 @@ ROOT="${1:-.}"
 cd "$ROOT"
 hits=$(grep -rniE "CREATE[[:space:]]+TABLE|ALTER[[:space:]]+TABLE" \
   --include='*.py' --include='*.sql' \
-  api core workers config.py tests scripts 2>/dev/null \
+  api core gateway ports adapters workers sandbox_agent evidence config.py tests scripts 2>/dev/null \
   | grep -v '^tests/integration/fixtures/legacy_schema\.sql:' \
   | grep -v '^scripts/labs/' || true)
 if [ -n "$hits" ]; then

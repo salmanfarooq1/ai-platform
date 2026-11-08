@@ -34,8 +34,7 @@ from core.database.jobs import JobRow
 from core.database.tenant import DbConnection, tenant_connection
 from core.identity.models import Principal, Scope
 from core.settings import get_settings
-from gateway import Action, ActionKind, EnforcementContext, require
-from gateway.estimate import estimate_tokens
+from gateway import Action, ActionKind, EnforcementContext, estimate_tokens, require
 from ports import RunSpec, RunState
 
 logger = logging.getLogger("api.agent")

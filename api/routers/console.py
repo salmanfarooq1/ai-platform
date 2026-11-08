@@ -4,6 +4,7 @@ Every route is GET, needs the `audit:read` scope (`admin` holds it), calls `requ
 itself leaves a decision row, and queries through `tenant_connection` so row-level security applies. Nothing
 here returns a key hash, a secret or any part of a key after its prefix.
 """
+import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Literal
 from uuid import UUID
@@ -54,7 +55,8 @@ TRACE_CAP = 200
 
 _DECISION_COLUMNS = """
     d.id, d.created_at, d.request_id, d.principal_id, p.name AS principal_name,
-    d.action, d.resource, d.outcome, d.stage, d.reason, d.policy_version, d.execution_id
+    d.action, d.resource, d.outcome, d.stage, d.reason, d.policy_version, d.execution_id,
+    d.record_version, d.extensions
 """
 _DECISION_FROM = "FROM gateway_decisions d LEFT JOIN principals p ON p.id = d.principal_id"
 
@@ -166,7 +168,8 @@ async def fetch_decision_detail(pool: DbPool, owner_id: UUID, wanted: UUID) -> D
     trace = await with_run_status(pool, owner_id, [_summary(r) for r in trace_rows])
     return DecisionDetail(
         **base.model_dump(), tenant=TenantRef(id=tenant["id"], slug=tenant["slug"]),
-        input_sha256=row["input_hash"], trace=trace,
+        input_sha256=row["input_hash"], trace=trace, record_version=row["record_version"],
+        extensions=json.loads(row["extensions"]) if isinstance(row["extensions"], str) else row["extensions"],
     )
 
 

@@ -9,8 +9,7 @@ from api.auth import KB_NOT_FOUND_MESSAGE
 from api.services.embedding import embed_query
 from api.services.retriever import RetrieverConfig, retrieve
 from config import FEATURES, LLM_CONFIG
-from gateway import Action, ActionKind, EnforcementContext, enforce
-from gateway.estimate import estimate_tokens
+from gateway import Action, ActionKind, EnforcementContext, enforce, estimate_tokens
 from ports import Adapters
 
 logger = logging.getLogger("api.agent.tools")

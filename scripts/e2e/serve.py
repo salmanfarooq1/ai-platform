@@ -1,6 +1,7 @@
 """Start the real app for the cross-stack Playwright tests, built by the adapter registry with the LLM and embedding fakes.
 
     poetry run python scripts/e2e/serve.py [--port 8000] [--state-dir ui/e2e/.state] [--preview]
+        [--enabled-modules gateway,agents]
 
 What it does, in order:
 1. Creates a throwaway Postgres database, migrates it, and seeds one tenant with two knowledge bases, one
@@ -13,7 +14,7 @@ What it does, in order:
    in this script; the product code has no fake switch. On exit the throwaway database is dropped.
 
 5. Runs the eval gate once and records it in `eval_runs`, so the Trust page has a real history to show.
-6. Makes two sandboxed agent runs (Sprint 009) so the Agent runs page has sandbox events to show. They run through the real
+6. When the `agents` module is enabled, makes two sandboxed agent runs (Sprint 009) so the Agent runs page has sandbox events to show. They run through the real
    `AGENT_RUNTIME=openshell` runtime, run tokens and gateway routes, but the sandbox is `FakeSandboxDriver`
    (tests/fake_sandbox.py): no real sandbox runs here. One run finishes cleanly. In the other the sandbox refuses a
    direct call to a model provider and a read outside the work directory. The serving app uses the default runtime.
@@ -27,6 +28,7 @@ import asyncio
 import atexit
 import json
 import os
+import secrets
 import signal
 import sys
 from pathlib import Path
@@ -54,7 +56,7 @@ def seed(owner_dsn: str) -> dict[str, str]:
     from gateway.admin import set_policy
 
     with admin_connection(owner_dsn) as conn:
-        create_tenant(conn, TENANT_SLUG, "E2E tenant", default_kb=False)
+        create_tenant(conn, TENANT_SLUG, "E2E tenant", default_kb=False, deploy_shape="multi_tenant")
         create_kb(conn, TENANT_SLUG, ALLOWED_KB, "General documents")
         create_kb(conn, TENANT_SLUG, DENIED_KB, "Legal documents")
         principal_id = create_principal(conn, TENANT_SLUG, "user", "e2e-user")
@@ -177,25 +179,37 @@ async def seed_sandbox_runs(owner_dsn: str, seeded: dict[str, str]) -> dict[str,
 
 
 def sweep_leftover_databases() -> None:
-    """Drop `gap_e2e_*` databases a killed earlier run left behind.
+    """Drop `gap_e2e_*` databases whose owning server no longer holds its lease."""
+    import psycopg2
 
-    Playwright stops this server with SIGKILL, so the atexit drop never runs. A database that still has a
-    connection belongs to a server that is running now (the preview and normal servers start together), so it is kept.
+    conn = psycopg2.connect(harness.ADMIN_URL)
+    conn.autocommit = True
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT datname FROM pg_database WHERE datname LIKE 'gap\\_e2e\\_%'")
+            candidates = [row[0] for row in cur.fetchall()]
+            for name in candidates:
+                cur.execute("SELECT pg_try_advisory_lock(hashtextextended(%s, 0))", (name,))
+                acquired = cur.fetchone()[0]
+                if acquired:
+                    cur.execute(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)')
+                    cur.execute("SELECT pg_advisory_unlock(hashtextextended(%s, 0))", (name,))
+    finally:
+        conn.close()
+
+
+def acquire_database_lease(name: str):
+    """Hold a session advisory lock for this database until its server process exits.
+
+    PostgreSQL releases the lease when the connection closes, including after SIGKILL.
     """
     import psycopg2
 
     conn = psycopg2.connect(harness.ADMIN_URL)
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT d.datname FROM pg_database d WHERE d.datname LIKE 'gap\\_e2e\\_%' "
-                "AND NOT EXISTS (SELECT 1 FROM pg_stat_activity a WHERE a.datname = d.datname)"
-            )
-            leftovers = [row[0] for row in cur.fetchall()]
-    finally:
-        conn.close()
-    for name in leftovers:
-        harness.drop_database(name)
+    conn.autocommit = True
+    with conn.cursor() as cur:
+        cur.execute("SELECT pg_advisory_lock(hashtextextended(%s, 0))", (name,))
+    return conn
 
 
 def main() -> int:
@@ -204,11 +218,24 @@ def main() -> int:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--state-dir", type=Path, default=ROOT / "ui" / "e2e" / ".state")
     parser.add_argument("--preview", action="store_true", help="run as MODE=public-preview with a preview principal")
+    parser.add_argument("--enabled-modules", help="comma-separated enabled module names; defaults to the configured edition")
     args = parser.parse_args()
 
     harness.ensure_app_role()
+    name = f"gap_e2e_{secrets.token_hex(4)}"
+    lease = acquire_database_lease(name)
+    atexit.register(lease.close)
     sweep_leftover_databases()
-    name, owner_dsn = harness.create_database("gap_e2e_")
+    import psycopg2
+
+    conn = psycopg2.connect(harness.ADMIN_URL)
+    conn.autocommit = True
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f'CREATE DATABASE "{name}"')
+    finally:
+        conn.close()
+    owner_dsn = harness._replace_db(harness.ADMIN_URL, name)
     atexit.register(harness.drop_database, name)
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
     harness.migrate(owner_dsn)
@@ -217,6 +244,10 @@ def main() -> int:
     os.environ["MIGRATION_DATABASE_URL"] = owner_dsn
     os.environ["REDIS_URL"] = harness.REDIS_URL
     os.environ["MODE"] = "public-preview" if args.preview else "local"
+    # The shared seed explicitly creates its tenant as multi-tenant.
+    os.environ["DEPLOY_SHAPE"] = "multi_tenant"
+    if args.enabled_modules is not None:
+        os.environ["ENABLED_MODULES"] = args.enabled_modules
     # Raw uploads go under the state directory (gitignored), never into the repository's data/objects.
     os.environ["OBJECT_STORE_DIR"] = str(args.state_dir / "objects")
     if args.preview:
@@ -243,7 +274,9 @@ def main() -> int:
         module.FEATURES["reranker_enabled"] = False
 
     asyncio.run(ingest_and_close_seed_key(owner_dsn, seeded))
-    sandbox_runs = asyncio.run(seed_sandbox_runs(owner_dsn, seeded))
+    from core.settings import get_settings
+
+    sandbox_runs = asyncio.run(seed_sandbox_runs(owner_dsn, seeded)) if "agents" in get_settings().enabled_module_names else {}
     harness.clean_redis()
 
     args.state_dir.mkdir(parents=True, exist_ok=True)

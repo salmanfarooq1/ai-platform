@@ -82,7 +82,7 @@ def main() -> int:
     harness.migrate(owner_dsn)
     harness.clean_redis()
     with admin_connection(owner_dsn) as conn:
-        create_tenant(conn, "live", default_kb=False)
+        create_tenant(conn, "live", default_kb=False, deploy_shape="multi_tenant")
         create_kb(conn, "live", "legal", "Legal documents")
         principal = create_principal(conn, "live", "service", "live-service")
         token = create_key(conn, principal, ["kb:read", "kb:write", "query"]).token

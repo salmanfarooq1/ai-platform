@@ -81,10 +81,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def run(args: argparse.Namespace) -> int:
-    dsn = args.dsn or get_settings().migration_dsn
+    settings = get_settings()
+    dsn = args.dsn or settings.migration_dsn
     with admin_connection(dsn) as conn:
         if args.command == "create-tenant":
-            tenant_id = create_tenant(conn, args.slug, args.name, default_kb=not args.no_default_kb)
+            tenant_id = create_tenant(conn, args.slug, args.name, default_kb=not args.no_default_kb, deploy_shape=settings.deploy_shape)
             print(f"tenant {args.slug} created: id={tenant_id}")
         elif args.command == "create-kb":
             create_kb(conn, args.tenant, args.slug, args.description)

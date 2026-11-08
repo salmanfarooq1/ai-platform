@@ -6,7 +6,11 @@ from uuid import UUID
 
 from core.database.jobs import JobRow
 from core.database.tenant import DbPool
+from core.settings import Settings
+from gateway import GatewayRuntime
+from ports import Adapters, SandboxDriver
 from ports.events import CloudEvent
+from ports.runtime import AgentRuntime, Runner
 
 
 class PermanentJobError(Exception):
@@ -50,3 +54,19 @@ class JobContext:
 
 
 Handler = Callable[[JobRow, JobContext], Awaitable[Any]]
+
+
+@dataclass(frozen=True)
+class JobHandlerDeps:
+    """Dependencies provided by the worker composition root to module handler factories."""
+
+    adapters: Adapters
+    pool: DbPool
+    gateway_runtime: GatewayRuntime
+    settings: Settings
+    agent_graph: Any | None
+    sandbox_driver: SandboxDriver | None
+    build_runtime: Callable[[Runner], AgentRuntime]
+
+
+JobHandlerFactory = Callable[[JobHandlerDeps], dict[str, Handler]]

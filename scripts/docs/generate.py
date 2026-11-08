@@ -40,11 +40,11 @@ GROUPS: tuple[tuple[str, tuple[str, ...], tuple[str, ...]], ...] = (
     ("Models and embeddings", ("llm_model", "embed_model", "embedding_dim", "embed_fallback_models"), ("azure_", "groq_")),
     ("Object store", (), ("object_store", "s3_")),
     ("Events", ("event_bus",), ("kafka_", "outbox_")),
-    ("Agent runtime and sandbox", (), ("agent_", "sandbox_", "openshell_")),
+    ("Agent runtime and sandbox", ("enabled_modules",), ("agent_", "sandbox_", "openshell_")),
     ("Jobs and workers", (), ("job_", "worker_", "embedded_")),
     ("Limits and guardrails", ("max_query_length", "confidence_floor"), ("rate_limit_", "daily_")),
     ("Receipts and retention", ("decision_retention_days", "purge_batch_size"), ("receipt_", "retention_")),
-    ("Identity and web edge", ("frontend_url", "preview_principal_id"), ("jwt_",)),
+    ("Identity and web edge", ("frontend_url", "preview_principal_id", "deploy_shape"), ("jwt_",)),
     ("Observability and process", ("metrics_public", "grafana_url", "log_level", "web_concurrency"), ("otel_",)),
 )
 

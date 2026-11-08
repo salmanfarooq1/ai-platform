@@ -18,11 +18,9 @@ from api.agent.models import AGENT_MAX_TOKENS
 from api.agent.response import book_agent_usage
 from api.agent.tools import make_list_namespaces_tool, make_retrieve_tool
 from api.dependencies import adapters_of
-from api.observability import current_request_id, current_trace_id
+from api.run_authority import run_ctx, run_grant  # noqa: F401 - preserve the shared dependency import path
 from config import LLM_CONFIG
-from core.identity.run_tokens import RunGrant
-from gateway import Action, ActionKind, EnforcementContext, GatewayDenied, GatewayRuntime, require
-from gateway.context import run_context
+from gateway import Action, ActionKind, EnforcementContext, GatewayDenied, require
 from gateway.estimate import estimate_tokens
 
 logger = logging.getLogger("api.sandbox")
@@ -68,25 +66,6 @@ _FAULTS = ("decision_unrecorded", "internal_error")
 
 def _unavailable() -> HTTPException:
     return HTTPException(status_code=503, detail={"error": "service_unavailable", "reason": "A required service is unavailable. Try again shortly."})
-
-
-def _forbidden() -> HTTPException:
-    return HTTPException(status_code=403, detail={"error": "forbidden", "reason": "A run token is needed for this route"})
-
-
-async def run_grant(request: Request, execution_id: UUID) -> RunGrant:
-    """The run token's grant, for this run only. Anything else is a 403 (the middleware has already refused other paths)."""
-    grant = getattr(request.state, "run_grant", None)
-    if not isinstance(grant, RunGrant) or grant.execution_id != execution_id:
-        raise _forbidden()
-    return grant
-
-
-async def run_ctx(request: Request, grant: RunGrant = Depends(run_grant)) -> EnforcementContext:
-    runtime: GatewayRuntime = request.app.state.gateway_runtime
-    request_id = str(getattr(request.state, "request_id", None) or current_request_id())
-    trace_id = str(getattr(request.state, "trace_id", None) or current_trace_id())
-    return await run_context(runtime, grant.principal, grant.boundary, grant.execution_id, request_id, trace_id)
 
 
 @router.post("/runs/{execution_id}/tools/{name}", response_model=ToolResult)
