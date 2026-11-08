@@ -30,7 +30,7 @@ def test_the_new_tables_have_forced_rls_and_the_app_role_gets_only_select_insert
 
 
 def test_the_definer_functions_are_executable_by_the_app_role_only(blank_db):
-    harness.migrate(blank_db)
+    harness.migrate(blank_db, "0008")
     for sig in ("jobs_claim(text, integer)", "jobs_tenant_of_execution(uuid)", "outbox_pending(integer, integer)"):
         assert _exec(blank_db, "SELECT prosecdef FROM pg_proc WHERE oid = %s::regprocedure", (sig,)) == [(True,)]
         assert _exec(blank_db, "SELECT has_function_privilege('gap_app', %s, 'EXECUTE'), has_function_privilege('public', %s, 'EXECUTE')", (sig, sig)) == [(True, False)]

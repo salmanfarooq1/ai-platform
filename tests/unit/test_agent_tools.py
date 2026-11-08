@@ -254,7 +254,9 @@ async def test_agent_query_initializes_reducer_lists_and_runs_graph(monkeypatch)
         knowledge=PgKnowledgeStore(app.state.db_pool),
         runtime=InProcessAgentRuntime(make_agent_runner(lambda: app.state.agent_graph)),
     )
-    app.state.gateway_runtime = GatewayRuntime(pool=app.state.db_pool, cache=FakeRedis())
+    from adapters.pg_evidence import PgDecisionSink
+    from core.modules import MODULE_NAMES
+    app.state.gateway_runtime = GatewayRuntime(pool=app.state.db_pool, cache=FakeRedis(), decisions=PgDecisionSink(app.state.db_pool), enabled_modules=MODULE_NAMES)
     client = TestClient(app)
     response = client.post("/agent/query", json={
         "question": "test question",

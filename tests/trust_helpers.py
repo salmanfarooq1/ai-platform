@@ -1,6 +1,6 @@
 """Helpers for the retention tests: write a valid decision chain with chosen timestamps, and run purge jobs.
 
-`seed_chain` writes rows as the owner role with the same hashing the gateway uses (`gateway.chain`), so a test can age
+`seed_chain` writes rows as the owner role with the same hashing the gateway uses (`evidence.chain`), so a test can age
 rows without breaking their chain. `run_purges` queues the purge jobs the scheduler would and runs a worker until they
 are done, all as the app role.
 """
@@ -11,8 +11,8 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from core.database import jobs
-from gateway import chain
-from gateway.receipts import Keyring
+from evidence import chain
+from evidence.receipts import Keyring
 from ports import EventBus
 from workers.handlers.purge import make_purge_handler
 from workers.loop import Worker

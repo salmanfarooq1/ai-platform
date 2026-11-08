@@ -10,10 +10,9 @@ import pytest
 from pydantic import SecretStr
 
 from core.settings import Settings
-from gateway import Action, ActionKind, Decision
+from evidence.record import decision_event
 from gateway.reasons import all_reasons
-from gateway.record import decision_event
-from ports import EVENT_CATALOGUE
+from ports import EVENT_CATALOGUE, DecisionEntry
 from tests.gateway_helpers import make_ctx
 from tests.harness import ROOT
 
@@ -86,7 +85,10 @@ def test_the_event_catalogue_lists_the_data_fields_of_the_real_events():
 
     by_type = {info.type: info for info in EVENT_CATALOGUE}
     ctx = make_ctx()
-    decision = decision_event(uuid4(), ctx.principal.tenant_id, ctx, Action(ActionKind.KB_READ, "legal"), Decision(True, "allow", "allowed"))
+    decision = decision_event(DecisionEntry(
+        ctx.principal.tenant_id, ctx.principal.id, ctx.request_id, ctx.trace_id, "kb.read", "legal", "allow",
+        "allow", "allowed", None, None, None, {},
+    ), uuid4())
     job = _job({"document_id": "d", "namespace": "n", "content_hash": "h"})
     events = [decision, completed_event(job, "done", 1), purge_event(job, 1, 2, "h", 90)]
     assert {e.type for e in events} == set(by_type)

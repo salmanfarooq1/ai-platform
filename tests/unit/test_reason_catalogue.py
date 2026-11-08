@@ -13,7 +13,7 @@ from tests.harness import ROOT
 
 pytestmark = pytest.mark.unit
 
-SCANNED = [*sorted((ROOT / "gateway").glob("*.py")), ROOT / "api" / "auth.py", ROOT / "api" / "gateway_deps.py"]
+SCANNED = [*sorted((ROOT / "gateway").glob("*.py")), *sorted((ROOT / "evidence").glob("*.py")), ROOT / "api" / "auth.py", ROOT / "api" / "gateway_deps.py"]
 
 
 def _text(node: ast.expr | None) -> str | None:

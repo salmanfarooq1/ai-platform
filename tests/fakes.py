@@ -37,6 +37,19 @@ from ports import (
     SemanticHit,
 )
 
+
+class FakeDecisionSink:
+    """Explicit decision test sink; unlike the production composition it may collect in memory."""
+
+    def __init__(self) -> None:
+        self.entries = []
+
+    async def write(self, entry, events=None):
+        from uuid import uuid4
+
+        self.entries.append(entry)
+        return uuid4()
+
 EMBEDDING_DIM = 768
 _WORD = re.compile(r"[a-z0-9]+")
 

@@ -119,7 +119,7 @@ def test_with_kafka_the_request_path_still_writes_the_outbox_and_only_the_relay_
 
 def test_sprint_010_adds_no_migration():
     heads = ScriptDirectory.from_config(Config(str(ROOT / "alembic.ini"))).get_heads()
-    assert heads == ["0010"] or [h.split("_")[0] for h in heads] == ["0010"]
+    assert heads == ["0011"] or [h.split("_")[0] for h in heads] == ["0011"]
 
 
 def test_a_bad_kafka_setting_error_names_the_variable_and_not_the_password(monkeypatch):

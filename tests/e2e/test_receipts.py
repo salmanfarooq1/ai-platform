@@ -16,7 +16,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from gateway import record
+from evidence import record
 from tests.e2e.web_helpers import bearer, insert_decision, key_with
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -166,11 +166,11 @@ async def test_the_script_exits_1_for_a_tampered_receipt(audit, tenant_a, pool, 
 
 async def test_a_receipt_signed_by_another_key_is_invalid(audit, tenant_a, pool, app):
     """A receipt signed with a key the platform does not list fails, even when everything else is consistent."""
-    from gateway.receipts import Keyring, sign_receipt
+    from evidence.receipts import Keyring, sign_receipt
 
     decision_id = await a_decision_id(audit, tenant_a, pool)
     receipt = (await audit.get(f"/v1/receipts/{decision_id}")).json()
-    from gateway.receipts import record_of
+    from evidence.receipts import record_of
 
     forged = {**receipt, **sign_receipt(Keyring.generate(), record_of(receipt["decision"]), receipt["chain"])}
     verdict = (await audit.post("/v1/receipts/verify", json=forged)).json()
@@ -178,7 +178,7 @@ async def test_a_receipt_signed_by_another_key_is_invalid(audit, tenant_a, pool,
 
 
 async def test_old_keys_stay_listed_after_a_rotation_so_old_receipts_still_verify(audit, tenant_a, pool, app):
-    from gateway.receipts import Keyring
+    from evidence.receipts import Keyring
 
     decision_id = await a_decision_id(audit, tenant_a, pool)
     old = app.state.receipt_keys
@@ -238,7 +238,7 @@ async def test_concurrent_decision_writes_of_one_tenant_give_one_unbroken_chain(
     assert all(ok for _, ok, _ in checks), checks
     assert export["rows"][0]["prev_hash"] == offline.genesis_hash(tenant_a.id)
     # the server-side module agrees with the standalone script
-    from gateway.chain import ChainRow, verify_chain
+    from evidence.chain import ChainRow, verify_chain
 
     rows = [ChainRow(r["position"], r["prev_hash"], r["row_hash"], r["decision"]) for r in export["rows"]]
     assert all(c.ok for c in verify_chain(rows, {0: offline.genesis_hash(tenant_a.id)}))

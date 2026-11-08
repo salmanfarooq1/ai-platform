@@ -59,7 +59,13 @@ async def test_agent_guardrail_block_uses_same_format(client, fake_llm, fake_emb
 
 
 async def test_rate_limit_is_429_in_standard_format(client, monkeypatch, fake_llm, fake_embeddings):
+    # Keep the requests in one fixed window even if this test starts on a minute boundary.
+    from types import SimpleNamespace
+
+    import gateway.limits
+
     monkeypatch.setattr(config, "RATE_LIMIT_REQUESTS", 2)
+    monkeypatch.setattr(gateway.limits, "time", SimpleNamespace(time=lambda: 1_800_000_030))
     # The limit is per principal now, not per namespace. `legal` is a real KB with no documents.
     payload = {"query": "anything about retention", "namespace": "legal", "rerank": False}
 

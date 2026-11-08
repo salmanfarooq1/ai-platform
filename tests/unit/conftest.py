@@ -73,18 +73,17 @@ class GatewayIO:
 @pytest.fixture(autouse=True)
 def gateway_io(monkeypatch):
     """Unit tests never reach Postgres: the policy loader and the decision writer are replaced."""
+    import evidence.record
     import gateway.policy
-    import gateway.record
 
     io = GatewayIO()
 
     async def load_active_policy(pool, tenant_id):
         return io.policy
 
-    async def write_decision(ctx, action, decision):
-        io.decisions.append((action.kind.value, action.resource, "allow" if decision.allowed else "deny",
-                             decision.stage, decision.reason))
+    async def write_decision(pool, entry, events=None):
+        io.decisions.append((entry.action, entry.resource, entry.outcome, entry.stage, entry.reason))
 
     monkeypatch.setattr(gateway.policy, "load_active_policy", load_active_policy)
-    monkeypatch.setattr(gateway.record, "write_decision", write_decision)
+    monkeypatch.setattr(evidence.record, "write_decision", write_decision)
     return io

@@ -54,7 +54,7 @@ def test_0010_works_for_a_non_superuser_owner_and_changes_nothing_that_came_befo
         _exec(blank_db, f"GRANT ALL ON SCHEMA public TO {role}")
         host = harness.ADMIN_URL.split("@", 1)[1].rsplit("/", 1)[0]
         owner_dsn = f"postgresql://{role}:{password}@{host}/{blank_db.rsplit('/', 1)[1]}"
-        harness.migrate(owner_dsn)
+        harness.migrate(owner_dsn, "0010")
         assert _exec(owner_dsn, "SELECT version_num FROM alembic_version") == [("0010",)]
         # the lookup function runs as the owner, subject to the forced policy: the owner_access policy lets it read
         app = psycopg2.connect(harness.app_url(blank_db))

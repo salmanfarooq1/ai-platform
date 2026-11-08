@@ -12,9 +12,9 @@ from core.identity.models import Principal
 from gateway.boundary import build_boundary
 from gateway.context import context_from_payload, context_to_payload
 from gateway.policy import PolicyDocument
-from gateway.types import EnforcementContext, GatewayRuntime
+from gateway.types import EnforcementContext
 from ports import CloudEvent, RunState
-from tests.gateway_helpers import FakeRedis
+from tests.gateway_helpers import FakeRedis, make_runtime
 
 pytestmark = pytest.mark.unit
 
@@ -38,10 +38,10 @@ def test_the_context_a_worker_rebuilds_is_the_one_the_request_had():
     principal = Principal(id=uuid4(), tenant_id=uuid4(), kind="service", scopes=frozenset({"agent", "kb:read"}))
     boundary = build_boundary(principal, PolicyDocument(allowed_kbs=["legal"], allowed_tools="*", allowed_models=["m/a"], blocked_terms=["Secret"]), 7)
     ctx = EnforcementContext(principal=principal, request_id="r1", trace_id="t" * 32, boundary=boundary,
-                             runtime=GatewayRuntime(pool=None, cache=FakeRedis()), execution_id=uuid4())
+                             runtime=make_runtime(FakeRedis()), execution_id=uuid4())
     payload = context_to_payload(ctx)
     assert "scopes" in payload["principal"] and "api_key" not in str(payload) and "secret" not in str(payload["principal"]).lower()
-    rebuilt = context_from_payload(GatewayRuntime(pool=None, cache=FakeRedis()), payload)
+    rebuilt = context_from_payload(make_runtime(FakeRedis()), payload)
     assert rebuilt.principal == principal and rebuilt.boundary == boundary and rebuilt.execution_id == ctx.execution_id
     assert (rebuilt.request_id, rebuilt.trace_id, rebuilt.boundary.policy_version) == ("r1", "t" * 32, 7)
     assert rebuilt.boundary.allows_kb("legal") and not rebuilt.boundary.allows_kb("default")  # nothing widened

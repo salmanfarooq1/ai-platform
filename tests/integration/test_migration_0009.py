@@ -6,7 +6,7 @@ from uuid import uuid4
 import psycopg2
 import pytest
 
-from gateway.chain import genesis_hash
+from evidence.chain import genesis_hash
 from tests import harness
 from tests.integration.test_migration_0007 import _exec
 

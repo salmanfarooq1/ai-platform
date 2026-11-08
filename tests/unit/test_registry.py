@@ -44,7 +44,8 @@ def test_an_override_replaces_one_port_and_the_real_one_is_never_built():
     fake_llm, store, cache = FakeLLM(), FakeKnowledgeStore(), FakeCache()
     adapters = build_adapters(settings(), overrides={"llm": fake_llm, "chat": fake_llm, "knowledge": store, "cache": cache,
                                                       "embeddings": FakeEmbeddings(), "events": InProcessEventBus(),
-                                                      "runtime": InProcessAgentRuntime()})  # no pool needed: all faked
+                                                      "runtime": InProcessAgentRuntime(), "decisions": object(),
+                                                      "evidence": object()})  # no pool needed: all faked
     assert adapters.llm is fake_llm and adapters.chat is fake_llm and adapters.knowledge is store and adapters.cache is cache
     assert isinstance(adapters.objects, LocalObjectStore)  # the rest stay real
 

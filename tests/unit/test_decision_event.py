@@ -4,8 +4,9 @@ from uuid import uuid4
 
 import pytest
 
+from evidence.record import decision_event
 from gateway import Action, ActionKind, Decision
-from gateway.record import decision_event
+from ports import DecisionEntry
 from tests.gateway_helpers import make_ctx
 
 pytestmark = pytest.mark.unit
@@ -18,7 +19,10 @@ def test_the_payload_is_the_verdict_and_ids_only():
     decision = Decision(allowed=False, stage="policy", reason="kb_not_allowed", policy_version=3)
     decision_id, tenant = uuid4(), ctx.principal.tenant_id
 
-    event = decision_event(decision_id, tenant, ctx, action, decision)
+    entry = DecisionEntry(tenant, ctx.principal.id, ctx.request_id, ctx.trace_id, action.kind.value, action.resource,
+                          "deny", decision.stage, decision.reason, decision.policy_version, action.input_hash,
+                          ctx.execution_id, {})
+    event = decision_event(entry, decision_id)
 
     assert event.type == "platform.gateway.decision.v1" and event.source == "/gateway"
     assert event.subject == str(decision_id) and event.tenantid == str(tenant)
@@ -32,5 +36,8 @@ def test_the_payload_is_the_verdict_and_ids_only():
 
 def test_a_decision_outside_any_run_has_a_null_execution_id_and_an_allow_says_allow():
     ctx = make_ctx()
-    event = decision_event(uuid4(), ctx.principal.tenant_id, ctx, Action(ActionKind.MODEL_INVOKE, "m"), Decision(True, "allow", "allowed"))
+    action = Action(ActionKind.MODEL_INVOKE, "m")
+    entry = DecisionEntry(ctx.principal.tenant_id, ctx.principal.id, ctx.request_id, ctx.trace_id, action.kind.value,
+                          action.resource, "allow", "allow", "allowed", None, None, None, {})
+    event = decision_event(entry, uuid4())
     assert event.data["outcome"] == "allow" and event.data["execution_id"] is None and event.data["resource"] == "m"

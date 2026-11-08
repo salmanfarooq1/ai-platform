@@ -77,7 +77,7 @@ def clean_state(database_url):
 
 def _make_tenant(dsn: str, slug: str) -> TenantFixture:
     with admin_connection(dsn) as conn:
-        tenant_id = create_tenant(conn, slug, default_kb=False)
+        tenant_id = create_tenant(conn, slug, default_kb=False, deploy_shape="multi_tenant")
         for kb_slug, description in KB_DESCRIPTIONS.items():
             create_kb(conn, slug, kb_slug, description)
         principal_id = create_principal(conn, slug, "service", f"{slug}-service")

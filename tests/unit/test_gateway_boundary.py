@@ -90,7 +90,7 @@ def test_a_boundary_is_frozen():
 
 def test_the_default_boundary_is_what_scopes_grant_over_the_platform_defaults():
     boundary = build_boundary(make_principal(("query",)), None)
-    assert boundary.actions == {"kb.read", "model.invoke", "tool.call", "feedback.write"}
+    assert boundary.actions == {"kb.read", "model.invoke", "tool.call", "feedback.write", "system.read"}
     assert boundary.kbs == boundary.tools == boundary.models == {WILDCARD}
     assert boundary.max_tool_calls == DEFAULT_POLICY.max_tool_calls and boundary.policy_version is None
     assert boundary.visible_kbs() is None
@@ -101,7 +101,7 @@ def test_a_policy_narrows_resources_but_cannot_grant_actions_the_scopes_lack():
                             max_tokens_per_request=500, max_query_length=200, blocked_terms=["Secret"])
     boundary = build_boundary(make_principal(("kb:read",)), policy, policy_version=7)
     # the policy lists models, but kb:read grants no model.invoke (tool.call is the MCP tool gate)
-    assert boundary.actions == {"kb.read", "tool.call", "analytics.read"}
+    assert boundary.actions == {"kb.read", "tool.call", "analytics.read", "system.read"}
     assert (boundary.kbs, boundary.tools, boundary.models) == ({"legal"}, {"retrieve_chunks"}, {"m1"})
     assert (boundary.max_tool_calls, boundary.max_tokens, boundary.max_query_length) == (3, 500, 200)
     assert boundary.blocked_terms == {"secret"} and boundary.policy_version == 7
@@ -112,7 +112,7 @@ def test_a_policy_narrows_resources_but_cannot_grant_actions_the_scopes_lack():
 def test_unknown_scopes_grant_nothing_and_admin_grants_everything():
     assert build_boundary(make_principal(("root",)), None).actions == frozenset()
     assert build_boundary(make_principal(("admin",)), None).actions == {
-        "kb.read", "kb.write", "model.invoke", "tool.call", "agent.run", "feedback.write", "analytics.read", "audit.read"}
+        "kb.read", "kb.write", "model.invoke", "tool.call", "agent.run", "feedback.write", "analytics.read", "audit.read", "system.read"}
 
 
 def test_the_deny_all_boundary_allows_nothing():

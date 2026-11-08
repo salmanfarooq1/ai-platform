@@ -498,7 +498,7 @@ async def test_the_question_text_is_not_in_any_sandbox_event_or_decision_row(app
 async def test_m1_a_fault_on_the_sandbox_routes_is_the_standard_503_not_a_policy_denial(app, make_client, tenant_a, monkeypatch, sandbox_llm, fake_embeddings):
     run, token = await token_for(app, tenant_a)
     client = as_run(make_client, token)
-    import gateway.record as record
+    import evidence.record as record
 
     async def fail(*a, **k):
         raise RuntimeError("database down")

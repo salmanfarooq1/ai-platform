@@ -83,7 +83,7 @@ async def test_csrf_comparison():
 
 
 def test_audit_read_scope_grants_only_audit_read_and_admin_grants_it_too():
-    assert SCOPE_ACTIONS[Scope.AUDIT_READ.value] == frozenset({"audit.read"})
+    assert SCOPE_ACTIONS[Scope.AUDIT_READ.value] == frozenset({"audit.read", "system.read"})
     assert "audit.read" in SCOPE_ACTIONS[Scope.ADMIN.value]
     for scope in ("kb:read", "kb:write", "query", "agent"):
         assert "audit.read" not in SCOPE_ACTIONS[scope]

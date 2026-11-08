@@ -56,7 +56,7 @@ async def run_until(worker, check, concurrency=1):
 
 async def test_two_claims_at_once_never_return_the_same_job(db_pool, tenant_a):
     await add(db_pool, tenant_a)
-    got = await asyncio.gather(*[jobs.claim(db_pool, f"w{i}", 30) for i in range(8)])
+    got = await asyncio.gather(*[jobs.claim(db_pool, f"w{i}", 30, ("ingest", "agent_run", "purge_decisions")) for i in range(8)])
     assert len([g for g in got if g is not None]) == 1
 
 
@@ -117,7 +117,7 @@ async def test_a_retry_waits_for_its_backoff(db_pool, tenant_a):
 
     row = await run_until(make_worker(db_pool, boom, backoff_base=30.0), queued_later)
     assert row.error_code == "internal_error" and (row.run_after - row.updated_at).total_seconds() > 20
-    assert await jobs.claim(db_pool, "other", 30) is None  # not claimable before run_after
+    assert await jobs.claim(db_pool, "other", 30, ("ingest", "agent_run", "purge_decisions")) is None  # not claimable before run_after
 
 
 async def test_a_job_that_keeps_failing_is_dead_after_max_attempts(db_pool, tenant_a):
@@ -135,7 +135,7 @@ async def test_a_job_that_keeps_failing_is_dead_after_max_attempts(db_pool, tena
     row = await run_until(make_worker(db_pool, boom), dead)
     assert len(runs) == 3 and row.attempts == 3 and row.error_code == "internal_error"
     assert "hunter2" not in (row.error_detail or "")  # only the exception type is kept
-    assert await jobs.claim(db_pool, "other", 30) is None  # dead jobs are never claimed again
+    assert await jobs.claim(db_pool, "other", 30, ("ingest", "agent_run", "purge_decisions")) is None  # dead jobs are never claimed again
 
 
 async def test_a_permanent_error_fails_at_once_without_a_retry(db_pool, tenant_a):
@@ -181,10 +181,10 @@ async def test_rls_as_the_app_role_hides_other_tenants_jobs(db_pool, tenant_a, t
 
 async def test_the_claim_function_returns_only_an_id_and_a_tenant(db_pool, tenant_a):
     job = await add(db_pool, tenant_a)
-    claimed = await jobs.claim(db_pool, "w", 30)
+    claimed = await jobs.claim(db_pool, "w", 30, ("ingest", "agent_run", "purge_decisions"))
     assert claimed == (job.id, UUID(tenant_a.id))
     async with db_pool.acquire() as conn:
-        record = await conn.fetchrow("SELECT * FROM jobs_claim('w', 30)")
+        record = await conn.fetchrow("SELECT * FROM jobs_claim('w', 30, ARRAY['ingest', 'agent_run', 'purge_decisions'])")
         assert record is None or list(record.keys()) == ["claimed_id", "claimed_tenant"]
         assert await conn.fetchval("SELECT has_table_privilege('gap_app', 'jobs', 'DELETE')") is False
 
@@ -214,7 +214,7 @@ async def test_a_killed_worker_leaves_its_job_to_be_claimed_again_after_the_leas
             proc.kill()
     stuck = await read(db_pool, tenant_a, job.id)
     assert stuck.status == "running" and stuck.attempts == 1  # still held by a dead worker
-    assert await jobs.claim(db_pool, "early", 30) is None  # the lease has not run out yet
+    assert await jobs.claim(db_pool, "early", 30, ("ingest", "agent_run", "purge_decisions")) is None  # the lease has not run out yet
 
     ran = []
 
@@ -231,9 +231,9 @@ async def test_a_killed_worker_leaves_its_job_to_be_claimed_again_after_the_leas
 
 async def test_a_job_that_loses_its_last_attempt_to_a_crash_is_dead_not_rerun(db_pool, tenant_a, owner_pool):
     job = await add(db_pool, tenant_a, max_attempts=1)
-    assert await jobs.claim(db_pool, "gone", 30) is not None
+    assert await jobs.claim(db_pool, "gone", 30, ("ingest", "agent_run", "purge_decisions")) is not None
     await owner_pool.execute("UPDATE jobs SET lease_until = NOW() - interval '1 second' WHERE id = $1", job.id)
-    assert await jobs.claim(db_pool, "next", 30) is None
+    assert await jobs.claim(db_pool, "next", 30, ("ingest", "agent_run", "purge_decisions")) is None
     row = await read(db_pool, tenant_a, job.id)
     assert row.status == "dead" and row.error_code == "lease_expired"
 
@@ -400,7 +400,9 @@ async def test_m3_usage_is_booked_at_most_once_per_execution_id(db_pool, tenant_
     from tests.gateway_helpers import FakeRedis
 
     cache = FakeRedis()
-    runtime = GatewayRuntime(pool=db_pool, cache=cache)
+    from adapters.pg_evidence import PgDecisionSink
+    from core.modules import MODULE_NAMES
+    runtime = GatewayRuntime(pool=db_pool, cache=cache, decisions=PgDecisionSink(db_pool), enabled_modules=MODULE_NAMES)
     usage = {"prompt_tokens": 10, "completion_tokens": 5, "total_cost": 0.0, "model": "m", "namespace": "legal", "routing_decision": "agent"}
     run_a, run_b = uuid4(), uuid4()
     first = await book_agent_usage(db_pool, runtime, UUID(tenant_a.id), "req-1", usage, run_a)

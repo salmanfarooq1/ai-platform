@@ -172,7 +172,7 @@ STAGE_NAMES = [name for name, _ in STAGES]
 
 
 def test_the_stage_list_is_in_the_documented_order():
-    assert STAGE_NAMES == ["principal", "boundary", "policy", "guardrails", "rate", "budget", "cost"]
+    assert STAGE_NAMES == ["principal", "module", "boundary", "policy", "guardrails", "rate", "budget", "cost"]
 
 
 @pytest.mark.parametrize("broken", STAGE_NAMES)
@@ -215,12 +215,12 @@ async def test_a_bug_inside_a_real_stage_is_a_deny(monkeypatch):
 
 async def test_a_failed_decision_write_on_an_allow_becomes_a_deny_decision_unrecorded(monkeypatch, caplog):
     """Fail closed (rules 3 and 10): no action without a record."""
-    import gateway.record
+    import evidence.record
 
-    async def broken_write(ctx, action, decision):
+    async def broken_write(pool, entry, events=None):
         raise OSError("database is down")
 
-    monkeypatch.setattr(gateway.record, "write_decision", broken_write)
+    monkeypatch.setattr(evidence.record, "write_decision", broken_write)
     ctx = make_ctx()
     with caplog.at_level("ERROR", logger="gateway.enforce"):
         decision = await enforce(ctx, Action(K.TOOL_CALL, "retrieve_chunks"))
@@ -233,12 +233,12 @@ async def test_a_failed_decision_write_on_an_allow_becomes_a_deny_decision_unrec
 
 
 async def test_a_failed_write_on_a_deny_leaves_the_original_deny(monkeypatch):
-    import gateway.record
+    import evidence.record
 
-    async def broken_write(ctx, action, decision):
+    async def broken_write(pool, entry, events=None):
         raise OSError("database is down")
 
-    monkeypatch.setattr(gateway.record, "write_decision", broken_write)
+    monkeypatch.setattr(evidence.record, "write_decision", broken_write)
     decision = await enforce(make_ctx(policy={"allowed_kbs": ["legal"]}), Action(K.KB_READ, "kyc_aml"))
     assert (decision.allowed, decision.stage, decision.reason) == (False, "policy", "kb_not_allowed")
 

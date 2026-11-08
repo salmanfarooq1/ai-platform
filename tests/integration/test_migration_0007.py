@@ -41,7 +41,7 @@ def seed_0005(dsn):
     ids = {}
     with admin_connection(dsn) as conn:
         for slug, docs in (("tenant-a", 3), ("tenant-b", 2)):
-            ids[slug] = (create_tenant(conn, slug, default_kb=False), docs)
+            ids[slug] = (create_tenant(conn, slug, default_kb=False, deploy_shape="multi_tenant"), docs)
             create_kb(conn, slug, "legal", "legal")
     for slug, (tenant_id, docs) in ids.items():
         conn = psycopg2.connect(dsn)

@@ -9,15 +9,17 @@ from adapters.pg_knowledge import PgKnowledgeStore
 from api.mcp.context import current_principal
 from api.mcp.server import mcp
 from core.identity.models import Principal
-from tests.fakes import FakeCache, FakeEmbeddings, FakePool
+from tests.fakes import FakeCache, FakeDecisionSink, FakeEmbeddings, FakePool
 
 
 def app_context(pool):
     """What `init_mcp_context` puts in the MCP server: the pool and the ports. The knowledge store is the real
     Postgres adapter over the fake pool, so the SQL it sends is still recorded."""
     knowledge = PgKnowledgeStore(pool) if pool is not None else None
-    return {"pool": pool, "adapters": SimpleNamespace(
-        knowledge=knowledge, cache=FakeCache(), events=None, embeddings=FakeEmbeddings())}
+    from core.modules import MODULE_NAMES
+    return {"pool": pool, "enabled_modules": MODULE_NAMES, "adapters": SimpleNamespace(
+        knowledge=knowledge, cache=FakeCache(), decisions=FakeDecisionSink(), evidence=None, data=None,
+        lineage=None, events=None, embeddings=FakeEmbeddings())}
 
 
 @pytest.fixture(autouse=True)

@@ -39,6 +39,19 @@ def test_images_health_dependencies_and_preserved_old_volumes():
     assert compose["services"]["worker"]["environment"]["REDIS_URL"] == "redis://valkey:6379"
 
 
+def test_postgres_has_init_and_restart_policy():
+    compose = yaml.safe_load((ROOT / "docker-compose.yml").read_text())
+    postgres = compose["services"]["postgres"]
+    assert postgres["init"] is True
+    assert postgres["restart"] == "unless-stopped"
+
+
+def test_runtime_image_copies_evidence():
+    dockerfile = (ROOT / "Dockerfile").read_text()
+    runtime = dockerfile.split(" AS runtime", maxsplit=1)[1]
+    assert re.search(r"^COPY --from=builder /app/evidence(?:/|\s)", runtime, re.MULTILINE)
+
+
 def test_optional_security_services_use_digest_pinned_upstream_images():
     compose = yaml.safe_load((ROOT / "docker-compose.yml").read_text())
     expected = {

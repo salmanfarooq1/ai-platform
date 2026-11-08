@@ -4,6 +4,7 @@ from pathlib import Path
 import psycopg2
 import pytest
 from alembic import command
+from alembic.script import ScriptDirectory
 
 from tests import harness
 
@@ -59,10 +60,12 @@ def _snapshot(dsn):
 
 
 def test_empty_database_reaches_head(blank_db):
-    harness.migrate(blank_db)
+    cfg = harness.alembic_config(blank_db)
+    head = ScriptDirectory.from_config(cfg).get_current_head()
+    command.upgrade(cfg, head)
     tables = {r[0] for r in _query(blank_db, "SELECT tablename FROM pg_tables WHERE schemaname = 'public'")}
     assert tables == BASELINE_TABLES | IDENTITY_TABLES | GATEWAY_TABLES | JOB_TABLES | TRUST_TABLES | SANDBOX_TABLES | {"alembic_version"}
-    assert _query(blank_db, "SELECT version_num FROM alembic_version") == [("0010",)]
+    assert _query(blank_db, "SELECT version_num FROM alembic_version") == [(head,)]
     assert _query(blank_db, "SELECT extname FROM pg_extension WHERE extname = 'vector'") == [("vector",)]
     index_names = {r[0] for r in _query(blank_db, "SELECT indexname FROM pg_indexes WHERE schemaname = 'public'")}
     # 0002 replaces the namespace-only indexes with indexes that lead with tenant_id.
@@ -142,8 +145,8 @@ def _counts(dsn):
     return {t: _query(dsn, f"SELECT count(*) FROM {t}")[0][0] for t in TENANT_OWNED}
 
 
-def _assert_backfilled(dsn, before):
-    assert _query(dsn, "SELECT version_num FROM alembic_version") == [("0010",)]
+def _assert_backfilled(dsn, before, revision):
+    assert _query(dsn, "SELECT version_num FROM alembic_version") == [(revision,)]
     assert _counts(dsn) == before == {"documents": 6, "document_registry": 3, "usage_log": 3, "feedback": 1}
     for table in TENANT_OWNED:
         assert _query(dsn, f"SELECT DISTINCT tenant_id::text FROM {table}") == [(DEFAULT_TENANT_ID,)]
@@ -162,9 +165,9 @@ def test_upgrade_from_0001_with_existing_rows_keeps_counts_and_backfills_default
     _seed_pre_identity_rows(blank_db)
     before = _counts(blank_db)
 
-    harness.migrate(blank_db)
+    harness.migrate(blank_db, "0010")
 
-    _assert_backfilled(blank_db, before)
+    _assert_backfilled(blank_db, before, "0010")
 
 
 def test_hosted_database_without_alembic_history_reaches_0002_and_backfills(blank_db):
@@ -177,9 +180,9 @@ def test_hosted_database_without_alembic_history_reaches_0002_and_backfills(blan
     _seed_pre_identity_rows(blank_db)
     before = _counts(blank_db)
 
-    harness.migrate(blank_db)
+    harness.migrate(blank_db, "0002")
 
-    _assert_backfilled(blank_db, before)
+    _assert_backfilled(blank_db, before, "0002")
 
 
 def test_rls_is_enabled_everywhere_and_forced_where_the_owner_is_not_exempt(blank_db):

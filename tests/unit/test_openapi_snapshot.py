@@ -32,6 +32,17 @@ def test_every_public_route_is_versioned():
     assert all(p.startswith("/v1/") or p in UNVERSIONED_PATHS or p == "/metrics" for p in paths)
 
 
+def test_snapshot_has_typed_module_and_versioned_decision_models():
+    schemas = json.loads(SNAPSHOT_PATH.read_text())["components"]["schemas"]
+    assert "ModuleList" in schemas
+    for schema in (schemas["DecisionDetail"], schemas["Receipt"]["properties"]["decision"]):
+        if "$ref" in schema:
+            schema = schemas[schema["$ref"].rsplit("/", 1)[-1]]
+        properties = schema["properties"]
+        assert properties["record_version"]["type"] == "integer"
+        assert properties["extensions"]["type"] == "object"
+
+
 def test_update_script_rewrites_the_snapshot(tmp_path):
     before = SNAPSHOT_PATH.read_text()
     SNAPSHOT_PATH.write_text("{}\n")
@@ -55,6 +66,11 @@ def test_ddl_check_passes_on_the_repo_and_fails_on_a_violation(tmp_path):
     bad = subprocess.run([script, str(tmp_path)], capture_output=True, text=True)
     assert bad.returncode == 1
     assert "api/bad.py" in bad.stdout and "tests/worse.sql" in bad.stdout
+    (tmp_path / "evidence").mkdir()
+    (tmp_path / "evidence" / "bad.py").write_text(f'await conn.execute("CREATE {TABLE} sneaky (id int)")\n')
+    bad_evidence = subprocess.run([script, str(tmp_path)], capture_output=True, text=True)
+    assert bad_evidence.returncode == 1 and "evidence/bad.py" in bad_evidence.stdout
+    (tmp_path / "evidence" / "bad.py").unlink()
     (tmp_path / "scripts" / "labs").mkdir(parents=True)
     (tmp_path / "scripts" / "labs" / "lab.py").write_text(f"CREATE {TABLE} lab (id int)\n")
     (tmp_path / "api" / "bad.py").unlink()

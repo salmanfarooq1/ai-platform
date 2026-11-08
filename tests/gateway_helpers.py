@@ -49,7 +49,10 @@ class FakeRedis:
 
 
 def make_runtime(redis: FakeRedis | None = None, pool: Any = None) -> GatewayRuntime:
-    return GatewayRuntime(pool=pool, cache=redis or FakeRedis())
+    from adapters.pg_evidence import PgDecisionSink
+    from core.modules import MODULE_NAMES
+
+    return GatewayRuntime(pool=pool, cache=redis or FakeRedis(), decisions=PgDecisionSink(pool), enabled_modules=MODULE_NAMES)
 
 
 def make_ctx(

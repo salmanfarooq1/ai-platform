@@ -13,7 +13,7 @@ def test_the_dockerfile_runtime_stage_copies_the_gateway_package():
 
 
 def test_ci_lints_and_typechecks_the_gateway_package():
-    assert "ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e" in (ROOT / ".github" / "workflows" / "tests.yml").read_text()
+    assert "ruff check api core gateway evidence ports adapters workers sandbox_agent tests scripts/e2e scripts/docs scripts/supply_chain" in (ROOT / ".github" / "workflows" / "tests.yml").read_text()
     mypy_files = (ROOT / "pyproject.toml").read_text().split("[tool.mypy]", 1)[1].split("\n", 3)[2]
     assert '"gateway"' in mypy_files and '"ports"' in mypy_files and '"adapters"' in mypy_files and '"workers"' in mypy_files and '"sandbox_agent"' in mypy_files
 

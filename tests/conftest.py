@@ -14,12 +14,17 @@ Run subsets with:
 import ipaddress
 import os
 import socket
+import sys
 from typing import Any
 
 # Workers in the tests poll and retry fast. Set before any module reads the settings (setdefault: a caller may override).
 os.environ.setdefault("JOB_POLL_INTERVAL_SECONDS", "0.05")
 os.environ.setdefault("JOB_BEAT_INTERVAL_SECONDS", "0.1")
 os.environ.setdefault("JOB_BACKOFF_BASE_SECONDS", "0.05")
+# Live fixtures create multiple tenants. Set this before test modules import Settings; the unit tier keeps the
+# production default so its environment-isolation assertions remain meaningful.
+if "-m" not in sys.argv or sys.argv[sys.argv.index("-m") + 1] != "unit":
+    os.environ.setdefault("DEPLOY_SHAPE", "multi_tenant")
 # The retention scheduler is off in tests: a test that needs it calls `schedule_purges` itself.
 os.environ.setdefault("RETENTION_SCHEDULE_INTERVAL_SECONDS", "0")
 
@@ -35,7 +40,9 @@ pytest_plugins = ["tests.db_fixtures"]
 def pytest_collection_modifyitems(config, items):
     for item in items:
         parts = item.path.parts
-        if "unit" in parts:
+        if "editions" in parts:
+            item.add_marker(pytest.mark.edition_smoke)
+        elif "unit" in parts:
             item.add_marker(pytest.mark.unit)
         elif "integration" in parts or "contracts" in parts:
             # The contract suites run every adapter of a port, the real ones (Postgres, Redis) included.

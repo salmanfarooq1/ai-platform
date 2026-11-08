@@ -16,11 +16,8 @@ from adapters.pg_outbox_events import OutboxEventBus
 from core.database import jobs
 from core.database.tenant import tenant_connection
 from core.identity.admin import admin_connection, set_retention
-from core.identity.models import Principal
-from gateway import chain, record
-from gateway.receipts import Keyring
-from gateway.types import Action, ActionKind, Decision
-from tests.gateway_helpers import make_ctx
+from evidence import chain
+from evidence.receipts import Keyring
 from tests.trust_helpers import KEYRING, run_purges, seed_chain, seed_unchained
 from workers.handlers.purge import make_purge_handler
 from workers.scheduler import schedule_purges
@@ -112,10 +109,14 @@ async def test_everything_expired_still_lets_the_chain_continue(db_pool, owner_p
     await seed_chain(owner_pool, tenant_a.id, [300, 200])
     await run_purges(db_pool)
     assert await rows_of(owner_pool, tenant_a) == []
-    principal = Principal(id=UUID(tenant_a.principal_id), tenant_id=UUID(tenant_a.id), kind="service", scopes=frozenset({"kb:read"}))
-    ctx = make_ctx(principal=principal)
-    ctx.runtime.pool = db_pool
-    await record.write_decision(ctx, Action(ActionKind.KB_READ, "legal"), Decision(allowed=True, stage="allow", reason="allowed"))
+    from adapters.pg_evidence import PgDecisionSink
+    from ports import DecisionEntry
+
+    await PgDecisionSink(db_pool).write(DecisionEntry(
+        tenant_id=UUID(tenant_a.id), principal_id=UUID(tenant_a.principal_id), request_id="after-purge",
+        trace_id="after-purge", action="kb.read", resource="legal", outcome="allow", stage="allow",
+        reason="allowed", policy_version=None, input_sha256=None, execution_id=None, extensions={},
+    ))
     export, checks = await verified(owner_pool, tenant_a, database_url)
     assert [r["position"] for r in export["rows"]] == [3]
     assert all(ok for _, ok, _ in checks), checks
@@ -256,7 +257,7 @@ async def test_m1_a_purge_checkpoint_is_signed_and_verification_rejects_an_unsig
     [purge] = [c for c in export["checkpoints"] if c["reason"] == "purge"]
     assert purge["key_id"] == KEYRING.active_key_id and purge["signature"]
     # the server-side check agrees
-    from gateway.receipts import verify_checkpoints
+    from evidence.receipts import verify_checkpoints
 
     assert verify_checkpoints(tenant_a.id, export["checkpoints"], KEYRING.public_map()).ok
     # unsigned, a changed hash (the signature no longer fits), another key, and no key given at all
