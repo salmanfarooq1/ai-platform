@@ -1,0 +1,4 @@
+ Container sprint011-stack-seaweedfs-1  Running
+create bucket under /buckets
+created bucket gap-local
+bucket owner: platform-local

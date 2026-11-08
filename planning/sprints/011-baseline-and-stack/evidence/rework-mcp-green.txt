@@ -1,0 +1,11 @@
+F..............                                                          [100%]
+=================================== FAILURES ===================================
+______ test_expected_gateway_denial_exposes_only_catalogued_reason[tool] _______
+tests/unit/test_mcp_compat.py:36: in test_expected_gateway_denial_exposes_only_catalogued_reason
+    with pytest.raises(ToolError, match="^kb_not_allowed$"):
+E   AssertionError: 
+E   - Error executing tool denied: kb_not_allowed
+E   + kb_not_allowed
+=========================== short test summary info ============================
+FAILED tests/unit/test_mcp_compat.py::test_expected_gateway_denial_exposes_only_catalogued_reason[tool]
+1 failed, 14 passed in 5.54s

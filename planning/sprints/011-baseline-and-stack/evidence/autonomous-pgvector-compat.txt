@@ -1,0 +1,284 @@
+Only newly generated scratch volumes used; no existing data volume is mounted.
+$ docker run -d --name sprint011-pgcompat-4618f463-old
+2bff052fb48c303c1480a48f917c366c4f23fd7da7157517215e8e0ae94d4919
+
+exit=0
+$ docker exec -i sprint011-pgcompat-4618f463-old psql
+CREATE EXTENSION
+CREATE TABLE
+INSERT 0 3
+CREATE INDEX
+CREATE INDEX
+
+exit=0
+$ docker exec -i sprint011-pgcompat-4618f463-old psql
+                                                           version                                                            
+------------------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 16.15 (Debian 16.15-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+(1 row)
+
+  datname  | datcollversion | actual | matches 
+-----------+----------------+--------+---------
+ postgres  | 2.36           | 2.36   | t
+ template1 | 2.36           | 2.36   | t
+(2 rows)
+
+ id |  label   | embedding 
+----+----------+-----------
+  1 | Ångström | [1,0,0]
+  2 | Zebra    | [0,1,0]
+  3 | apple    | [0,0,1]
+(3 rows)
+
+ id 
+----
+  1
+(1 row)
+
+  label   
+----------
+ Ångström
+ apple
+ Zebra
+(3 rows)
+
+
+exit=0
+$ docker exec sprint011-pgcompat-4618f463-old pg_dump -U
+--
+-- PostgreSQL database dump
+--
+
+\restrict hbtzPeY5bf0cQOVye0ZbfHuelJbgRUzoynfaiotb4vfYh0BdVn68UYWy48iMRnC
+
+-- Dumped from database version 16.15 (Debian 16.15-1.pgdg12+2)
+-- Dumped by pg_dump version 16.15 (Debian 16.15-1.pgdg12+2)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+DROP INDEX IF EXISTS public.probe_vector;
+DROP INDEX IF EXISTS public.probe_label;
+ALTER TABLE IF EXISTS ONLY public.probe DROP CONSTRAINT IF EXISTS probe_pkey;
+DROP TABLE IF EXISTS public.probe;
+DROP EXTENSION IF EXISTS vector;
+--
+-- Name: vector; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION vector; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION vector IS 'vector data type and ivfflat and hnsw access methods';
+
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: probe; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.probe (
+    id integer NOT NULL,
+    label text,
+    embedding public.vector(3)
+);
+
+
+ALTER TABLE public.probe OWNER TO postgres;
+
+--
+-- Data for Name: probe; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.probe (id, label, embedding) FROM stdin;
+1	Ångström	[1,0,0]
+2	Zebra	[0,1,0]
+3	apple	[0,0,1]
+\.
+
+
+--
+-- Name: probe probe_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.probe
+    ADD CONSTRAINT probe_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: probe_label; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX probe_label ON public.probe USING btree (label);
+
+
+--
+-- Name: probe_vector; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX probe_vector ON public.probe USING hnsw (embedding public.vector_l2_ops);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict hbtzPeY5bf0cQOVye0ZbfHuelJbgRUzoynfaiotb4vfYh0BdVn68UYWy48iMRnC
+
+
+exit=0
+$ docker stop --time 30 sprint011-pgcompat-4618f463-old
+Flag --time has been deprecated, use --timeout instead
+sprint011-pgcompat-4618f463-old
+
+exit=0
+$ docker run -d --name sprint011-pgcompat-4618f463-new
+de3c64cb6c4d4f4696293175b4193fd5552fc04515424685ea004419ad21b6ef
+
+exit=0
+$ docker exec -i sprint011-pgcompat-4618f463-new psql
+                                                       version                                                        
+----------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+(1 row)
+
+  datname  | datcollversion | actual | matches 
+-----------+----------------+--------+---------
+ postgres  | 2.36           | 2.41   | f
+ template1 | 2.36           | 2.41   | f
+(2 rows)
+
+ id |  label   | embedding 
+----+----------+-----------
+  1 | Ångström | [1,0,0]
+  2 | Zebra    | [0,1,0]
+  3 | apple    | [0,0,1]
+(3 rows)
+
+ id 
+----
+  1
+(1 row)
+
+  label   
+----------
+ Ångström
+ apple
+ Zebra
+(3 rows)
+
+WARNING:  database "postgres" has a collation version mismatch
+DETAIL:  The database was created using collation version 2.36, but the operating system provides version 2.41.
+HINT:  Rebuild all objects in this database that use the default collation and run ALTER DATABASE postgres REFRESH COLLATION VERSION, or build PostgreSQL with the right library version.
+
+exit=0
+$ docker exec -i sprint011-pgcompat-4618f463-new psql
+ collation_mismatches 
+----------------------
+                    2
+(1 row)
+
+WARNING:  database "postgres" has a collation version mismatch
+DETAIL:  The database was created using collation version 2.36, but the operating system provides version 2.41.
+HINT:  Rebuild all objects in this database that use the default collation and run ALTER DATABASE postgres REFRESH COLLATION VERSION, or build PostgreSQL with the right library version.
+
+exit=0
+$ docker stop --time 30 sprint011-pgcompat-4618f463-new
+Flag --time has been deprecated, use --timeout instead
+sprint011-pgcompat-4618f463-new
+
+exit=0
+$ docker run -d --name sprint011-pgcompat-4618f463-restore
+eab4964295115b927350a9ef81d1b62a42d9b0e716d5e44dcaa365cf47de4f89
+
+exit=0
+$ docker exec -i sprint011-pgcompat-4618f463-restore psql
+SET
+SET
+SET
+SET
+SET
+ set_config 
+------------
+ 
+(1 row)
+
+SET
+SET
+SET
+SET
+DROP INDEX
+DROP INDEX
+ALTER TABLE
+DROP TABLE
+DROP EXTENSION
+CREATE EXTENSION
+COMMENT
+SET
+SET
+CREATE TABLE
+ALTER TABLE
+COPY 3
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+
+exit=0
+$ docker exec -i sprint011-pgcompat-4618f463-restore psql
+                                                       version                                                        
+----------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+(1 row)
+
+  datname  | datcollversion | actual | matches 
+-----------+----------------+--------+---------
+ postgres  | 2.41           | 2.41   | t
+ template1 | 2.41           | 2.41   | t
+(2 rows)
+
+ id |  label   | embedding 
+----+----------+-----------
+  1 | Ångström | [1,0,0]
+  2 | Zebra    | [0,1,0]
+  3 | apple    | [0,0,1]
+(3 rows)
+
+ id 
+----
+  1
+(1 row)
+
+  label   
+----------
+ Ångström
+ apple
+ Zebra
+(3 rows)
+
+
+exit=0
+$ docker exec -i sprint011-pgcompat-4618f463-restore psql
+DO
+
+exit=0
+Physical restart and logical restore completed on separate scratch volumes. Review explicit collation results; no blanket physical-upgrade compatibility claim.
+$ docker stop --time 30 sprint011-pgcompat-4618f463-restore
+Flag --time has been deprecated, use --timeout instead
+sprint011-pgcompat-4618f463-restore
+
+exit=0

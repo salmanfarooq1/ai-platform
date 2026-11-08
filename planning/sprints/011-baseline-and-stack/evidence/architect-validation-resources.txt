@@ -1,0 +1,12 @@
+Concurrent final scan and test diagnostics; resource observation only, not a substitute for passing reruns.
+/proc/loadavg
+10.06 10.40 9.83 1/1244 12257
+/proc/pressure/io
+some avg10=24.34 avg60=33.46 avg300=29.82 total=419781215
+full avg10=21.11 avg60=26.92 avg300=21.77 total=311011091
+/proc/pressure/cpu
+some avg10=2.87 avg60=4.08 avg300=7.66 total=264340404
+full avg10=0.00 avg60=0.00 avg300=0.00 total=0
+  PID     ELAPSED     TIME %CPU STAT WCHAN
+11328       07:35 00:01:57 25.8 Sl   futex_wait_queue
+11786       02:16 00:00:11  8.2 D    folio_wait_bit_common

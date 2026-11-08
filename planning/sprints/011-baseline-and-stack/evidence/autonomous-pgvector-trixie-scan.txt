@@ -1,0 +1,3 @@
+NAME                      INSTALLED        FIXED IN         TYPE       VULNERABILITY        SEVERITY  EPSS         RISK   
+libpcre2-8-0              10.46-1~deb13u2  10.46-1~deb13u3  deb        CVE-2026-103111      High      0.2% (11th)  0.2    
+github.com/moby/sys/user  v0.1.0           0.4.1            go-module  GHSA-mjcv-p78q-w5fw  Medium    0.1% (1st)   < 0.1

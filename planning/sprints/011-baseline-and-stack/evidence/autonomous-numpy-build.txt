@@ -1,0 +1,1777 @@
+* Getting build dependencies for wheel...
+
+ERROR Missing dependencies:
+	patchelf>=0.11.0
+* Getting build dependencies for wheel...
+* Building wheel...
+
+meson-python: error: Could not find ninja version 1.8.2 or newer.
+
+ERROR Backend subprocess exited when trying to invoke build_wheel
+* Getting build dependencies for wheel...
+* Building wheel...
++ /tmp/sprint011-builder/numpy-build-env/bin/python /tmp/sprint011-builder/numpy-2.4.2/vendored-meson/meson/meson.py setup /tmp/sprint011-builder/numpy-2.4.2 /tmp/sprint011-builder/numpy-compile -Dbuildtype=release -Db_ndebug=if-release -Db_vscrt=md -Dblas=none -Dlapack=none --native-file=/tmp/sprint011-builder/numpy-compile/meson-python-native-file.ini
+The Meson build system
+Version: 1.9.2
+Source dir: /tmp/sprint011-builder/numpy-2.4.2
+Build dir: /tmp/sprint011-builder/numpy-compile
+Build type: native build
+Project name: NumPy
+Project version: 2.4.2
+C compiler for the host machine: cc (gcc 11.4.0 "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C linker for the host machine: cc ld.bfd 2.38
+C++ compiler for the host machine: c++ (gcc 11.4.0 "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0")
+C++ linker for the host machine: c++ ld.bfd 2.38
+Cython compiler for the host machine: cython (cython 3.2.4)
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Program python found: YES (/tmp/sprint011-builder/numpy-build-env/bin/python)
+Found pkg-config: YES (/usr/bin/pkg-config) 0.29.2
+Run-time dependency python found: YES 3.11
+Has header "Python.h" with dependency python-3.11: YES 
+Compiler for C supports arguments -fno-strict-aliasing: YES 
+Test features "X86_V2" : Supported 
+Test features "X86_V3" : Supported 
+Test features "X86_V4" : Supported 
+Test features "AVX512_ICL" : Supported 
+Test features "AVX512_SPR" : Unsupported due to Arguments "-msse, -msse2, -msse3, -mssse3, -msse4.1, -msse4.2, -mpopcnt, -msahf, -mcx16, -DHWY_WANT_SSE4, -DHWY_DISABLE_PCLMUL_AES, -mavx, -mavx2, -mfma, -mbmi, -mbmi2, -mlzcnt, -mf16c, -mmovbe, -mavx512f, -mavx512cd, -mavx512vl, -mavx512bw, -mavx512dq, -mavx512vbmi, -mavx512vbmi2, -mavx512vnni, -mavx512bitalg, -mavx512vpopcntdq, -mavx512ifma, -mvaes, -mgfni, -mvpclmulqdq, -mavx512fp16, -mavx512bf16" are not supported
+Configuring npy_cpu_dispatch_config.h using configuration
+Message: 
+CPU Optimization Options
+  baseline:
+    Requested : min
+    Enabled   : X86_V2
+  dispatch:
+    Requested : max
+    Enabled   : X86_V3 X86_V4 AVX512_ICL
+
+Library m found: YES
+Did not find CMake 'cmake'
+Found CMake: NO
+Run-time dependency none found: NO (tried pkgconfig and cmake)
+Run-time dependency none found: NO (tried pkgconfig and cmake)
+Checking if "Check atomic builtins without -latomic" links: YES 
+Program _build_utils/process_src_template.py found: YES (/tmp/sprint011-builder/numpy-build-env/bin/python /tmp/sprint011-builder/numpy-2.4.2/numpy/_build_utils/process_src_template.py)
+Program _build_utils/tempita.py found: YES (/tmp/sprint011-builder/numpy-build-env/bin/python /tmp/sprint011-builder/numpy-2.4.2/numpy/_build_utils/tempita.py)
+Configuring __config__.py using configuration
+../numpy-2.4.2/numpy/meson.build:445: WARNING: The variable(s) 'BLAS_INCLUDEDIR', 'BLAS_LIBDIR', 'BLAS_OPENBLAS_CONFIG', 'BLAS_PCFILEDIR', 'BLAS_TYPE_NAME', 'BLAS_VERSION', 'LAPACK_INCLUDEDIR', 'LAPACK_LIBDIR', 'LAPACK_OPENBLAS_CONFIG', 'LAPACK_PCFILEDIR', 'LAPACK_TYPE_NAME', 'LAPACK_VERSION' in the input file 'numpy/__config__.py.in' are not present in the given configuration data.
+Checking for size of "short" : 2 
+Checking for size of "int" : 4 
+Checking for size of "long" : 8 
+Checking for size of "long long" : 8 
+Checking for size of "float" : 4 
+Checking for size of "double" : 8 
+Checking for size of "long double" : 16 
+Checking for size of "size_t" : 8 
+Checking for size of "size_t" : 8 (cached)
+Checking for size of "wchar_t" : 4 
+Checking for size of "off_t" : 8 
+Checking for size of "Py_intptr_t" with dependency python-3.11: 8 
+Checking for size of "PY_LONG_LONG" with dependency python-3.11: 8 
+Has header "complex.h" : YES 
+Checking for type "complex float" : YES 
+Checking for size of "complex float" : 8 
+Checking for type "complex double" : YES 
+Checking for size of "complex double" : 16 
+Checking for type "complex long double" : YES 
+Checking for size of "complex long double" : 32 
+Checking for function "sin" with dependency -lm: YES 
+Checking for function "cos" with dependency -lm: YES 
+Checking for function "tan" with dependency -lm: YES 
+Checking for function "sinh" with dependency -lm: YES 
+Checking for function "cosh" with dependency -lm: YES 
+Checking for function "tanh" with dependency -lm: YES 
+Checking for function "fabs" with dependency -lm: YES 
+Checking for function "floor" with dependency -lm: YES 
+Checking for function "ceil" with dependency -lm: YES 
+Checking for function "sqrt" with dependency -lm: YES 
+Checking for function "log10" with dependency -lm: YES 
+Checking for function "log" with dependency -lm: YES 
+Checking for function "exp" with dependency -lm: YES 
+Checking for function "asin" with dependency -lm: YES 
+Checking for function "acos" with dependency -lm: YES 
+Checking for function "atan" with dependency -lm: YES 
+Checking for function "fmod" with dependency -lm: YES 
+Checking for function "modf" with dependency -lm: YES 
+Checking for function "frexp" with dependency -lm: YES 
+Checking for function "ldexp" with dependency -lm: YES 
+Checking for function "expm1" with dependency -lm: YES 
+Checking for function "log1p" with dependency -lm: YES 
+Checking for function "acosh" with dependency -lm: YES 
+Checking for function "asinh" with dependency -lm: YES 
+Checking for function "atanh" with dependency -lm: YES 
+Checking for function "rint" with dependency -lm: YES 
+Checking for function "trunc" with dependency -lm: YES 
+Checking for function "exp2" with dependency -lm: YES 
+Checking for function "copysign" with dependency -lm: YES 
+Checking for function "nextafter" with dependency -lm: YES 
+Checking for function "cbrt" with dependency -lm: YES 
+Checking for function "log2" with dependency -lm: YES 
+Checking for function "pow" with dependency -lm: YES 
+Checking for function "hypot" with dependency -lm: YES 
+Checking for function "atan2" with dependency -lm: YES 
+Checking for function "csin" with dependency -lm: YES 
+Checking for function "csinh" with dependency -lm: YES 
+Checking for function "ccos" with dependency -lm: YES 
+Checking for function "ccosh" with dependency -lm: YES 
+Checking for function "ctan" with dependency -lm: YES 
+Checking for function "ctanh" with dependency -lm: YES 
+Checking for function "creal" with dependency -lm: YES 
+Checking for function "cimag" with dependency -lm: YES 
+Checking for function "conj" with dependency -lm: YES 
+Checking for function "strtoll" : YES 
+Checking for function "strtoull" : YES 
+Checking for function "cabs" with dependency -lm: YES 
+Checking for function "cabsf" with dependency -lm: YES 
+Checking for function "cabsl" with dependency -lm: YES 
+Checking for function "cacos" with dependency -lm: YES 
+Checking for function "cacosf" with dependency -lm: YES 
+Checking for function "cacosl" with dependency -lm: YES 
+Checking for function "cacosh" with dependency -lm: YES 
+Checking for function "cacoshf" with dependency -lm: YES 
+Checking for function "cacoshl" with dependency -lm: YES 
+Checking for function "carg" with dependency -lm: YES 
+Checking for function "cargf" with dependency -lm: YES 
+Checking for function "cargl" with dependency -lm: YES 
+Checking for function "casin" with dependency -lm: YES 
+Checking for function "casinf" with dependency -lm: YES 
+Checking for function "casinl" with dependency -lm: YES 
+Checking for function "casinh" with dependency -lm: YES 
+Checking for function "casinhf" with dependency -lm: YES 
+Checking for function "casinhl" with dependency -lm: YES 
+Checking for function "catan" with dependency -lm: YES 
+Checking for function "catanf" with dependency -lm: YES 
+Checking for function "catanl" with dependency -lm: YES 
+Checking for function "catanh" with dependency -lm: YES 
+Checking for function "catanhf" with dependency -lm: YES 
+Checking for function "catanhl" with dependency -lm: YES 
+Checking for function "cexp" with dependency -lm: YES 
+Checking for function "cexpf" with dependency -lm: YES 
+Checking for function "cexpl" with dependency -lm: YES 
+Checking for function "clog" with dependency -lm: YES 
+Checking for function "clogf" with dependency -lm: YES 
+Checking for function "clogl" with dependency -lm: YES 
+Checking for function "cpow" with dependency -lm: YES 
+Checking for function "cpowf" with dependency -lm: YES 
+Checking for function "cpowl" with dependency -lm: YES 
+Checking for function "csqrt" with dependency -lm: YES 
+Checking for function "csqrtf" with dependency -lm: YES 
+Checking for function "csqrtl" with dependency -lm: YES 
+Checking for function "csin" with dependency -lm: YES (cached)
+Checking for function "csinf" with dependency -lm: YES 
+Checking for function "csinl" with dependency -lm: YES 
+Checking for function "csinh" with dependency -lm: YES (cached)
+Checking for function "csinhf" with dependency -lm: YES 
+Checking for function "csinhl" with dependency -lm: YES 
+Checking for function "ccos" with dependency -lm: YES (cached)
+Checking for function "ccosf" with dependency -lm: YES 
+Checking for function "ccosl" with dependency -lm: YES 
+Checking for function "ccosh" with dependency -lm: YES (cached)
+Checking for function "ccoshf" with dependency -lm: YES 
+Checking for function "ccoshl" with dependency -lm: YES 
+Checking for function "ctan" with dependency -lm: YES (cached)
+Checking for function "ctanf" with dependency -lm: YES 
+Checking for function "ctanl" with dependency -lm: YES 
+Checking for function "ctanh" with dependency -lm: YES (cached)
+Checking for function "ctanhf" with dependency -lm: YES 
+Checking for function "ctanhl" with dependency -lm: YES 
+Checking for function "isfinite" with dependency -lm: YES 
+Header "Python.h" has symbol "isfinite" with dependency python-3.11: YES 
+Checking for function "isinf" with dependency -lm: YES 
+Header "Python.h" has symbol "isinf" with dependency python-3.11: YES 
+Checking for function "isnan" with dependency -lm: YES 
+Header "Python.h" has symbol "isnan" with dependency python-3.11: YES 
+Checking for function "signbit" with dependency -lm: YES 
+Header "Python.h" has symbol "signbit" with dependency python-3.11: YES 
+Checking if "thread_local" compiles: NO 
+Checking if "_Thread_local" compiles: YES 
+Checking if "__thread" compiles: YES 
+Checking if "__declspec(thread)" compiles: NO 
+Checking for function "fallocate" : YES 
+Header "Python.h" has symbol "HAVE_FTELLO" with dependency python-3.11: YES 
+Header "Python.h" has symbol "HAVE_FSEEKO" with dependency python-3.11: YES 
+Checking for function "backtrace" : YES 
+Checking for function "madvise" : YES 
+Has header "features.h" : YES 
+Has header "xlocale.h" : NO 
+Has header "dlfcn.h" : YES 
+Has header "execinfo.h" : YES 
+Has header "libunwind.h" : NO 
+Has header "sys/mman.h" : YES 
+Checking for function "strtold_l" : YES 
+Checking if "__attribute__((optimize("unroll-loops")))" compiles: YES 
+Checking if "__attribute__((optimize("O3")))" compiles: YES 
+Checking if "__attribute__((nonnull(1)))" compiles: YES 
+Compiler for C supports arguments -O3: YES 
+Message: Long double format: INTEL_EXTENDED_16_BYTES_LE
+Has header "endian.h" : YES 
+Has header "sys/endian.h" : NO 
+Compiler for C supports function attribute visibility:hidden: YES 
+Configuring config.h using configuration
+Configuring _numpyconfig.h using configuration
+Configuring npymath.ini using configuration
+Configuring mlib.ini using configuration
+Configuring numpy.pc using configuration
+Generating multi-targets for "_umath_tests.dispatch.h" 
+  Enabled targets: X86_V3, baseline
+Generating multi-targets for "argfunc.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "x86_simd_argsort.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3
+Generating multi-targets for "x86_simd_qsort.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3
+Generating multi-targets for "x86_simd_qsort_16bit.dispatch.h" 
+  Enabled targets: AVX512_ICL
+Generating multi-targets for "highway_qsort.dispatch.h" 
+  Enabled targets: 
+Generating multi-targets for "highway_qsort_16bit.dispatch.h" 
+  Enabled targets: 
+Generating multi-targets for "loops_arithm_fp.dispatch.h" 
+  Enabled targets: X86_V3, baseline
+Generating multi-targets for "loops_arithmetic.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "loops_comparison.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "loops_exponent_log.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "loops_hyperbolic.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "loops_logical.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "loops_minmax.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "loops_modulo.dispatch.h" 
+  Enabled targets: baseline
+Generating multi-targets for "loops_trigonometric.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "loops_umath_fp.dispatch.h" 
+  Enabled targets: X86_V4, baseline
+Generating multi-targets for "loops_unary.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "loops_unary_fp.dispatch.h" 
+  Enabled targets: baseline
+Generating multi-targets for "loops_unary_fp_le.dispatch.h" 
+  Enabled targets: baseline
+Generating multi-targets for "loops_unary_complex.dispatch.h" 
+  Enabled targets: X86_V4, X86_V3, baseline
+Generating multi-targets for "loops_autovec.dispatch.h" 
+  Enabled targets: X86_V3, baseline
+Generating multi-targets for "loops_half.dispatch.h" 
+  Enabled targets: X86_V4, baseline
+WARNING: Project targets '>=1.8.3' but uses feature deprecated since '1.3.0': Source file src/umath/svml/linux/avx512/svml_z0_acos_d_la.s in the 'objects' kwarg is not an object..
+Generating multi-targets for "_simd.dispatch.h" 
+  Enabled targets: X86_V3, X86_V4, baseline
+Build targets in project: 94
+WARNING: Deprecated features used:
+ * 1.3.0: {'Source file src/umath/svml/linux/avx512/svml_z0_acos_d_la.s in the 'objects' kwarg is not an object.'}
+
+NumPy 2.4.2
+
+  User defined options
+    Native files: /tmp/sprint011-builder/numpy-compile/meson-python-native-file.ini
+    b_ndebug    : if-release
+    b_vscrt     : md
+    blas        : none
+    buildtype   : release
+    lapack      : none
+
+Found ninja-1.13.0.git.kitware.jobserver-pipe-1 at /tmp/sprint011-builder/numpy-build-env/bin/ninja
++ /tmp/sprint011-builder/numpy-build-env/bin/ninja -j2
+[1/479] Copying file numpy/__init__.py
+[2/479] Generating numpy/_core/__umath_generated with a custom command
+[3/479] Copying file numpy/__init__.pxd
+[4/479] Copying file numpy/__init__.cython-30.pxd
+[5/479] Generating numpy/_core/npy_math_internal.h with a custom command
+[6/479] Generating 'numpy/_core/libnpymath.a.p/ieee754.c'
+[7/479] Generating 'numpy/_core/libnpymath.a.p/npy_math_complex.c'
+[8/479] Generating numpy/_core/__ufunc_api with a custom command
+[9/479] Generating numpy/_core/__multiarray_api with a custom command
+[10/479] Generating 'numpy/_core/libargfunc.dispatch.h_baseline.a.p/arraytypes.h'
+[11/479] Generating 'numpy/_core/libargfunc.dispatch.h_baseline.a.p/npy_sort.h'
+[12/479] Generating 'numpy/_core/libargfunc.dispatch.h_baseline.a.p/argfunc.dispatch.c'
+[13/479] Generating 'numpy/_core/libargfunc.dispatch.h_X86_V4.a.p/arraytypes.h'
+[14/479] Generating 'numpy/_core/libargfunc.dispatch.h_X86_V4.a.p/npy_sort.h'
+[15/479] Generating 'numpy/_core/libargfunc.dispatch.h_X86_V4.a.p/argfunc.dispatch.c'
+[16/479] Generating 'numpy/_core/libargfunc.dispatch.h_X86_V3.a.p/arraytypes.h'
+[17/479] Generating 'numpy/_core/libargfunc.dispatch.h_X86_V3.a.p/npy_sort.h'
+[18/479] Generating 'numpy/_core/libargfunc.dispatch.h_X86_V3.a.p/argfunc.dispatch.c'
+[19/479] Generating 'numpy/_core/libx86_simd_argsort.dispatch.h_X86_V4.a.p/arraytypes.h'
+[20/479] Generating 'numpy/_core/libx86_simd_argsort.dispatch.h_X86_V4.a.p/npy_sort.h'
+[21/479] Generating 'numpy/_core/libx86_simd_argsort.dispatch.h_X86_V3.a.p/arraytypes.h'
+[22/479] Generating 'numpy/_core/libx86_simd_argsort.dispatch.h_X86_V3.a.p/npy_sort.h'
+[23/479] Generating 'numpy/_core/libx86_simd_qsort.dispatch.h_X86_V4.a.p/arraytypes.h'
+[24/479] Generating 'numpy/_core/libx86_simd_qsort.dispatch.h_X86_V4.a.p/npy_sort.h'
+[25/479] Generating 'numpy/_core/libx86_simd_qsort.dispatch.h_X86_V3.a.p/arraytypes.h'
+[26/479] Generating 'numpy/_core/libx86_simd_qsort.dispatch.h_X86_V3.a.p/npy_sort.h'
+[27/479] Generating 'numpy/_core/libx86_simd_qsort_16bit.dispatch.h_AVX512_ICL.a.p/arraytypes.h'
+[28/479] Generating 'numpy/_core/libx86_simd_qsort_16bit.dispatch.h_AVX512_ICL.a.p/npy_sort.h'
+[29/479] Generating 'numpy/_core/libloops_arithm_fp.dispatch.h_baseline.a.p/loops.h'
+[30/479] Generating 'numpy/_core/libloops_arithm_fp.dispatch.h_baseline.a.p/loops_utils.h'
+[31/479] Generating 'numpy/_core/libloops_arithm_fp.dispatch.h_baseline.a.p/loops_arithm_fp.dispatch.c'
+[32/479] Generating 'numpy/_core/libloops_arithm_fp.dispatch.h_X86_V3.a.p/loops.h'
+[33/479] Generating 'numpy/_core/libloops_arithm_fp.dispatch.h_X86_V3.a.p/loops_utils.h'
+[34/479] Generating 'numpy/_core/libloops_arithm_fp.dispatch.h_X86_V3.a.p/loops_arithm_fp.dispatch.c'
+[35/479] Generating 'numpy/_core/libloops_arithmetic.dispatch.h_baseline.a.p/loops.h'
+[36/479] Generating 'numpy/_core/libloops_arithmetic.dispatch.h_baseline.a.p/loops_utils.h'
+[37/479] Generating 'numpy/_core/libloops_arithmetic.dispatch.h_baseline.a.p/loops_arithmetic.dispatch.c'
+[38/479] Generating 'numpy/_core/libloops_arithmetic.dispatch.h_X86_V4.a.p/loops_utils.h'
+[39/479] Generating 'numpy/_core/libloops_arithmetic.dispatch.h_X86_V4.a.p/loops.h'
+[40/479] Generating 'numpy/_core/libloops_arithmetic.dispatch.h_X86_V4.a.p/loops_arithmetic.dispatch.c'
+[41/479] Generating 'numpy/_core/libloops_arithmetic.dispatch.h_X86_V3.a.p/loops.h'
+[42/479] Generating 'numpy/_core/libloops_arithmetic.dispatch.h_X86_V3.a.p/loops_utils.h'
+[43/479] Generating 'numpy/_core/libloops_arithmetic.dispatch.h_X86_V3.a.p/loops_arithmetic.dispatch.c'
+[44/479] Generating 'numpy/_core/libloops_comparison.dispatch.h_baseline.a.p/loops.h'
+[45/479] Generating 'numpy/_core/libloops_comparison.dispatch.h_baseline.a.p/loops_utils.h'
+[46/479] Generating 'numpy/_core/libloops_comparison.dispatch.h_X86_V4.a.p/loops.h'
+[47/479] Generating 'numpy/_core/libloops_comparison.dispatch.h_baseline.a.p/loops_comparison.dispatch.c'
+[48/479] Generating 'numpy/_core/libloops_comparison.dispatch.h_X86_V4.a.p/loops_utils.h'
+[49/479] Generating 'numpy/_core/libloops_comparison.dispatch.h_X86_V4.a.p/loops_comparison.dispatch.c'
+[50/479] Generating 'numpy/_core/libloops_comparison.dispatch.h_X86_V3.a.p/loops.h'
+[51/479] Generating 'numpy/_core/libloops_comparison.dispatch.h_X86_V3.a.p/loops_utils.h'
+[52/479] Generating 'numpy/_core/libloops_comparison.dispatch.h_X86_V3.a.p/loops_comparison.dispatch.c'
+[53/479] Generating 'numpy/_core/libloops_exponent_log.dispatch.h_baseline.a.p/loops.h'
+[54/479] Generating 'numpy/_core/libloops_exponent_log.dispatch.h_baseline.a.p/loops_utils.h'
+[55/479] Generating 'numpy/_core/libloops_exponent_log.dispatch.h_baseline.a.p/loops_exponent_log.dispatch.c'
+[56/479] Generating 'numpy/_core/libloops_exponent_log.dispatch.h_X86_V4.a.p/loops.h'
+[57/479] Generating 'numpy/_core/libloops_exponent_log.dispatch.h_X86_V4.a.p/loops_utils.h'
+[58/479] Generating 'numpy/_core/libloops_exponent_log.dispatch.h_X86_V4.a.p/loops_exponent_log.dispatch.c'
+[59/479] Generating 'numpy/_core/libloops_exponent_log.dispatch.h_X86_V3.a.p/loops.h'
+[60/479] Generating 'numpy/_core/libloops_exponent_log.dispatch.h_X86_V3.a.p/loops_utils.h'
+[61/479] Generating 'numpy/_core/libloops_exponent_log.dispatch.h_X86_V3.a.p/loops_exponent_log.dispatch.c'
+[62/479] Generating 'numpy/_core/libloops_hyperbolic.dispatch.h_baseline.a.p/loops.h'
+[63/479] Generating 'numpy/_core/libloops_hyperbolic.dispatch.h_baseline.a.p/loops_utils.h'
+[64/479] Generating 'numpy/_core/libloops_hyperbolic.dispatch.h_baseline.a.p/loops_hyperbolic.dispatch.cpp'
+[65/479] Generating 'numpy/_core/libloops_hyperbolic.dispatch.h_X86_V4.a.p/loops.h'
+[66/479] Generating 'numpy/_core/libloops_hyperbolic.dispatch.h_X86_V4.a.p/loops_utils.h'
+[67/479] Generating 'numpy/_core/libloops_hyperbolic.dispatch.h_X86_V4.a.p/loops_hyperbolic.dispatch.cpp'
+[68/479] Generating 'numpy/_core/libloops_hyperbolic.dispatch.h_X86_V3.a.p/loops.h'
+[69/479] Generating 'numpy/_core/libloops_hyperbolic.dispatch.h_X86_V3.a.p/loops_utils.h'
+[70/479] Generating 'numpy/_core/libloops_hyperbolic.dispatch.h_X86_V3.a.p/loops_hyperbolic.dispatch.cpp'
+[71/479] Generating 'numpy/_core/libloops_logical.dispatch.h_baseline.a.p/loops.h'
+[72/479] Generating 'numpy/_core/libloops_logical.dispatch.h_baseline.a.p/loops_utils.h'
+[73/479] Generating 'numpy/_core/libloops_logical.dispatch.h_X86_V4.a.p/loops.h'
+[74/479] Generating 'numpy/_core/libloops_logical.dispatch.h_X86_V4.a.p/loops_utils.h'
+[75/479] Generating 'numpy/_core/libloops_logical.dispatch.h_X86_V3.a.p/loops_utils.h'
+[76/479] Generating 'numpy/_core/libloops_logical.dispatch.h_X86_V3.a.p/loops.h'
+[77/479] Generating 'numpy/_core/libloops_minmax.dispatch.h_baseline.a.p/loops_utils.h'
+[78/479] Generating 'numpy/_core/libloops_minmax.dispatch.h_baseline.a.p/loops.h'
+[79/479] Generating 'numpy/_core/libloops_minmax.dispatch.h_X86_V4.a.p/loops.h'
+[80/479] Generating 'numpy/_core/libloops_minmax.dispatch.h_baseline.a.p/loops_minmax.dispatch.c'
+[81/479] Generating 'numpy/_core/libloops_minmax.dispatch.h_X86_V4.a.p/loops_utils.h'
+[82/479] Generating 'numpy/_core/libloops_minmax.dispatch.h_X86_V4.a.p/loops_minmax.dispatch.c'
+[83/479] Generating 'numpy/_core/libloops_minmax.dispatch.h_X86_V3.a.p/loops.h'
+[84/479] Generating 'numpy/_core/libloops_minmax.dispatch.h_X86_V3.a.p/loops_utils.h'
+[85/479] Generating 'numpy/_core/libloops_minmax.dispatch.h_X86_V3.a.p/loops_minmax.dispatch.c'
+[86/479] Generating 'numpy/_core/libloops_modulo.dispatch.h_baseline.a.p/loops.h'
+[87/479] Generating 'numpy/_core/libloops_modulo.dispatch.h_baseline.a.p/loops_utils.h'
+[88/479] Generating 'numpy/_core/libloops_modulo.dispatch.h_baseline.a.p/loops_modulo.dispatch.c'
+[89/479] Generating 'numpy/_core/libloops_trigonometric.dispatch.h_baseline.a.p/loops_utils.h'
+[90/479] Generating 'numpy/_core/libloops_trigonometric.dispatch.h_baseline.a.p/loops.h'
+[91/479] Generating 'numpy/_core/libloops_trigonometric.dispatch.h_X86_V4.a.p/loops_utils.h'
+[92/479] Generating 'numpy/_core/libloops_trigonometric.dispatch.h_X86_V4.a.p/loops.h'
+[93/479] Generating 'numpy/_core/libloops_trigonometric.dispatch.h_X86_V3.a.p/loops.h'
+[94/479] Generating 'numpy/_core/libloops_trigonometric.dispatch.h_X86_V3.a.p/loops_utils.h'
+[95/479] Generating 'numpy/_core/libloops_umath_fp.dispatch.h_baseline.a.p/loops_utils.h'
+[96/479] Generating 'numpy/_core/libloops_umath_fp.dispatch.h_baseline.a.p/loops.h'
+[97/479] Generating 'numpy/_core/libloops_umath_fp.dispatch.h_baseline.a.p/loops_umath_fp.dispatch.c'
+[98/479] Generating 'numpy/_core/libloops_umath_fp.dispatch.h_X86_V4.a.p/loops.h'
+[99/479] Generating 'numpy/_core/libloops_umath_fp.dispatch.h_X86_V4.a.p/loops_utils.h'
+[100/479] Generating 'numpy/_core/libloops_umath_fp.dispatch.h_X86_V4.a.p/loops_umath_fp.dispatch.c'
+[101/479] Generating 'numpy/_core/libloops_unary.dispatch.h_baseline.a.p/loops.h'
+[102/479] Generating 'numpy/_core/libloops_unary.dispatch.h_baseline.a.p/loops_utils.h'
+[103/479] Generating 'numpy/_core/libloops_unary.dispatch.h_baseline.a.p/loops_unary.dispatch.c'
+[104/479] Generating 'numpy/_core/libloops_unary.dispatch.h_X86_V4.a.p/loops.h'
+[105/479] Generating 'numpy/_core/libloops_unary.dispatch.h_X86_V4.a.p/loops_utils.h'
+[106/479] Generating 'numpy/_core/libloops_unary.dispatch.h_X86_V4.a.p/loops_unary.dispatch.c'
+[107/479] Generating 'numpy/_core/libloops_unary.dispatch.h_X86_V3.a.p/loops.h'
+[108/479] Generating 'numpy/_core/libloops_unary.dispatch.h_X86_V3.a.p/loops_utils.h'
+[109/479] Generating 'numpy/_core/libloops_unary_fp.dispatch.h_baseline.a.p/loops.h'
+[110/479] Generating 'numpy/_core/libloops_unary.dispatch.h_X86_V3.a.p/loops_unary.dispatch.c'
+[111/479] Generating 'numpy/_core/libloops_unary_fp.dispatch.h_baseline.a.p/loops_utils.h'
+[112/479] Generating 'numpy/_core/libloops_unary_fp.dispatch.h_baseline.a.p/loops_unary_fp.dispatch.c'
+[113/479] Generating 'numpy/_core/libloops_unary_fp_le.dispatch.h_baseline.a.p/loops.h'
+[114/479] Generating 'numpy/_core/libloops_unary_fp_le.dispatch.h_baseline.a.p/loops_utils.h'
+[115/479] Generating 'numpy/_core/libloops_unary_fp_le.dispatch.h_baseline.a.p/loops_unary_fp_le.dispatch.c'
+[116/479] Generating 'numpy/_core/libloops_unary_complex.dispatch.h_baseline.a.p/loops.h'
+[117/479] Generating 'numpy/_core/libloops_unary_complex.dispatch.h_baseline.a.p/loops_utils.h'
+[118/479] Generating 'numpy/_core/libloops_unary_complex.dispatch.h_baseline.a.p/loops_unary_complex.dispatch.c'
+[119/479] Generating 'numpy/_core/libloops_unary_complex.dispatch.h_X86_V4.a.p/loops_utils.h'
+[120/479] Generating 'numpy/_core/libloops_unary_complex.dispatch.h_X86_V4.a.p/loops.h'
+[121/479] Generating 'numpy/_core/libloops_unary_complex.dispatch.h_X86_V4.a.p/loops_unary_complex.dispatch.c'
+[122/479] Generating 'numpy/_core/libloops_unary_complex.dispatch.h_X86_V3.a.p/loops.h'
+[123/479] Generating 'numpy/_core/libloops_unary_complex.dispatch.h_X86_V3.a.p/loops_utils.h'
+[124/479] Generating 'numpy/_core/libloops_unary_complex.dispatch.h_X86_V3.a.p/loops_unary_complex.dispatch.c'
+[125/479] Generating 'numpy/_core/libloops_autovec.dispatch.h_baseline.a.p/loops.h'
+[126/479] Generating 'numpy/_core/libloops_autovec.dispatch.h_baseline.a.p/loops_utils.h'
+[127/479] Generating 'numpy/_core/libloops_autovec.dispatch.h_baseline.a.p/loops_autovec.dispatch.c'
+[128/479] Generating 'numpy/_core/libloops_autovec.dispatch.h_X86_V3.a.p/loops_utils.h'
+[129/479] Generating 'numpy/_core/libloops_autovec.dispatch.h_X86_V3.a.p/loops.h'
+[130/479] Generating 'numpy/_core/libloops_autovec.dispatch.h_X86_V3.a.p/loops_autovec.dispatch.c'
+[131/479] Generating 'numpy/_core/libloops_half.dispatch.h_baseline.a.p/loops.h'
+[132/479] Generating 'numpy/_core/libloops_half.dispatch.h_baseline.a.p/loops_utils.h'
+[133/479] Generating 'numpy/_core/libloops_half.dispatch.h_baseline.a.p/loops_half.dispatch.c'
+[134/479] Generating 'numpy/_core/libloops_half.dispatch.h_X86_V4.a.p/loops.h'
+[135/479] Generating 'numpy/_core/libloops_half.dispatch.h_X86_V4.a.p/loops_utils.h'
+[136/479] Generating 'numpy/_core/libloops_half.dispatch.h_X86_V4.a.p/loops_half.dispatch.c'
+[137/479] Generating 'numpy/_core/lib_simd.dispatch.h_baseline.a.p/_simd_inc.h'
+[138/479] Generating 'numpy/_core/lib_simd.dispatch.h_baseline.a.p/_simd_data.inc'
+[139/479] Generating 'numpy/_core/lib_simd.dispatch.h_X86_V3.a.p/_simd_inc.h'
+[140/479] Generating 'numpy/_core/lib_simd.dispatch.h_baseline.a.p/_simd.dispatch.c'
+[141/479] Generating 'numpy/_core/lib_simd.dispatch.h_X86_V3.a.p/_simd_data.inc'
+[142/479] Generating 'numpy/_core/lib_simd.dispatch.h_X86_V4.a.p/_simd_inc.h'
+[143/479] Generating 'numpy/_core/lib_simd.dispatch.h_X86_V3.a.p/_simd.dispatch.c'
+[144/479] Generating 'numpy/_core/lib_simd.dispatch.h_X86_V4.a.p/_simd_data.inc'
+[145/479] Generating 'numpy/_core/lib_simd.dispatch.h_X86_V4.a.p/_simd.dispatch.c'
+[146/479] Copying file numpy/random/__init__.py
+[147/479] Copying file numpy/random/__init__.pxd
+[148/479] Copying file numpy/random/_common.pxd
+[149/479] Copying file numpy/random/bit_generator.pxd
+[150/479] Copying file numpy/random/c_distributions.pxd
+[151/479] Generating numpy/random/_bounded_integer_pxd with a custom command
+[152/479] Generating numpy/random/_bounded_integer_pyx with a custom command
+[153/479] Copying file numpy/random/_generator.pyx
+[154/479] Copying file numpy/random/mtrand.pyx
+[155/479] Compiling C object numpy/_core/libnpymath.a.p/meson-generated_ieee754.c.o
+[156/479] Compiling C object numpy/_core/libnpymath.a.p/meson-generated_npy_math_complex.c.o
+[157/479] Compiling C++ object numpy/_core/libhighway.a.p/src_highway_hwy_abort.cc.o
+[158/479] Compiling C object numpy/_core/libnpymath.a.p/src_npymath_npy_math.c.o
+[159/479] Generating numpy/_core/_umath_doc_generated with a custom command
+[160/479] Generating 'numpy/_core/_multiarray_tests.cpython-311-x86_64-linux-gnu.so.p/_multiarray_tests.c'
+[161/479] Generating 'numpy/_core/_multiarray_tests.cpython-311-x86_64-linux-gnu.so.p/templ_common.h'
+[162/479] Compiling C object numpy/_core/lib_umath_tests.dispatch.h_baseline.a.p/src_umath__umath_tests.dispatch.c.o
+[163/479] Compiling C++ object numpy/_core/libnpymath.a.p/src_npymath_halffloat.cpp.o
+[164/479] Generating 'numpy/_core/_umath_tests.cpython-311-x86_64-linux-gnu.so.p/_umath_tests.c'
+[165/479] Compiling C object numpy/_core/lib_umath_tests.dispatch.h_X86_V3.a.p/src_umath__umath_tests.dispatch.c.o
+[166/479] Compiling C object numpy/_core/libargfunc.dispatch.h_baseline.a.p/meson-generated_argfunc.dispatch.c.o
+[167/479] Compiling C object numpy/_core/libargfunc.dispatch.h_X86_V4.a.p/meson-generated_argfunc.dispatch.c.o
+[168/479] Compiling C object numpy/_core/libargfunc.dispatch.h_X86_V3.a.p/meson-generated_argfunc.dispatch.c.o
+[169/479] Compiling C++ object numpy/_core/libx86_simd_argsort.dispatch.h_X86_V4.a.p/src_npysort_x86_simd_argsort.dispatch.cpp.o
+[170/479] Compiling C++ object numpy/_core/libx86_simd_argsort.dispatch.h_X86_V3.a.p/src_npysort_x86_simd_argsort.dispatch.cpp.o
+[171/479] Compiling C++ object numpy/_core/libx86_simd_qsort.dispatch.h_X86_V4.a.p/src_npysort_x86_simd_qsort.dispatch.cpp.o
+[172/479] Compiling C++ object numpy/_core/libx86_simd_qsort.dispatch.h_X86_V3.a.p/src_npysort_x86_simd_qsort.dispatch.cpp.o
+[173/479] Compiling C object numpy/_core/libloops_arithm_fp.dispatch.h_baseline.a.p/meson-generated_loops_arithm_fp.dispatch.c.o
+[174/479] Compiling C object numpy/_core/libloops_arithm_fp.dispatch.h_X86_V3.a.p/meson-generated_loops_arithm_fp.dispatch.c.o
+[175/479] Compiling C++ object numpy/_core/libx86_simd_qsort_16bit.dispatch.h_AVX512_ICL.a.p/src_npysort_x86_simd_qsort_16bit.dispatch.cpp.o
+[176/479] Compiling C object numpy/_core/libloops_arithmetic.dispatch.h_baseline.a.p/meson-generated_loops_arithmetic.dispatch.c.o
+[177/479] Compiling C object numpy/_core/libloops_arithmetic.dispatch.h_X86_V4.a.p/meson-generated_loops_arithmetic.dispatch.c.o
+[178/479] Compiling C object numpy/_core/libloops_arithmetic.dispatch.h_X86_V3.a.p/meson-generated_loops_arithmetic.dispatch.c.o
+[179/479] Compiling C object numpy/_core/libloops_comparison.dispatch.h_baseline.a.p/meson-generated_loops_comparison.dispatch.c.o
+[180/479] Compiling C object numpy/_core/libloops_comparison.dispatch.h_X86_V4.a.p/meson-generated_loops_comparison.dispatch.c.o
+[181/479] Compiling C object numpy/_core/libloops_exponent_log.dispatch.h_baseline.a.p/meson-generated_loops_exponent_log.dispatch.c.o
+[182/479] Compiling C object numpy/_core/libloops_exponent_log.dispatch.h_X86_V4.a.p/meson-generated_loops_exponent_log.dispatch.c.o
+[183/479] Compiling C object numpy/_core/libloops_exponent_log.dispatch.h_X86_V3.a.p/meson-generated_loops_exponent_log.dispatch.c.o
+[184/479] Compiling C object numpy/_core/libloops_comparison.dispatch.h_X86_V3.a.p/meson-generated_loops_comparison.dispatch.c.o
+[185/479] Compiling C++ object numpy/_core/libloops_hyperbolic.dispatch.h_baseline.a.p/meson-generated_loops_hyperbolic.dispatch.cpp.o
+[186/479] Compiling C++ object numpy/_core/libloops_hyperbolic.dispatch.h_X86_V4.a.p/meson-generated_loops_hyperbolic.dispatch.cpp.o
+[187/479] Compiling C++ object numpy/_core/libloops_hyperbolic.dispatch.h_X86_V3.a.p/meson-generated_loops_hyperbolic.dispatch.cpp.o
+[188/479] Compiling C++ object numpy/_core/libloops_logical.dispatch.h_baseline.a.p/src_umath_loops_logical.dispatch.cpp.o
+[189/479] Compiling C++ object numpy/_core/libloops_logical.dispatch.h_X86_V4.a.p/src_umath_loops_logical.dispatch.cpp.o
+[190/479] Compiling C++ object numpy/_core/libloops_logical.dispatch.h_X86_V3.a.p/src_umath_loops_logical.dispatch.cpp.o
+[191/479] Compiling C object numpy/_core/libloops_minmax.dispatch.h_baseline.a.p/meson-generated_loops_minmax.dispatch.c.o
+[192/479] Compiling C object numpy/_core/libloops_minmax.dispatch.h_X86_V4.a.p/meson-generated_loops_minmax.dispatch.c.o
+[193/479] Compiling C object numpy/_core/libloops_modulo.dispatch.h_baseline.a.p/meson-generated_loops_modulo.dispatch.c.o
+[194/479] Compiling C++ object numpy/_core/libloops_trigonometric.dispatch.h_baseline.a.p/src_umath_loops_trigonometric.dispatch.cpp.o
+[195/479] Compiling C object numpy/_core/libloops_minmax.dispatch.h_X86_V3.a.p/meson-generated_loops_minmax.dispatch.c.o
+[196/479] Compiling C++ object numpy/_core/libloops_trigonometric.dispatch.h_X86_V4.a.p/src_umath_loops_trigonometric.dispatch.cpp.o
+[197/479] Compiling C++ object numpy/_core/libloops_trigonometric.dispatch.h_X86_V3.a.p/src_umath_loops_trigonometric.dispatch.cpp.o
+[198/479] Compiling C object numpy/_core/libloops_umath_fp.dispatch.h_baseline.a.p/meson-generated_loops_umath_fp.dispatch.c.o
+[199/479] Compiling C object numpy/_core/libloops_unary.dispatch.h_baseline.a.p/meson-generated_loops_unary.dispatch.c.o
+[200/479] Compiling C object numpy/_core/libloops_umath_fp.dispatch.h_X86_V4.a.p/meson-generated_loops_umath_fp.dispatch.c.o
+[201/479] Compiling C object numpy/_core/libloops_unary.dispatch.h_X86_V4.a.p/meson-generated_loops_unary.dispatch.c.o
+[202/479] Compiling C object numpy/_core/libloops_unary.dispatch.h_X86_V3.a.p/meson-generated_loops_unary.dispatch.c.o
+[203/479] Compiling C object numpy/_core/libloops_unary_fp.dispatch.h_baseline.a.p/meson-generated_loops_unary_fp.dispatch.c.o
+[204/479] Compiling C object numpy/_core/libloops_unary_fp_le.dispatch.h_baseline.a.p/meson-generated_loops_unary_fp_le.dispatch.c.o
+[205/479] Compiling C object numpy/_core/libloops_unary_complex.dispatch.h_baseline.a.p/meson-generated_loops_unary_complex.dispatch.c.o
+[206/479] Compiling C object numpy/_core/libloops_unary_complex.dispatch.h_X86_V4.a.p/meson-generated_loops_unary_complex.dispatch.c.o
+[207/479] Compiling C object numpy/_core/libloops_unary_complex.dispatch.h_X86_V3.a.p/meson-generated_loops_unary_complex.dispatch.c.o
+[208/479] Compiling C object numpy/_core/libloops_autovec.dispatch.h_baseline.a.p/meson-generated_loops_autovec.dispatch.c.o
+[209/479] Compiling C object numpy/_core/libloops_half.dispatch.h_baseline.a.p/meson-generated_loops_half.dispatch.c.o
+[210/479] Compiling C object numpy/_core/libloops_half.dispatch.h_X86_V4.a.p/meson-generated_loops_half.dispatch.c.o
+[211/479] Compiling C object numpy/_core/libloops_autovec.dispatch.h_X86_V3.a.p/meson-generated_loops_autovec.dispatch.c.o
+[212/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/arraytypes.h'
+[213/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/npy_sort.h'
+[214/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/arraytypes.c'
+[215/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/einsum_sumprod.c'
+[216/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/lowlevel_strided_loops.c'
+[217/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/nditer_templ.c'
+[218/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/scalartypes.c'
+[219/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/templ_common.h'
+[220/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/loops.h'
+[221/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/loops_utils.h'
+[222/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/funcs.inc'
+[223/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/loops.c'
+[224/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/matmul.c'
+[225/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/matmul.h'
+[226/479] Generating 'numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/scalarmath.c'
+[227/479] Compiling C++ object numpy/_core/libunique_hash.a.p/src_multiarray_unique.cpp.o
+[228/479] Compiling C object numpy/_core/lib_simd.dispatch.h_baseline.a.p/meson-generated__simd.dispatch.c.o
+[229/479] Compiling C object numpy/_core/lib_simd.dispatch.h_X86_V3.a.p/meson-generated__simd.dispatch.c.o
+[230/479] Compiling C object numpy/random/libnpyrandom.a.p/src_distributions_logfactorial.c.o
+[231/479] Compiling C object numpy/random/libnpyrandom.a.p/src_distributions_distributions.c.o
+[232/479] Compiling C object numpy/random/libnpyrandom.a.p/src_distributions_random_mvhg_count.c.o
+[233/479] Compiling C object numpy/random/libnpyrandom.a.p/src_distributions_random_mvhg_marginals.c.o
+[234/479] Compiling C object numpy/random/libnpyrandom.a.p/src_distributions_random_hypergeometric.c.o
+[235/479] Compiling Cython source numpy/random/_bounded_integers.pyx
+[236/479] Compiling Cython source /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_common.pyx
+[237/479] Compiling Cython source /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_mt19937.pyx
+[238/479] Compiling Cython source /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_philox.pyx
+[239/479] Compiling C object numpy/_core/lib_simd.dispatch.h_X86_V4.a.p/meson-generated__simd.dispatch.c.o
+[240/479] Compiling Cython source /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_pcg64.pyx
+[241/479] Compiling Cython source /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_sfc64.pyx
+[242/479] Compiling Cython source /tmp/sprint011-builder/numpy-2.4.2/numpy/random/bit_generator.pyx
+[243/479] Compiling Cython source numpy/random/_generator.pyx
+[244/479] Linking static target numpy/_core/libhighway.a
+[245/479] Linking static target numpy/_core/libnpymath.a
+[246/479] Compiling Cython source numpy/random/mtrand.pyx
+[247/479] Compiling C object numpy/_core/_multiarray_tests.cpython-311-x86_64-linux-gnu.so.p/src_common_mem_overlap.c.o
+[248/479] Compiling C object numpy/_core/_multiarray_tests.cpython-311-x86_64-linux-gnu.so.p/meson-generated__multiarray_tests.c.o
+[249/479] Compiling C object numpy/_core/_multiarray_tests.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_argparse.c.o
+[250/479] Compiling C object numpy/_core/_multiarray_tests.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_import.c.o
+[251/479] Linking static target numpy/_core/lib_umath_tests_mtargets.a
+[252/479] Compiling C object numpy/_core/_umath_tests.cpython-311-x86_64-linux-gnu.so.p/meson-generated__umath_tests.c.o
+[253/479] Compiling C++ object numpy/_core/_multiarray_tests.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_hashtable.cpp.o
+[254/479] Compiling C object numpy/_core/_umath_tests.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_cpu_features.c.o
+[255/479] Compiling C object numpy/_core/_struct_ufunc_tests.cpython-311-x86_64-linux-gnu.so.p/src_umath__struct_ufunc_tests.c.o
+[256/479] Compiling C object numpy/_core/_operand_flag_tests.cpython-311-x86_64-linux-gnu.so.p/src_umath__operand_flag_tests.c.o
+[257/479] Linking static target numpy/_core/libunique_hash.a
+[258/479] Linking static target numpy/_core/lib_multiarray_umath_mtargets.a
+[259/479] Compiling C object numpy/_core/_rational_tests.cpython-311-x86_64-linux-gnu.so.p/src_umath__rational_tests.c.o
+[260/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/meson-generated_einsum_sumprod.c.o
+[261/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/meson-generated_arraytypes.c.o
+[262/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/meson-generated_nditer_templ.c.o
+[263/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/meson-generated_scalartypes.c.o
+[264/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/meson-generated_loops.c.o
+[265/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/meson-generated_matmul.c.o
+[266/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/meson-generated_scalarmath.c.o
+[267/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_abstractdtypes.c.o
+[268/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_alloc.c.o
+[269/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_arrayobject.c.o
+[270/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_array_coercion.c.o
+[271/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_array_converter.c.o
+[272/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_array_method.c.o
+[273/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_array_api_standard.c.o
+[274/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_array_assign_scalar.c.o
+[275/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_array_assign_array.c.o
+[276/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_arrayfunction_override.c.o
+[277/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_arraywrap.c.o
+[278/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_buffer.c.o
+[279/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_calculation.c.o
+[280/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_compiled_base.c.o
+[281/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_common.c.o
+[282/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_common_dtype.c.o
+[283/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_convert.c.o
+[284/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_convert_datatype.c.o
+[285/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_conversion_utils.c.o
+[286/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_ctors.c.o
+[287/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_datetime.c.o
+[288/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/meson-generated_lowlevel_strided_loops.c.o
+[289/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_datetime_strings.c.o
+[290/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_datetime_busday.c.o
+[291/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_datetime_busdaycal.c.o
+[292/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_dlpack.c.o
+[293/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_dtypemeta.c.o
+[294/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_descriptor.c.o
+[295/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_dragon4.c.o
+[296/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_dtype_traversal.c.o
+[297/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_dtype_transfer.c.o
+[298/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_public_dtype_api.c.o
+[299/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_flagsobject.c.o
+[300/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_einsum.cpp.o
+[301/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_hashdescr.c.o
+[302/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_getset.c.o
+[303/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_iterators.c.o
+[304/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_legacy_dtype_implementation.c.o
+[305/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_item_selection.c.o
+[306/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_mapping.c.o
+[307/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_methods.c.o
+[308/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_nditer_api.c.o
+[309/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_multiarraymodule.c.o
+[310/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_nditer_constr.c.o
+[311/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_npy_static_data.c.o
+[312/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_nditer_pywrap.c.o
+[313/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_refcount.c.o
+[314/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_number.c.o
+[315/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_sequence.c.o
+[316/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_scalarapi.c.o
+[317/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_shape.c.o
+[318/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_strfuncs.c.o
+[319/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_stringdtype_dtype.c.o
+[320/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_stringdtype_utf8_utils.c.o
+[321/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_stringdtype_static_string.c.o
+[322/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_temp_elide.c.o
+[323/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_usertypes.c.o
+[324/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_stringdtype_casts.cpp.o
+[325/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_vdot.c.o
+[326/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_npysort_mergesort.cpp.o
+[327/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_npysort_quicksort.cpp.o
+[328/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_npysort_heapsort.cpp.o
+[329/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_npysort_radixsort.cpp.o
+[330/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_npysort_timsort.cpp.o
+[331/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_npysort_binsearch.cpp.o
+[332/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_textreading_conversions.c.o
+[333/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_textreading_field_types.c.o
+[334/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_textreading_growth.c.o
+[335/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_textreading_readtext.c.o
+[336/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_textreading_rows.c.o
+[337/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_textreading_stream_pyobject.c.o
+[338/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_textreading_str_to_int.c.o
+[339/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_npysort_selection.cpp.o
+[340/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_npymath_arm64_exports.c.o
+[341/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_textreading_tokenize.cpp.o
+[342/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_multiarray_fnv.c.o
+[343/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_blas_utils.c.o
+[344/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_array_assign.c.o
+[345/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_gil_utils.c.o
+[346/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_argparse.c.o
+[347/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_mem_overlap.c.o
+[348/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_import.c.o
+[349/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_longdouble.c.o
+[350/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_hashtable.cpp.o
+[351/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_ufunc_override.c.o
+[352/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_numpyos.c.o
+[353/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_cpu_features.c.o
+[354/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_cpu_dispatch.c.o
+[355/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_ufunc_type_resolution.c.o
+[356/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_clip.cpp.o
+[357/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_extobj.c.o
+[358/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_legacy_array_method.c.o
+[359/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_dispatching.cpp.o
+[360/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_override.c.o
+[361/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_reduction.c.o
+[362/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_ufunc_object.c.o
+[363/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_special_integer_comparisons.cpp.o
+[364/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_umathmodule.c.o
+[365/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_string_ufuncs.cpp.o
+[366/479] Compiling C++ object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_stringdtype_ufuncs.cpp.o
+[367/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath_wrapping_array_method.c.o
+[368/479] Linking static target numpy/_core/lib_simd_mtargets.a
+[369/479] Compiling C object numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so.p/src_umath__scaled_float_dtype.c.o
+[370/479] Compiling C object numpy/_core/_simd.cpython-311-x86_64-linux-gnu.so.p/src_common_npy_cpu_features.c.o
+[371/479] Compiling C object numpy/_core/_simd.cpython-311-x86_64-linux-gnu.so.p/src__simd__simd.c.o
+[372/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_litemodule.c.o
+[373/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_python_xerbla.c.o
+[374/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c.c.o
+[375/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_c_lapack.c.o
+[376/479] Compiling C++ object numpy/fft/_pocketfft_umath.cpython-311-x86_64-linux-gnu.so.p/_pocketfft_umath.cpp.o
+[377/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_d_lapack.c.o
+[378/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_z_lapack.c.o
+[379/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_s_lapack.c.o
+[380/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_config.c.o
+[381/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_lapack.c.o
+[382/479] Compiling C++ object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/umath_linalg.cpp.o
+[383/479] Compiling C object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_python_xerbla.c.o
+[384/479] Compiling C object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c.c.o
+[385/479] Compiling C object numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_blas.c.o
+[386/479] Compiling C object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_c_lapack.c.o
+[387/479] Compiling C object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_d_lapack.c.o
+[388/479] Compiling C object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_z_lapack.c.o
+[389/479] Compiling C object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_s_lapack.c.o
+[390/479] Compiling C object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_config.c.o
+[391/479] Compiling C object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_lapack.c.o
+[392/479] Linking static target numpy/random/libnpyrandom.a
+[393/479] Compiling C object numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so.p/lapack_lite_f2c_blas.c.o
+[394/479] Compiling C object numpy/random/_bounded_integers.cpython-311-x86_64-linux-gnu.so.p/meson-generated_numpy_random__bounded_integers.pyx.c.o
+[395/479] Compiling C object numpy/random/_mt19937.cpython-311-x86_64-linux-gnu.so.p/meson-generated_numpy_random__mt19937.pyx.c.o
+[396/479] Compiling C object numpy/random/_mt19937.cpython-311-x86_64-linux-gnu.so.p/src_mt19937_mt19937.c.o
+[397/479] Compiling C object numpy/random/_mt19937.cpython-311-x86_64-linux-gnu.so.p/src_mt19937_mt19937-jump.c.o
+[398/479] Compiling C object numpy/random/_philox.cpython-311-x86_64-linux-gnu.so.p/meson-generated_numpy_random__philox.pyx.c.o
+[399/479] Compiling C object numpy/random/_philox.cpython-311-x86_64-linux-gnu.so.p/src_philox_philox.c.o
+[400/479] Compiling C object numpy/random/_common.cpython-311-x86_64-linux-gnu.so.p/meson-generated_numpy_random__common.pyx.c.o
+[401/479] Compiling C object numpy/random/_pcg64.cpython-311-x86_64-linux-gnu.so.p/src_pcg64_pcg64.c.o
+[402/479] Compiling C object numpy/random/_sfc64.cpython-311-x86_64-linux-gnu.so.p/meson-generated_numpy_random__sfc64.pyx.c.o
+[403/479] Compiling C object numpy/random/_pcg64.cpython-311-x86_64-linux-gnu.so.p/meson-generated_numpy_random__pcg64.pyx.c.o
+[404/479] Compiling C object numpy/random/_sfc64.cpython-311-x86_64-linux-gnu.so.p/src_sfc64_sfc64.c.o
+[405/479] Compiling C object numpy/random/bit_generator.cpython-311-x86_64-linux-gnu.so.p/meson-generated_numpy_random_bit_generator.pyx.c.o
+[406/479] Compiling C object numpy/random/mtrand.cpython-311-x86_64-linux-gnu.so.p/meson-generated_numpy_random_mtrand.pyx.c.o
+[407/479] Compiling C object numpy/random/mtrand.cpython-311-x86_64-linux-gnu.so.p/src_distributions_distributions.c.o
+[408/479] Compiling C object numpy/random/mtrand.cpython-311-x86_64-linux-gnu.so.p/src_legacy_legacy-distributions.c.o
+[409/479] Compiling C object numpy/random/_generator.cpython-311-x86_64-linux-gnu.so.p/meson-generated_numpy_random__generator.pyx.c.o
+[410/479] Linking static target numpy/_core/lib_umath_tests.dispatch.h_baseline.a
+[411/479] Linking static target numpy/_core/lib_umath_tests.dispatch.h_X86_V3.a
+[412/479] Linking target numpy/_core/_multiarray_tests.cpython-311-x86_64-linux-gnu.so
+[413/479] Linking target numpy/_core/_umath_tests.cpython-311-x86_64-linux-gnu.so
+[414/479] Linking target numpy/_core/_rational_tests.cpython-311-x86_64-linux-gnu.so
+[415/479] Linking target numpy/_core/_struct_ufunc_tests.cpython-311-x86_64-linux-gnu.so
+[416/479] Linking static target numpy/_core/libargfunc.dispatch.h_baseline.a
+[417/479] Linking static target numpy/_core/libargfunc.dispatch.h_X86_V4.a
+[418/479] Linking static target numpy/_core/libargfunc.dispatch.h_X86_V3.a
+[419/479] Linking static target numpy/_core/libx86_simd_argsort.dispatch.h_X86_V4.a
+[420/479] Linking static target numpy/_core/libx86_simd_argsort.dispatch.h_X86_V3.a
+[421/479] Linking static target numpy/_core/libx86_simd_qsort.dispatch.h_X86_V4.a
+[422/479] Linking static target numpy/_core/libx86_simd_qsort.dispatch.h_X86_V3.a
+[423/479] Linking static target numpy/_core/libx86_simd_qsort_16bit.dispatch.h_AVX512_ICL.a
+[424/479] Linking static target numpy/_core/libloops_arithm_fp.dispatch.h_baseline.a
+[425/479] Linking static target numpy/_core/libloops_arithm_fp.dispatch.h_X86_V3.a
+[426/479] Linking static target numpy/_core/libloops_arithmetic.dispatch.h_baseline.a
+[427/479] Linking static target numpy/_core/libloops_arithmetic.dispatch.h_X86_V4.a
+[428/479] Linking static target numpy/_core/libloops_arithmetic.dispatch.h_X86_V3.a
+[429/479] Linking static target numpy/_core/libloops_comparison.dispatch.h_baseline.a
+[430/479] Linking static target numpy/_core/libloops_comparison.dispatch.h_X86_V4.a
+[431/479] Linking static target numpy/_core/libloops_comparison.dispatch.h_X86_V3.a
+[432/479] Linking static target numpy/_core/libloops_exponent_log.dispatch.h_baseline.a
+[433/479] Linking static target numpy/_core/libloops_exponent_log.dispatch.h_X86_V4.a
+[434/479] Linking static target numpy/_core/libloops_exponent_log.dispatch.h_X86_V3.a
+[435/479] Linking static target numpy/_core/libloops_hyperbolic.dispatch.h_baseline.a
+[436/479] Linking static target numpy/_core/libloops_hyperbolic.dispatch.h_X86_V4.a
+[437/479] Linking static target numpy/_core/libloops_hyperbolic.dispatch.h_X86_V3.a
+[438/479] Linking static target numpy/_core/libloops_logical.dispatch.h_baseline.a
+[439/479] Linking static target numpy/_core/libloops_logical.dispatch.h_X86_V4.a
+[440/479] Linking static target numpy/_core/libloops_logical.dispatch.h_X86_V3.a
+[441/479] Linking static target numpy/_core/libloops_minmax.dispatch.h_baseline.a
+[442/479] Linking target numpy/_core/_operand_flag_tests.cpython-311-x86_64-linux-gnu.so
+[443/479] Linking static target numpy/_core/libloops_minmax.dispatch.h_X86_V4.a
+[444/479] Linking static target numpy/_core/libloops_minmax.dispatch.h_X86_V3.a
+[445/479] Linking static target numpy/_core/libloops_modulo.dispatch.h_baseline.a
+[446/479] Linking static target numpy/_core/libloops_trigonometric.dispatch.h_baseline.a
+[447/479] Linking static target numpy/_core/libloops_trigonometric.dispatch.h_X86_V4.a
+[448/479] Linking static target numpy/_core/libloops_trigonometric.dispatch.h_X86_V3.a
+[449/479] Linking static target numpy/_core/libloops_umath_fp.dispatch.h_baseline.a
+[450/479] Linking static target numpy/_core/libloops_umath_fp.dispatch.h_X86_V4.a
+[451/479] Linking static target numpy/_core/libloops_unary.dispatch.h_baseline.a
+[452/479] Linking static target numpy/_core/libloops_unary.dispatch.h_X86_V4.a
+[453/479] Linking static target numpy/_core/libloops_unary.dispatch.h_X86_V3.a
+[454/479] Linking static target numpy/_core/libloops_unary_fp.dispatch.h_baseline.a
+[455/479] Linking static target numpy/_core/libloops_unary_fp_le.dispatch.h_baseline.a
+[456/479] Linking static target numpy/_core/libloops_unary_complex.dispatch.h_baseline.a
+[457/479] Linking static target numpy/_core/libloops_unary_complex.dispatch.h_X86_V4.a
+[458/479] Linking static target numpy/_core/libloops_unary_complex.dispatch.h_X86_V3.a
+[459/479] Linking static target numpy/_core/libloops_autovec.dispatch.h_baseline.a
+[460/479] Linking static target numpy/_core/libloops_autovec.dispatch.h_X86_V3.a
+[461/479] Linking static target numpy/_core/libloops_half.dispatch.h_baseline.a
+[462/479] Linking static target numpy/_core/libloops_half.dispatch.h_X86_V4.a
+[463/479] Linking static target numpy/_core/lib_simd.dispatch.h_baseline.a
+[464/479] Linking static target numpy/_core/lib_simd.dispatch.h_X86_V3.a
+[465/479] Linking static target numpy/_core/lib_simd.dispatch.h_X86_V4.a
+[466/479] Linking target numpy/_core/_simd.cpython-311-x86_64-linux-gnu.so
+[467/479] Linking target numpy/fft/_pocketfft_umath.cpython-311-x86_64-linux-gnu.so
+[468/479] Linking target numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so
+[469/479] Linking target numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so
+[470/479] Linking target numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so
+[471/479] Linking target numpy/random/_bounded_integers.cpython-311-x86_64-linux-gnu.so
+[472/479] Linking target numpy/random/_common.cpython-311-x86_64-linux-gnu.so
+[473/479] Linking target numpy/random/_mt19937.cpython-311-x86_64-linux-gnu.so
+[474/479] Linking target numpy/random/_philox.cpython-311-x86_64-linux-gnu.so
+[475/479] Linking target numpy/random/_pcg64.cpython-311-x86_64-linux-gnu.so
+[476/479] Linking target numpy/random/_sfc64.cpython-311-x86_64-linux-gnu.so
+[477/479] Linking target numpy/random/bit_generator.cpython-311-x86_64-linux-gnu.so
+[478/479] Linking target numpy/random/_generator.cpython-311-x86_64-linux-gnu.so
+[479/479] Linking target numpy/random/mtrand.cpython-311-x86_64-linux-gnu.so
+[1/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/libnpymath.a
+[2/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/__multiarray_api.c
+[3/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/__multiarray_api.h
+[4/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/__ufunc_api.c
+[5/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/__ufunc_api.h
+[6/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/_multiarray_tests.cpython-311-x86_64-linux-gnu.so
+[7/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/_umath_tests.cpython-311-x86_64-linux-gnu.so
+[8/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/_rational_tests.cpython-311-x86_64-linux-gnu.so
+[9/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/_struct_ufunc_tests.cpython-311-x86_64-linux-gnu.so
+[10/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/_operand_flag_tests.cpython-311-x86_64-linux-gnu.so
+[11/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/_multiarray_umath.cpython-311-x86_64-linux-gnu.so
+[12/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/_simd.cpython-311-x86_64-linux-gnu.so
+[13/1018] /tmp/sprint011-builder/numpy-compile/numpy/fft/_pocketfft_umath.cpython-311-x86_64-linux-gnu.so
+[14/1018] /tmp/sprint011-builder/numpy-compile/numpy/linalg/lapack_lite.cpython-311-x86_64-linux-gnu.so
+[15/1018] /tmp/sprint011-builder/numpy-compile/numpy/linalg/_umath_linalg.cpython-311-x86_64-linux-gnu.so
+[16/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/libnpyrandom.a
+[17/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/_bounded_integers.pxd
+[18/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/_bounded_integers.cpython-311-x86_64-linux-gnu.so
+[19/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/_common.cpython-311-x86_64-linux-gnu.so
+[20/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/_mt19937.cpython-311-x86_64-linux-gnu.so
+[21/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/_philox.cpython-311-x86_64-linux-gnu.so
+[22/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/_pcg64.cpython-311-x86_64-linux-gnu.so
+[23/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/_sfc64.cpython-311-x86_64-linux-gnu.so
+[24/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/bit_generator.cpython-311-x86_64-linux-gnu.so
+[25/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/_generator.cpython-311-x86_64-linux-gnu.so
+[26/1018] /tmp/sprint011-builder/numpy-compile/numpy/random/mtrand.cpython-311-x86_64-linux-gnu.so
+[27/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/__init__.cython-30.pxd
+[28/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/__init__.pxd
+[29/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/__init__.py
+[30/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/__init__.pyi
+[31/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/__config__.pyi
+[32/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_array_api_info.py
+[33/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_array_api_info.pyi
+[34/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_configtool.py
+[35/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_configtool.pyi
+[36/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_distributor_init.py
+[37/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_distributor_init.pyi
+[38/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_globals.py
+[39/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_globals.pyi
+[40/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_pytesttester.py
+[41/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_pytesttester.pyi
+[42/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_expired_attrs_2_0.py
+[43/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_expired_attrs_2_0.pyi
+[44/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/conftest.py
+[45/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/exceptions.py
+[46/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/exceptions.pyi
+[47/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/dtypes.py
+[48/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/dtypes.pyi
+[49/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matlib.py
+[50/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matlib.pyi
+[51/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/py.typed
+[52/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/version.pyi
+[53/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/version.py
+[54/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/__init__.py
+[55/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/__init__.pyi
+[56/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_add_newdocs.py
+[57/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_add_newdocs.pyi
+[58/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_add_newdocs_scalars.py
+[59/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_add_newdocs_scalars.pyi
+[60/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_asarray.py
+[61/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_asarray.pyi
+[62/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_dtype.py
+[63/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_dtype.pyi
+[64/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_dtype_ctypes.py
+[65/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_dtype_ctypes.pyi
+[66/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_exceptions.py
+[67/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_exceptions.pyi
+[68/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_internal.py
+[69/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_internal.pyi
+[70/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_methods.py
+[71/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_methods.pyi
+[72/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_simd.pyi
+[73/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_string_helpers.py
+[74/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_string_helpers.pyi
+[75/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_type_aliases.py
+[76/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_type_aliases.pyi
+[77/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_ufunc_config.py
+[78/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_ufunc_config.pyi
+[79/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/_umath_tests.pyi
+[80/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/arrayprint.py
+[81/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/arrayprint.pyi
+[82/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/cversions.py
+[83/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/defchararray.py
+[84/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/defchararray.pyi
+[85/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/einsumfunc.py
+[86/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/einsumfunc.pyi
+[87/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/fromnumeric.py
+[88/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/fromnumeric.pyi
+[89/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/function_base.py
+[90/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/function_base.pyi
+[91/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/getlimits.py
+[92/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/getlimits.pyi
+[93/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/memmap.py
+[94/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/memmap.pyi
+[95/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/multiarray.py
+[96/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/multiarray.pyi
+[97/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/numeric.py
+[98/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/numeric.pyi
+[99/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/numerictypes.py
+[100/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/numerictypes.pyi
+[101/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/overrides.py
+[102/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/overrides.pyi
+[103/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/printoptions.py
+[104/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/printoptions.pyi
+[105/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/records.py
+[106/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/records.pyi
+[107/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/shape_base.py
+[108/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/shape_base.pyi
+[109/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/strings.py
+[110/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/strings.pyi
+[111/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/umath.py
+[112/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/umath.pyi
+[113/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/_neighborhood_iterator_imp.h
+[114/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/_public_dtype_api_table.h
+[115/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/arrayobject.h
+[116/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/arrayscalars.h
+[117/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/dtype_api.h
+[118/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/halffloat.h
+[119/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/ndarrayobject.h
+[120/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/ndarraytypes.h
+[121/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/npy_2_compat.h
+[122/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/npy_2_complexcompat.h
+[123/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/npy_3kcompat.h
+[124/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/npy_common.h
+[125/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/npy_cpu.h
+[126/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/npy_endian.h
+[127/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/npy_math.h
+[128/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/npy_no_deprecated_api.h
+[129/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/npy_os.h
+[130/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/numpyconfig.h
+[131/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/ufuncobject.h
+[132/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/utils.h
+[133/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/random/bitgen.h
+[134/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/random/distributions.h
+[135/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/libdivide/libdivide.h
+[136/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/include/numpy/libdivide/LICENSE.txt
+[137/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/fft/__init__.py
+[138/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/fft/__init__.pyi
+[139/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/fft/_pocketfft.py
+[140/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/fft/_pocketfft.pyi
+[141/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/fft/_helper.py
+[142/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/fft/_helper.pyi
+[143/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/fft/tests/__init__.py
+[144/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/fft/tests/test_helper.py
+[145/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/fft/tests/test_pocketfft.py
+[146/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/__init__.py
+[147/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/__init__.pyi
+[148/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/_linalg.py
+[149/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/_linalg.pyi
+[150/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/_umath_linalg.pyi
+[151/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/lapack_lite.pyi
+[152/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/tests/__init__.py
+[153/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/tests/test_deprecations.py
+[154/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/tests/test_linalg.py
+[155/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/linalg/tests/test_regression.py
+[156/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/__init__.pxd
+[157/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/__init__.py
+[158/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/__init__.pyi
+[159/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_bounded_integers.pyi
+[160/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_common.pxd
+[161/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_common.pyi
+[162/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_generator.pyi
+[163/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_mt19937.pyi
+[164/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_pcg64.pyi
+[165/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_pickle.py
+[166/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_pickle.pyi
+[167/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_philox.pyi
+[168/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_sfc64.pyi
+[169/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/bit_generator.pxd
+[170/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/bit_generator.pyi
+[171/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/c_distributions.pxd
+[172/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/LICENSE.md
+[173/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/mtrand.pyi
+[174/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/__init__.py
+[175/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_direct.py
+[176/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_extending.py
+[177/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_generator_mt19937.py
+[178/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_generator_mt19937_regressions.py
+[179/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_random.py
+[180/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_randomstate.py
+[181/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_randomstate_regression.py
+[182/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_regression.py
+[183/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_seed_sequence.py
+[184/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/test_smoke.py
+[185/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/__init__.py
+[186/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/mt19937-testset-1.csv
+[187/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/mt19937-testset-2.csv
+[188/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/pcg64-testset-1.csv
+[189/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/pcg64-testset-2.csv
+[190/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/pcg64dxsm-testset-1.csv
+[191/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/pcg64dxsm-testset-2.csv
+[192/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/philox-testset-1.csv
+[193/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/philox-testset-2.csv
+[194/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/sfc64-testset-1.csv
+[195/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/sfc64-testset-2.csv
+[196/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/sfc64_np126.pkl.gz
+[197/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/generator_pcg64_np126.pkl.gz
+[198/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/tests/data/generator_pcg64_np121.pkl.gz
+[199/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_examples/cffi/extending.py
+[200/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_examples/cffi/parse.py
+[201/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_examples/cython/extending.pyx
+[202/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_examples/cython/extending_distributions.pyx
+[203/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_examples/cython/meson.build
+[204/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_examples/numba/extending.py
+[205/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/random/_examples/numba/extending_distributions.py
+[206/1018] /tmp/sprint011-builder/numpy-compile/numpy/__config__.py
+[207/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/_numpyconfig.h
+[208/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/npymath.ini
+[209/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/mlib.ini
+[210/1018] /tmp/sprint011-builder/numpy-compile/numpy/_core/numpy.pc
+[211/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_pyinstaller/__init__.py
+[212/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_pyinstaller/__init__.pyi
+[213/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_pyinstaller/hook-numpy.py
+[214/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_pyinstaller/hook-numpy.pyi
+[215/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_pyinstaller/tests/__init__.py
+[216/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_pyinstaller/tests/pyinstaller-smoke.py
+[217/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_pyinstaller/tests/test_pyinstaller.py
+[218/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/__init__.py
+[219/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_add_docstring.py
+[220/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_array_like.py
+[221/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_char_codes.py
+[222/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_dtype_like.py
+[223/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_extended_precision.py
+[224/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_nbit.py
+[225/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_nbit_base.py
+[226/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_nbit_base.pyi
+[227/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_nested_sequence.py
+[228/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_scalars.py
+[229/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_shape.py
+[230/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_ufunc.py
+[231/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_typing/_ufunc.pyi
+[232/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_utils/__init__.py
+[233/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_utils/__init__.pyi
+[234/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_utils/_convertions.py
+[235/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_utils/_convertions.pyi
+[236/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_utils/_inspect.py
+[237/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_utils/_inspect.pyi
+[238/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_utils/_pep440.py
+[239/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_utils/_pep440.pyi
+[240/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ctypeslib/__init__.py
+[241/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ctypeslib/__init__.pyi
+[242/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ctypeslib/_ctypeslib.py
+[243/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ctypeslib/_ctypeslib.pyi
+[244/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/doc/ufuncs.py
+[245/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/__init__.py
+[246/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/__init__.pyi
+[247/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/__main__.py
+[248/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/__version__.py
+[249/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/__version__.pyi
+[250/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_isocbind.py
+[251/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_isocbind.pyi
+[252/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_src_pyf.py
+[253/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_src_pyf.pyi
+[254/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/auxfuncs.py
+[255/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/auxfuncs.pyi
+[256/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/capi_maps.py
+[257/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/capi_maps.pyi
+[258/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/cb_rules.py
+[259/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/cb_rules.pyi
+[260/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/cfuncs.py
+[261/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/cfuncs.pyi
+[262/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/common_rules.py
+[263/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/common_rules.pyi
+[264/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/crackfortran.py
+[265/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/crackfortran.pyi
+[266/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/diagnose.py
+[267/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/diagnose.pyi
+[268/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/f2py2e.py
+[269/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/f2py2e.pyi
+[270/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/f90mod_rules.py
+[271/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/f90mod_rules.pyi
+[272/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/func2subr.py
+[273/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/func2subr.pyi
+[274/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/rules.py
+[275/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/rules.pyi
+[276/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/setup.cfg
+[277/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/symbolic.py
+[278/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/symbolic.pyi
+[279/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/use_rules.py
+[280/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/use_rules.pyi
+[281/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_backends/__init__.py
+[282/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_backends/__init__.pyi
+[283/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_backends/_backend.py
+[284/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_backends/_backend.pyi
+[285/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_backends/_distutils.py
+[286/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_backends/_distutils.pyi
+[287/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_backends/_meson.py
+[288/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_backends/_meson.pyi
+[289/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/_backends/meson.build.template
+[290/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/src/fortranobject.c
+[291/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/src/fortranobject.h
+[292/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/__init__.py
+[293/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_abstract_interface.py
+[294/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_array_from_pyobj.py
+[295/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_assumed_shape.py
+[296/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_block_docstring.py
+[297/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_callback.py
+[298/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_character.py
+[299/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_common.py
+[300/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_crackfortran.py
+[301/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_data.py
+[302/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_docs.py
+[303/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_f2cmap.py
+[304/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_f2py2e.py
+[305/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_isoc.py
+[306/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_kind.py
+[307/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_mixed.py
+[308/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_modules.py
+[309/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_parameter.py
+[310/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_pyf_src.py
+[311/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_quoted_character.py
+[312/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_regression.py
+[313/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_return_character.py
+[314/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_return_complex.py
+[315/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_return_integer.py
+[316/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_return_logical.py
+[317/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_return_real.py
+[318/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_routines.py
+[319/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_semicolon_split.py
+[320/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_size.py
+[321/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_string.py
+[322/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_symbolic.py
+[323/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/test_value_attrspec.py
+[324/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/util.py
+[325/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/abstract_interface/foo.f90
+[326/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/abstract_interface/gh18403_mod.f90
+[327/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/array_from_pyobj/wrapmodule.c
+[328/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/assumed_shape/.f2py_f2cmap
+[329/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/assumed_shape/foo_free.f90
+[330/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/assumed_shape/foo_mod.f90
+[331/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/assumed_shape/foo_use.f90
+[332/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/assumed_shape/precision.f90
+[333/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/block_docstring/foo.f
+[334/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/callback/foo.f
+[335/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/callback/gh17797.f90
+[336/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/callback/gh18335.f90
+[337/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/callback/gh25211.f
+[338/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/callback/gh25211.pyf
+[339/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/callback/gh26681.f90
+[340/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/cli/gh_22819.pyf
+[341/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/cli/hi77.f
+[342/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/cli/hiworld.f90
+[343/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/common/block.f
+[344/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/common/gh19161.f90
+[345/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/accesstype.f90
+[346/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/common_with_division.f
+[347/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/data_common.f
+[348/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/data_multiplier.f
+[349/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/data_stmts.f90
+[350/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/data_with_comments.f
+[351/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/foo_deps.f90
+[352/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/gh15035.f
+[353/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/gh17859.f
+[354/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/gh22648.pyf
+[355/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/gh23533.f
+[356/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/gh23598.f90
+[357/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/gh23598Warn.f90
+[358/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/gh23879.f90
+[359/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/gh27697.f90
+[360/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/gh2848.f90
+[361/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/operators.f90
+[362/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/privatemod.f90
+[363/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/publicmod.f90
+[364/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/pubprivmod.f90
+[365/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/crackfortran/unicode_comment.f90
+[366/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/f2cmap/.f2py_f2cmap
+[367/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/f2cmap/isoFortranEnvMap.f90
+[368/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/isocintrin/isoCtests.f90
+[369/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/kind/foo.f90
+[370/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/mixed/foo.f
+[371/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/mixed/foo_fixed.f90
+[372/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/mixed/foo_free.f90
+[373/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/modules/module_data_docstring.f90
+[374/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/modules/use_modules.f90
+[375/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/modules/gh25337/data.f90
+[376/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/modules/gh25337/use_data.f90
+[377/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/modules/gh26920/two_mods_with_no_public_entities.f90
+[378/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/modules/gh26920/two_mods_with_one_public_routine.f90
+[379/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/negative_bounds/issue_20853.f90
+[380/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/parameter/constant_array.f90
+[381/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/parameter/constant_both.f90
+[382/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/parameter/constant_compound.f90
+[383/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/parameter/constant_integer.f90
+[384/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/parameter/constant_non_compound.f90
+[385/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/parameter/constant_real.f90
+[386/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/quoted_character/foo.f
+[387/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/AB.inc
+[388/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/assignOnlyModule.f90
+[389/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/datonly.f90
+[390/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/f77comments.f
+[391/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/f77fixedform.f95
+[392/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/f90continuation.f90
+[393/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/incfile.f90
+[394/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/inout.f90
+[395/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/lower_f2py_fortran.f90
+[396/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/regression/mod_derived_types.f90
+[397/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_character/foo77.f
+[398/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_character/foo90.f90
+[399/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_complex/foo77.f
+[400/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_complex/foo90.f90
+[401/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_integer/foo77.f
+[402/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_integer/foo90.f90
+[403/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_logical/foo77.f
+[404/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_logical/foo90.f90
+[405/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_real/foo77.f
+[406/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/return_real/foo90.f90
+[407/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/routines/funcfortranname.f
+[408/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/routines/funcfortranname.pyf
+[409/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/routines/subrout.f
+[410/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/routines/subrout.pyf
+[411/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/size/foo.f90
+[412/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/string/char.f90
+[413/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/string/fixed_string.f90
+[414/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/string/gh24008.f
+[415/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/string/gh24662.f90
+[416/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/string/gh25286.f90
+[417/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/string/gh25286.pyf
+[418/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/string/gh25286_bc.pyf
+[419/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/string/scalar_string.f90
+[420/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/string/string.f
+[421/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/f2py/tests/src/value_attrspec/gh21665.f90
+[422/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/__init__.py
+[423/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/__init__.pyi
+[424/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_array_utils_impl.py
+[425/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_array_utils_impl.pyi
+[426/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_arraypad_impl.py
+[427/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_arraypad_impl.pyi
+[428/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_arraysetops_impl.py
+[429/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_arraysetops_impl.pyi
+[430/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_arrayterator_impl.py
+[431/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_arrayterator_impl.pyi
+[432/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_datasource.py
+[433/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_datasource.pyi
+[434/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_format_impl.py
+[435/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_format_impl.pyi
+[436/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_function_base_impl.py
+[437/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_function_base_impl.pyi
+[438/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_histograms_impl.py
+[439/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_histograms_impl.pyi
+[440/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_index_tricks_impl.py
+[441/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_index_tricks_impl.pyi
+[442/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_iotools.py
+[443/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_iotools.pyi
+[444/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_nanfunctions_impl.py
+[445/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_nanfunctions_impl.pyi
+[446/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_npyio_impl.py
+[447/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_npyio_impl.pyi
+[448/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_polynomial_impl.py
+[449/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_polynomial_impl.pyi
+[450/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_scimath_impl.py
+[451/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_scimath_impl.pyi
+[452/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_shape_base_impl.py
+[453/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_shape_base_impl.pyi
+[454/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_stride_tricks_impl.py
+[455/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_stride_tricks_impl.pyi
+[456/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_twodim_base_impl.py
+[457/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_twodim_base_impl.pyi
+[458/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_type_check_impl.py
+[459/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_type_check_impl.pyi
+[460/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_ufunclike_impl.py
+[461/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_ufunclike_impl.pyi
+[462/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_user_array_impl.py
+[463/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_user_array_impl.pyi
+[464/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_utils_impl.py
+[465/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_utils_impl.pyi
+[466/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_version.py
+[467/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/_version.pyi
+[468/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/array_utils.py
+[469/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/array_utils.pyi
+[470/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/format.py
+[471/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/format.pyi
+[472/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/introspect.py
+[473/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/introspect.pyi
+[474/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/mixins.py
+[475/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/mixins.pyi
+[476/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/npyio.py
+[477/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/npyio.pyi
+[478/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/recfunctions.py
+[479/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/recfunctions.pyi
+[480/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/scimath.py
+[481/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/scimath.pyi
+[482/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/stride_tricks.py
+[483/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/stride_tricks.pyi
+[484/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/user_array.py
+[485/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/user_array.pyi
+[486/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/__init__.py
+[487/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test__datasource.py
+[488/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test__iotools.py
+[489/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test__version.py
+[490/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_array_utils.py
+[491/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_arraypad.py
+[492/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_arraysetops.py
+[493/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_arrayterator.py
+[494/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_format.py
+[495/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_function_base.py
+[496/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_histograms.py
+[497/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_index_tricks.py
+[498/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_io.py
+[499/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_loadtxt.py
+[500/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_mixins.py
+[501/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_nanfunctions.py
+[502/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_packbits.py
+[503/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_polynomial.py
+[504/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_recfunctions.py
+[505/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_regression.py
+[506/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_shape_base.py
+[507/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_stride_tricks.py
+[508/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_twodim_base.py
+[509/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_type_check.py
+[510/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_ufunclike.py
+[511/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/test_utils.py
+[512/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/data/py2-np0-objarr.npy
+[513/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/data/py2-objarr.npy
+[514/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/data/py2-objarr.npz
+[515/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/data/py3-objarr.npy
+[516/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/data/py3-objarr.npz
+[517/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/data/python3.npy
+[518/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/lib/tests/data/win64python2.npy
+[519/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/API_CHANGES.txt
+[520/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/LICENSE
+[521/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/README.rst
+[522/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/__init__.py
+[523/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/__init__.pyi
+[524/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/core.py
+[525/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/core.pyi
+[526/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/extras.py
+[527/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/extras.pyi
+[528/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/mrecords.py
+[529/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/mrecords.pyi
+[530/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/testutils.py
+[531/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/testutils.pyi
+[532/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/tests/__init__.py
+[533/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/tests/test_arrayobject.py
+[534/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/tests/test_core.py
+[535/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/tests/test_deprecations.py
+[536/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/tests/test_extras.py
+[537/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/tests/test_mrecords.py
+[538/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/tests/test_old_ma.py
+[539/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/tests/test_regression.py
+[540/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/ma/tests/test_subclassing.py
+[541/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/__init__.py
+[542/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/__init__.pyi
+[543/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/defmatrix.py
+[544/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/defmatrix.pyi
+[545/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/tests/__init__.py
+[546/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/tests/test_defmatrix.py
+[547/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/tests/test_interaction.py
+[548/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/tests/test_masked_matrix.py
+[549/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/tests/test_matrix_linalg.py
+[550/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/tests/test_multiarray.py
+[551/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/tests/test_numeric.py
+[552/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/matrixlib/tests/test_regression.py
+[553/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/__init__.py
+[554/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/__init__.pyi
+[555/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/_polybase.py
+[556/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/_polybase.pyi
+[557/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/_polytypes.pyi
+[558/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/chebyshev.py
+[559/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/chebyshev.pyi
+[560/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/hermite.py
+[561/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/hermite.pyi
+[562/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/hermite_e.py
+[563/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/hermite_e.pyi
+[564/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/laguerre.py
+[565/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/laguerre.pyi
+[566/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/legendre.py
+[567/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/legendre.pyi
+[568/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/polynomial.py
+[569/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/polynomial.pyi
+[570/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/polyutils.py
+[571/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/polyutils.pyi
+[572/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/__init__.py
+[573/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_chebyshev.py
+[574/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_classes.py
+[575/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_hermite.py
+[576/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_hermite_e.py
+[577/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_laguerre.py
+[578/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_legendre.py
+[579/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_polynomial.py
+[580/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_polyutils.py
+[581/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_printing.py
+[582/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/polynomial/tests/test_symbol.py
+[583/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/__init__.py
+[584/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/__init__.pyi
+[585/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/overrides.py
+[586/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/overrides.pyi
+[587/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/print_coercion_tables.py
+[588/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/print_coercion_tables.pyi
+[589/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/_private/__init__.py
+[590/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/_private/__init__.pyi
+[591/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/_private/extbuild.py
+[592/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/_private/extbuild.pyi
+[593/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/_private/utils.py
+[594/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/_private/utils.pyi
+[595/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/tests/__init__.py
+[596/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/testing/tests/test_utils.py
+[597/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/__init__.py
+[598/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/__init__.pyi
+[599/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/mypy_plugin.py
+[600/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/__init__.py
+[601/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/test_isfile.py
+[602/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/test_runtime.py
+[603/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/test_typing.py
+[604/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/mypy.ini
+[605/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/arithmetic.pyi
+[606/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/array_constructors.pyi
+[607/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/array_like.pyi
+[608/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/array_pad.pyi
+[609/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/arrayprint.pyi
+[610/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/arrayterator.pyi
+[611/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/bitwise_ops.pyi
+[612/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/char.pyi
+[613/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/chararray.pyi
+[614/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/comparisons.pyi
+[615/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/constants.pyi
+[616/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/datasource.pyi
+[617/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/dtype.pyi
+[618/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/einsumfunc.pyi
+[619/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/flatiter.pyi
+[620/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/fromnumeric.pyi
+[621/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/histograms.pyi
+[622/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/index_tricks.pyi
+[623/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/lib_function_base.pyi
+[624/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/lib_polynomial.pyi
+[625/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/lib_utils.pyi
+[626/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/lib_version.pyi
+[627/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/linalg.pyi
+[628/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/ma.pyi
+[629/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/memmap.pyi
+[630/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/modules.pyi
+[631/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/multiarray.pyi
+[632/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/ndarray.pyi
+[633/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/ndarray_misc.pyi
+[634/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/nditer.pyi
+[635/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/nested_sequence.pyi
+[636/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/npyio.pyi
+[637/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/numerictypes.pyi
+[638/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/random.pyi
+[639/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/rec.pyi
+[640/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/scalars.pyi
+[641/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/shape.pyi
+[642/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/shape_base.pyi
+[643/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/stride_tricks.pyi
+[644/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/strings.pyi
+[645/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/testing.pyi
+[646/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/twodim_base.pyi
+[647/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/type_check.pyi
+[648/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/ufunc_config.pyi
+[649/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/ufunclike.pyi
+[650/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/ufuncs.pyi
+[651/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/fail/warnings_and_errors.pyi
+[652/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/misc/extended_precision.pyi
+[653/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/arithmetic.py
+[654/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/array_constructors.py
+[655/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/array_like.py
+[656/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/arrayprint.py
+[657/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/arrayterator.py
+[658/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/bitwise_ops.py
+[659/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/comparisons.py
+[660/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/dtype.py
+[661/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/einsumfunc.py
+[662/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/flatiter.py
+[663/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/fromnumeric.py
+[664/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/index_tricks.py
+[665/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/lib_user_array.py
+[666/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/lib_utils.py
+[667/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/lib_version.py
+[668/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/literal.py
+[669/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/ma.py
+[670/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/mod.py
+[671/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/modules.py
+[672/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/multiarray.py
+[673/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/ndarray_conversion.py
+[674/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/ndarray_misc.py
+[675/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/ndarray_shape_manipulation.py
+[676/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/nditer.py
+[677/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/numeric.py
+[678/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/numerictypes.py
+[679/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/random.py
+[680/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/recfunctions.py
+[681/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/scalars.py
+[682/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/shape.py
+[683/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/simple.py
+[684/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/ufunc_config.py
+[685/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/ufunclike.py
+[686/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/ufuncs.py
+[687/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/pass/warnings_and_errors.py
+[688/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/arithmetic.pyi
+[689/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/array_api_info.pyi
+[690/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/array_constructors.pyi
+[691/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/arraypad.pyi
+[692/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/arrayprint.pyi
+[693/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/arraysetops.pyi
+[694/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/arrayterator.pyi
+[695/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/bitwise_ops.pyi
+[696/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/char.pyi
+[697/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/chararray.pyi
+[698/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/comparisons.pyi
+[699/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/constants.pyi
+[700/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/ctypeslib.pyi
+[701/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/datasource.pyi
+[702/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/dtype.pyi
+[703/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/einsumfunc.pyi
+[704/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/emath.pyi
+[705/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/fft.pyi
+[706/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/flatiter.pyi
+[707/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/fromnumeric.pyi
+[708/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/getlimits.pyi
+[709/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/histograms.pyi
+[710/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/index_tricks.pyi
+[711/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/lib_function_base.pyi
+[712/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/lib_polynomial.pyi
+[713/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/lib_utils.pyi
+[714/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/lib_version.pyi
+[715/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/linalg.pyi
+[716/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/ma.pyi
+[717/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/matrix.pyi
+[718/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/memmap.pyi
+[719/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/mod.pyi
+[720/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/modules.pyi
+[721/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/multiarray.pyi
+[722/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/nbit_base_example.pyi
+[723/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/ndarray_assignability.pyi
+[724/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/ndarray_conversion.pyi
+[725/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/ndarray_misc.pyi
+[726/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/ndarray_shape_manipulation.pyi
+[727/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/nditer.pyi
+[728/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/nested_sequence.pyi
+[729/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/npyio.pyi
+[730/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/numeric.pyi
+[731/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/numerictypes.pyi
+[732/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/polynomial_polybase.pyi
+[733/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/polynomial_polyutils.pyi
+[734/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/polynomial_series.pyi
+[735/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/random.pyi
+[736/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/rec.pyi
+[737/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/scalars.pyi
+[738/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/shape.pyi
+[739/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/shape_base.pyi
+[740/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/stride_tricks.pyi
+[741/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/strings.pyi
+[742/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/testing.pyi
+[743/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/twodim_base.pyi
+[744/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/type_check.pyi
+[745/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/ufunc_config.pyi
+[746/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/ufunclike.pyi
+[747/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/ufuncs.pyi
+[748/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/typing/tests/data/reveal/warnings_and_errors.pyi
+[749/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/rec/__init__.py
+[750/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/rec/__init__.pyi
+[751/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/char/__init__.py
+[752/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/char/__init__.pyi
+[753/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/__init__.py
+[754/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/__init__.pyi
+[755/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/_dtype.py
+[756/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/_dtype.pyi
+[757/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/_dtype_ctypes.py
+[758/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/_dtype_ctypes.pyi
+[759/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/_internal.py
+[760/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/_multiarray_umath.py
+[761/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/_utils.py
+[762/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/arrayprint.py
+[763/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/defchararray.py
+[764/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/einsumfunc.py
+[765/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/fromnumeric.py
+[766/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/function_base.py
+[767/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/getlimits.py
+[768/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/multiarray.py
+[769/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/numeric.py
+[770/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/numerictypes.py
+[771/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/overrides.py
+[772/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/overrides.pyi
+[773/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/records.py
+[774/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/shape_base.py
+[775/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/core/umath.py
+[776/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/strings/__init__.py
+[777/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/strings/__init__.pyi
+[778/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/__init__.py
+[779/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/__init__.pyi
+[780/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/_shell_utils.py
+[781/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/armccompiler.py
+[782/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/ccompiler.py
+[783/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/ccompiler_opt.py
+[784/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/conv_template.py
+[785/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/core.py
+[786/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/cpuinfo.py
+[787/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/exec_command.py
+[788/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/extension.py
+[789/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/from_template.py
+[790/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fujitsuccompiler.py
+[791/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/intelccompiler.py
+[792/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/lib2def.py
+[793/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/line_endings.py
+[794/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/log.py
+[795/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/mingw32ccompiler.py
+[796/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/misc_util.py
+[797/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/msvc9compiler.py
+[798/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/msvccompiler.py
+[799/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/npy_pkg_config.py
+[800/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/numpy_distribution.py
+[801/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/pathccompiler.py
+[802/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/system_info.py
+[803/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/unixccompiler.py
+[804/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/__pycache__/conv_template.cpython-311.pyc
+[805/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_asimd.c
+[806/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_asimddp.c
+[807/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_asimdfhm.c
+[808/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_asimdhp.c
+[809/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx.c
+[810/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx2.c
+[811/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx512_clx.c
+[812/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx512_cnl.c
+[813/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx512_icl.c
+[814/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx512_knl.c
+[815/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx512_knm.c
+[816/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx512_skx.c
+[817/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx512_spr.c
+[818/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx512cd.c
+[819/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_avx512f.c
+[820/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_f16c.c
+[821/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_fma3.c
+[822/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_fma4.c
+[823/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_lsx.c
+[824/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_neon.c
+[825/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_neon_fp16.c
+[826/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_neon_vfpv4.c
+[827/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_popcnt.c
+[828/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_rvv.c
+[829/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_sse.c
+[830/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_sse2.c
+[831/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_sse3.c
+[832/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_sse41.c
+[833/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_sse42.c
+[834/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_ssse3.c
+[835/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_sve.c
+[836/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_vsx.c
+[837/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_vsx2.c
+[838/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_vsx3.c
+[839/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_vsx4.c
+[840/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_vx.c
+[841/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_vxe.c
+[842/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_vxe2.c
+[843/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/cpu_xop.c
+[844/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/extra_avx512bw_mask.c
+[845/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/extra_avx512dq_mask.c
+[846/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/extra_avx512f_reduce.c
+[847/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/extra_vsx3_half_double.c
+[848/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/extra_vsx4_mma.c
+[849/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/extra_vsx_asm.c
+[850/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/checks/test_flags.c
+[851/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/__init__.py
+[852/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/autodist.py
+[853/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/bdist_rpm.py
+[854/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/build.py
+[855/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/build_clib.py
+[856/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/build_ext.py
+[857/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/build_py.py
+[858/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/build_scripts.py
+[859/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/build_src.py
+[860/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/config.py
+[861/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/config_compiler.py
+[862/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/develop.py
+[863/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/egg_info.py
+[864/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/install.py
+[865/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/install_clib.py
+[866/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/install_data.py
+[867/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/install_headers.py
+[868/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/command/sdist.py
+[869/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/__init__.py
+[870/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/absoft.py
+[871/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/arm.py
+[872/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/compaq.py
+[873/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/environment.py
+[874/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/fujitsu.py
+[875/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/g95.py
+[876/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/gnu.py
+[877/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/hpux.py
+[878/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/ibm.py
+[879/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/intel.py
+[880/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/lahey.py
+[881/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/mips.py
+[882/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/nag.py
+[883/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/none.py
+[884/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/nv.py
+[885/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/pathf95.py
+[886/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/pg.py
+[887/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/sun.py
+[888/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/fcompiler/vast.py
+[889/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/mingw/gfortran_vs2003_hack.c
+[890/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/__init__.py
+[891/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_build_ext.py
+[892/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_ccompiler_opt.py
+[893/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_ccompiler_opt_conf.py
+[894/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_exec_command.py
+[895/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_fcompiler.py
+[896/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_fcompiler_gnu.py
+[897/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_fcompiler_intel.py
+[898/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_fcompiler_nagfor.py
+[899/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_from_template.py
+[900/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_log.py
+[901/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_mingw32ccompiler.py
+[902/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_misc_util.py
+[903/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_npy_pkg_config.py
+[904/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_shell_utils.py
+[905/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/test_system_info.py
+[906/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/distutils/tests/utilities.py
+[907/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/__init__.py
+[908/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test__all__.py
+[909/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_configtool.py
+[910/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_ctypeslib.py
+[911/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_lazyloading.py
+[912/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_matlib.py
+[913/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_numpy_config.py
+[914/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_numpy_version.py
+[915/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_public_api.py
+[916/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_reloading.py
+[917/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_scripts.py
+[918/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/tests/test_warnings.py
+[919/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/_locales.py
+[920/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/_natype.py
+[921/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test__exceptions.py
+[922/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_abc.py
+[923/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_api.py
+[924/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_argparse.py
+[925/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_array_api_info.py
+[926/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_array_coercion.py
+[927/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_array_interface.py
+[928/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_arraymethod.py
+[929/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_arrayobject.py
+[930/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_arrayprint.py
+[931/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_casting_floatingpoint_errors.py
+[932/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_casting_unittests.py
+[933/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_conversion_utils.py
+[934/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_cpu_dispatcher.py
+[935/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_cpu_features.py
+[936/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_custom_dtypes.py
+[937/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_cython.py
+[938/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_datetime.py
+[939/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_defchararray.py
+[940/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_deprecations.py
+[941/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_dlpack.py
+[942/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_dtype.py
+[943/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_einsum.py
+[944/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_errstate.py
+[945/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_extint128.py
+[946/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_finfo.py
+[947/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_function_base.py
+[948/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_getlimits.py
+[949/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_half.py
+[950/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_hashtable.py
+[951/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_indexerrors.py
+[952/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_indexing.py
+[953/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_item_selection.py
+[954/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_limited_api.py
+[955/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_longdouble.py
+[956/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_mem_overlap.py
+[957/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_mem_policy.py
+[958/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_memmap.py
+[959/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_multiarray.py
+[960/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_multiprocessing.py
+[961/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_multithreading.py
+[962/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_nditer.py
+[963/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_nep50_promotions.py
+[964/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_numeric.py
+[965/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_numerictypes.py
+[966/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_overrides.py
+[967/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_print.py
+[968/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_protocols.py
+[969/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_records.py
+[970/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_regression.py
+[971/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_scalar_ctors.py
+[972/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_scalar_methods.py
+[973/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_scalarbuffer.py
+[974/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_scalarinherit.py
+[975/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_scalarmath.py
+[976/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_scalarprint.py
+[977/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_shape_base.py
+[978/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_simd.py
+[979/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_simd_module.py
+[980/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_stringdtype.py
+[981/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_strings.py
+[982/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_ufunc.py
+[983/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_umath.py
+[984/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_umath_accuracy.py
+[985/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_umath_complex.py
+[986/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/test_unicode.py
+[987/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/astype_copy.pkl
+[988/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/generate_umath_validation_data.cpp
+[989/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/recarray_from_file.fits
+[990/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-README.txt
+[991/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-arccos.csv
+[992/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-arccosh.csv
+[993/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-arcsin.csv
+[994/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-arcsinh.csv
+[995/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-arctan.csv
+[996/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-arctanh.csv
+[997/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-cbrt.csv
+[998/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-cos.csv
+[999/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-cosh.csv
+[1000/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-exp.csv
+[1001/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-exp2.csv
+[1002/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-expm1.csv
+[1003/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-log.csv
+[1004/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-log10.csv
+[1005/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-log1p.csv
+[1006/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-log2.csv
+[1007/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-sin.csv
+[1008/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-sinh.csv
+[1009/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-tan.csv
+[1010/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/data/umath-validation-set-tanh.csv
+[1011/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/examples/cython/checks.pyx
+[1012/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/examples/cython/meson.build
+[1013/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/examples/cython/setup.py
+[1014/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/examples/limited_api/limited_api1.c
+[1015/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/examples/limited_api/limited_api2.pyx
+[1016/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/examples/limited_api/limited_api_latest.c
+[1017/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/examples/limited_api/meson.build
+[1018/1018] /tmp/sprint011-builder/numpy-2.4.2/numpy/_core/tests/examples/limited_api/setup.py
+Successfully built numpy-2.4.2-cp311-cp311-linux_x86_64.whl

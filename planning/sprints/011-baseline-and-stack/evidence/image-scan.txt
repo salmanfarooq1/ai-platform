@@ -1,0 +1,126 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 4.68kB 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#2 DONE 2.7s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 279B 0.0s done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 ...
+
+#5 [builder 1/6] FROM docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#5 resolve docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89 0.1s done
+#5 DONE 0.1s
+
+#4 [internal] load build context
+#4 transferring context: 10.63MB 0.5s done
+#4 DONE 0.5s
+
+#6 [builder 2/6] RUN pip install --no-cache-dir pipx &&     pipx install poetry==2.3.3
+#6 CACHED
+
+#7 [builder 3/6] WORKDIR /app
+#7 CACHED
+
+#8 [builder 4/6] COPY pyproject.toml poetry.lock ./
+#8 CACHED
+
+#9 [builder 5/6] RUN --mount=type=cache,id=gap-poetry,target=/root/.cache/pypoetry     if [ "false" = "true" ]; then         poetry install --only main,rerank --no-root;     else         poetry install --only main --no-root;     fi
+#9 CACHED
+
+#10 [builder 6/6] COPY . .
+#10 DONE 2.6s
+
+#11 [runtime  3/14] COPY --from=builder /app/.venv .venv
+#11 CACHED
+
+#12 [runtime  4/14] COPY --from=builder /app/api api/
+#12 CACHED
+
+#13 [runtime  6/14] COPY --from=builder /app/gateway gateway/
+#13 CACHED
+
+#14 [runtime  8/14] COPY --from=builder /app/adapters adapters/
+#14 CACHED
+
+#15 [runtime  9/14] COPY --from=builder /app/workers workers/
+#15 CACHED
+
+#16 [runtime 12/14] COPY --from=builder /app/alembic.ini alembic.ini
+#16 CACHED
+
+#17 [runtime  2/14] WORKDIR /app
+#17 CACHED
+
+#18 [runtime  5/14] COPY --from=builder /app/core core/
+#18 CACHED
+
+#19 [runtime  7/14] COPY --from=builder /app/ports ports/
+#19 CACHED
+
+#20 [runtime 10/14] COPY --from=builder /app/sandbox_agent sandbox_agent/
+#20 CACHED
+
+#21 [runtime 11/14] COPY --from=builder /app/config.py config.py
+#21 CACHED
+
+#22 [runtime 13/14] COPY --from=builder /app/migrations migrations/
+#22 CACHED
+
+#23 [runtime 14/14] COPY --from=builder /app/data data/
+#23 CACHED
+
+#24 exporting to image
+#24 exporting layers 0.0s done
+#24 exporting manifest sha256:a387609ec73f39e4b689fc4549a094fc7b0503e71166de2a33c3653e8b378abd done
+#24 exporting config sha256:e7bf68e3976b97484bec05068be111a494c3eae65bbf11c9d9196d8110c224ce done
+#24 exporting attestation manifest sha256:113a1ec8450dc038b9f29a4920cfa446facc45abb9a1f8380cff8d84ad3eb3bf
+#24 exporting attestation manifest sha256:113a1ec8450dc038b9f29a4920cfa446facc45abb9a1f8380cff8d84ad3eb3bf 0.1s done
+#24 exporting manifest list sha256:1aa568b6a404c48b6eb06fed6fbfd088e8ff22fadf749252e97bd419b8d51b34 0.0s done
+#24 naming to docker.io/library/gap-supply-chain:scan done
+#24 unpacking to docker.io/library/gap-supply-chain:scan
+#24 unpacking to docker.io/library/gap-supply-chain:scan 0.1s done
+#24 DONE 0.5s
+Scanning docker:gap-supply-chain:scan
+NAME            INSTALLED  FIXED IN                       TYPE    VULNERABILITY        SEVERITY    EPSS         RISK   
+jaraco-context  5.3.0      6.1.0                          python  GHSA-58pv-8j8x-9vj2  High        0.6% (49th)  0.5    
+httpx2          2.9.1      2.12.0                         python  GHSA-8xx6-hgc6-gc2m  High        0.6% (49th)  0.5    
+python          3.11.17    *3.13.10, 3.14.1, 3.15.0a2     binary  CVE-2025-12781       Medium      0.6% (45th)  0.3    
+mcp             2.0.0      2.2.0                          python  GHSA-84m7-p3x7-pcfv  Medium      0.5% (38th)  0.3    
+urllib3         2.7.0      2.8.0                          python  GHSA-vxq7-64xx-v4gw  High        0.3% (25th)  0.3    
+fsspec          2026.4.0   2026.6.0                       python  GHSA-27vj-qcqg-25rc  High        0.3% (23rd)  0.3    
+pip             24.0       26.1.2                         python  GHSA-wf93-45jw-7689  Medium      0.5% (38th)  0.3    
+pip             24.0       25.3                           python  GHSA-4xh5-x5gv-qwph  Medium      0.5% (39th)  0.3    
+wheel           0.45.1     0.46.2                         python  GHSA-8rrh-rw8j-w5fx  High        0.4% (27th)  0.3    
+python          3.11.17    *3.13.15, 3.14.7, 3.15.0a6     binary  CVE-2025-15366       Medium      0.4% (35th)  0.2    
+setuptools      79.0.1     83.0.0                         python  GHSA-h35f-9h28-mq5c  Medium      0.4% (33rd)  0.2    
+python          3.11.17    3.15.0a6                       binary  CVE-2025-15367       Medium      0.4% (30th)  0.2    
+langgraph-sdk   0.4.2      0.4.4                          python  GHSA-fvww-7h3r-vfhp  High        0.3% (15th)  0.2    
+urllib3         2.7.0      2.8.0                          python  GHSA-gh4c-6fx4-qh6g  Medium      0.3% (20th)  0.2    
+httpx2          2.9.1      2.10.0                         python  GHSA-f2fp-rgf2-35cp  Medium      0.3% (22nd)  0.2    
+httpx2          2.9.1      2.11.0                         python  GHSA-h4x7-gw46-3wm6  Medium      0.3% (23rd)  0.2    
+urllib3         2.7.0      2.8.0                          python  GHSA-8988-9cw3-xx77  High        0.2% (9th)   0.2    
+pip             24.0       26.2.0                         python  GHSA-qwm4-qh6w-59xr  Medium      0.3% (20th)  0.2    
+multidict       6.7.1      6.9.1                          python  GHSA-54p9-h82j-f925  Medium      0.3% (20th)  0.2    
+python          3.11.17    *3.13.13, 3.14.4, 3.15.0a8     binary  CVE-2026-3446        Medium      0.2% (12th)  0.1    
+httpx2          2.9.1      2.11.0                         python  GHSA-pf96-p4fj-6566  Medium      0.2% (11th)  0.1    
+pip             24.0       26.0                           python  GHSA-6vgw-5pg2-w6jp  Low         0.4% (37th)  0.1    
+python          3.11.17    3.15.0rc3                      binary  CVE-2026-12345       Medium      0.2% (7th)   < 0.1  
+python          3.11.17    *3.13.14, 3.14.5rc1, 3.15.0b1  binary  CVE-2026-6019        Medium      0.2% (10th)  < 0.1  
+httpcore2       2.9.1      2.10.0                         python  GHSA-7mj9-2mp8-4m2p  High        0.1% (1st)   < 0.1  
+httpx2          2.9.1      2.10.0                         python  GHSA-7mj9-2mp8-4m2p  High        0.1% (1st)   < 0.1  
+pip             24.0       26.1                           python  GHSA-jp4c-xjxw-mgf9  Medium      0.2% (6th)   < 0.1  
+pip             24.0       26.1                           python  GHSA-58qw-9mgm-455v  Medium      0.2% (7th)   < 0.1  
+python          3.11.17    *3.13.13, 3.14.4, 3.15.0a8     binary  CVE-2026-3479        Negligible  0.3% (15th)  < 0.1
+Image gate passed: docker:gap-supply-chain:scan
+docker.io/grafana/grafana@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0: Pulling from grafana/grafana
+Digest: sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0
+Status: Image is up to date for grafana/grafana@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0
+docker.io/grafana/grafana:13.2.2@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0
+Scanning docker:grafana/grafana:13.2.2@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0

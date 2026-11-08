@@ -1,0 +1,33 @@
+Final Compose rendering summary (environment values omitted).
+default_config_exit_status=0
+default_service=postgres profiles=default ports=127.0.0.1:5432->5432
+default_service=valkey profiles=default ports=127.0.0.1:6379->6379
+default_service=worker profiles=default ports=none
+default_service_count=3
+default_expected_services=postgres,valkey,worker
+configured_named_volumes=objects,pgdata_trixie,valkey_data
+all_profiles_config_exit_status=0
+all_profiles_service=grafana profiles=observability ports=127.0.0.1:3000->3000
+all_profiles_service=kafka profiles=streams ports=127.0.0.1:19092->19092
+kafka_image_key_present=False build_context=/home/ubuntu/ai-platform dockerfile=docker/kafka/Dockerfile
+all_profiles_service=kafka-topics profiles=streams ports=none
+kafka-topics_image_key_present=False build_context=/home/ubuntu/ai-platform dockerfile=docker/kafka/Dockerfile
+all_profiles_service=ollama profiles=models ports=127.0.0.1:11434->11434
+ollama_image_key_present=False build_context=/home/ubuntu/ai-platform dockerfile=docker/ollama/Dockerfile
+ollama_named_volumes=ollama_data_v0407:/root/.ollama
+ollama_no_cloud_enabled=true ollama_no_prune_enabled=true
+all_profiles_service=ollama-pull profiles=models ports=none
+ollama-pull_image_key_present=False build_context=/home/ubuntu/ai-platform dockerfile=docker/ollama/Dockerfile
+all_profiles_service=postgres profiles=default ports=127.0.0.1:5432->5432
+all_profiles_service=prometheus profiles=observability ports=127.0.0.1:9090->9090
+all_profiles_service=seaweedfs profiles=lake ports=127.0.0.1:8333->8333
+seaweedfs_image_key_present=False build_context=/home/ubuntu/ai-platform dockerfile=docker/seaweedfs/Dockerfile
+all_profiles_service=seaweedfs-init profiles=lake ports=none
+seaweedfs-init_image_key_present=False build_context=/home/ubuntu/ai-platform dockerfile=docker/seaweedfs/Dockerfile
+all_profiles_service=valkey profiles=default ports=127.0.0.1:6379->6379
+all_profiles_service=worker profiles=default ports=none
+all_profiles_service_count=11
+all_profile_services=grafana,kafka,kafka-topics,ollama,ollama-pull,postgres,prometheus,seaweedfs,seaweedfs-init,valkey,worker
+configured_named_volumes=grafana_data_v13,kafka_data,objects,ollama_data_v0407,pgdata_trixie,prometheus_data,seaweedfs_data,valkey_data
+published_ports_loopback_only=true
+secrets_or_environment_values_printed=no

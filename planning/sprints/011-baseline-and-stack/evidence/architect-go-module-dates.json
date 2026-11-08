@@ -1,0 +1,255 @@
+[
+  {
+    "module": "golang.org/x/arch",
+    "version": "v0.8.0",
+    "source": "https://proxy.golang.org/golang.org/x/arch/@v/v0.8.0.info",
+    "metadata": {
+      "Version": "v0.8.0",
+      "Time": "2024-04-16T17:16:58Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/arch",
+        "Ref": "refs/tags/v0.8.0",
+        "Hash": "5d0b1102bee052ce00bf47f9cfef8f73d2ac6d46"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/crypto",
+    "version": "v0.57.0",
+    "source": "https://proxy.golang.org/golang.org/x/crypto/@v/v0.57.0.info",
+    "metadata": {
+      "Version": "v0.57.0",
+      "Time": "2026-09-08T18:05:01Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/crypto",
+        "Hash": "3f62bf119e84c6e35e8518a2958089ade622d1a3",
+        "Ref": "refs/tags/v0.57.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/exp",
+    "version": "v0.0.0-20250218142911-aa4b98e5adaa",
+    "source": "https://proxy.golang.org/golang.org/x/exp/@v/v0.0.0-20250218142911-aa4b98e5adaa.info",
+    "metadata": {
+      "Version": "v0.0.0-20250218142911-aa4b98e5adaa",
+      "Time": "2025-02-18T14:29:11Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/exp",
+        "Hash": "aa4b98e5adaa776b18e544db3ee2b32a74335849"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/exp",
+    "version": "v0.0.0-20260709172345-9ea1abe57597",
+    "source": "https://proxy.golang.org/golang.org/x/exp/@v/v0.0.0-20260709172345-9ea1abe57597.info",
+    "metadata": {
+      "Version": "v0.0.0-20260709172345-9ea1abe57597",
+      "Time": "2026-07-09T17:23:45Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/exp",
+        "Hash": "9ea1abe5759723e90ff9d6e93de05faedacb461a"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/image",
+    "version": "v0.22.0",
+    "source": "https://proxy.golang.org/golang.org/x/image/@v/v0.22.0.info",
+    "metadata": {
+      "Version": "v0.22.0",
+      "Time": "2024-11-07T22:54:16Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/image",
+        "Hash": "3724ab8af5c31f982e13765ba3707ffe5c463e64",
+        "Ref": "refs/tags/v0.22.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/image",
+    "version": "v0.45.0",
+    "source": "https://proxy.golang.org/golang.org/x/image/@v/v0.45.0.info",
+    "metadata": {
+      "Version": "v0.45.0",
+      "Time": "2026-08-11T17:56:44Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/image",
+        "Hash": "3ebddc7c54bd879f8d84d11db82892726f5192fd",
+        "Ref": "refs/tags/v0.45.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/mod",
+    "version": "v0.41.0",
+    "source": "https://proxy.golang.org/golang.org/x/mod/@v/v0.41.0.info",
+    "metadata": {
+      "Version": "v0.41.0",
+      "Time": "2026-08-24T20:56:42Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/mod",
+        "Hash": "d0a27b2d4a48460806692bf5c87fc157c3c65292",
+        "Ref": "refs/tags/v0.41.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/net",
+    "version": "v0.60.0",
+    "source": "https://proxy.golang.org/golang.org/x/net/@v/v0.60.0.info",
+    "metadata": {
+      "Version": "v0.60.0",
+      "Time": "2026-10-08T17:22:58Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/net",
+        "Hash": "18ece0ce30bc35fa81fe72028bf309bb3ff3f4a5",
+        "Ref": "refs/tags/v0.60.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/oauth2",
+    "version": "v0.36.0",
+    "source": "https://proxy.golang.org/golang.org/x/oauth2/@v/v0.36.0.info",
+    "metadata": {
+      "Version": "v0.36.0",
+      "Time": "2026-02-11T19:14:10Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/oauth2",
+        "Hash": "4d954e69a88d9e1ccb8439f8d5b6cbef230c4ef9",
+        "Ref": "refs/tags/v0.36.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/sync",
+    "version": "v0.23.0",
+    "source": "https://proxy.golang.org/golang.org/x/sync/@v/v0.23.0.info",
+    "metadata": {
+      "Version": "v0.23.0",
+      "Time": "2026-08-31T03:04:41Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/sync",
+        "Hash": "f75267d8412fc1dfd12b343644a7ea46e4d9c85d",
+        "Ref": "refs/tags/v0.23.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/sys",
+    "version": "v0.48.0",
+    "source": "https://proxy.golang.org/golang.org/x/sys/@v/v0.48.0.info",
+    "metadata": {
+      "Version": "v0.48.0",
+      "Time": "2026-08-31T19:43:43Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/sys",
+        "Hash": "613e2570718ecde85c04e69ebd5585c3881c442c",
+        "Ref": "refs/tags/v0.48.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/term",
+    "version": "v0.46.0",
+    "source": "https://proxy.golang.org/golang.org/x/term/@v/v0.46.0.info",
+    "metadata": {
+      "Version": "v0.46.0",
+      "Time": "2026-09-08T16:27:41Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/term",
+        "Hash": "6226200ed12cba417a9d9e799c2a7179d3fc0e27",
+        "Ref": "refs/tags/v0.46.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/text",
+    "version": "v0.42.0",
+    "source": "https://proxy.golang.org/golang.org/x/text/@v/v0.42.0.info",
+    "metadata": {
+      "Version": "v0.42.0",
+      "Time": "2026-09-08T16:29:55Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/text",
+        "Hash": "fafe4a06967e06550e69ee42787d9902845d2a3f",
+        "Ref": "refs/tags/v0.42.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/time",
+    "version": "v0.15.0",
+    "source": "https://proxy.golang.org/golang.org/x/time/@v/v0.15.0.info",
+    "metadata": {
+      "Version": "v0.15.0",
+      "Time": "2026-02-11T19:14:29Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/time",
+        "Hash": "812b343c8714c317b0dad633efa6d103e554c006",
+        "Ref": "refs/tags/v0.15.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/tools",
+    "version": "v0.49.0",
+    "source": "https://proxy.golang.org/golang.org/x/tools/@v/v0.49.0.info",
+    "metadata": {
+      "Version": "v0.49.0",
+      "Time": "2026-08-13T14:53:26Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/tools",
+        "Hash": "18332fec72972efbb8ab9881984fec2d8cfc2b58",
+        "Ref": "refs/tags/v0.49.0"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/tools/godoc",
+    "version": "v0.1.0-deprecated",
+    "source": "https://proxy.golang.org/golang.org/x/tools/godoc/@v/v0.1.0-deprecated.info",
+    "metadata": {
+      "Version": "v0.1.0-deprecated",
+      "Time": "2025-09-04T13:43:47Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/tools",
+        "Subdir": "godoc",
+        "Hash": "923c35d570805dc3f09bfc09193beaaf00f91f38",
+        "Ref": "refs/tags/godoc/v0.1.0-deprecated"
+      }
+    }
+  },
+  {
+    "module": "golang.org/x/xerrors",
+    "version": "v0.0.0-20240903120638-7835f813f4da",
+    "source": "https://proxy.golang.org/golang.org/x/xerrors/@v/v0.0.0-20240903120638-7835f813f4da.info",
+    "metadata": {
+      "Version": "v0.0.0-20240903120638-7835f813f4da",
+      "Time": "2024-09-03T12:06:38Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/xerrors",
+        "Hash": "7835f813f4da395c9a1f7c0fe732a63d1c79d331"
+      }
+    }
+  }
+]

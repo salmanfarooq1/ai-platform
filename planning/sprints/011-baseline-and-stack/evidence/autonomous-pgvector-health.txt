@@ -1,0 +1,9 @@
+sprint011-pgcompat-4618f463-new expected=1 actual=1
+WARNING:  database "postgres" has a collation version mismatch
+DETAIL:  The database was created using collation version 2.36, but the operating system provides version 2.41.
+HINT:  Rebuild all objects in this database that use the default collation and run ALTER DATABASE postgres REFRESH COLLATION VERSION, or build PostgreSQL with the right library version.
+WARNING:  database "postgres" has a collation version mismatch
+DETAIL:  The database was created using collation version 2.36, but the operating system provides version 2.41.
+HINT:  Rebuild all objects in this database that use the default collation and run ALTER DATABASE postgres REFRESH COLLATION VERSION, or build PostgreSQL with the right library version.
+Database collation version differs from the runtime. See docs/postgres-upgrade.md.
+sprint011-pgcompat-4618f463-restore expected=0 actual=0

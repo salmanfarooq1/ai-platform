@@ -1,0 +1,22 @@
+Source: https://api.github.com/repos/prometheus/prometheus/releases/tags/v3.15.1
+Fetch result: URLError
+
+Source: https://raw.githubusercontent.com/prometheus/prometheus/v3.15.1/CHANGELOG.md
+# Changelog
+
+## 3.15.1 / 2026-10-21
+
+- [SECURITY] Container images: Update CA certificates to distrust "emSign ECC Root CA - G3" and "Comodo AAA Services root" following the compromise of eMudhra intermediate CA private keys.
+- [SECURITY] Build with Go 1.27.3 to fix vulnerabilities in `net/http`, `net/textproto`, `crypto/tls` and `html/template`.
+- [SECURITY] Bump golang.org/x/net to v0.60.0 to fix HTTP/2 vulnerabilities (GO-2026-6603, GO-2026-6610, GO-2026-6611, GO-2026-6612, GO-2026-6617).
+
+## 3.15.0 / 2026-09-24
+- [CHANGE] PromQL: A range query whose `end` was not aligned to `step` caused subqueries inside it to evaluate past the parent's last actual step, inflating `peakSamples` in the query stats and against the `query.max-samples` limit, and wasting storage I/O reading samples that were never used in the result. Add tests to prevent regression of the fix made in #18081. #18598
+- [CHANGE] PromQL: Do not register a start timestamp reset if the start timestamp hasn't changed between subsequent samples. #19454
+- [CHANGE] Logging: Deprecate `--log.level`; use `runtime.log_level` configuration to supply the default level. #19511
+- [FEATURE] Configuration: Allow changing the process log level through `runtime.log_level` on configuration reload. #19511
+- [FEATURE] Prometheus: Add `--auto-gomemlimit.refresh-interval` flag to periodically re-detect the container or system memory limit and update `GOMEMLIMIT` at runtime. #18843
+- [FEATURE] Scraping: Add support for scraping targets via Unix Domain Sockets. #12024. #18091
+- [FEATURE] scrape: Implement OM2.0 scrape format. #18606
+- [ENHANCEMENT] Reduce TSDB head CPU utilization when initializing. #18001
+- [ENHANCEMENT] Docker SD: Add labels `__meta_docker_container_image` and `__meta_docker_container_image_id`. #19386

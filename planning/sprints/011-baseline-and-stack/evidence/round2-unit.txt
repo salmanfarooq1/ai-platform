@@ -1,0 +1,60 @@
+$ poetry run pytest -m unit -q -p no:cacheprovider
+........................................................................ [  7%]
+.................................FFFFF.................................. [ 15%]
+........................................................................ [ 23%]
+........................................................................ [ 31%]
+........................................................................ [ 39%]
+........................................................................ [ 47%]
+........................................................................ [ 55%]
+........................................................................ [ 63%]
+........................................................................ [ 71%]
+........................................................................ [ 79%]
+........................................................................ [ 87%]
+........................................................................ [ 95%]
+......................................                                   [100%]
+=================================== FAILURES ===================================
+______________ test_compose_profiles_render_with_loopback_ports[] ______________
+tests/unit/test_compose.py:17: in test_compose_profiles_render_with_loopback_ports
+    assert result.returncode == 0, result.stderr
+E   AssertionError: 
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['docker', 'compose', 'config', '--format', 'json'], returncode=1, stdout="\nThe command 'docker...ings.\n\nFor details about using Docker Desktop with WSL 2, visit:\n\nhttps://docs.docker.com/go/wsl2/\n\n", stderr='').returncode
+___________ test_compose_profiles_render_with_loopback_ports[models] ___________
+tests/unit/test_compose.py:17: in test_compose_profiles_render_with_loopback_ports
+    assert result.returncode == 0, result.stderr
+E   AssertionError: 
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['docker', 'compose', '--profile', 'models', 'config', '--format', 'json'], returncode=1, stdout...ings.\n\nFor details about using Docker Desktop with WSL 2, visit:\n\nhttps://docs.docker.com/go/wsl2/\n\n", stderr='').returncode
+__________ test_compose_profiles_render_with_loopback_ports[streams] ___________
+tests/unit/test_compose.py:17: in test_compose_profiles_render_with_loopback_ports
+    assert result.returncode == 0, result.stderr
+E   AssertionError: 
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['docker', 'compose', '--profile', 'streams', 'config', '--format', 'json'], returncode=1, stdou...ings.\n\nFor details about using Docker Desktop with WSL 2, visit:\n\nhttps://docs.docker.com/go/wsl2/\n\n", stderr='').returncode
+____________ test_compose_profiles_render_with_loopback_ports[lake] ____________
+tests/unit/test_compose.py:17: in test_compose_profiles_render_with_loopback_ports
+    assert result.returncode == 0, result.stderr
+E   AssertionError: 
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['docker', 'compose', '--profile', 'lake', 'config', '--format', 'json'], returncode=1, stdout="...ings.\n\nFor details about using Docker Desktop with WSL 2, visit:\n\nhttps://docs.docker.com/go/wsl2/\n\n", stderr='').returncode
+_______ test_compose_profiles_render_with_loopback_ports[observability] ________
+tests/unit/test_compose.py:17: in test_compose_profiles_render_with_loopback_ports
+    assert result.returncode == 0, result.stderr
+E   AssertionError: 
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['docker', 'compose', '--profile', 'observability', 'config', '--format', 'json'], returncode=1,...ings.\n\nFor details about using Docker Desktop with WSL 2, visit:\n\nhttps://docs.docker.com/go/wsl2/\n\n", stderr='').returncode
+=============================== warnings summary ===============================
+tests/unit/test_eval_gate.py::test_the_suite_scores_what_the_baseline_says
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_compose.py::test_compose_profiles_render_with_loopback_ports[]
+FAILED tests/unit/test_compose.py::test_compose_profiles_render_with_loopback_ports[models]
+FAILED tests/unit/test_compose.py::test_compose_profiles_render_with_loopback_ports[streams]
+FAILED tests/unit/test_compose.py::test_compose_profiles_render_with_loopback_ports[lake]
+FAILED tests/unit/test_compose.py::test_compose_profiles_render_with_loopback_ports[observability]
+5 failed, 897 passed, 845 deselected, 1 warning in 36.22s
+
+EXIT_CODE=1

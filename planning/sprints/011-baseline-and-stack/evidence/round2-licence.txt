@@ -1,0 +1,4 @@
+$ scripts/supply_chain/licence_gate.sh
+typing_extensions==4.15.0: licence not approved: PSF-2.0
+
+EXIT_CODE=1

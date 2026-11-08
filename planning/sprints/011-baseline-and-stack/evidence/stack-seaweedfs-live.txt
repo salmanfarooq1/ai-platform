@@ -1,0 +1,297 @@
+FFFF.....F                                                               [100%]
+=================================== FAILURES ===================================
+___ test_put_returns_the_sha256_of_the_bytes_and_get_returns_them[seaweedfs] ___
+tests/contracts/test_object_store_contract.py:54: in test_put_returns_the_sha256_of_the_bytes_and_get_returns_them
+    key = await env.store.put(data)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+adapters/s3_object_store.py:43: in put
+    await asyncio.to_thread(self._client.put_object, Bucket=self._bucket, Key=key, Body=data)
+../.pyenv/versions/3.11.0/lib/python3.11/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:606: in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/context.py:123: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:1094: in _make_api_call
+    raise error_class(parsed_response, operation_name)
+E   botocore.exceptions.ClientError: An error occurred (InternalError) when calling the PutObject operation (reached max retries: 4): We encountered an internal error, please try again.
+_ test_the_same_bytes_twice_give_the_same_key_and_are_written_once[seaweedfs] __
+tests/contracts/test_object_store_contract.py:61: in test_the_same_bytes_twice_give_the_same_key_and_are_written_once
+    first = await env.store.put(b"same bytes")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+adapters/s3_object_store.py:41: in put
+    if await self.exists(key):
+       ^^^^^^^^^^^^^^^^^^^^^^
+adapters/s3_object_store.py:62: in exists
+    await asyncio.to_thread(self._client.head_object, Bucket=self._bucket, Key=key)
+../.pyenv/versions/3.11.0/lib/python3.11/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:606: in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/context.py:123: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:1094: in _make_api_call
+    raise error_class(parsed_response, operation_name)
+E   botocore.exceptions.ClientError: An error occurred (500) when calling the HeadObject operation (reached max retries: 4): Internal Server Error
+_______________ test_exists_tells_stored_from_unknown[seaweedfs] _______________
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:788: in urlopen
+    response = self._make_request(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:1374: in getresponse
+    response.begin()
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:318: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:279: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/socket.py:705: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/httpsession.py:509: in send
+    urllib_response = conn.urlopen(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:842: in urlopen
+    retries = retries.increment(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/util/retry.py:473: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/util/util.py:38: in reraise
+    raise value.with_traceback(tb)
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:788: in urlopen
+    response = self._make_request(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:1374: in getresponse
+    response.begin()
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:318: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:279: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/socket.py:705: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+
+During handling of the above exception, another exception occurred:
+tests/contracts/test_object_store_contract.py:70: in test_exists_tells_stored_from_unknown
+    key = await env.store.put(b"present")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+adapters/s3_object_store.py:41: in put
+    if await self.exists(key):
+       ^^^^^^^^^^^^^^^^^^^^^^
+adapters/s3_object_store.py:62: in exists
+    await asyncio.to_thread(self._client.head_object, Bucket=self._bucket, Key=key)
+../.pyenv/versions/3.11.0/lib/python3.11/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:606: in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/context.py:123: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:1076: in _make_api_call
+    http, parsed_response = self._make_request(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:1100: in _make_request
+    return self._endpoint.make_request(operation_model, request_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:119: in make_request
+    return self._send_request(request_dict, operation_model)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:202: in _send_request
+    while self._needs_retry(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:362: in _needs_retry
+    responses = self._event_emitter.emit(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/hooks.py:412: in emit
+    return self._emitter.emit(aliased_event_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/hooks.py:256: in emit
+    return self._emit(event_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/hooks.py:239: in _emit
+    response = handler(**kwargs)
+               ^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:207: in __call__
+    if self._checker(**checker_kwargs):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:284: in __call__
+    should_retry = self._should_retry(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:320: in _should_retry
+    return self._checker(attempt_number, response, caught_exception)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:363: in __call__
+    checker_response = checker(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:247: in __call__
+    return self._check_caught_exception(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:416: in _check_caught_exception
+    raise caught_exception
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:281: in _do_get_response
+    http_response = self._send(request)
+                    ^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:385: in _send
+    return self.http_session.send(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/httpsession.py:549: in send
+    raise ConnectionClosedError(
+E   botocore.exceptions.ConnectionClosedError: Connection was closed before we received a valid response from endpoint URL: "http://127.0.0.1:18333/gap-local/4d4c7eee2e28d03cb2dbf3df639c3290ade66e18755e83caade2d8f37bd8c044".
+____________ test_a_missing_key_raises_object_not_found[seaweedfs] _____________
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:788: in urlopen
+    response = self._make_request(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:1374: in getresponse
+    response.begin()
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:318: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:287: in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+E   http.client.RemoteDisconnected: Remote end closed connection without response
+
+During handling of the above exception, another exception occurred:
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/httpsession.py:509: in send
+    urllib_response = conn.urlopen(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:842: in urlopen
+    retries = retries.increment(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/util/retry.py:473: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/util/util.py:38: in reraise
+    raise value.with_traceback(tb)
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:788: in urlopen
+    response = self._make_request(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/urllib3/connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:1374: in getresponse
+    response.begin()
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:318: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/http/client.py:287: in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+E   urllib3.exceptions.ProtocolError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+
+During handling of the above exception, another exception occurred:
+tests/contracts/test_object_store_contract.py:77: in test_a_missing_key_raises_object_not_found
+    await env.store.get(hashlib.sha256(b"never stored").hexdigest())
+adapters/s3_object_store.py:50: in get
+    response = await asyncio.to_thread(self._client.get_object, Bucket=self._bucket, Key=key)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:606: in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/context.py:123: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:1076: in _make_api_call
+    http, parsed_response = self._make_request(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:1100: in _make_request
+    return self._endpoint.make_request(operation_model, request_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:119: in make_request
+    return self._send_request(request_dict, operation_model)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:202: in _send_request
+    while self._needs_retry(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:362: in _needs_retry
+    responses = self._event_emitter.emit(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/hooks.py:412: in emit
+    return self._emitter.emit(aliased_event_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/hooks.py:256: in emit
+    return self._emit(event_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/hooks.py:239: in _emit
+    response = handler(**kwargs)
+               ^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:207: in __call__
+    if self._checker(**checker_kwargs):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:284: in __call__
+    should_retry = self._should_retry(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:320: in _should_retry
+    return self._checker(attempt_number, response, caught_exception)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:363: in __call__
+    checker_response = checker(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:247: in __call__
+    return self._check_caught_exception(
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/retryhandler.py:416: in _check_caught_exception
+    raise caught_exception
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:281: in _do_get_response
+    http_response = self._send(request)
+                    ^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/endpoint.py:385: in _send
+    return self.http_session.send(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/httpsession.py:549: in send
+    raise ConnectionClosedError(
+E   botocore.exceptions.ConnectionClosedError: Connection was closed before we received a valid response from endpoint URL: "http://127.0.0.1:18333/gap-local/b68565cf5699273f6a21847b3fe44726374cbd6c3bfdc829527f1db2a0504341".
+___ test_different_bytes_get_different_keys_and_empty_bytes_work[seaweedfs] ____
+tests/contracts/test_object_store_contract.py:88: in test_different_bytes_get_different_keys_and_empty_bytes_work
+    a, b, empty = await env.store.put(b"a"), await env.store.put(b"b"), await env.store.put(b"")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+adapters/s3_object_store.py:41: in put
+    if await self.exists(key):
+       ^^^^^^^^^^^^^^^^^^^^^^
+adapters/s3_object_store.py:62: in exists
+    await asyncio.to_thread(self._client.head_object, Bucket=self._bucket, Key=key)
+../.pyenv/versions/3.11.0/lib/python3.11/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:606: in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/context.py:123: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+../.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/botocore/client.py:1094: in _make_api_call
+    raise error_class(parsed_response, operation_name)
+E   botocore.exceptions.ClientError: An error occurred (403) when calling the HeadObject operation: Forbidden
+5 failed, 5 passed, 20 deselected in 53.07s

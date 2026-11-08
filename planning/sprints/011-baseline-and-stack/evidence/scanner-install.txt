@@ -1,0 +1,13 @@
+/tmp/tmp.jcxprHOIAH/gitleaks.tar.gz: OK
+/tmp/tmp.jcxprHOIAH/grype.tar.gz: OK
+8.30.1
+Application:         grype
+Version:             0.119.0
+BuildDate:           2026-09-17T16:17:07Z
+GitCommit:           b6f5194537747ee7f705f4113069ac9eb269919f
+GitDescription:      v0.119.0
+Platform:            linux/amd64
+GoVersion:           go1.26.3
+Compiler:            gc
+Syft Version:        v1.52.0
+Supported DB Schema: 6

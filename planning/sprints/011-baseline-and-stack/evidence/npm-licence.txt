@@ -1,0 +1,2 @@
+npm:caniuse-lite==1.0.30001814: licence not approved: CC-BY-4.0
+npm:gsap==3.15.0: licence not approved: Custom: https://gsap.com/standard-license.

@@ -1,0 +1,66 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_______________________ test_licence_fixture[non_osi-1] ________________________
+
+fixture = 'non_osi', expected = 1
+
+    @pytest.mark.parametrize("fixture,expected", [("non_osi", 1), ("mit", 0)])
+    def test_licence_fixture(fixture, expected):
+        result = subprocess.run(
+            ["bash", str(ROOT / "scripts/supply_chain/licence_gate.sh"), "--fixture", str(ROOT / "tests/fixtures/licence" / fixture)],
+            capture_output=True, text=True,
+        )
+>       assert result.returncode == expected, result.stdout + result.stderr
+E       AssertionError: bash: /home/ubuntu/ai-platform/scripts/supply_chain/licence_gate.sh: No such file or directory
+E         
+E       assert 127 == 1
+E        +  where 127 = CompletedProcess(args=['bash', '/home/ubuntu/ai-platform/scripts/supply_chain/licence_gate.sh', '--fixture', '/home/ub..., stdout='', stderr='bash: /home/ubuntu/ai-platform/scripts/supply_chain/licence_gate.sh: No such file or directory\n').returncode
+
+tests/unit/test_licence_gate.py:17: AssertionError
+_________________________ test_licence_fixture[mit-0] __________________________
+
+fixture = 'mit', expected = 0
+
+    @pytest.mark.parametrize("fixture,expected", [("non_osi", 1), ("mit", 0)])
+    def test_licence_fixture(fixture, expected):
+        result = subprocess.run(
+            ["bash", str(ROOT / "scripts/supply_chain/licence_gate.sh"), "--fixture", str(ROOT / "tests/fixtures/licence" / fixture)],
+            capture_output=True, text=True,
+        )
+>       assert result.returncode == expected, result.stdout + result.stderr
+E       AssertionError: bash: /home/ubuntu/ai-platform/scripts/supply_chain/licence_gate.sh: No such file or directory
+E         
+E       assert 127 == 0
+E        +  where 127 = CompletedProcess(args=['bash', '/home/ubuntu/ai-platform/scripts/supply_chain/licence_gate.sh', '--fixture', '/home/ub..., stdout='', stderr='bash: /home/ubuntu/ai-platform/scripts/supply_chain/licence_gate.sh: No such file or directory\n').returncode
+
+tests/unit/test_licence_gate.py:17: AssertionError
+______________________ test_workflow_telemetry[tests.yml] ______________________
+
+name = 'tests.yml'
+
+    @pytest.mark.parametrize("name", ["tests.yml", "frontend.yml"])
+    def test_workflow_telemetry(name):
+        workflow = yaml.safe_load((ROOT / ".github/workflows" / name).read_text())
+>       assert workflow["env"]["DEEPEVAL_TELEMETRY_OPT_OUT"] == "YES"
+               ^^^^^^^^^^^^^^^
+E       KeyError: 'env'
+
+tests/unit/test_ci_env.py:13: KeyError
+____________________ test_workflow_telemetry[frontend.yml] _____________________
+
+name = 'frontend.yml'
+
+    @pytest.mark.parametrize("name", ["tests.yml", "frontend.yml"])
+    def test_workflow_telemetry(name):
+        workflow = yaml.safe_load((ROOT / ".github/workflows" / name).read_text())
+>       assert workflow["env"]["DEEPEVAL_TELEMETRY_OPT_OUT"] == "YES"
+               ^^^^^^^^^^^^^^^
+E       KeyError: 'env'
+
+tests/unit/test_ci_env.py:13: KeyError
+=========================== short test summary info ============================
+FAILED tests/unit/test_licence_gate.py::test_licence_fixture[non_osi-1] - Ass...
+FAILED tests/unit/test_licence_gate.py::test_licence_fixture[mit-0] - Asserti...
+FAILED tests/unit/test_ci_env.py::test_workflow_telemetry[tests.yml] - KeyErr...
+FAILED tests/unit/test_ci_env.py::test_workflow_telemetry[frontend.yml] - Key...
+4 failed in 1.82s

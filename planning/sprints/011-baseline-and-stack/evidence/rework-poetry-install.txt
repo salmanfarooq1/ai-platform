@@ -1,0 +1,6 @@
+Installing dependencies from lock file
+
+Package operations: 0 installs, 2 updates, 0 removals
+
+  - Updating mcp (2.0.0 -> 2.2.0)
+  - Updating mcp-types (2.0.0 -> 2.2.0)

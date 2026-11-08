@@ -1,0 +1,4 @@
+ Container sprint011-redis  Starting
+ Container sprint011-postgres  Starting
+ Container sprint011-redis  Started
+ Container sprint011-postgres  Started

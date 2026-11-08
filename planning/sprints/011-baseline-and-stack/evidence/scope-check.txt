@@ -1,0 +1,8 @@
+Branch: sprint/011-baseline-and-stack
+Changed paths in other sprint folders: []
+Changed API, UI or migration source: []
+Missing report evidence links: []
+git diff --check exit=0
+Image script shell syntax exit=0
+STATE lines: 42
+Accepted checks: A2., A3., A5., A8.

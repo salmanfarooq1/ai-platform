@@ -1,0 +1,1 @@
+skip check ok: 10 allowed skips

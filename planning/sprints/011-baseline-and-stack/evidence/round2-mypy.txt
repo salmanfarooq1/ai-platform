@@ -1,0 +1,4 @@
+$ poetry run mypy
+Success: no issues found in 147 source files
+
+EXIT_CODE=0

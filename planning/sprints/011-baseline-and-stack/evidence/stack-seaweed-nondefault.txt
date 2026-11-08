@@ -1,0 +1,31 @@
+Non-default generated credentials; values are not recorded.
+ Container sprint011-stack-seaweedfs-1  Recreate
+ Container sprint011-stack-seaweedfs-1  Recreated
+ Container sprint011-stack-seaweedfs-1  Starting
+ Container sprint011-stack-seaweedfs-1  Started
+ Container sprint011-stack-seaweedfs-1  Waiting
+ Container sprint011-stack-seaweedfs-1  Healthy
+Traceback (most recent call last):
+  File "/home/ubuntu/ai-platform/scripts/verify/seaweedfs_presign.py", line 31, in <module>
+    main()
+  File "/home/ubuntu/ai-platform/scripts/verify/seaweedfs_presign.py", line 22, in main
+    with urlopen(Request(put_url, data=data, method="PUT"), timeout=20) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 500: Internal Server Error

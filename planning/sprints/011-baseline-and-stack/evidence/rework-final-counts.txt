@@ -1,0 +1,16 @@
+unit: 817 passed, 0 failed/errors, 0 skipped
+integration/e2e: 831 passed, 0 failed/errors, 10 skipped
+Normalize only the generated route UUID in the two console audit parametrizations (test_console_api.py:19).
+Observed baseline collected: 1591
+Final collected: 1658
+Removed baseline cases: 0
+Added cases: 67
+Added cases by module:
+  tests.unit.test_check_skips: 3
+  tests.unit.test_ci_env: 9
+  tests.unit.test_config_mode: 3
+  tests.unit.test_docs_links: 2
+  tests.unit.test_licence_gate: 12
+  tests.unit.test_mcp_compat: 5
+  tests.unit.test_supply_chain_controls: 33
+Total backend: 1648 passed, 10 original skips; exact skip guard is recorded separately.

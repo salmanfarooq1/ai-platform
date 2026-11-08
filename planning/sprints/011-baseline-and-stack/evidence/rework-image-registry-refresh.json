@@ -1,0 +1,164 @@
+[
+  {
+    "repository": "grafana/grafana",
+    "source": "https://hub.docker.com/v2/repositories/grafana/grafana/tags?page_size=100&ordering=last_updated",
+    "candidates": [
+      {
+        "name": "13.2.4",
+        "digest": "sha256:dbbc38ea21103cefb50396340cd88afec779c7e070b0a7bf5a75b4ce46651d3f",
+        "last_updated": "2026-10-13T10:17:27.330576Z",
+        "tag_last_pushed": "2026-10-13T10:17:27.330576Z"
+      },
+      {
+        "name": "13.2.3",
+        "digest": "sha256:b28bae15e219c998fb0e0424ed724930cc61b1f61fb404d47c862f9a23f9e572",
+        "last_updated": "2026-09-29T07:33:07.31557Z",
+        "tag_last_pushed": "2026-09-29T07:33:07.31557Z"
+      },
+      {
+        "name": "13.2.2",
+        "digest": "sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0",
+        "last_updated": "2026-09-15T09:15:12.33129Z",
+        "tag_last_pushed": "2026-09-15T09:15:12.33129Z"
+      },
+      {
+        "name": "13.2.1",
+        "digest": "sha256:f772d434e8fab0049deb2b1b30abd43342bcfca1537614aa8d36080232cf4283",
+        "last_updated": "2026-09-01T15:10:35.595169Z",
+        "tag_last_pushed": "2026-09-01T15:10:35.595169Z"
+      }
+    ]
+  },
+  {
+    "repository": "prom/prometheus",
+    "source": "https://hub.docker.com/v2/repositories/prom/prometheus/tags?page_size=100&ordering=last_updated",
+    "candidates": [
+      {
+        "name": "v3.15.1",
+        "digest": "sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2",
+        "last_updated": "2026-10-21T14:08:25.882414Z",
+        "tag_last_pushed": "2026-10-21T14:08:25.882414Z"
+      },
+      {
+        "name": "v3.15.0",
+        "digest": "sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e",
+        "last_updated": "2026-09-25T08:10:48.974043Z",
+        "tag_last_pushed": "2026-09-25T08:10:48.974043Z"
+      },
+      {
+        "name": "v3.14.0",
+        "digest": "sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0",
+        "last_updated": "2026-08-18T07:44:13.815901Z",
+        "tag_last_pushed": "2026-08-18T07:44:13.815901Z"
+      }
+    ]
+  },
+  {
+    "repository": "ollama/ollama",
+    "source": "https://hub.docker.com/v2/repositories/ollama/ollama/tags?page_size=100&ordering=last_updated",
+    "candidates": [
+      {
+        "name": "0.40.7",
+        "digest": "sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b",
+        "last_updated": "2026-10-21T03:50:58.128345Z",
+        "tag_last_pushed": "2026-10-21T03:50:58.128345Z"
+      },
+      {
+        "name": "0.40.6",
+        "digest": "sha256:265409e1d931028a8f7d5a32bcbafddd7bffbc6cc629d77efe9560adf692a5e7",
+        "last_updated": "2026-10-17T00:53:40.008329Z",
+        "tag_last_pushed": "2026-10-17T00:53:40.008329Z"
+      },
+      {
+        "name": "0.40.5",
+        "digest": "sha256:5d3a2f25f9825628daba94dc0b1d421c7d57d6c03ae5faa9ba050e058bab8241",
+        "last_updated": "2026-10-15T18:44:26.584499Z",
+        "tag_last_pushed": "2026-10-15T18:44:26.584499Z"
+      },
+      {
+        "name": "0.40.4",
+        "digest": "sha256:926d40fd6eeeebd346b5c358a63de2a10ec995371cd93dd22f1843200694b1a6",
+        "last_updated": "2026-10-14T00:31:39.036214Z",
+        "tag_last_pushed": "2026-10-14T00:31:39.036214Z"
+      },
+      {
+        "name": "0.40.3",
+        "digest": "sha256:adca95a12c2b386a8f9a995e7fa0600e187e3323b5e5522f5a6c3b1ec73eff99",
+        "last_updated": "2026-10-11T04:14:08.069862Z",
+        "tag_last_pushed": "2026-10-11T04:14:08.069862Z"
+      },
+      {
+        "name": "0.40.2",
+        "digest": "sha256:b86366bb528bbf7f1424435d165028497a5b69bf6ddb4fa5a87102e2b79f44fb",
+        "last_updated": "2026-10-08T18:24:21.479177Z",
+        "tag_last_pushed": "2026-10-08T18:24:21.479177Z"
+      },
+      {
+        "name": "0.40.1",
+        "digest": "sha256:69f27594d8127cb43db1edcafa5e2d3cd8f88bdbc54a2cf3ceb11b8d138a24b1",
+        "last_updated": "2026-10-08T00:57:56.344241Z",
+        "tag_last_pushed": "2026-10-08T00:57:56.344241Z"
+      },
+      {
+        "name": "0.40.0",
+        "digest": "sha256:1bef639749741b375e9a1eb2c1346fb57ce52f5432de1f74846e44ccc18e1687",
+        "last_updated": "2026-10-06T18:05:18.084654Z",
+        "tag_last_pushed": "2026-10-06T18:05:18.084654Z"
+      },
+      {
+        "name": "0.35.1",
+        "digest": "sha256:292ee7945dfc3d5840a181f3ab86fedb1e66703e02c8af98b50f4da56b7e278c",
+        "last_updated": "2026-10-02T17:03:23.876371Z",
+        "tag_last_pushed": "2026-10-02T17:03:23.876371Z"
+      },
+      {
+        "name": "0.35.0",
+        "digest": "sha256:2a6e883b917fc543389599dae79918f5cac9e1438890506982f44aa4f5625d01",
+        "last_updated": "2026-09-29T01:49:09.059844Z",
+        "tag_last_pushed": "2026-09-29T01:49:09.059844Z"
+      },
+      {
+        "name": "0.34.4",
+        "digest": "sha256:8262851b2846b87c649eddf3e76beb270c52f4d1bc94559f47efde16b0841551",
+        "last_updated": "2026-09-24T04:02:35.273426Z",
+        "tag_last_pushed": "2026-09-24T04:02:35.273426Z"
+      },
+      {
+        "name": "0.34.3",
+        "digest": "sha256:7ab595e4ead391f6818c7215297781282babe0701f6d9a9f8862ac591360a58b",
+        "last_updated": "2026-09-22T19:00:45.533294Z",
+        "tag_last_pushed": "2026-09-22T19:00:45.533294Z"
+      }
+    ]
+  },
+  {
+    "repository": "pgvector/pgvector",
+    "source": "https://hub.docker.com/v2/repositories/pgvector/pgvector/tags?page_size=100&ordering=last_updated",
+    "candidates": [
+      {
+        "name": "0.8.7-pg16",
+        "digest": "sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a",
+        "last_updated": "2026-10-01T17:34:34.052068Z",
+        "tag_last_pushed": "2026-10-01T17:34:34.052068Z"
+      },
+      {
+        "name": "0.8.6-pg16",
+        "digest": "sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b",
+        "last_updated": "2026-08-13T21:26:05.381869Z",
+        "tag_last_pushed": "2026-08-13T21:26:05.381869Z"
+      },
+      {
+        "name": "0.8.5-pg16",
+        "digest": "sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb",
+        "last_updated": "2026-07-08T23:12:49.13428Z",
+        "tag_last_pushed": "2026-07-08T23:12:49.13428Z"
+      },
+      {
+        "name": "0.8.4-pg16",
+        "digest": "sha256:ad2e18408bf447f62092a8a5259e7df10505c5a0360bd1a1853ac8b8b0763da2",
+        "last_updated": "2026-06-30T22:33:07.355197Z",
+        "tag_last_pushed": "2026-06-30T22:33:07.355197Z"
+      }
+    ]
+  }
+]

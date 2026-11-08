@@ -1,0 +1,9 @@
+sdist SHA256: 659a6107e31a83c4e33f763942275fd278b21d095094044eb35569e86a21ddae
+official wheel SHA256: c02ef4401a506fb60b411467ad501e1429a3487abca4664871d9ae0b46c8ba32
+unmodified sdist files verified: 8242
+compiler commands: 229
+compiler dependency bytes: 4099669
+official wheel members: 1042 original notices retained: 17
+official NumPy binaries/static libraries inspected: 21
+Neither CC0 implementation occurs in compiler source/header inputs or official wheel source members/symbols.
+The wheel audit and upstream source/build selection support the artifact-specific correction; the local wheel is not substituted.

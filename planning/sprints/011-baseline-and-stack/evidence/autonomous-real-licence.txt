@@ -1,0 +1,1560 @@
+licence gate ok: 129 packages
+ Name                                      Version   License                         
+ Mako                                      1.4.3     MIT                             
+ MarkupSafe                                3.0.3     BSD-3-Clause                    
+ PyJWT                                     2.15.1    MIT                             
+ Pygments                                  2.20.0    BSD-2-Clause                    
+ SQLAlchemy                                2.1.3     MIT                             
+ aiohttp                                   3.14.3    Apache-2.0 AND MIT              
+ aiokafka                                  0.14.0    Apache-2.0                      
+ alembic                                   1.20.0    MIT                             
+ annotated-doc                             0.0.4     MIT                             
+ anyio                                     4.14.2    MIT                             
+ asyncpg                                   0.31.0    Apache-2.0                      
+ attrs                                     25.4.0    MIT                             
+ boto3                                     1.43.108  Apache-2.0                      
+ botocore                                  1.43.108  Apache-2.0                      
+ cffi                                      2.1.0     MIT-0                           
+ charset-normalizer                        3.4.7     MIT                             
+ click                                     8.3.3     BSD-3-Clause                    
+ cryptography                              50.0.2    Apache-2.0 OR BSD-3-Clause      
+ fastapi                                   0.137.0   MIT                             
+ filelock                                  3.29.4    MIT                             
+ frozenlist                                1.8.0     Apache-2.0                      
+ fsspec                                    2026.4.0  BSD-3-Clause                    
+ googleapis-common-protos                  1.75.5    Apache-2.0                      
+ h2                                        4.4.1     MIT                             
+ hf-xet                                    1.5.1     Apache-2.0                      
+ hpack                                     4.2.0     MIT                             
+ httpcore                                  1.0.9     BSD-3-Clause                    
+ httpcore2                                 2.9.1     BSD-3-Clause                    
+ httpx2                                    2.9.1     BSD-3-Clause                    
+ idna                                      3.18      BSD-3-Clause                    
+ importlib_metadata                        8.9.0     Apache-2.0                      
+ jiter                                     0.14.0    MIT                             
+ jsonschema                                4.26.0    MIT                             
+ jsonschema-specifications                 2025.9.1  MIT                             
+ langgraph                                 1.2.10    MIT                             
+ langgraph-checkpoint                      4.1.1     MIT                             
+ langgraph-prebuilt                        1.1.0     MIT                             
+ langgraph-sdk                             0.4.2     MIT                             
+ langsmith                                 0.10.15   MIT                             
+ litellm                                   1.103.2   MIT                             
+ opentelemetry-api                         1.45.0    Apache-2.0                      
+ opentelemetry-exporter-http-transport     0.66b0    Apache-2.0                      
+ opentelemetry-exporter-otlp-common        0.66b0    Apache-2.0                      
+ opentelemetry-exporter-otlp-proto-common  1.45.0    Apache-2.0                      
+ opentelemetry-exporter-otlp-proto-http    1.45.0    Apache-2.0                      
+ opentelemetry-exporter-prometheus         0.66b0    Apache-2.0                      
+ opentelemetry-instrumentation             0.66b0    Apache-2.0                      
+ opentelemetry-instrumentation-asgi        0.66b0    Apache-2.0                      
+ opentelemetry-instrumentation-fastapi     0.66b0    Apache-2.0                      
+ opentelemetry-proto                       1.45.0    Apache-2.0                      
+ opentelemetry-sdk                         1.45.0    Apache-2.0                      
+ opentelemetry-semantic-conventions        0.66b0    Apache-2.0                      
+ opentelemetry-util-http                   0.66b0    Apache-2.0                      
+ orjson                                    3.11.9    MPL-2.0 AND (Apache-2.0 OR MIT) 
+ ormsgpack                                 1.12.2    Apache-2.0 OR MIT               
+ packaging                                 26.0      Apache-2.0 OR BSD-2-Clause      
+ pgvector                                  0.4.2     MIT                             
+ prometheus_client                         0.26.0    Apache-2.0 AND BSD-2-Clause     
+ pycparser                                 3.0       BSD-3-Clause                    
+ pydantic                                  2.13.4    MIT                             
+ pydantic-settings                         2.15.0    MIT                             
+ pydantic_core                             2.46.4    MIT                             
+ python-dotenv                             1.2.2     BSD-3-Clause                    
+ python-multipart                          0.0.32    Apache-2.0                      
+ redis                                     8.1.0     MIT                             
+ referencing                               0.37.0    MIT                             
+ regex                                     2026.5.9  Apache-2.0 AND CNRI-Python      
+ rpds-py                                   2026.5.1  MIT                             
+ soupsieve                                 2.9       MIT                             
+ sse-starlette                             3.4.8     BSD-3-Clause                    
+ starlette                                 1.3.1     BSD-3-Clause                    
+ tqdm                                      4.68.3    MPL-2.0 AND MIT                 
+ truststore                                0.10.4    MIT                             
+ typer                                     0.25.1    MIT                             
+ typing-inspection                         0.4.2     MIT                             
+ typing_extensions                         4.15.0    PSF-2.0                         
+ urllib3                                   2.7.0     MIT                             
+ uuid_utils                                0.17.0    BSD-3-Clause                    
+ uvicorn                                   0.49.0    BSD-3-Clause                    
+ wrapt                                     2.5.0     BSD-2-Clause                    
+ xxhash                                    3.8.1     BSD-2-Clause                    
+ zipp                                      4.1.0     MIT                             
+ zstandard                                 0.25.0    BSD-3-Clause                    
+npm inventory: 236 identities; 0 absent optional packages; private root ai-platform-ui@2.0.0 excluded
+npm inventory: 236 identities; 0 absent optional packages; private root ai-platform-ui@2.0.0 excluded
+licence gate ok: 236 packages
+npm inventory: 236 identities; 0 absent optional packages; private root ai-platform-ui@2.0.0 excluded
+licence gate ok: 236 packages
+├─ @babel/runtime@7.29.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/babel/babel
+│  ├─ publisher: The Babel Team
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@babel/runtime
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@babel/runtime/LICENSE
+├─ @dimforge/rapier3d-compat@0.12.0
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/dimforge/rapier.js
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@dimforge/rapier3d-compat
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@dimforge/rapier3d-compat/LICENSE
+├─ @floating-ui/core@1.8.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/floating-ui/floating-ui
+│  ├─ publisher: atomiks
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@floating-ui/core
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@floating-ui/core/LICENSE
+├─ @floating-ui/dom@1.8.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/floating-ui/floating-ui
+│  ├─ publisher: atomiks
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@floating-ui/dom
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@floating-ui/dom/LICENSE
+├─ @floating-ui/react-dom@2.1.9
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/floating-ui/floating-ui
+│  ├─ publisher: atomiks
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@floating-ui/react-dom
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@floating-ui/react-dom/LICENSE
+├─ @floating-ui/utils@0.2.12
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/floating-ui/floating-ui
+│  ├─ publisher: atomiks
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@floating-ui/utils
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@floating-ui/utils/LICENSE
+├─ @mediapipe/tasks-vision@0.10.17
+│  ├─ licenses: Apache-2.0
+│  ├─ publisher: mediapipe@google.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@mediapipe/tasks-vision
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@mediapipe/tasks-vision/README.md
+├─ @monogrid/gainmap-js@3.4.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/MONOGRID/gainmap-js
+│  ├─ publisher: MONOGRID
+│  ├─ email: gainmap@monogrid.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@monogrid/gainmap-js
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@monogrid/gainmap-js/LICENSE
+├─ @phosphor-icons/react@2.1.10
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/phosphor-icons/react
+│  ├─ publisher: Tobias Fried
+│  ├─ email: friedtm@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@phosphor-icons/react
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@phosphor-icons/react/LICENSE
+├─ @radix-ui/primitive@1.1.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/primitive
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/primitive/LICENSE
+├─ @radix-ui/react-arrow@1.1.15
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-arrow
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-arrow/LICENSE
+├─ @radix-ui/react-collection@1.1.15
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-collection
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-collection/LICENSE
+├─ @radix-ui/react-compose-refs@1.1.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-compose-refs
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-compose-refs/LICENSE
+├─ @radix-ui/react-context@1.2.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-context
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-context/LICENSE
+├─ @radix-ui/react-dialog@1.1.23
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-dialog
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-dialog/LICENSE
+├─ @radix-ui/react-direction@1.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-direction
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-direction/LICENSE
+├─ @radix-ui/react-dismissable-layer@1.1.19
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-dismissable-layer
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-dismissable-layer/LICENSE
+├─ @radix-ui/react-dropdown-menu@2.1.24
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-dropdown-menu
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-dropdown-menu/LICENSE
+├─ @radix-ui/react-focus-guards@1.1.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-focus-guards
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-focus-guards/LICENSE
+├─ @radix-ui/react-focus-scope@1.1.16
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-focus-scope
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-focus-scope/LICENSE
+├─ @radix-ui/react-id@1.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-id
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-id/LICENSE
+├─ @radix-ui/react-menu@2.1.24
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-menu
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-menu/LICENSE
+├─ @radix-ui/react-popper@1.3.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-popper
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-popper/LICENSE
+├─ @radix-ui/react-portal@1.1.17
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-portal
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-portal/LICENSE
+├─ @radix-ui/react-presence@1.1.10
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-presence
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-presence/LICENSE
+├─ @radix-ui/react-primitive@2.1.10
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-primitive
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-primitive/LICENSE
+├─ @radix-ui/react-roving-focus@1.1.19
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-roving-focus
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-roving-focus/LICENSE
+├─ @radix-ui/react-slot@1.3.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-slot
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-slot/LICENSE
+├─ @radix-ui/react-toggle-group@1.1.19
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-toggle-group
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-toggle-group/LICENSE
+├─ @radix-ui/react-toggle@1.1.18
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-toggle
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-toggle/LICENSE
+├─ @radix-ui/react-use-callback-ref@1.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-callback-ref
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-callback-ref/LICENSE
+├─ @radix-ui/react-use-controllable-state@1.2.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-controllable-state
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-controllable-state/LICENSE
+├─ @radix-ui/react-use-effect-event@0.0.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-effect-event
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-effect-event/LICENSE
+├─ @radix-ui/react-use-is-hydrated@0.1.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-is-hydrated
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-is-hydrated/LICENSE
+├─ @radix-ui/react-use-layout-effect@1.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-layout-effect
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-layout-effect/LICENSE
+├─ @radix-ui/react-use-rect@1.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-rect
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-rect/LICENSE
+├─ @radix-ui/react-use-size@1.1.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-size
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/react-use-size/LICENSE
+├─ @radix-ui/rect@1.1.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/radix-ui/primitives
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/rect
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@radix-ui/rect/LICENSE
+├─ @react-spring/animated@9.7.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/react-spring
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/animated
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/animated/LICENSE
+├─ @react-spring/core@9.7.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/react-spring
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/core
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/core/LICENSE
+├─ @react-spring/rafz@9.7.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/react-spring
+│  ├─ publisher: Josh Ellis
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/rafz
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/rafz/LICENSE
+├─ @react-spring/shared@9.7.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/react-spring
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/shared
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/shared/LICENSE
+├─ @react-spring/three@9.7.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/react-spring
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/three
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/three/LICENSE
+├─ @react-spring/types@9.7.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/react-spring
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/types
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-spring/types/LICENSE
+├─ @react-three/drei@9.122.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/drei
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-three/drei
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-three/drei/LICENSE
+├─ @react-three/fiber@8.18.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/react-three-fiber
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-three/fiber
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-three/fiber/readme.md
+├─ @remix-run/router@1.23.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remix-run/react-router
+│  ├─ publisher: Remix Software
+│  ├─ email: hello@remix.run
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@remix-run/router
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@remix-run/router/LICENSE.md
+├─ @tanstack/query-core@5.104.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/TanStack/query
+│  ├─ publisher: tannerlinsley
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@tanstack/query-core
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@tanstack/query-core/LICENSE
+├─ @tanstack/react-query@5.104.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/TanStack/query
+│  ├─ publisher: tannerlinsley
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@tanstack/react-query
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@tanstack/react-query/LICENSE
+├─ @tweenjs/tween.js@23.1.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/tweenjs/tween.js
+│  ├─ publisher: tween.js contributors
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@tweenjs/tween.js
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@tweenjs/tween.js/LICENSE
+├─ @types/debug@4.1.13
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/debug
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/debug/LICENSE
+├─ @types/draco3d@1.4.10
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/draco3d
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/draco3d/LICENSE
+├─ @types/estree-jsx@1.0.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/estree-jsx
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/estree-jsx/LICENSE
+├─ @types/estree@1.0.9
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/estree
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/estree/LICENSE
+├─ @types/hast@3.0.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/hast
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/hast/LICENSE
+├─ @types/mdast@4.0.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/mdast
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/mdast/LICENSE
+├─ @types/ms@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/ms
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/ms/LICENSE
+├─ @types/offscreencanvas@2019.7.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/offscreencanvas
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/offscreencanvas/LICENSE
+├─ @types/prop-types@15.7.15
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/prop-types
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/prop-types/LICENSE
+├─ @types/react-dom@18.3.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/react-dom
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/react-dom/LICENSE
+├─ @types/react-reconciler@0.26.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/react-reconciler
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/react-reconciler/LICENSE
+├─ @types/react-reconciler@0.28.9
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/its-fine/node_modules/@types/react-reconciler
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/its-fine/node_modules/@types/react-reconciler/LICENSE
+├─ @types/react@18.3.31
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/react
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/react/LICENSE
+├─ @types/stats.js@0.17.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/stats.js
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/stats.js/LICENSE
+├─ @types/three@0.186.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/three
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/three/LICENSE
+├─ @types/unist@2.0.11
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/parse-entities/node_modules/@types/unist
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/parse-entities/node_modules/@types/unist/LICENSE
+├─ @types/unist@3.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/unist
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/unist/LICENSE
+├─ @types/webxr@0.5.24
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/DefinitelyTyped/DefinitelyTyped
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@types/webxr
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@types/webxr/LICENSE
+├─ @ungap/structured-clone@1.4.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/ungap/structured-clone
+│  ├─ publisher: Andrea Giammarchi
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@ungap/structured-clone
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@ungap/structured-clone/LICENSE
+├─ @use-gesture/core@10.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/use-gesture
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@use-gesture/core
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@use-gesture/core/LICENSE
+├─ @use-gesture/react@10.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/use-gesture
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@use-gesture/react
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@use-gesture/react/LICENSE
+├─ aria-hidden@1.2.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/theKashey/aria-hidden
+│  ├─ publisher: Anton Korzunov
+│  ├─ email: thekashey@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/aria-hidden
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/aria-hidden/LICENSE
+├─ bail@2.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/bail
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/bail
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/bail/license
+├─ base64-js@1.5.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/beatgammit/base64-js
+│  ├─ publisher: T. Jameson Little
+│  ├─ email: t.jameson.little@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/base64-js
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/base64-js/LICENSE
+├─ bidi-js@1.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lojjic/bidi-js
+│  ├─ publisher: Jason Johnston
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/bidi-js
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/bidi-js/LICENSE.txt
+├─ buffer@6.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/feross/buffer
+│  ├─ publisher: Feross Aboukhadijeh
+│  ├─ email: feross@feross.org
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/buffer
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/buffer/LICENSE
+├─ camera-controls@2.10.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/yomotsu/camera-controls
+│  ├─ publisher: Yomotsu
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/camera-controls
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/camera-controls/LICENSE
+├─ ccount@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/ccount
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/ccount
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/ccount/license
+├─ character-entities-html4@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/character-entities-html4
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/character-entities-html4
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/character-entities-html4/license
+├─ character-entities-legacy@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/character-entities-legacy
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/character-entities-legacy
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/character-entities-legacy/license
+├─ character-entities@2.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/character-entities
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/character-entities
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/character-entities/license
+├─ character-reference-invalid@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/character-reference-invalid
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/character-reference-invalid
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/character-reference-invalid/license
+├─ class-variance-authority@0.7.1
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/joe-bell/cva
+│  ├─ publisher: Joe Bell
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/class-variance-authority
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/class-variance-authority/LICENSE
+├─ clsx@2.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/clsx
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/clsx
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/clsx/license
+├─ comma-separated-tokens@2.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/comma-separated-tokens
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/comma-separated-tokens
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/comma-separated-tokens/license
+├─ cross-env@7.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/kentcdodds/cross-env
+│  ├─ publisher: Kent C. Dodds
+│  ├─ email: me@kentcdodds.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/cross-env
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/cross-env/LICENSE
+├─ cross-spawn@7.0.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/moxystudio/node-cross-spawn
+│  ├─ publisher: André Cruz
+│  ├─ email: andre@moxy.studio
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/cross-spawn
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/cross-spawn/LICENSE
+├─ csstype@3.2.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/frenic/csstype
+│  ├─ publisher: Fredrik Nicol
+│  ├─ email: fredrik.nicol@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/csstype
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/csstype/LICENSE
+├─ debug@4.4.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/debug-js/debug
+│  ├─ publisher: Josh Junon
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/debug
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/debug/LICENSE
+├─ decode-named-character-reference@1.3.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/decode-named-character-reference
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/decode-named-character-reference
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/decode-named-character-reference/license
+├─ dequal@2.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lukeed/dequal
+│  ├─ publisher: Luke Edwards
+│  ├─ email: luke.edwards05@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/dequal
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/dequal/license
+├─ detect-gpu@5.0.70
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/detect-gpu
+│  ├─ publisher: Tim van Scherpenzeel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/detect-gpu
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/detect-gpu/LICENSE
+├─ detect-node-es@1.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/thekashey/detect-node
+│  ├─ publisher: Ilya Kantor
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/detect-node-es
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/detect-node-es/LICENSE
+├─ devlop@1.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/devlop
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/devlop
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/devlop/license
+├─ draco3d@1.5.7
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/google/draco
+│  ├─ publisher: Google Draco Team
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/draco3d
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/draco3d/README.md
+├─ escape-string-regexp@5.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/escape-string-regexp
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/escape-string-regexp
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/escape-string-regexp/license
+├─ estree-util-is-identifier-name@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/estree-util-is-identifier-name
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/estree-util-is-identifier-name
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/estree-util-is-identifier-name/license
+├─ extend@3.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/justmoon/node-extend
+│  ├─ publisher: Stefan Thomas
+│  ├─ email: justmoon@members.fsf.org
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/extend
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/extend/LICENSE
+├─ fflate@0.6.11
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/101arrowz/fflate
+│  ├─ publisher: Arjun Barrett
+│  ├─ email: arjunbarrett@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/three-stdlib/node_modules/fflate
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/three-stdlib/node_modules/fflate/LICENSE
+├─ fflate@0.8.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/101arrowz/fflate
+│  ├─ publisher: Arjun Barrett
+│  ├─ email: arjunbarrett@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/fflate
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/fflate/LICENSE
+├─ get-nonce@1.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/theKashey/get-nonce
+│  ├─ publisher: Anton Korzunov
+│  ├─ email: thekashey@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/get-nonce
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/get-nonce/LICENSE
+├─ glsl-noise@0.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/hughsk/glsl-noise
+│  ├─ publisher: Ian McEwan, Ashima Arts, Stefan Gustavson
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/glsl-noise
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/glsl-noise/LICENSE
+├─ hast-util-to-jsx-runtime@2.3.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/hast-util-to-jsx-runtime
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/hast-util-to-jsx-runtime
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/hast-util-to-jsx-runtime/license
+├─ hast-util-whitespace@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/hast-util-whitespace
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/hast-util-whitespace
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/hast-util-whitespace/license
+├─ hls.js@1.7.3
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/video-dev/hls.js
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/hls.js
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/hls.js/LICENSE
+├─ html-url-attributes@3.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/rehypejs/rehype-minify.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/html-url-attributes
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/html-url-attributes/license
+├─ ieee754@1.2.1
+│  ├─ licenses: BSD-3-Clause
+│  ├─ repository: https://github.com/feross/ieee754
+│  ├─ publisher: Feross Aboukhadijeh
+│  ├─ email: feross@feross.org
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/ieee754
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/ieee754/LICENSE
+├─ immediate@3.0.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/calvinmetcalf/immediate
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/immediate
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/immediate/LICENSE.txt
+├─ inline-style-parser@0.2.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remarkablemark/inline-style-parser
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/inline-style-parser
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/inline-style-parser/LICENSE
+├─ is-alphabetical@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/is-alphabetical
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/is-alphabetical
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/is-alphabetical/license
+├─ is-alphanumerical@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/is-alphanumerical
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/is-alphanumerical
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/is-alphanumerical/license
+├─ is-decimal@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/is-decimal
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/is-decimal
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/is-decimal/license
+├─ is-hexadecimal@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/is-hexadecimal
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/is-hexadecimal
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/is-hexadecimal/license
+├─ is-plain-obj@4.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/is-plain-obj
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/is-plain-obj
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/is-plain-obj/license
+├─ is-promise@2.2.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/then/is-promise
+│  ├─ publisher: ForbesLindesay
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/is-promise
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/is-promise/LICENSE
+├─ isexe@2.0.0
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/isexe
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/isexe
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/isexe/LICENSE
+├─ its-fine@1.2.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/its-fine
+│  ├─ publisher: Cody Bennett
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/its-fine
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/its-fine/LICENSE
+├─ js-tokens@4.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lydell/js-tokens
+│  ├─ publisher: Simon Lydell
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/js-tokens
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/js-tokens/LICENSE
+├─ lie@3.3.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/calvinmetcalf/lie
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/lie
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/lie/license.md
+├─ longest-streak@3.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/longest-streak
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/longest-streak
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/longest-streak/license
+├─ loose-envify@1.4.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/zertosh/loose-envify
+│  ├─ publisher: Andres Suarez
+│  ├─ email: zertosh@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/loose-envify
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/loose-envify/LICENSE
+├─ maath@0.10.8
+│  ├─ licenses: MIT
+│  └─ path: /home/ubuntu/ai-platform/ui/node_modules/maath
+├─ markdown-table@3.0.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/markdown-table
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/markdown-table
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/markdown-table/license
+├─ mdast-util-find-and-replace@3.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-find-and-replace
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-find-and-replace
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-find-and-replace/license
+├─ mdast-util-from-markdown@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-from-markdown
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-from-markdown
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-from-markdown/license
+├─ mdast-util-gfm-autolink-literal@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-gfm-autolink-literal
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-autolink-literal
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-autolink-literal/license
+├─ mdast-util-gfm-footnote@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-gfm-footnote
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-footnote
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-footnote/license
+├─ mdast-util-gfm-strikethrough@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-gfm-strikethrough
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-strikethrough
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-strikethrough/license
+├─ mdast-util-gfm-table@2.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-gfm-table
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-table
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-table/license
+├─ mdast-util-gfm-task-list-item@2.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-gfm-task-list-item
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-task-list-item
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm-task-list-item/license
+├─ mdast-util-gfm@3.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-gfm
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-gfm/license
+├─ mdast-util-mdx-expression@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-mdx-expression
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-mdx-expression
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-mdx-expression/license
+├─ mdast-util-mdx-jsx@3.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-mdx-jsx
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-mdx-jsx
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-mdx-jsx/license
+├─ mdast-util-mdxjs-esm@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-mdxjs-esm
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-mdxjs-esm
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-mdxjs-esm/license
+├─ mdast-util-phrasing@4.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-phrasing
+│  ├─ publisher: Victor Felder
+│  ├─ email: victor@draft.li
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-phrasing
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-phrasing/license
+├─ mdast-util-to-hast@13.2.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-to-hast
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-to-hast
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-to-hast/license
+├─ mdast-util-to-markdown@2.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-to-markdown
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-to-markdown
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-to-markdown/license
+├─ mdast-util-to-string@4.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/mdast-util-to-string
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-to-string
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/mdast-util-to-string/license
+├─ meshline@3.3.1
+│  ├─ licenses: MIT
+│  ├─ publisher: Jaume Sanchez
+│  ├─ email: the.spite@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/meshline
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/meshline/LICENSE
+├─ meshoptimizer@1.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/zeux/meshoptimizer
+│  ├─ publisher: Arseny Kapoulkine
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/meshoptimizer
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/meshoptimizer/LICENSE.md
+├─ micromark-core-commonmark@2.0.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-core-commonmark
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-core-commonmark/license
+├─ micromark-extension-gfm-autolink-literal@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark-extension-gfm-autolink-literal
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-autolink-literal
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-autolink-literal/license
+├─ micromark-extension-gfm-footnote@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark-extension-gfm-footnote
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-footnote
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-footnote/license
+├─ micromark-extension-gfm-strikethrough@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark-extension-gfm-strikethrough
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-strikethrough
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-strikethrough/license
+├─ micromark-extension-gfm-table@2.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark-extension-gfm-table
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-table
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-table/license
+├─ micromark-extension-gfm-tagfilter@2.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark-extension-gfm-tagfilter
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-tagfilter
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-tagfilter/license
+├─ micromark-extension-gfm-task-list-item@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark-extension-gfm-task-list-item
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-task-list-item
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm-task-list-item/license
+├─ micromark-extension-gfm@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark-extension-gfm
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-extension-gfm/license
+├─ micromark-factory-destination@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-destination
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-destination/license
+├─ micromark-factory-label@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-label
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-label/license
+├─ micromark-factory-space@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-space
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-space/license
+├─ micromark-factory-title@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-title
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-title/license
+├─ micromark-factory-whitespace@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-whitespace
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-factory-whitespace/license
+├─ micromark-util-character@2.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-character
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-character/license
+├─ micromark-util-chunked@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-chunked
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-chunked/license
+├─ micromark-util-classify-character@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-classify-character
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-classify-character/license
+├─ micromark-util-combine-extensions@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-combine-extensions
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-combine-extensions/license
+├─ micromark-util-decode-numeric-character-reference@2.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-decode-numeric-character-reference
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-decode-numeric-character-reference/license
+├─ micromark-util-decode-string@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-decode-string
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-decode-string/license
+├─ micromark-util-edit-map@1.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-edit-map
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-edit-map/license
+├─ micromark-util-encode@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-encode
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-encode/license
+├─ micromark-util-html-tag-name@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-html-tag-name
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-html-tag-name/license
+├─ micromark-util-normalize-identifier@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-normalize-identifier
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-normalize-identifier/license
+├─ micromark-util-resolve-all@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-resolve-all
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-resolve-all/license
+├─ micromark-util-sanitize-uri@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-sanitize-uri
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-sanitize-uri/license
+├─ micromark-util-subtokenize@2.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-subtokenize
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-subtokenize/license
+├─ micromark-util-symbol@2.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-symbol
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-symbol/license
+├─ micromark-util-types@2.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-types
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark-util-types/license
+├─ micromark@4.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/micromark/micromark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/micromark
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/micromark/license
+├─ ms@2.1.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/vercel/ms
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/ms
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/ms/license.md
+├─ object-assign@4.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/object-assign
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/object-assign
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/object-assign/license
+├─ parse-entities@4.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/parse-entities
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/parse-entities
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/parse-entities/license
+├─ path-key@3.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/path-key
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/path-key
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/path-key/license
+├─ potpack@1.0.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/mapbox/potpack
+│  ├─ publisher: Vladimir Agafonkin
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/potpack
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/potpack/LICENSE
+├─ promise-worker-transferable@1.0.4
+│  ├─ licenses: Apache-2.0
+│  ├─ repository: https://github.com/terikon/promise-worker-transferable
+│  ├─ publisher: Roman Viskin
+│  ├─ email: npm@terikon.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/promise-worker-transferable
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/promise-worker-transferable/LICENSE
+├─ prop-types@15.8.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/facebook/prop-types
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/prop-types
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/prop-types/LICENSE
+├─ property-information@7.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/property-information
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/property-information
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/property-information/license
+├─ react-composer@5.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/jamesplease/react-composer
+│  ├─ publisher: James Smith
+│  ├─ email: jamesplease2@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-composer
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-composer/LICENSE
+├─ react-dom@18.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/facebook/react
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-dom
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-dom/LICENSE
+├─ react-is@16.13.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/facebook/react
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-is
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-is/LICENSE
+├─ react-markdown@10.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remarkjs/react-markdown
+│  ├─ publisher: Espen Hovlandsdal
+│  ├─ email: espen@hovlandsdal.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-markdown
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-markdown/license
+├─ react-reconciler@0.27.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/facebook/react
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-reconciler
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-reconciler/LICENSE
+├─ react-remove-scroll-bar@2.3.8
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/theKashey/react-remove-scroll-bar
+│  ├─ publisher: Anton Korzunov
+│  ├─ email: thekashey@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-remove-scroll-bar
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-remove-scroll-bar/README.md
+├─ react-remove-scroll@2.7.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/theKashey/react-remove-scroll
+│  ├─ publisher: Anton Korzunov
+│  ├─ email: thekashey@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-remove-scroll
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-remove-scroll/LICENSE
+├─ react-router-dom@6.30.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remix-run/react-router
+│  ├─ publisher: Remix Software
+│  ├─ email: hello@remix.run
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-router-dom
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-router-dom/LICENSE.md
+├─ react-router@6.30.6
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remix-run/react-router
+│  ├─ publisher: Remix Software
+│  ├─ email: hello@remix.run
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-router
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-router/LICENSE.md
+├─ react-style-singleton@2.2.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/theKashey/react-style-singleton
+│  ├─ publisher: Anton Korzunov
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-style-singleton
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-style-singleton/LICENSE
+├─ react-use-measure@2.1.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/react-use-measure
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react-use-measure
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react-use-measure/LICENSE
+├─ react@18.3.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/facebook/react
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/react
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/react/LICENSE
+├─ remark-gfm@4.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remarkjs/remark-gfm
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/remark-gfm
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/remark-gfm/license
+├─ remark-parse@11.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remarkjs/remark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/remark-parse
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/remark-parse/license
+├─ remark-rehype@11.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remarkjs/remark-rehype
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/remark-rehype
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/remark-rehype/license
+├─ remark-stringify@11.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remarkjs/remark.git#main
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/remark-stringify
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/remark-stringify/license
+├─ require-from-string@2.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/floatdrop/require-from-string
+│  ├─ publisher: Vsevolod Strukchinsky
+│  ├─ email: floatdrop@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/require-from-string
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/require-from-string/license
+├─ scheduler@0.21.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/facebook/react
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-three/fiber/node_modules/scheduler
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-three/fiber/node_modules/scheduler/LICENSE
+├─ scheduler@0.23.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/facebook/react
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/scheduler
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/scheduler/LICENSE
+├─ shebang-command@2.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/kevva/shebang-command
+│  ├─ publisher: Kevin Mårtensson
+│  ├─ email: kevinmartensson@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/shebang-command
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/shebang-command/license
+├─ shebang-regex@3.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/sindresorhus/shebang-regex
+│  ├─ publisher: Sindre Sorhus
+│  ├─ email: sindresorhus@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/shebang-regex
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/shebang-regex/license
+├─ space-separated-tokens@2.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/space-separated-tokens
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/space-separated-tokens
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/space-separated-tokens/license
+├─ stats-gl@2.4.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/RenaudRohlinger/stats-gl
+│  ├─ publisher: Renaud ROHLINGER
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/stats-gl
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/stats-gl/README.md
+├─ stats.js@0.17.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/mrdoob/stats.js
+│  ├─ publisher: mrdoob
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/stats.js
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/stats.js/LICENSE
+├─ stringify-entities@4.0.4
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/stringify-entities
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/stringify-entities
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/stringify-entities/license
+├─ style-to-js@1.1.21
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remarkablemark/style-to-js
+│  ├─ publisher: Mark
+│  ├─ email: mark@remarkablemark.org
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/style-to-js
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/style-to-js/LICENSE
+├─ style-to-object@1.0.14
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/remarkablemark/style-to-object
+│  ├─ publisher: Mark
+│  ├─ email: mark@remarkablemark.org
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/style-to-object
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/style-to-object/LICENSE
+├─ suspend-react@0.1.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/suspend-react
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/suspend-react
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/suspend-react/LICENSE
+├─ tailwind-merge@3.7.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/dcastil/tailwind-merge
+│  ├─ publisher: Dany Castillo
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/tailwind-merge
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/tailwind-merge/LICENSE.md
+├─ three-mesh-bvh@0.7.8
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/gkjohnson/three-mesh-bvh
+│  ├─ publisher: Garrett Johnson
+│  ├─ email: garrett.kjohnson@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/three-mesh-bvh
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/three-mesh-bvh/LICENSE
+├─ three-stdlib@2.36.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/three-stdlib
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/three-stdlib
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/three-stdlib/LICENSE
+├─ three@0.170.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/mrdoob/three.js
+│  ├─ publisher: mrdoob
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/stats-gl/node_modules/three
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/stats-gl/node_modules/three/LICENSE
+├─ three@0.186.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/mrdoob/three.js
+│  ├─ publisher: mrdoob
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/three
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/three/LICENSE
+├─ trim-lines@3.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/trim-lines
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/trim-lines
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/trim-lines/license
+├─ troika-three-text@0.52.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/protectwise/troika
+│  ├─ publisher: Jason Johnston
+│  ├─ email: jason.johnston@protectwise.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/troika-three-text
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/troika-three-text/LICENSE
+├─ troika-three-utils@0.52.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/protectwise/troika
+│  ├─ publisher: Jason Johnston
+│  ├─ email: jason.johnston@protectwise.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/troika-three-utils
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/troika-three-utils/LICENSE
+├─ troika-worker-utils@0.52.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/protectwise/troika
+│  ├─ publisher: Jason Johnston
+│  ├─ email: jason.johnston@protectwise.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/troika-worker-utils
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/troika-worker-utils/LICENSE
+├─ trough@2.2.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/wooorm/trough
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/trough
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/trough/license
+├─ tslib@2.8.1
+│  ├─ licenses: 0BSD
+│  ├─ repository: https://github.com/Microsoft/tslib
+│  ├─ publisher: Microsoft Corp.
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/tslib
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/tslib/LICENSE.txt
+├─ tunnel-rat@0.1.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/tunnel-rat
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/tunnel-rat
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/tunnel-rat/LICENSE
+├─ unified@11.0.5
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/unifiedjs/unified
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/unified
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/unified/license
+├─ unist-util-is@6.0.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/unist-util-is
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/unist-util-is
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/unist-util-is/license
+├─ unist-util-position@5.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/unist-util-position
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/unist-util-position
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/unist-util-position/license
+├─ unist-util-stringify-position@4.0.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/unist-util-stringify-position
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/unist-util-stringify-position
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/unist-util-stringify-position/license
+├─ unist-util-visit-parents@6.0.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/unist-util-visit-parents
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/unist-util-visit-parents
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/unist-util-visit-parents/license
+├─ unist-util-visit@5.1.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/syntax-tree/unist-util-visit
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/unist-util-visit
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/unist-util-visit/license
+├─ use-callback-ref@1.3.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/theKashey/use-callback-ref
+│  ├─ publisher: theKashey
+│  ├─ email: thekashey@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/use-callback-ref
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/use-callback-ref/LICENSE
+├─ use-sidecar@1.1.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/theKashey/use-sidecar
+│  ├─ publisher: theKashey
+│  ├─ email: thekashey@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/use-sidecar
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/use-sidecar/LICENSE
+├─ use-sync-external-store@1.7.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/react/react
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/use-sync-external-store
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/use-sync-external-store/LICENSE
+├─ utility-types@3.11.0
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/piotrwitek/utility-types
+│  ├─ publisher: Piotr Witek
+│  ├─ email: piotrek.witek@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/utility-types
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/utility-types/LICENSE
+├─ vfile-message@4.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/vfile/vfile-message
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/vfile-message
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/vfile-message/license
+├─ vfile@6.0.3
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/vfile/vfile
+│  ├─ publisher: Titus Wormer
+│  ├─ email: tituswormer@gmail.com
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/vfile
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/vfile/license
+├─ webgl-sdf-generator@1.1.1
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/lojjic/webgl-sdf-generator
+│  ├─ publisher: Jason Johnston
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/webgl-sdf-generator
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/webgl-sdf-generator/LICENSE.txt
+├─ which@2.0.2
+│  ├─ licenses: ISC
+│  ├─ repository: https://github.com/isaacs/node-which
+│  ├─ publisher: Isaac Z. Schlueter
+│  ├─ email: i@izs.me
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/which
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/which/LICENSE
+├─ zustand@3.7.2
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/zustand
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/@react-three/fiber/node_modules/zustand
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/@react-three/fiber/node_modules/zustand/LICENSE
+├─ zustand@4.5.7
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/zustand
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/tunnel-rat/node_modules/zustand
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/tunnel-rat/node_modules/zustand/LICENSE
+├─ zustand@5.0.15
+│  ├─ licenses: MIT
+│  ├─ repository: https://github.com/pmndrs/zustand
+│  ├─ publisher: Paul Henschel
+│  ├─ path: /home/ubuntu/ai-platform/ui/node_modules/zustand
+│  └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/zustand/LICENSE
+└─ zwitch@2.0.4
+   ├─ licenses: MIT
+   ├─ repository: https://github.com/wooorm/zwitch
+   ├─ publisher: Titus Wormer
+   ├─ email: tituswormer@gmail.com
+   ├─ path: /home/ubuntu/ai-platform/ui/node_modules/zwitch
+   └─ licenseFile: /home/ubuntu/ai-platform/ui/node_modules/zwitch/license
+
+licence gate ok: Python and npm

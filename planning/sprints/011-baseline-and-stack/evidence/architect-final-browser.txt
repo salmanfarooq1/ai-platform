@@ -1,0 +1,106 @@
+
+> ai-platform-ui@2.0.0 e2e
+> npm run build && playwright test
+
+
+> ai-platform-ui@2.0.0 build
+> tsc --noEmit && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 5624 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                  0.99 kB │ gzip:   0.56 kB
+dist/assets/Geist-Variable-Bj2R_7yk.woff2       69.65 kB
+dist/assets/GeistMono-Variable-Dispecij.woff2   71.37 kB
+dist/assets/index-BxgS77ia.css                  32.53 kB │ gzip:   7.63 kB
+dist/assets/time-range-BpH6G2fq.js               0.21 kB │ gzip:   0.19 kB
+dist/assets/walkthrough-store-CMuV9Tm6.js        0.22 kB │ gzip:   0.16 kB
+dist/assets/stages-UorP1m-x.js                   0.27 kB │ gzip:   0.21 kB
+dist/assets/density-D1tfL_P2.js                  0.30 kB │ gzip:   0.22 kB
+dist/assets/select-LleD8hQZ.js                   0.40 kB │ gzip:   0.29 kB
+dist/assets/input-BFy0-HnL.js                    0.66 kB │ gzip:   0.39 kB
+dist/assets/governance-text-e8mtuZEi.js          0.73 kB │ gzip:   0.45 kB
+dist/assets/reasons-DGRkdr1e.js                  0.96 kB │ gzip:   0.52 kB
+dist/assets/useInfiniteQuery-8QInVv1E.js         1.16 kB │ gzip:   0.49 kB
+dist/assets/receipt-BLWYHKgw.js                  1.27 kB │ gzip:   0.66 kB
+dist/assets/history-page-BIgKMXo0.js             1.57 kB │ gzip:   0.81 kB
+dist/assets/X.es-CgQTaXL8.js                     1.95 kB │ gzip:   0.66 kB
+dist/assets/keys-page-Bf-h5RAv.js                1.95 kB │ gzip:   0.90 kB
+dist/assets/hero-scene-DlO9yN3w.js               1.99 kB │ gzip:   1.06 kB
+dist/assets/deny-callout-oxd29h5w.js             2.11 kB │ gzip:   0.81 kB
+dist/assets/trace-timeline-HyUJwDax.js           2.22 kB │ gzip:   1.02 kB
+dist/assets/copy-value-BJTJFq7k.js               2.44 kB │ gzip:   0.98 kB
+dist/assets/signin-page-BhOqiTe_.js              2.49 kB │ gzip:   1.28 kB
+dist/assets/policies-page-LkgPSwfj.js            2.64 kB │ gzip:   1.21 kB
+dist/assets/landing-motion-_4fCSAsx.js           2.67 kB │ gzip:   1.29 kB
+dist/assets/system-page-D7ml-nld.js              2.81 kB │ gzip:   1.08 kB
+dist/assets/useMutation-CLwqjsxY.js              3.24 kB │ gzip:   1.32 kB
+dist/assets/segmented-DJD29zQ_.js                3.40 kB │ gzip:   1.39 kB
+dist/assets/marketing-shell-D88SmIuS.js          3.89 kB │ gzip:   1.59 kB
+dist/assets/usage-page-DjHwafCp.js               5.64 kB │ gzip:   1.87 kB
+dist/assets/how-it-works-page-r4mhXtS4.js        5.83 kB │ gzip:   2.29 kB
+dist/assets/walkthrough-page-Cx0qPrYk.js         5.86 kB │ gzip:   2.33 kB
+dist/assets/overview-page-Da0dm9mc.js            6.93 kB │ gzip:   2.47 kB
+dist/assets/decisions-page-2w1iXhj3.js           7.82 kB │ gzip:   3.02 kB
+dist/assets/states-Dq90ocSu.js                   8.79 kB │ gzip:   2.59 kB
+dist/assets/verdict-badge-D3zo4jdX.js           10.32 kB │ gzip:   2.84 kB
+dist/assets/requests-page-DYK2sZyC.js           10.38 kB │ gzip:   3.80 kB
+dist/assets/library-page-BN2Nzel7.js            11.88 kB │ gzip:   4.42 kB
+dist/assets/trust-page-CwChi6Uy.js              16.29 kB │ gzip:   5.05 kB
+dist/assets/landing-page-B_xdxp2U.js            16.82 kB │ gzip:   5.61 kB
+dist/assets/runs-page-BrxRIAiG.js               21.86 kB │ gzip:   7.12 kB
+dist/assets/react-CxfcT2zT.js                  171.48 kB │ gzip:  56.23 kB
+dist/assets/ask-page-pDZvi_NN.js               186.86 kB │ gzip:  56.83 kB
+dist/assets/index-B7j848i5.js                  248.39 kB │ gzip:  76.38 kB
+dist/assets/webgl-gc836SuQ.js                  878.61 kB │ gzip: 235.14 kB
+✓ built in 38.51s
+[WebServer] INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+[WebServer] INFO  [alembic.runtime.migration] Will assume transactional DDL.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Trust baseline: the decision hash chain, retention, eval runs and the metrics reads (Sprint 008).
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Sandboxed agent runs: the sandbox event log and the run tokens (Sprint 009).
+[WebServer] INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+[WebServer] INFO  [alembic.runtime.migration] Will assume transactional DDL.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Trust baseline: the decision hash chain, retention, eval runs and the metrics reads (Sprint 008).
+[WebServer] INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Sandboxed agent runs: the sandbox event log and the run tokens (Sprint 009).
+
+Running 82 tests using 1 worker
+
+  ✓   1 [setup] › e2e/auth.setup.ts:8:1 › sign in once and keep the session cookie (1.1s)
+axe landing (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=22
+  ✓   2 [chromium] › e2e/a11y.spec.ts:22:5 › axe, light theme › landing page (9.7s)
+axe how it works (light): violations=0 critical=0 serious=0 moderate=0 minor=0 passes=21
+  ✓   3 [chromium] › e2e/a11y.spec.ts:28:5 › axe, light theme › How it works (2.9s)
+  ✘   4 [chromium] › e2e/a11y.spec.ts:33:5 › axe, light theme › Overview (10.9s)
+  ✘   5 [chromium] › e2e/a11y.spec.ts:42:5 › axe, light theme › Requests, with the drawer open on a denied request (10.6s)
+  ✘   6 [chromium] › e2e/a11y.spec.ts:50:5 › axe, light theme › Requests, the list (10.5s)
+  ✘   7 [chromium] › e2e/a11y.spec.ts:55:5 › axe, light theme › the walkthrough, after both requests ran (11.6s)
+  ✘   8 [chromium] › e2e/a11y.spec.ts:62:5 › axe, light theme › the command palette, open (11.2s)
+  ✘   9 [chromium] › e2e/a11y.spec.ts:68:5 › axe, light theme › the session menu, open (10.9s)
+npm error path /workspace/ui
+npm error command failed
+npm error signal SIGTERM
+npm error command sh -c npm run build && playwright test
+npm notice
+npm notice New major version of npm available! 10.9.3 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice
+npm error A complete log of this run can be found in: /root/.npm/_logs/2026-10-21T17_40_15_538Z-debug-0.log

@@ -1,0 +1,10 @@
+Mounted scanner binary SHA-256: e02ba25615668c6bae03473e3c6493b6dfffc2e4e419f65f9bd62555ac10cd0e
+Source: previously checksum-verified primary release archive; see scanner-install.txt and pins.txt
+Mounted database import metadata:
+{
+ "digest": "xxh64:41938d37602e59c2",
+ "source": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-21T00:28:41Z_1792564262.tar.zst?checksum=sha256%3Afe51ed05fd0bf2e0642a362b75b245caf0da0eabb92b26a543e061f9873ec2ba",
+ "client_version": "v6.1.9"
+}
+
+Network disabled; same image digest, binary, DB cache, ignore file and critical threshold as the host scan.

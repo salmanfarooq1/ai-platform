@@ -1,0 +1,5 @@
+Source: https://raw.githubusercontent.com/ollama/ollama/v0.40.7/go.mod
+SHA256: c8330ba5f762c4bded1401cc8ecadbe85ebe8e5d159fd81da122da986b26cda5
+go 1.26.0
+	golang.org/x/crypto v0.43.0
+	golang.org/x/net v0.46.0 // indirect

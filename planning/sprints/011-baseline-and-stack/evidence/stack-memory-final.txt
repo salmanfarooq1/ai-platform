@@ -1,0 +1,5 @@
+capture_context=final SeaweedFS signed-url verification complete; measured with sprint011-final-valkey and sprint011-stack-kafka active; not an idle benchmark; container limits were not set by this capture
+container=sprint011-final-valkey memory=14.18MiB / 15.44GiB cpu=1.14%
+container=sprint011-stack-kafka-1 memory=473.9MiB / 15.44GiB cpu=1.70%
+container=sprint011-seaweed-final-seaweedfs-1 memory=128.9MiB / 15.44GiB cpu=0.65%
+exit_status=0

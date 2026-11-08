@@ -1,0 +1,5 @@
+tsc
+hyperv_clocksource_tsc_page
+tsc
+tsc
+active

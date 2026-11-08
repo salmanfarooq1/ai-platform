@@ -1,0 +1,14 @@
+CREATE DATABASE
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Trust baseline: the decision hash chain, retention, eval runs and the metrics reads (Sprint 008).
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Sandboxed agent runs: the sandbox event log and the run tokens (Sprint 009).
+SETUP_DONE

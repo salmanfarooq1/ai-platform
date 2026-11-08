@@ -1,0 +1,2 @@
+Reference: sprint011-ollama-security:latest
+Immutable image identity: sha256:b3592e01488e94656d81d5592694172214a0a8ff700df27ce014a807e9bbc7ec

@@ -1,0 +1,3 @@
+sprint011-stack-valkey 20.41MiB / 15.44GiB
+sprint011-stack-kafka-1 390MiB / 15.44GiB
+sprint011-stack-seaweedfs-1 167.7MiB / 15.44GiB

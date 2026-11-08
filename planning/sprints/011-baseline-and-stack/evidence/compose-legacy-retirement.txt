@@ -1,0 +1,6 @@
+legacy_compose_source=docker-compose.prod.yml
+historical_copy=planning/history/docker-compose.prod.yml
+before_sha256=bf70dce11da8fe400e23e760b5a181cc883e3a2ba4570972c14331cacd799d38
+after_sha256=bf70dce11da8fe400e23e760b5a181cc883e3a2ba4570972c14331cacd799d38
+byte_identical=true
+root_source_absent=true

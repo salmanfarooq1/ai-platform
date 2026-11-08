@@ -1,0 +1,64 @@
+F.....FFF                                                                [100%]
+=================================== FAILURES ===================================
+_______________ test_only_live_minio_skips_of_the_contract_pass ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_only_live_minio_skips_of_0')
+
+    def test_only_live_minio_skips_of_the_contract_pass(tmp_path):
+        assert check_skips.check(report(tmp_path, minio_cases(10)), expect=10) == []
+        empty = tmp_path / "empty-allowlist.json"
+        empty.write_text("[]")
+>       assert check_skips.check(report(tmp_path, []), expect=None, allowlist=empty) == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: check() got an unexpected keyword argument 'allowlist'
+
+tests/unit/test_check_skips.py:33: TypeError
+_________________________ test_missing_allowlist_fails _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_missing_allowlist_fails0')
+
+    def test_missing_allowlist_fails(tmp_path):
+>       assert check_skips.main([report(tmp_path, minio_cases(10)), "--allowlist", str(tmp_path / "missing.json")]) == 1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = <function main at 0x7957ecf66ac0>(['/tmp/pytest-of-ubuntu/pytest-2/test_missing_allowlist_fails0/report.xml', '--allowlist', '/tmp/pytest-of-ubuntu/pytest-2/test_missing_allowlist_fails0/missing.json'])
+E        +    where <function main at 0x7957ecf66ac0> = check_skips.main
+
+tests/unit/test_check_skips.py:63: AssertionError
+----------------------------- Captured stdout call -----------------------------
+skip check ok: 10 allowed live-MinIO skips
+_____________ test_custom_allowlist_requires_exact_count_per_entry _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_custom_allowlist_requires0')
+
+    def test_custom_allowlist_requires_exact_count_per_entry(tmp_path):
+        import json
+    
+        allowlist = tmp_path / "allowlist.json"
+        allowlist.write_text(json.dumps([{
+            "classname": CONTRACT, "name_contains": "[minio", "reason_prefix": "live MinIO not available",
+            "count": 1, "why": "The live service is optional here.",
+        }]))
+>       assert check_skips.check(report(tmp_path, minio_cases(1)), allowlist=allowlist) == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: check() got an unexpected keyword argument 'allowlist'
+
+tests/unit/test_check_skips.py:74: TypeError
+_________________ test_cli_cannot_override_the_allowlist_count _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_cli_cannot_override_the_a0')
+
+    def test_cli_cannot_override_the_allowlist_count(tmp_path):
+>       assert check_skips.main([report(tmp_path, minio_cases(9)), "--expect", "9"]) == 1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = <function main at 0x7957ecf66ac0>(['/tmp/pytest-of-ubuntu/pytest-2/test_cli_cannot_override_the_a0/report.xml', '--expect', '9'])
+E        +    where <function main at 0x7957ecf66ac0> = check_skips.main
+
+tests/unit/test_check_skips.py:79: AssertionError
+----------------------------- Captured stdout call -----------------------------
+skip check ok: 9 allowed live-MinIO skips
+=========================== short test summary info ============================
+FAILED tests/unit/test_check_skips.py::test_only_live_minio_skips_of_the_contract_pass
+FAILED tests/unit/test_check_skips.py::test_missing_allowlist_fails - Asserti...
+FAILED tests/unit/test_check_skips.py::test_custom_allowlist_requires_exact_count_per_entry
+FAILED tests/unit/test_check_skips.py::test_cli_cannot_override_the_allowlist_count
+4 failed, 5 passed in 0.42s

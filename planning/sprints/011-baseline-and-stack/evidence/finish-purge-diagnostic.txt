@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.17, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: /workspace
+configfile: pyproject.toml
+plugins: asyncio-1.4.0, cov-7.1.0, xdist-3.8.0, repeat-0.9.4, anyio-4.14.2, rerunfailures-16.4, langsmith-0.10.15, hypothesis-6.168.3
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/e2e/test_trust_summary.py::test_purge_jobs_are_not_shown_by_the_job_routes PASSED [100%]
+
+---------- generated xml file: /workspace/final-purge-diagnostic.xml -----------
+============================== 1 passed in 10.56s ==============================

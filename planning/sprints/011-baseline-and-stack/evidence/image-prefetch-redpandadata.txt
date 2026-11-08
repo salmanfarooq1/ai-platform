@@ -1,0 +1,21 @@
+Pulling redpandadata/redpanda:v24.2.7@sha256:82a69763bef8d8b55ea5a520fa1b38f993908ef68946819ca1aed43541824c48
+docker.io/redpandadata/redpanda@sha256:82a69763bef8d8b55ea5a520fa1b38f993908ef68946819ca1aed43541824c48: Pulling from redpandadata/redpanda
+6a27372c01c0: Pulling fs layer
+13690d62279f: Pulling fs layer
+6aebcf12adfc: Pulling fs layer
+302e3ee49805: Pulling fs layer
+23a344da42ef: Pulling fs layer
+23a344da42ef: Download complete
+13690d62279f: Download complete
+302e3ee49805: Download complete
+302e3ee49805: Pull complete
+13690d62279f: Pull complete
+23a344da42ef: Pull complete
+6aebcf12adfc: Download complete
+6aebcf12adfc: Pull complete
+6a27372c01c0: Download complete
+6a27372c01c0: Pull complete
+Digest: sha256:82a69763bef8d8b55ea5a520fa1b38f993908ef68946819ca1aed43541824c48
+Status: Downloaded newer image for redpandadata/redpanda@sha256:82a69763bef8d8b55ea5a520fa1b38f993908ef68946819ca1aed43541824c48
+docker.io/redpandadata/redpanda:v24.2.7@sha256:82a69763bef8d8b55ea5a520fa1b38f993908ef68946819ca1aed43541824c48
+exit=0

@@ -1,0 +1,5 @@
+sbom/npm.cdx.json: spec 1.6, 668 components; strict schema validation passed
+sbom/python.cdx.json: spec 1.6, 225 components; strict schema validation passed
+sbom/npm.cdx.json: SHA256 9fe1a9c21a3a0b361d05326ace0f2486fee55b5c8c4659d963ab971148a7e2d9
+sbom/python.cdx.json: SHA256 4ed372ebc80c9fdf337c9e9ed6987d137fc1dd8a9ab380729f4336deb0cf75f5
+Verified current certifi component: 2026.10.19

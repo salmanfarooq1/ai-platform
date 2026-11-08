@@ -1,0 +1,8 @@
+Warning: Docker Desktop detected; supported runtimes are Docker Engine (moby) or Podman.
+Engine reachable: docker
+Memory available: 7545 MiB; profile budget: 2048 MiB
+Host/container clocks agree
+Port 25432 is free
+Port 26379 is free
+Port 28000 is free
+Port 25173 is free

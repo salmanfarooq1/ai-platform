@@ -1,0 +1,32 @@
+Branch: sprint/011-baseline-and-stack
+Other sprint folders modified: []
+API-source amendment paths: ['api/mcp/resources.py', 'api/mcp/server.py', 'api/mcp/tools.py']
+UI/migration paths modified: []
+Unchanged OpenAPI SHA-256: 00f8870c6b404b53ce229a853e3bae5ff42c41c5e564fd2389c42b80e0c0f39c
+a2f10f71dd490ef57921bc72eb0962b1fe122f74798c7cbc2b73d696bfb49427 AGENTS.md
+07f6c718c349238e9ce42c50099bffb4ee8bbe34888ed73a32e4a68dacecc65a CODEX.md
+38b1236ff9f3228cfc1db231e4f444ad007145f10cf78971986d4e3bd8ba0915 poetry.lock
+62678804a516360b0d851084fc2c55ef311ed51b162236a60042be113993968d pyproject.toml
+eccd59c2a9712f3bfee9fc4d81dc27d1f1ce0196891baea74f1a024b4c98e7ed requirements/main.txt
+3c55f00e6afbc861b39774988563a8b35378acdac8aaca11e206b0a464f939d9 requirements/dev.txt
+8201a7f95132b3c7075260dac6d125d3641fa7aef8d42b6dc00cddc5a6b3e6a7 api/mcp/server.py
+83d17f053c94b046597b644af5cb28561fbe0a134a2cf5f623ce09219cc37452 api/mcp/tools.py
+cacd25f4a1f1ec20c30c04817a5574e0e939fe89be3d44cbfa477d9079a75ed9 api/mcp/resources.py
+5210e3d0bee039b3bbcf72e65bab9894d8d80866ad8651b96573ae2fa74c3040 scripts/supply_chain/check_pins.py
+fee9968bad2c247bd0067e295dc8d7d2103e806ad8cef20b43eea8131990b53f scripts/supply_chain/licence_metadata.py
+a09dd7f8a8f8747bff2bff10fb0134638f5d4528051602421e918afa044976db scripts/supply_chain/licence-exceptions.txt
+859f25286d011f775abe51bcce97c8f9b93976d024720588bcb282823bb4ca6e scripts/supply_chain/collect_npm.py
+c110b83348686fb4a771da759adb05407fd3be0debe46a297b5cafbb8c3336c5 scripts/supply_chain/run_checks.sh
+ad8a7e48d65e6cf950e5f8aff775448acca0cbf9c54ce8aeb3e214e05f80be02 .github/workflows/tests.yml
+6c91758c823ad21f28c3af7c2b6314dd534aab5aa1d3ee1da98870c86ded5e64 tests/unit/test_supply_chain_controls.py
+69981ca1fc0357db4edae05a7e247c1d2fcd681f9c74ff1e3f60288cc0f78258 tests/unit/test_mcp_compat.py
+1b3b5f4a545dd2ecf76e9c92b99e9d73ee709e13d12179d38b2e32f824ec1d90 tests/e2e/test_web_edge.py
+git diff --check exit=0
+
+warning: Empty last update token.
+
+Missing final report links: []
+Continued image pass: Docker compose pin only; no UI/migration/other sprint change.
+fac9e71d1d968ced703d733e8e6ad2f64ff5f381d14b57428491c42b46a0e716 docker-compose.yml
+Final report/remediation missing links: []
+Post-Prometheus git diff --check exit=0

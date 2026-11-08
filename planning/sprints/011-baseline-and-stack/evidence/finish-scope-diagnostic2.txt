@@ -1,0 +1,27 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Trust baseline: the decision hash chain, retention, eval runs and the metrics reads (Sprint 008).
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Sandboxed agent runs: the sandbox event log and the run tokens (Sprint 009).
+{"timestamp": "2026-10-21T18:06:43.478387+00:00", "level": "INFO", "logger": "api.db", "message": "[db] Pool ready: 4 connections/worker \u00d7 1 worker(s) = 4 total DB connections", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-21T18:06:43.507888+00:00", "level": "INFO", "logger": "gateway.receipts", "message": "receipt signing key generated for local use (not stored): key_id=238d292f2ebcab37", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-21T18:06:43.528729+00:00", "level": "INFO", "logger": "adapters.redis_cache", "message": "[cache] Semantic cache index created", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-21T18:06:43.529049+00:00", "level": "INFO", "logger": "api.mcp.transport", "message": "[mcp] Context initialized with DB pool and adapters", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-21T18:06:43.529351+00:00", "level": "INFO", "logger": "api.main", "message": "startup complete: DB pool, adapters, agent graph, semantic cache, MCP context ready", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-21T18:06:43.529800+00:00", "level": "INFO", "logger": "workers.loop", "message": "worker embedded started: concurrency=1 lease=60s", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-21T18:06:44.197227+00:00", "level": "INFO", "logger": "api.access", "message": "request completed", "request_id": "4e076bf966154c3badb5ec0b86cba933", "trace_id": "d2b0ff03d9c7840ea6aafa861f6a7506", "tenant_id": "6efa4d0f-5e80-48f8-bce5-b65668a08c3a", "principal_id": "b9e8898e-1a03-41f2-acb2-a0dff7ff6dfc", "method": "POST", "path": "/v1/feedback", "status": 201, "duration_ms": 129.01}
+{"timestamp": "2026-10-21T18:06:44.271523+00:00", "level": "INFO", "logger": "api.access", "message": "request completed", "request_id": "bd87dbe1f04c4f129749099de11184ad", "trace_id": "1cc76c99541ebde164bf894128e60a55", "tenant_id": "6efa4d0f-5e80-48f8-bce5-b65668a08c3a", "principal_id": "b9e8898e-1a03-41f2-acb2-a0dff7ff6dfc", "method": "GET", "path": "/v1/analytics/summary", "status": 200, "duration_ms": 69.86}
+{"timestamp": "2026-10-21T18:06:44.325096+00:00", "level": "INFO", "logger": "api.access", "message": "request completed", "request_id": "55044f99c1b94b77995c183f3fbae080", "trace_id": "04d24c5e879c2e8e01821effd22da014", "tenant_id": "6efa4d0f-5e80-48f8-bce5-b65668a08c3a", "principal_id": "b9e8898e-1a03-41f2-acb2-a0dff7ff6dfc", "method": "GET", "path": "/v1/quality-report", "status": 200, "duration_ms": 50.39}
+{"timestamp": "2026-10-21T18:06:44.381304+00:00", "level": "INFO", "logger": "api.access", "message": "request completed", "request_id": "f68239443c684dac92888cd32ed99cd8", "trace_id": "1c416f0f881247982376cee5dea73ef5", "tenant_id": "6efa4d0f-5e80-48f8-bce5-b65668a08c3a", "principal_id": "b9e8898e-1a03-41f2-acb2-a0dff7ff6dfc", "method": "POST", "path": "/v1/feedback", "status": 403, "duration_ms": 51.31}
+GATEWAY_ROWS_DIAGNOSTIC=[{"action": "feedback.write", "chain_position": 1, "created_at": "2026-10-21T18:06:44.155454+00:00", "outcome": "allow", "reason": "allowed"}, {"action": "analytics.read", "chain_position": 2, "created_at": "2026-10-21T18:06:44.236976+00:00", "outcome": "allow", "reason": "allowed"}, {"action": "analytics.read", "chain_position": 3, "created_at": "2026-10-21T18:06:44.303470+00:00", "outcome": "allow", "reason": "allowed"}, {"action": "kb.read", "chain_position": 4, "created_at": "2026-10-21T18:06:44.358729+00:00", "outcome": "deny", "reason": "missing_scope"}]
+.{"timestamp": "2026-10-21T18:06:44.407097+00:00", "level": "INFO", "logger": "workers.loop", "message": "worker embedded stopped: finished=0", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-10-21T18:06:44.414058+00:00", "level": "INFO", "logger": "api.main", "message": "shutdown complete: DB pool and cache closed", "request_id": "-", "trace_id": "-"}
+
+1 passed in 20.48s

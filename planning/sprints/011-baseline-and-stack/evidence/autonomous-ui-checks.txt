@@ -1,0 +1,1331 @@
+$ npm run tokens:check
+
+> ai-platform-ui@2.0.0 tokens:check
+> node scripts/build-tokens.mjs --check
+
+
+css
+✔︎ /tmp/tokens-SvuHWJ/tokens.css
+No drift: src/styles/tokens.css is exactly what tokens/tokens.json generates.
+exit=0
+$ npm run typecheck
+
+> ai-platform-ui@2.0.0 typecheck
+> tsc --noEmit
+
+exit=0
+$ npm test -- --run
+
+> ai-platform-ui@2.0.0 test
+> vitest --run
+
+
+ RUN  v2.1.9 /home/ubuntu/ai-platform/ui
+
+ ✓ src/lib/reasons.test.tsx (7 tests) 979ms
+   ✓ the reason hooks > fetches the catalogue once and caches it 583ms
+ ✓ src/styles/tokens.test.ts (7 tests) 435ms
+ ✓ src/components/governance/run-steps.test.tsx (11 tests) 4734ms
+   ✓ RunSteps > lists the gateway decisions and the sandbox events of a run in one rail, in the order given 3235ms
+   ✓ RunSteps > shows a blocked network call and a blocked file read as a deny state with a word, an icon and the detail 520ms
+   ✓ RunSteps > shows a gateway deny next to the sandbox events with the failing stage and the catalogue sentence 422ms
+ ✓ src/components/ui/ui.test.tsx (10 tests) 6002ms
+   ✓ Button > is ink by default, not the seal color 2379ms
+   ✓ Button > has secondary, ghost and danger variants, and sizes 483ms
+   ✓ Button > is disabled and does not fire 374ms
+   ✓ Segmented > is a labelled single-select radio group 931ms
+   ✓ Segmented > does not let the selection be cleared by clicking it again 343ms
+   ✓ Dialog > opens, names itself, and closes with Escape 1059ms
+ ✓ src/features/overview/overview.test.tsx (9 tests) 6015ms
+   ✓ OverviewTiles > shows checked, blocked, deny rate and budget used, and each links to its filtered records 1337ms
+   ✓ TopDenyReasons > lists the reasons with the catalogue title, sentence and count 2033ms
+   ✓ OverviewPage > loads the overview and sends the blocked number to the deny-filtered list 1429ms
+   ✓ OverviewPage > has an empty state that says how to fill it 484ms
+   ✓ OverviewPage > shows the error code and a retry when the overview fails 372ms
+ ✓ src/components/governance/governance.test.tsx (15 tests) 6731ms
+   ✓ VerdictBadge > shows an icon, a word and the verdict for each state 398ms
+   ✓ TraceTimeline > lists the steps oldest first with action, resource, stage and time to the next step 1450ms
+   ✓ Receipt > shows the ids, policy version, tenant and the input hash in mono 336ms
+   ✓ Receipt > shows "none" for a missing hash or policy version, and has a copy button for each value 700ms
+   ✓ Receipt > copies a value to the clipboard 2241ms
+   ✓ DecisionsTable states > rows: one row per decision with verdict, resource and policy version, and a link to the detail 532ms
+ ✓ src/features/walkthrough/walkthrough.test.tsx (8 tests) 7881ms
+   ✓ WalkthroughPage > runs one allowed and one blocked request and shows both side by side, the blocked one at the guardrails stage 4629ms
+   ✓ WalkthroughPage > treats "no passage matched" as allowed by the gateway, and still shows the trace 996ms
+   ✓ WalkthroughPage > shows the error state for a 404 not_found when the request detail cannot be loaded 485ms
+   ✓ WalkthroughPage > shows the error state for a 404 not_found when the request detail holds no allow decision 617ms
+   ✓ WalkthroughPage > shows the error state for a 404 not_found when the request detail holds no decisions 388ms
+ ✓ src/features/requests/requests.test.tsx (10 tests) 9131ms
+   ✓ RequestsTable > lists one row per request with outcome, checks, the stage that stopped it and the policy 2962ms
+   ✓ RequestsTable > keeps the filters in the link that opens a row 401ms
+   ✓ RequestsTable > loading shows skeleton rows, empty says how to fill it, error shows the code and retries 823ms
+   ✓ RequestDrawer > opens as a dialog with the verdict, the deny emphasis, the stage trace and a receipt link per decision 1413ms
+   ✓ RequestDrawer > has no deny callout for an allowed request 342ms
+   ✓ RequestDrawer > says so for a request id that is not found, and shows the error code for any other failure 470ms
+   ✓ RequestsPage > asks for console views only when "Include console views" is on 1382ms
+   ✓ RequestsPage > filters to denied requests from the URL and opens a row in the drawer 998ms
+ ✓ src/features/runs/runs-page.test.tsx (11 tests) 10773ms
+   ✓ RunsPage > lists each run with its execution id and the status the runtime reports 4396ms
+   ✓ RunsPage > shows the full execution id and the status of the selected run next to its steps 891ms
+   ✓ RunsPage > a run with no execution id or status still renders honestly 661ms
+   ✓ RunsPage > opens a run when its time is clicked 1174ms
+   ✓ RunsPage > reads each run status and duration from the runs endpoint, and polls it only while a run is active 587ms
+   ✓ RunsPage > shows the sandbox events next to the gateway decisions for a sandboxed run, and says what the sandbox stopped 1105ms
+   ✓ RunsPage > says the sandbox blocked nothing when it did not 645ms
+   ✓ RunsPage > keeps the request trace for a run that has no sandbox events, or whose record cannot be read 982ms
+ ✓ src/app/command-palette.test.tsx (15 tests) 12475ms
+   ✓ buildPaletteItems > offers to open a typed request id, and lists matching recent requests first 525ms
+   ✓ CommandPalette > typing ../x and pressing Enter never navigates outside /app/requests/ 2926ms
+   ✓ CommandPalette > typing <script>alert(1)</script> and pressing Enter never navigates outside /app/requests/ 2203ms
+   ✓ CommandPalette > typing %2F..%2F and pressing Enter never navigates outside /app/requests/ 1082ms
+   ✓ CommandPalette > is a combobox over a listbox, named for what it does 811ms
+   ✓ CommandPalette > goes to a screen with the arrow keys and Enter 1143ms
+   ✓ CommandPalette > jumps to a request id 1705ms
+   ✓ CommandPalette > opens a typed id even when it is not in the recent list 1569ms
+   ✓ CommandPalette > closes with Escape 427ms
+ ✓ src/features/trust/trust.test.tsx (10 tests) 11449ms
+   ✓ Trust page > verifies a decision id: fetches the receipt, checks it, shows valid, each check and the chain position 5717ms
+   ✓ Trust page > shows invalid with the failing check, as a word and an icon, for a tampered pasted receipt 1520ms
+   ✓ Trust page > refuses text that is not JSON without calling the API 1185ms
+   ✓ Trust page > opens from a decision link and runs the check once 431ms
+   ✓ Trust page > shows the API error code for an unknown decision 660ms
+   ✓ Trust page > shows retention read only, the empty eval state and the Grafana hint 455ms
+   ✓ Trust page > shows a tenant override, the eval history with pass and fail words, and the Grafana link 477ms
+   ✓ Trust page > L5: only the signed text is shown under Verified; names and labels are context, and nothing is Verified when invalid 480ms
+ ❯ src/features/library/library-page.test.tsx (6 tests | 1 failed) 15154ms
+   × LibraryPage ingest status > shows a queued document that is not in the registry yet, and a ready one 2642ms
+     → Unable to find an element with the text: new.md. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mb-4 flex flex-wrap items-end justify-between gap-3"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h1>[39m
+            [0mLibrary[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-1 max-w-prose text-callout text-fg-secondary"[39m
+          [36m>[39m
+            [0mDocuments ingested into a knowledge base.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-callout font-medium transition-[transform,background-color,border-color,color] duration-fast ease-out active:scale-[var(--motion-press-scale)] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 bg-ink text-fg-onink hover:bg-ink-hover h-9 px-4"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mfill[39m=[32m"currentColor"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mviewBox[39m=[32m"0 0 256 256"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0ZM93.66,77.66,120,51.31V144a8,8,0,0,0,16,0V51.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,77.66Z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [0m Add documents[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mb-3 flex flex-wrap items-center gap-2"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"flex items-center gap-2 text-footnote text-fg-secondary"[39m
+        [36m>[39m
+          [0mKnowledge base[0m
+          [36m<select[39m
+            [33maria-label[39m=[32m"Knowledge base"[39m
+            [33mclass[39m=[32m"h-9 rounded-sm border border-hairline bg-muted px-2 text-callout text-fg transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"legal"[39m
+            [36m>[39m
+              [0mlegal[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-fg-secondary"[39m
+            [33mfill[39m=[32m"currentColor"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mviewBox[39m=[32m"0 0 256 256"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<input[39m
+            [33maria-label[39m=[32m"Search documents"[39m
+            [33mclass[39m=[32m"rounded-sm border border-hairline bg-muted px-3 text-callout text-fg placeholder:text-fg-tertiary transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal disabled:opacity-50 aria-[invalid=true]:border-deny h-9 w-64 pl-8"[39m
+            [33mplaceholder[39m=[32m"Search documents"[39m
+            [33mtype[39m=[32m"search"[39m
+            [33mvalue[39m=[32m""[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-busy[39m=[32m"true"[39m
+        [33maria-label[39m=[32m"Loading"[39m
+        [33mclass[39m=[32m"flex flex-col gap-2"[39m
+        [33mrole[39m=[32m"status"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mb-4 flex flex-wrap items-end justify-between gap-3"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h1>[39m
+            [0mLibrary[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-1 max-w-prose text-callout text-fg-secondary"[39m
+          [36m>[39m
+            [0mDocuments ingested into a knowledge base.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-callout font-medium transition-[transform,background-color,border-color,color] duration-fast ease-out active:scale-[var(--motion-press-scale)] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 bg-ink text-fg-onink hover:bg-ink-hover h-9 px-4"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mfill[39m=[32m"currentColor"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mviewBox[39m=[32m"0 0 256 256"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0ZM93.66,77.66,120,51.31V144a8,8,0,0,0,16,0V51.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,77.66Z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [0m Add documents[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mb-3 flex flex-wrap items-center gap-2"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"flex items-center gap-2 text-footnote text-fg-secondary"[39m
+        [36m>[39m
+          [0mKnowledge base[0m
+          [36m<select[39m
+            [33maria-label[39m=[32m"Knowledge base"[39m
+            [33mclass[39m=[32m"h-9 rounded-sm border border-hairline bg-muted px-2 text-callout text-fg transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"legal"[39m
+            [36m>[39m
+              [0mlegal[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-fg-secondary"[39m
+            [33mfill[39m=[32m"currentColor"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mviewBox[39m=[32m"0 0 256 256"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<input[39m
+            [33maria-label[39m=[32m"Search documents"[39m
+            [33mclass[39m=[32m"rounded-sm border border-hairline bg-muted px-3 text-callout text-fg placeholder:text-fg-tertiary transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal disabled:opacity-50 aria-[invalid=true]:border-deny h-9 w-64 pl-8"[39m
+            [33mplaceholder[39m=[32m"Search documents"[39m
+            [33mtype[39m=[32m"search"[39m
+            [33mvalue[39m=[32m""[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-busy[39m=[32m"true"[39m
+        [33maria-label[39m=[32m"Loading"[39m
+        [33mclass[39m=[32m"flex flex-col gap-2"[39m
+        [33mrole[39m=[32m"status"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   ✓ LibraryPage ingest status > shows how far a running job is 3006ms
+   ✓ LibraryPage ingest status > shows the error code and a plain sentence for a failed job and for a dead one 814ms
+   ✓ LibraryPage ingest status > a document whose latest job succeeded is Ready 842ms
+   ✓ LibraryPage ingest status > polls every 2 seconds while a job is active and stops when none is 5201ms
+   ✓ LibraryPage ingest status > reads the registry again when the last job ends 2627ms
+ ✓ src/api/client.test.ts (9 tests) 292ms
+ ✓ src/features/library/job-status.test.ts (4 tests) 88ms
+ ✓ src/features/auth/signin-page.test.tsx (3 tests) 3620ms
+   ✓ SignInPage destination > opens the walkthrough the first time, and remembers it 2288ms
+   ✓ SignInPage destination > opens the Overview after the walkthrough has been seen 665ms
+   ✓ SignInPage destination > returns to the page that was asked for, whatever the first-run rule says 653ms
+ ✓ src/features/auth/signin-form.test.tsx (4 tests) 7830ms
+   ✓ SignInForm > keeps the submit button disabled until a key is typed, and masks the key 4998ms
+   ✓ SignInForm > submits the trimmed key 1411ms
+   ✓ SignInForm > shows the error message, code and request id when the key is rejected 916ms
+   ✓ SignInForm > offers the read-only preview only when a handler is given 487ms
+stdout | src/styles/contrast.test.ts > ACCESSIBILITY.md contrast pairs > every pair meets its minimum in the light theme
+contrast, light theme
+light text-primary    on bg-canvas      16.12:1  (min 4.5)  Body text on the page
+light text-primary    on bg-surface     17.28:1  (min 4.5)  Text on cards, tables and drawers
+light text-primary    on bg-muted       15.02:1  (min 4.5)  Text in inputs and table heads
+light text-primary    on bg-selected    15.32:1  (min 4.5)  Text in a selected row or active nav item
+light text-secondary  on bg-selected     5.85:1  (min 4.5)  Secondary text in a selected row or the active palette option
+light text-tertiary   on bg-selected     4.87:1  (min 4.5)  Quiet labels in a selected row
+light text-secondary  on bg-canvas       6.16:1  (min 4.5)  Secondary text on the page
+light text-secondary  on bg-surface      6.60:1  (min 4.5)  Secondary text on cards
+light text-secondary  on bg-muted        5.74:1  (min 4.5)  Secondary text in inputs and table heads
+light text-tertiary   on bg-canvas       5.12:1  (min 4.5)  Placeholders and hints on the page
+light text-tertiary   on bg-surface      5.49:1  (min 4.5)  Placeholders and hints on cards
+light text-tertiary   on bg-muted        4.77:1  (min 4.5)  Placeholders in inputs
+light text-on-ink     on ink            17.28:1  (min 4.5)  Label on a primary button
+light text-on-ink     on ink-hover      12.06:1  (min 4.5)  Label on a hovered primary button
+light seal            on bg-canvas       6.81:1  (min 4.5)  Links on the page
+light seal            on bg-surface      7.30:1  (min 4.5)  Links on cards, and the focus ring
+light seal            on bg-muted        6.35:1  (min 4.5)  Links on quiet fills
+light seal            on bg-selected     6.48:1  (min 4.5)  Links in a selected row
+light allow           on bg-surface      6.38:1  (min 4.5)  Allowed verdict text
+light deny            on bg-surface      5.74:1  (min 4.5)  Denied verdict text
+light escalate        on bg-surface      5.85:1  (min 4.5)  Needs-approval verdict text
+light allow           on allow-tint      5.51:1  (min 4.5)  Allowed badge
+light deny            on deny-tint       4.90:1  (min 4.5)  Denied badge and the deny callout heading
+light escalate        on escalate-tint   5.08:1  (min 4.5)  Needs-approval badge
+light text-primary    on deny-tint      14.77:1  (min 4.5)  Sentence in the deny callout
+light text-secondary  on deny-tint       5.64:1  (min 4.5)  Labels in the deny callout
+light deny            on bg-muted        4.99:1  (min 4.5)  Deny text on a quiet fill
+
+stdout | src/styles/contrast.test.ts > ACCESSIBILITY.md contrast pairs > every pair meets its minimum in the dark theme
+contrast, dark theme
+dark  text-primary    on bg-canvas      15.45:1  (min 4.5)  Body text on the page
+dark  text-primary    on bg-surface     14.31:1  (min 4.5)  Text on cards, tables and drawers
+dark  text-primary    on bg-muted       13.06:1  (min 4.5)  Text in inputs and table heads
+dark  text-primary    on bg-selected    11.67:1  (min 4.5)  Text in a selected row or active nav item
+dark  text-secondary  on bg-selected     5.32:1  (min 4.5)  Secondary text in a selected row or the active palette option
+dark  text-tertiary   on bg-selected     4.76:1  (min 4.5)  Quiet labels in a selected row
+dark  text-secondary  on bg-canvas       7.05:1  (min 4.5)  Secondary text on the page
+dark  text-secondary  on bg-surface      6.53:1  (min 4.5)  Secondary text on cards
+dark  text-secondary  on bg-muted        5.96:1  (min 4.5)  Secondary text in inputs and table heads
+dark  text-tertiary   on bg-canvas       6.31:1  (min 4.5)  Placeholders and hints on the page
+dark  text-tertiary   on bg-surface      5.84:1  (min 4.5)  Placeholders and hints on cards
+dark  text-tertiary   on bg-muted        5.33:1  (min 4.5)  Placeholders in inputs
+dark  text-on-ink     on ink            15.45:1  (min 4.5)  Label on a primary button
+dark  text-on-ink     on ink-hover      17.05:1  (min 4.5)  Label on a hovered primary button
+dark  seal            on bg-canvas       8.00:1  (min 4.5)  Links on the page
+dark  seal            on bg-surface      7.41:1  (min 4.5)  Links on cards, and the focus ring
+dark  seal            on bg-muted        6.76:1  (min 4.5)  Links on quiet fills
+dark  seal            on bg-selected     6.04:1  (min 4.5)  Links in a selected row
+dark  allow           on bg-surface      9.01:1  (min 4.5)  Allowed verdict text
+dark  deny            on bg-surface      6.78:1  (min 4.5)  Denied verdict text
+dark  escalate        on bg-surface      9.08:1  (min 4.5)  Needs-approval verdict text
+dark  allow           on allow-tint      6.84:1  (min 4.5)  Allowed badge
+dark  deny            on deny-tint       5.43:1  (min 4.5)  Denied badge and the deny callout heading
+dark  escalate        on escalate-tint   6.84:1  (min 4.5)  Needs-approval badge
+dark  text-primary    on deny-tint      11.44:1  (min 4.5)  Sentence in the deny callout
+dark  text-secondary  on deny-tint       5.22:1  (min 4.5)  Labels in the deny callout
+dark  deny            on bg-muted        6.20:1  (min 4.5)  Deny text on a quiet fill
+
+ ✓ src/styles/contrast.test.ts (3 tests) 85ms
+ ✓ src/app/session.test.tsx (1 test) 206ms
+ ✓ src/styles/color-guard.test.ts (2 tests) 66ms
+ ✓ src/features/ask/ask-run.test.tsx (3 tests) 10175ms
+   ✓ Ask in Agent mode with a slow run > shows a quiet "Still working" state while it polls the run, then the answer 6828ms
+   ✓ Ask in Agent mode with a slow run > a run that failed becomes an error, not a silent empty answer 2032ms
+   ✓ Ask in Agent mode with a slow run > an answer that arrives at once (200) never polls 1290ms
+ ✓ src/components/governance/deny-callout.test.tsx (6 tests) 955ms
+   ✓ DenyCalloutView (deny emphasis) > names the failing stage in red, with an icon and the word Denied 522ms
+ ✓ src/features/ask/governance-line.test.tsx (6 tests) 1792ms
+   ✓ GovernanceLine > links the line to the request drawer 1275ms
+   ✓ GovernanceLine > says the record is not available, with the error code, when the lookup fails 379ms
+ ✓ src/styles/eslint-colour-guard.test.ts (32 tests) 14234ms
+   ✓ eslint colour guard > a real colour fails: const s = { color: '#fff' } 12252ms
+ ✓ src/app/session-menu.test.tsx (4 tests) 4986ms
+   ✓ SessionMenu > shows who you are, the tenant and the scopes 2275ms
+   ✓ SessionMenu > says when the session is a read-only preview 696ms
+   ✓ SessionMenu > sets the theme and remembers it 1399ms
+   ✓ SessionMenu > signs out 589ms
+ ✓ src/features/ask/ask.test.tsx (5 tests) 2572ms
+   ✓ AnswerView > shows the verdict, confidence, evidence and the receipt link 2190ms
+ ✓ src/components/governance/trace-deny.test.tsx (4 tests) 2432ms
+   ✓ TraceTimeline deny emphasis > shows the failing stage in red and the plain sentence on the denied step 477ms
+   ✓ DecisionDetailView > adds the deny callout and a link to the whole request for a denied decision 1575ms
+ ❯ src/features/ask/ask-page.test.tsx (2 tests | 1 failed) 2458ms
+   × AskPage knowledge base field > starts on the first knowledge base the policy allows 1949ms
+     → expect(element).toHaveValue(default)
+
+Expected the element to have value:
+  default
+Received:
+
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mx-auto max-w-3xl"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"mb-4 flex flex-wrap items-end justify-between gap-3"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<h1>[39m
+              [0mAsk[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"mt-1 max-w-prose text-callout text-fg-secondary"[39m
+            [36m>[39m
+              [0mAnswers come with their evidence, a confidence level and a receipt for the call.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</header>[39m
+        [36m<form[39m
+          [33maria-label[39m=[32m"Ask a question"[39m
+          [33mclass[39m=[32m"mb-6 flex flex-col gap-3 rounded-md border border-hairline bg-surface p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Mode"[39m
+              [33mclass[39m=[32m"inline-flex rounded-sm border border-hairline bg-muted p-0.5"[39m
+              [33mdir[39m=[32m"ltr"[39m
+              [33mrole[39m=[32m"radiogroup"[39m
+              [33mstyle[39m=[32m"outline: none;"[39m
+              [33mtabindex[39m=[32m"0"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-checked[39m=[32m"true"[39m
+                [33mclass[39m=[32m"inline-flex h-7 items-center gap-1.5 rounded-[calc(var(--radius-sm)-2px)] px-3 text-footnote font-medium text-fg-secondary transition-colors duration-fast hover:text-fg data-[state=on]:bg-surface data-[state=on]:text-fg data-[state=on]:shadow-sm"[39m
+                [33mdata-radix-collection-item[39m=[32m""[39m
+                [33mdata-state[39m=[32m"on"[39m
+                [33mrole[39m=[32m"radio"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mfill[39m=[32m"currentColor"[39m
+                  [33mheight[39m=[32m"14"[39m
+                  [33mviewBox[39m=[32m"0 0 256 256"[39m
+                  [33mwidth[39m=[32m"14"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mSearch[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-checked[39m=[32m"false"[39m
+                [33mclass[39m=[32m"inline-flex h-7 items-center gap-1.5 rounded-[calc(var(--radius-sm)-2px)] px-3 text-footnote font-medium text-fg-secondary transition-colors duration-fast hover:text-fg data-[state=on]:bg-surface data-[state=on]:text-fg data-[state=on]:shadow-sm"[39m
+                [33mdata-radix-collection-item[39m=[32m""[39m
+                [33mdata-state[39m=[32m"off"[39m
+                [33mrole[39m=[32m"radio"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mfill[39m=[32m"currentColor"[39m
+                  [33mheight[39m=[32m"14"[39m
+                  [33mviewBox[39m=[32m"0 0 256 256"[39m
+                  [33mwidth[39m=[32m"14"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M248,124a56.11,56.11,0,0,0-32-50.61V72a48,48,0,0,0-88-26.49A48,48,0,0,0,40,72v1.39a56,56,0,0,0,0,101.2V176a48,48,0,0,0,88,26.49A48,48,0,0,0,216,176v-1.41A56.09,56.09,0,0,0,248,124ZM88,208a32,32,0,0,1-31.81-28.56A55.87,55.87,0,0,0,64,180h8a8,8,0,0,0,0-16H64A40,40,0,0,1,50.67,86.27,8,8,0,0,0,56,78.73V72a32,32,0,0,1,64,0v68.26A47.8,47.8,0,0,0,88,128a8,8,0,0,0,0,16,32,32,0,0,1,0,64Zm104-44h-8a8,8,0,0,0,0,16h8a55.87,55.87,0,0,0,7.81-.56A32,32,0,1,1,168,144a8,8,0,0,0,0-16,47.8,47.8,0,0,0-32,12.26V72a32,32,0,0,1,64,0v6.73a8,8,0,0,0,5.33,7.54A40,40,0,0,1,192,164Zm16-52a8,8,0,0,1-8,8h-4a36,36,0,0,1-36-36V80a8,8,0,0,1,16,0v4a20,20,0,0,0,20,20h4A8,8,0,0,1,208,112ZM60,120H56a8,8,0,0,1,0-16h4A20,20,0,0,0,80,84V80a8,8,0,0,1,16,0v4A36,36,0,0,1,60,120Z"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mAgent[0m
+              [36m</button>[39m
+            [36m</div>[39m
+            [36m<label[39m
+              [33mclass[39m=[32m"ml-auto flex items-center gap-2 text-footnote text-fg-secondary"[39m
+            [36m>[39m
+              [0mKnowledge base[0m
+              [36m<input[39m
+                [33maria-label[39m=[32m"Knowledge base"[39m
+                [33mautocomplete[39m=[32m"off"[39m
+                [33mclass[39m=[32m"rounded-sm border border-hairline bg-muted px-3 text-callout text-fg placeholder:text-fg-tertiary transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal disabled:opacity-50 aria-[invalid=true]:border-deny mono h-9 w-40"[39m
+                [33mlist[39m=[32m"kb-options"[39m
+                [33mplaceholder[39m=[32m"Loading"[39m
+                [33mspellcheck[39m=[32m"false"[39m
+                [33mvalue[39m=[32m""[39m
+              [36m/>[39m
+              [36m<datalist[39m
+                [33mid[39m=[32m"kb-options"[39m
+              [36m/>[39m
+            [36m</label>[39m
+          [36m</div>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"sr-only"[39m
+            [33mfor[39m=[32m"question"[39m
+          [36m>[39m
+            [0mQuestion[0m
+          [36m</label>[39m
+          [36m<textarea[39m
+            [33mclass[39m=[32m"w-full rounded-sm border border-hairline bg-muted px-3 text-fg placeholder:text-fg-tertiary transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal disabled:opacity-50 aria-[invalid=true]:border-deny min-h-[88px] resize-y py-2 text-body"[39m
+            [33mid[39m=[32m"question"[39m
+            [33mplaceholder[39m=[32m"Ask a question about your documents"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between gap-3"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-footnote text-fg-secondary"[39m
+            [36m>[39m
+              [0mSearch retrieves passages and writes one answer.[0m
+            [36m</p>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-callout font-medium transition-[transform,background-color,border-color,color] duration-fast ease-out active:scale-[var(--motion-press-scale)] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 bg-ink text-fg-onink hover:bg-ink-hover h-9 px-4"[39m
+              [33mdisabled[39m=[32m""[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"currentColor"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mviewBox[39m=[32m"0 0 256 256"[39m
+                [33mwidth[39m=[32m"16"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M231.87,114l-168-95.89A16,16,0,0,0,40.92,37.34L71.55,128,40.92,218.67A16,16,0,0,0,56,240a16.15,16.15,0,0,0,7.93-2.1l167.92-96.05a16,16,0,0,0,.05-27.89ZM56,224a.56.56,0,0,0,0-.12L85.74,136H144a8,8,0,0,0,0-16H85.74L56.06,32.16A.46.46,0,0,0,56,32l168,95.83Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [0m [0m
+              [0mAsk[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</form>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"text-callout text-fg-secondary"[39m
+        [36m>[39m
+          [0mThe answer, its evidence and the receipt link appear here.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+   ✓ AskPage knowledge base field > does not fill the field in once the person has focused it, even if the config reply is late 497ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/features/ask/ask-page.test.tsx > AskPage knowledge base field > starts on the first knowledge base the policy allows
+Error: expect(element).toHaveValue(default)
+
+Expected the element to have value:
+  default
+Received:
+
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mx-auto max-w-3xl"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"mb-4 flex flex-wrap items-end justify-between gap-3"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<h1>[39m
+              [0mAsk[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"mt-1 max-w-prose text-callout text-fg-secondary"[39m
+            [36m>[39m
+              [0mAnswers come with their evidence, a confidence level and a receipt for the call.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</header>[39m
+        [36m<form[39m
+          [33maria-label[39m=[32m"Ask a question"[39m
+          [33mclass[39m=[32m"mb-6 flex flex-col gap-3 rounded-md border border-hairline bg-surface p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Mode"[39m
+              [33mclass[39m=[32m"inline-flex rounded-sm border border-hairline bg-muted p-0.5"[39m
+              [33mdir[39m=[32m"ltr"[39m
+              [33mrole[39m=[32m"radiogroup"[39m
+              [33mstyle[39m=[32m"outline: none;"[39m
+              [33mtabindex[39m=[32m"0"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-checked[39m=[32m"true"[39m
+                [33mclass[39m=[32m"inline-flex h-7 items-center gap-1.5 rounded-[calc(var(--radius-sm)-2px)] px-3 text-footnote font-medium text-fg-secondary transition-colors duration-fast hover:text-fg data-[state=on]:bg-surface data-[state=on]:text-fg data-[state=on]:shadow-sm"[39m
+                [33mdata-radix-collection-item[39m=[32m""[39m
+                [33mdata-state[39m=[32m"on"[39m
+                [33mrole[39m=[32m"radio"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mfill[39m=[32m"currentColor"[39m
+                  [33mheight[39m=[32m"14"[39m
+                  [33mviewBox[39m=[32m"0 0 256 256"[39m
+                  [33mwidth[39m=[32m"14"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mSearch[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-checked[39m=[32m"false"[39m
+                [33mclass[39m=[32m"inline-flex h-7 items-center gap-1.5 rounded-[calc(var(--radius-sm)-2px)] px-3 text-footnote font-medium text-fg-secondary transition-colors duration-fast hover:text-fg data-[state=on]:bg-surface data-[state=on]:text-fg data-[state=on]:shadow-sm"[39m
+                [33mdata-radix-collection-item[39m=[32m""[39m
+                [33mdata-state[39m=[32m"off"[39m
+                [33mrole[39m=[32m"radio"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mfill[39m=[32m"currentColor"[39m
+                  [33mheight[39m=[32m"14"[39m
+                  [33mviewBox[39m=[32m"0 0 256 256"[39m
+                  [33mwidth[39m=[32m"14"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M248,124a56.11,56.11,0,0,0-32-50.61V72a48,48,0,0,0-88-26.49A48,48,0,0,0,40,72v1.39a56,56,0,0,0,0,101.2V176a48,48,0,0,0,88,26.49A48,48,0,0,0,216,176v-1.41A56.09,56.09,0,0,0,248,124ZM88,208a32,32,0,0,1-31.81-28.56A55.87,55.87,0,0,0,64,180h8a8,8,0,0,0,0-16H64A40,40,0,0,1,50.67,86.27,8,8,0,0,0,56,78.73V72a32,32,0,0,1,64,0v68.26A47.8,47.8,0,0,0,88,128a8,8,0,0,0,0,16,32,32,0,0,1,0,64Zm104-44h-8a8,8,0,0,0,0,16h8a55.87,55.87,0,0,0,7.81-.56A32,32,0,1,1,168,144a8,8,0,0,0,0-16,47.8,47.8,0,0,0-32,12.26V72a32,32,0,0,1,64,0v6.73a8,8,0,0,0,5.33,7.54A40,40,0,0,1,192,164Zm16-52a8,8,0,0,1-8,8h-4a36,36,0,0,1-36-36V80a8,8,0,0,1,16,0v4a20,20,0,0,0,20,20h4A8,8,0,0,1,208,112ZM60,120H56a8,8,0,0,1,0-16h4A20,20,0,0,0,80,84V80a8,8,0,0,1,16,0v4A36,36,0,0,1,60,120Z"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0mAgent[0m
+              [36m</button>[39m
+            [36m</div>[39m
+            [36m<label[39m
+              [33mclass[39m=[32m"ml-auto flex items-center gap-2 text-footnote text-fg-secondary"[39m
+            [36m>[39m
+              [0mKnowledge base[0m
+              [36m<input[39m
+                [33maria-label[39m=[32m"Knowledge base"[39m
+                [33mautocomplete[39m=[32m"off"[39m
+                [33mclass[39m=[32m"rounded-sm border border-hairline bg-muted px-3 text-callout text-fg placeholder:text-fg-tertiary transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal disabled:opacity-50 aria-[invalid=true]:border-deny mono h-9 w-40"[39m
+                [33mlist[39m=[32m"kb-options"[39m
+                [33mplaceholder[39m=[32m"Loading"[39m
+                [33mspellcheck[39m=[32m"false"[39m
+                [33mvalue[39m=[32m""[39m
+              [36m/>[39m
+              [36m<datalist[39m
+                [33mid[39m=[32m"kb-options"[39m
+              [36m/>[39m
+            [36m</label>[39m
+          [36m</div>[39m
+          [36m<label[39m
+            [33mclass[39m=[32m"sr-only"[39m
+            [33mfor[39m=[32m"question"[39m
+          [36m>[39m
+            [0mQuestion[0m
+          [36m</label>[39m
+          [36m<textarea[39m
+            [33mclass[39m=[32m"w-full rounded-sm border border-hairline bg-muted px-3 text-fg placeholder:text-fg-tertiary transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal disabled:opacity-50 aria-[invalid=true]:border-deny min-h-[88px] resize-y py-2 text-body"[39m
+            [33mid[39m=[32m"question"[39m
+            [33mplaceholder[39m=[32m"Ask a question about your documents"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between gap-3"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-footnote text-fg-secondary"[39m
+            [36m>[39m
+              [0mSearch retrieves passages and writes one answer.[0m
+            [36m</p>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-callout font-medium transition-[transform,background-color,border-color,color] duration-fast ease-out active:scale-[var(--motion-press-scale)] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 bg-ink text-fg-onink hover:bg-ink-hover h-9 px-4"[39m
+              [33mdisabled[39m=[32m""[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"currentColor"[39m
+                [33mheight[39m=[32m"16"[39m
+                [33mviewBox[39m=[32m"0 0 256 256"[39m
+                [33mwidth[39m=[32m"16"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M231.87,114l-168-95.89A16,16,0,0,0,40.92,37.34L71.55,128,40.92,218.67A16,16,0,0,0,56,240a16.15,16.15,0,0,0,7.93-2.1l167.92-96.05a16,16,0,0,0,.05-27.89ZM56,224a.56.56,0,0,0,0-.12L85.74,136H144a8,8,0,0,0,0-16H85.74L56.06,32.16A.46.46,0,0,0,56,32l168,95.83Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [0m [0m
+              [0mAsk[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</form>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"text-callout text-fg-secondary"[39m
+        [36m>[39m
+          [0mThe answer, its evidence and the receipt link appear here.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ src/features/ask/ask-page.test.tsx:20:90
+     18|     vi.spyOn(api, 'config').mockResolvedValue(config({ default: 'Gener…
+     19|     renderWithProviders(<AskPage />)
+     20|     await waitFor(() => expect(screen.getByRole('combobox', { name: 'K…
+       |                                                                                          ^
+     21|   })
+     22| 
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/features/library/library-page.test.tsx > LibraryPage ingest status > shows a queued document that is not in the registry yet, and a ready one
+TestingLibraryElementError: Unable to find an element with the text: new.md. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mb-4 flex flex-wrap items-end justify-between gap-3"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h1>[39m
+            [0mLibrary[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-1 max-w-prose text-callout text-fg-secondary"[39m
+          [36m>[39m
+            [0mDocuments ingested into a knowledge base.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-callout font-medium transition-[transform,background-color,border-color,color] duration-fast ease-out active:scale-[var(--motion-press-scale)] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 bg-ink text-fg-onink hover:bg-ink-hover h-9 px-4"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mfill[39m=[32m"currentColor"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mviewBox[39m=[32m"0 0 256 256"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0ZM93.66,77.66,120,51.31V144a8,8,0,0,0,16,0V51.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,77.66Z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [0m Add documents[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mb-3 flex flex-wrap items-center gap-2"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"flex items-center gap-2 text-footnote text-fg-secondary"[39m
+        [36m>[39m
+          [0mKnowledge base[0m
+          [36m<select[39m
+            [33maria-label[39m=[32m"Knowledge base"[39m
+            [33mclass[39m=[32m"h-9 rounded-sm border border-hairline bg-muted px-2 text-callout text-fg transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"legal"[39m
+            [36m>[39m
+              [0mlegal[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-fg-secondary"[39m
+            [33mfill[39m=[32m"currentColor"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mviewBox[39m=[32m"0 0 256 256"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<input[39m
+            [33maria-label[39m=[32m"Search documents"[39m
+            [33mclass[39m=[32m"rounded-sm border border-hairline bg-muted px-3 text-callout text-fg placeholder:text-fg-tertiary transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal disabled:opacity-50 aria-[invalid=true]:border-deny h-9 w-64 pl-8"[39m
+            [33mplaceholder[39m=[32m"Search documents"[39m
+            [33mtype[39m=[32m"search"[39m
+            [33mvalue[39m=[32m""[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-busy[39m=[32m"true"[39m
+        [33maria-label[39m=[32m"Loading"[39m
+        [33mclass[39m=[32m"flex flex-col gap-2"[39m
+        [33mrole[39m=[32m"status"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mb-4 flex flex-wrap items-end justify-between gap-3"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h1>[39m
+            [0mLibrary[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-1 max-w-prose text-callout text-fg-secondary"[39m
+          [36m>[39m
+            [0mDocuments ingested into a knowledge base.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-callout font-medium transition-[transform,background-color,border-color,color] duration-fast ease-out active:scale-[var(--motion-press-scale)] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 bg-ink text-fg-onink hover:bg-ink-hover h-9 px-4"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mfill[39m=[32m"currentColor"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mviewBox[39m=[32m"0 0 256 256"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0ZM93.66,77.66,120,51.31V144a8,8,0,0,0,16,0V51.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,77.66Z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [0m Add documents[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mb-3 flex flex-wrap items-center gap-2"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"flex items-center gap-2 text-footnote text-fg-secondary"[39m
+        [36m>[39m
+          [0mKnowledge base[0m
+          [36m<select[39m
+            [33maria-label[39m=[32m"Knowledge base"[39m
+            [33mclass[39m=[32m"h-9 rounded-sm border border-hairline bg-muted px-2 text-callout text-fg transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"legal"[39m
+            [36m>[39m
+              [0mlegal[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-fg-secondary"[39m
+            [33mfill[39m=[32m"currentColor"[39m
+            [33mheight[39m=[32m"16"[39m
+            [33mviewBox[39m=[32m"0 0 256 256"[39m
+            [33mwidth[39m=[32m"16"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<input[39m
+            [33maria-label[39m=[32m"Search documents"[39m
+            [33mclass[39m=[32m"rounded-sm border border-hairline bg-muted px-3 text-callout text-fg placeholder:text-fg-tertiary transition-colors duration-fast hover:border-fg-tertiary focus-visible:outline-2 focus-visible:outline-seal disabled:opacity-50 aria-[invalid=true]:border-deny h-9 w-64 pl-8"[39m
+            [33mplaceholder[39m=[32m"Search documents"[39m
+            [33mtype[39m=[32m"search"[39m
+            [33mvalue[39m=[32m""[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-busy[39m=[32m"true"[39m
+        [33maria-label[39m=[32m"Loading"[39m
+        [33mclass[39m=[32m"flex flex-col gap-2"[39m
+        [33mrole[39m=[32m"status"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid gap-3"[39m
+          [33mstyle[39m=[32m"grid-template-columns: repeat(4, minmax(0, 1fr));"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"skeleton w-full h-6"[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/library/library-page.test.tsx:32:18
+     30|   it('shows a queued document that is not in the registry yet, and a r…
+     31|     const { list } = setup([job({ status: 'queued' })])
+     32|     await screen.findByText('new.md')
+       |                  ^
+     33|     expect(list).toHaveBeenCalledWith({ kind: 'ingest' })
+     34|     expect(statusOf('new.md')).toHaveTextContent('Queued')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  2 failed | 25 passed (27)
+      Tests  2 failed | 205 passed (207)
+   Start at  20:21:39
+   Duration  113.97s (transform 22.33s, setup 51.90s, collect 597.60s, tests 143.55s, environment 241.78s, prepare 46.57s)
+
+exit=1

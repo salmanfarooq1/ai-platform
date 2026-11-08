@@ -1,0 +1,2 @@
+sbom/npm.cdx.json: spec 1.6, 668 components; strict schema validation passed
+sbom/python.cdx.json: spec 1.6, 225 components; strict schema validation passed

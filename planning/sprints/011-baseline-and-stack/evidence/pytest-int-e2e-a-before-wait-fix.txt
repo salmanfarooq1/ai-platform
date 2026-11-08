@@ -1,0 +1,32 @@
+........................................................................ [  8%]
+.............................................................s..s..s..s. [ 17%]
+.........sssss..s....................................................... [ 25%]
+........................................................................ [ 34%]
+........................................................................ [ 42%]
+........................................................................ [ 51%]
+........................................................................ [ 59%]
+.....................F.................................................. [ 68%]
+........................................................................ [ 77%]
+........................................................................ [ 85%]
+........................................................................ [ 94%]
+.................................................                        [100%]
+=================================== FAILURES ===================================
+_____________ test_an_mcp_session_enforces_tool_scopes_end_to_end ______________
+tests/e2e/test_tenancy.py:702: in test_an_mcp_session_enforces_tool_scopes_end_to_end
+    assert set(replies[2]) == {"default", "kyc_aml", "legal"}
+               ^^^^^^^^^^
+E   KeyError: 2
+=============================== warnings summary ===============================
+tests/contracts/test_llm_contract.py::test_complete_returns_a_typed_completion[fake]
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/contracts/test_object_store_contract.py:52: live MinIO not available here (image not pullable); set MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET (scripts/verify/minio.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:60: live MinIO not available here (image not pullable); set MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET (scripts/verify/minio.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:69: live MinIO not available here (image not pullable); set MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET (scripts/verify/minio.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:75: live MinIO not available here (image not pullable); set MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET (scripts/verify/minio.sh)
+SKIPPED [5] tests/contracts/test_object_store_contract.py:80: live MinIO not available here (image not pullable); set MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET (scripts/verify/minio.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:87: live MinIO not available here (image not pullable); set MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET (scripts/verify/minio.sh)
+1 failed, 830 passed, 10 skipped, 777 deselected, 1 warning in 845.10s (0:14:05)

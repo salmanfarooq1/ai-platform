@@ -1,0 +1,8 @@
+Installed font package: geist 1.7.2
+a369fcf5628ea2aa4e1b9e2ec6a5b3624e365bda588e1f0f2f12b564f728fbb8 ui/node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2
+fba8f577f38a2bbcbe818efa6348dd58f36303a10b8737c42fefad275be563ab ui/node_modules/geist/dist/fonts/geist-mono/GeistMono-Variable.woff2
+930853ee1daa68554d9e35c8a9175affb74f699fad9a5da6ee5ebe76379d9137 ui/node_modules/geist/LICENSE.txt
+Observed dependency consumer: ui/src/styles/fonts.css
+Observed dependency consumer: ui/src/landing/gsap-loader.ts
+Observed dependency consumer: ui/src/landing/landing-page.tsx
+Observed dependency consumer: ui/src/landing/scroll-story.tsx

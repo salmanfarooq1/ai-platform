@@ -1,0 +1,66 @@
+NAME            INSTALLED         FIXED IN                                  TYPE    VULNERABILITY        SEVERITY    EPSS         RISK   
+libssl3         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-63076       High        1.6% (75th)  1.2    
+openssl         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-63076       High        1.6% (75th)  1.2    
+libssl3         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-63072       High        0.9% (59th)  0.7    
+openssl         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-63072       High        0.9% (59th)  0.7    
+jaraco-context  5.3.0             6.1.0                                     python  GHSA-58pv-8j8x-9vj2  High        0.6% (49th)  0.5    
+httpx2          2.9.1             2.12.0                                    python  GHSA-8xx6-hgc6-gc2m  High        0.6% (49th)  0.5    
+libssl3         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-54874       High        0.6% (48th)  0.5    
+openssl         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-54874       High        0.6% (48th)  0.5    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-48959       High        0.6% (48th)  0.5    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-8376        Critical    0.5% (40th)  0.5    
+python          3.11.16           3.10.22, *3.11.17, 3.12.15, 3.13.16, ...  binary  CVE-2026-17084       Medium      0.7% (53rd)  0.4    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-13221       Critical    0.4% (36th)  0.4    
+python          3.11.16           3.10.22, *3.11.17, 3.12.15, 3.13.16, ...  binary  CVE-2026-19445       Critical    0.4% (35th)  0.4    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-42496       Critical    0.4% (35th)  0.4    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-48962       High        0.5% (41st)  0.4    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-42497       High        0.5% (39th)  0.4    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-12087       Critical    0.4% (29th)  0.3    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-57433       Critical    0.4% (27th)  0.3    
+libssl3         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-63074       Medium      0.6% (47th)  0.3    
+openssl         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-63074       Medium      0.6% (47th)  0.3    
+libssl3         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-42767       Medium      0.6% (45th)  0.3    
+openssl         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-42767       Medium      0.6% (45th)  0.3    
+python          3.11.16           *3.13.10, 3.14.1, 3.15.0a2                binary  CVE-2025-12781       Medium      0.6% (45th)  0.3    
+python          3.11.16           3.10.22, *3.11.17, 3.12.15, 3.13.16, ...  binary  CVE-2026-19553       High        0.4% (32nd)  0.3    
+python          3.11.16           3.10.22, *3.11.17, 3.12.15, 3.13.16, ...  binary  CVE-2026-15806       Medium      0.5% (43rd)  0.3    
+urllib3         2.7.0             2.8.0                                     python  GHSA-vxq7-64xx-v4gw  High        0.3% (25th)  0.3    
+python          3.11.16           3.10.22, *3.11.17, 3.12.15, 3.13.16, ...  binary  CVE-2026-87910       Medium      0.5% (41st)  0.3    
+python          3.11.16           3.10.22, *3.11.17, 3.12.15, 3.13.16, ...  binary  CVE-2026-19672       Medium      0.5% (39th)  0.3    
+anyio           4.13.0            4.14.2                                    python  GHSA-82r6-8w77-94w6  Critical    0.3% (20th)  0.3    
+fsspec          2026.4.0          2026.6.0                                  python  GHSA-27vj-qcqg-25rc  High        0.3% (23rd)  0.3    
+pip             24.0              26.1.2                                    python  GHSA-wf93-45jw-7689  Medium      0.5% (38th)  0.3    
+pip             24.0              25.3                                      python  GHSA-4xh5-x5gv-qwph  Medium      0.5% (39th)  0.3    
+wheel           0.45.1            0.46.2                                    python  GHSA-8rrh-rw8j-w5fx  High        0.4% (27th)  0.3    
+python          3.11.16           *3.13.15, 3.14.7, 3.15.0a6                binary  CVE-2025-15366       Medium      0.4% (35th)  0.2    
+setuptools      79.0.1            83.0.0                                    python  GHSA-h35f-9h28-mq5c  Medium      0.4% (33rd)  0.2    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-19487       Medium      0.4% (34th)  0.2    
+libssl3         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-75803       Critical    0.2% (13th)  0.2    
+openssl         3.0.20-1~deb12u2  3.0.22-1~deb12u1                          deb     CVE-2026-75803       Critical    0.2% (13th)  0.2    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-7010        Medium      0.4% (28th)  0.2    
+python          3.11.16           3.15.0a6                                  binary  CVE-2025-15367       Medium      0.4% (30th)  0.2    
+langgraph-sdk   0.4.2             0.4.4                                     python  GHSA-fvww-7h3r-vfhp  High        0.3% (15th)  0.2    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-7017        High        0.2% (14th)  0.2    
+urllib3         2.7.0             2.8.0                                     python  GHSA-gh4c-6fx4-qh6g  Medium      0.3% (20th)  0.2    
+httpx2          2.9.1             2.10.0                                    python  GHSA-f2fp-rgf2-35cp  Medium      0.3% (22nd)  0.2    
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2026-57432       High        0.2% (10th)  0.2    
+httpx2          2.9.1             2.11.0                                    python  GHSA-h4x7-gw46-3wm6  Medium      0.3% (23rd)  0.2    
+libpcre2-8-0    10.42-1+deb12u1   10.42-1+deb12u2                           deb     CVE-2026-103111      High        0.2% (11th)  0.2    
+urllib3         2.7.0             2.8.0                                     python  GHSA-8988-9cw3-xx77  High        0.2% (9th)   0.2    
+pip             24.0              26.2.0                                    python  GHSA-qwm4-qh6w-59xr  Medium      0.3% (20th)  0.2    
+multidict       6.7.1             6.9.1                                     python  GHSA-54p9-h82j-f925  Medium      0.3% (20th)  0.2    
+python          3.11.16           3.10.22, *3.11.17, 3.12.15, 3.13.16, ...  binary  CVE-2026-82049       High        0.2% (7th)   0.1    
+python          3.11.16           3.10.22, *3.11.17, 3.12.15, 3.13.16, ...  binary  CVE-2026-15310       Low         0.5% (43rd)  0.1    
+python          3.11.16           *3.13.13, 3.14.4, 3.15.0a8                binary  CVE-2026-3446        Medium      0.2% (12th)  0.1    
+httpx2          2.9.1             2.11.0                                    python  GHSA-pf96-p4fj-6566  Medium      0.2% (11th)  0.1    
+pip             24.0              26.0                                      python  GHSA-6vgw-5pg2-w6jp  Low         0.4% (37th)  0.1    
+python          3.11.16           3.15.0rc3                                 binary  CVE-2026-12345       Medium      0.2% (7th)   < 0.1  
+python          3.11.16           *3.13.14, 3.14.5rc1, 3.15.0b1             binary  CVE-2026-6019        Medium      0.2% (10th)  < 0.1  
+anyio           4.13.0            4.14.2                                    python  GHSA-5p39-cfhj-2xmp  Medium      0.2% (4th)   < 0.1  
+httpcore2       2.9.1             2.10.0                                    python  GHSA-7mj9-2mp8-4m2p  High        0.1% (1st)   < 0.1  
+httpx2          2.9.1             2.10.0                                    python  GHSA-7mj9-2mp8-4m2p  High        0.1% (1st)   < 0.1  
+pip             24.0              26.1                                      python  GHSA-jp4c-xjxw-mgf9  Medium      0.2% (6th)   < 0.1  
+pip             24.0              26.1                                      python  GHSA-58qw-9mgm-455v  Medium      0.2% (7th)   < 0.1  
+perl-base       5.36.0-7+deb12u3  5.36.0-7+deb12u4                          deb     CVE-2025-15649       Medium      0.1% (2nd)   < 0.1  
+python          3.11.16           *3.13.13, 3.14.4, 3.15.0a8                binary  CVE-2026-3479        Negligible  0.3% (15th)  < 0.1
+[0704] ERROR discovered vulnerabilities at or above the severity threshold

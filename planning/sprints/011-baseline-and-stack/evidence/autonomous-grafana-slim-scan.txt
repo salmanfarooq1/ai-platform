@@ -1,0 +1,8 @@
+NAME                           INSTALLED  FIXED IN  TYPE       VULNERABILITY        SEVERITY  EPSS         RISK  
+github.com/getkin/kin-openapi  v0.144.0   0.147.0   go-module  GHSA-23vg-4cjm-66q5  High      0.5% (40th)  0.4   
+github.com/getkin/kin-openapi  v0.144.0   0.149.0   go-module  GHSA-g8cf-rcjf-c8cf  High      0.4% (36th)  0.3   
+github.com/getkin/kin-openapi  v0.144.0   0.148.0   go-module  GHSA-rj39-cv6w-8wv7  High      0.4% (35th)  0.3   
+github.com/getkin/kin-openapi  v0.144.0   0.146.0   go-module  GHSA-74vm-87hj-r66f  High      0.4% (29th)  0.3   
+github.com/getkin/kin-openapi  v0.144.0   0.145.0   go-module  GHSA-fh4f-47mf-f2gj  Medium    0.5% (42nd)  0.3   
+github.com/getkin/kin-openapi  v0.144.0   0.149.0   go-module  GHSA-vrcc-3ch7-hppw  High      0.3% (25th)  0.3   
+github.com/getkin/kin-openapi  v0.144.0   0.145.0   go-module  GHSA-mh7x-f8wq-4jhx  Medium    0.4% (29th)  0.2

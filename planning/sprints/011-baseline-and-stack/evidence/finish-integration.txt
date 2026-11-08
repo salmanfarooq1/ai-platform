@@ -1,0 +1,53 @@
+........................................................................ [  8%]
+.................................................................s..s..s [ 17%]
+..s..........sssss..s................................................... [ 25%]
+........................................................................ [ 34%]
+........................................................F............... [ 42%]
+........................................................................ [ 51%]
+........................................................................ [ 59%]
+........................................................................ [ 68%]
+........................................................................ [ 76%]
+................F....................................................... [ 85%]
+........................................................................ [ 93%]
+....................................................F                    [100%]
+=================================== FAILURES ===================================
+___ test_m4_the_scope_map_grants_feedback_to_query_and_analytics_to_kb_read ____
+tests/e2e/test_gateway_followups.py:155: in test_m4_the_scope_map_grants_feedback_to_query_and_analytics_to_kb_read
+    assert [(r["action"], r["outcome"], r["reason"]) for r in await rows(pool, tenant_a)] == [
+E   AssertionError: assert [('analytics....', 'allowed')] == [('feedback.w...ssing_scope')]
+E     
+E     At index 0 diff: ('analytics.read', 'allow', 'allowed') != ('feedback.write', 'allow', 'allowed')
+E     Use -v to get more diff
+___ test_a_killed_worker_leaves_its_job_to_be_claimed_again_after_the_lease ____
+tests/integration/test_jobs.py:209: in test_a_killed_worker_leaves_its_job_to_be_claimed_again_after_the_lease
+    assert line.decode().strip() == f"RUNNING {job.id}"
+E   AssertionError: assert '' == 'RUNNING 21bb...-9b013ca33d1a'
+E     
+E     - RUNNING 21bb4341-d1a6-41e5-9357-9b013ca33d1a
+----------------------------- Captured stderr call -----------------------------
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/tests/support/crash_worker.py", line 8, in <module>
+    import asyncpg
+ModuleNotFoundError: No module named 'asyncpg'
+______ test_the_worker_process_starts_reports_health_and_stops_on_sigterm ______
+tests/integration/test_worker_process.py:39: in test_the_worker_process_starts_reports_health_and_stops_on_sigterm
+    assert health.exists() and row.status == "failed" and row.error_code == "object_missing"
+E   AssertionError: assert (False)
+E    +  where False = exists()
+E    +    where exists = PosixPath('/tmp/pytest-of-root/pytest-0/test_the_worker_process_starts0/health').exists
+=============================== warnings summary ===============================
+tests/contracts/test_llm_contract.py::test_complete_returns_a_typed_completion[fake]
+  /opt/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/contracts/test_object_store_contract.py:52: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:60: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:69: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:75: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [5] tests/contracts/test_object_store_contract.py:80: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:87: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+3 failed, 832 passed, 10 skipped, 865 deselected, 1 warning in 1209.76s (0:20:09)

@@ -1,0 +1,8 @@
+kafka
+kafka-topics
+ollama
+ollama-pull
+seaweedfs
+seaweedfs-init
+worker
+exit_status=0

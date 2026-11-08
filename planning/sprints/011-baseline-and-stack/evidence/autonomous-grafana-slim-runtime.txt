@@ -1,0 +1,14 @@
+bd4805637616c8444a832e6da052572f63ab84a8aee2a9f501d6619d308860d7
+
+exit=0
+health={"database": "ok", "version": "13.2.4", "commit": "0e79aef9d91abf3bdadae9af15763029072fb45b"}
+/api/search=[{"id": 754156581171200, "uid": "bg1wvk9wz3xmoc", "orgId": 1, "title": "Governed Agent Platform", "uri": "db/governed-agent-platform", "url": "/dashboards/f/bg1wvk9wz3xmoc/governed-agent-platform", "slug": "", "type": "dash-folder", "tags": [], "isStarred": false, "sortMeta": 0, "isDeleted": false}, {"id": 754157377716224, "uid": "platform-trust", "orgId": 1, "title": "Platform trust", "uri": "db/platform-trust", "url": "/d/platform-trust/platform-trust", "slug": "", "type": "dash-db", "tags": ["platform", "trust"], "isStarred": false, "folderId": 754156581171200, "folderUid": "bg1wvk9wz3xmoc", "folderTitle": "Governed Agent Platform", "folderUrl": "/dashboards/f/bg1wvk9wz3xmoc/governed-agent-platform", "sortMeta": 0, "isDeleted": false}]
+/api/datasources=[{"id": 1, "uid": "prometheus", "orgId": 1, "name": "Prometheus", "type": "prometheus", "typeName": "prometheus", "typeLogoUrl": "public/img/icn-datasource.svg", "access": "proxy", "url": "http://prometheus:9090", "user": "", "database": "", "basicAuth": false, "isDefault": true, "jsonData": {}, "readOnly": true}]
+
+exit=0
+exact image licence SHA256=0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0
+                    GNU AFFERO GENERAL PUBLIC LICENSE
+PASS: exact candidate starts with the existing provisioning and exposes the dashboard and datasource to the configured viewer.
+sprint011-grafana-slim-398bbb
+
+exit=0

@@ -1,0 +1,5 @@
+{"query": "grafana/grafana", "source": "https://api.github.com/repos/grafana/grafana/releases?per_page=4", "error": "<urlopen error [Errno 101] Network is unreachable>"}
+{"query": "prometheus/prometheus", "source": "https://api.github.com/repos/prometheus/prometheus/releases?per_page=4", "error": "<urlopen error [Errno 101] Network is unreachable>"}
+{"query": "redpanda-data/redpanda", "source": "https://api.github.com/repos/redpanda-data/redpanda/releases?per_page=4", "error": "<urlopen error [Errno 101] Network is unreachable>"}
+{"query": "pgvector/pgvector", "source": "https://hub.docker.com/v2/repositories/pgvector/pgvector/tags/0.8.7-pg16", "result": {"name": "0.8.7-pg16", "digest": "sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a", "last_updated": "2026-10-01T17:34:34.052068Z"}}
+{"query": "grafana13.2.4", "source": "https://hub.docker.com/v2/repositories/grafana/grafana/tags/13.2.4", "result": {"name": "13.2.4", "digest": "sha256:dbbc38ea21103cefb50396340cd88afec779c7e070b0a7bf5a75b4ce46651d3f", "last_updated": "2026-10-13T10:17:27.330576Z"}}

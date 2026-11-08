@@ -1,0 +1,3 @@
+npm inventory: 264 identities; 27 absent optional packages; private root ai-platform-ui@2.0.0 excluded
+npm:caniuse-lite==1.0.30001814: licence not approved: CC-BY-4.0
+npm:gsap==3.15.0: licence not approved: Custom: https://gsap.com/standard-license.

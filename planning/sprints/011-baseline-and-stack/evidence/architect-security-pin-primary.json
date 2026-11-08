@@ -1,0 +1,32 @@
+{
+  "ollama-release": {
+    "source": "https://api.github.com/repos/ollama/ollama/releases/tags/v0.40.7",
+    "error_type": "URLError"
+  },
+  "x-net": {
+    "source": "https://proxy.golang.org/golang.org/x/net/@v/v0.60.0.info",
+    "metadata": {
+      "Version": "v0.60.0",
+      "Time": "2026-10-08T17:22:58Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/net",
+        "Hash": "18ece0ce30bc35fa81fe72028bf309bb3ff3f4a5",
+        "Ref": "refs/tags/v0.60.0"
+      }
+    }
+  },
+  "x-crypto": {
+    "source": "https://proxy.golang.org/golang.org/x/crypto/@v/v0.57.0.info",
+    "metadata": {
+      "Version": "v0.57.0",
+      "Time": "2026-09-08T18:05:01Z",
+      "Origin": {
+        "VCS": "git",
+        "URL": "https://go.googlesource.com/crypto",
+        "Hash": "3f62bf119e84c6e35e8518a2958089ade622d1a3",
+        "Ref": "refs/tags/v0.57.0"
+      }
+    }
+  }
+}

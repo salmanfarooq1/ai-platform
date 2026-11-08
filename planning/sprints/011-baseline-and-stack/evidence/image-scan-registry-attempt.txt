@@ -1,0 +1,255 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 4.68kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#2 DONE 3.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 269B 0.0s done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [builder 1/6] FROM docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#5 resolve docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89 0.1s done
+#5 DONE 0.1s
+
+#6 [runtime  2/14] WORKDIR /app
+#6 CACHED
+
+#4 [internal] load build context
+#4 transferring context: 138.85MB 4.8s
+#4 transferring context: 181.40MB 6.2s done
+#4 DONE 6.2s
+
+#7 [builder 2/6] RUN pip install --no-cache-dir pipx &&     pipx install poetry==2.3.3
+#7 CACHED
+
+#8 [builder 3/6] WORKDIR /app
+#8 CACHED
+
+#9 [builder 4/6] COPY pyproject.toml poetry.lock ./
+#9 CACHED
+
+#10 [builder 5/6] RUN --mount=type=cache,id=gap-poetry,target=/root/.cache/pypoetry     if [ "false" = "true" ]; then         poetry install --only main,rerank --no-root;     else         poetry install --only main --no-root;     fi
+#10 2.004 Creating virtualenv ai-platform in /app/.venv
+#10 2.891 Installing dependencies from lock file
+#10 4.056 
+#10 4.056 Package operations: 129 installs, 0 updates, 0 removals
+#10 4.056 
+#10 4.059   - Installing aiohappyeyeballs (2.6.1)
+#10 4.060   - Installing aiohttp (3.14.3)
+#10 4.061   - Installing aiokafka (0.14.0)
+#10 4.064   - Installing aiosignal (1.4.0)
+#10 5.137   - Installing alembic (1.20.0)
+#10 5.157   - Installing annotated-doc (0.0.4)
+#10 5.553   - Installing annotated-types (0.7.0)
+#10 5.928   - Installing anyio (4.14.2)
+#10 5.935   - Installing asgiref (3.12.1)
+#10 6.292   - Installing async-timeout (5.0.1)
+#10 6.376   - Installing asyncpg (0.31.0)
+#10 6.390   - Installing attrs (25.4.0)
+#10 6.448   - Installing beautifulsoup4 (4.15.0)
+#10 6.491   - Installing boto3 (1.43.108)
+#10 7.037   - Installing botocore (1.43.108)
+#10 7.060   - Installing certifi (2026.6.17)
+#10 7.377   - Installing cffi (2.1.0)
+#10 7.507   - Installing charset-normalizer (3.4.7)
+#10 8.211   - Installing click (8.3.3)
+#10 8.294   - Installing cryptography (50.0.2)
+#10 8.656   - Installing distro (1.9.0)
+#10 8.767   - Installing fastapi (0.137.0)
+#10 9.174   - Installing fastuuid (0.14.0)
+#10 9.697   - Installing filelock (3.29.4)
+#10 9.905   - Installing frozenlist (1.8.0)
+#10 10.21   - Installing fsspec (2026.4.0)
+#10 10.35   - Installing googleapis-common-protos (1.75.5)
+#10 11.39   - Installing groq (1.5.0)
+#10 11.81   - Installing h11 (0.16.0)
+#10 12.37   - Installing h2 (4.4.1)
+#10 12.91   - Installing hf-xet (1.5.1)
+#10 12.92   - Installing hiredis (3.4.0)
+#10 12.97   - Installing hpack (4.2.0)
+#10 13.36   - Installing httpcore (1.0.9)
+#10 13.37   - Installing httpcore2 (2.9.1)
+#10 13.99   - Installing httpx (0.28.1)
+#10 14.01   - Installing httpx2 (2.9.1)
+#10 14.11   - Installing huggingface-hub (1.16.1)
+#10 14.70   - Installing hyperframe (6.1.0)
+#10 14.79   - Installing idna (3.18)
+#10 15.07   - Installing importlib-metadata (8.9.0)
+#10 15.23   - Installing jinja2 (3.1.6)
+#10 15.50   - Installing jiter (0.14.0)
+#10 15.91   - Installing jmespath (1.1.0)
+#10 16.08   - Installing jsonpatch (1.33)
+#10 16.35   - Installing jsonpointer (3.1.1)
+#10 16.46   - Installing jsonschema (4.26.0)
+#10 16.51   - Installing jsonschema-specifications (2025.9.1)
+#10 16.56   - Installing langchain-core (1.6.6)
+#10 17.26   - Installing langchain-litellm (0.7.2)
+#10 17.32   - Installing langchain-protocol (0.0.18)
+#10 17.74   - Installing langgraph (1.2.10)
+#10 17.81   - Installing langgraph-checkpoint (4.1.1)
+#10 18.62   - Installing langgraph-prebuilt (1.1.0)
+#10 19.05   - Installing langgraph-sdk (0.4.2)
+#10 19.09   - Installing langsmith (0.10.15)
+#10 19.11   - Installing litellm (1.103.2)
+#10 19.54   - Installing mako (1.4.3)
+#10 20.25   - Installing markdown-it-py (4.2.0)
+#10 21.36   - Installing markupsafe (3.0.3)
+#10 21.80   - Installing mcp (2.0.0)
+#10 23.42   - Installing mcp-types (2.0.0)
+#10 23.56   - Installing mdurl (0.1.2)
+#10 23.73   - Installing multidict (6.7.1)
+#10 23.88   - Installing numpy (2.4.2)
+#10 24.26   - Installing openai (2.43.0)
+#10 24.53   - Installing opentelemetry-api (1.45.0)
+#10 25.45   - Installing opentelemetry-exporter-http-transport (0.66b0)
+#10 25.92   - Installing opentelemetry-exporter-otlp-common (0.66b0)
+#10 26.38   - Installing opentelemetry-exporter-otlp-proto-common (1.45.0)
+#10 26.83   - Installing opentelemetry-exporter-otlp-proto-http (1.45.0)
+#10 27.37   - Installing opentelemetry-exporter-prometheus (0.66b0)
+#10 27.80   - Installing opentelemetry-instrumentation (0.66b0)
+#10 28.41   - Installing opentelemetry-instrumentation-asgi (0.66b0)
+#10 28.78   - Installing opentelemetry-instrumentation-fastapi (0.66b0)
+#10 29.18   - Installing opentelemetry-proto (1.45.0)
+#10 30.05   - Installing opentelemetry-sdk (1.45.0)
+#10 31.31   - Installing opentelemetry-semantic-conventions (0.66b0)
+#10 33.34   - Installing opentelemetry-util-http (0.66b0)
+#10 33.66   - Installing orjson (3.11.9)
+#10 34.31   - Installing ormsgpack (1.12.2)
+#10 34.88   - Installing packaging (26.0)
+#10 35.65   - Installing pgvector (0.4.2)
+#10 36.57   - Installing prometheus-client (0.26.0)
+#10 37.29   - Installing propcache (0.4.1)
+#10 38.02   - Installing protobuf (7.36.2)
+#10 39.44   - Installing psycopg2-binary (2.9.11)
+#10 40.67   - Installing pycparser (3.0)
+#10 41.13   - Installing pydantic (2.13.4)
+#10 41.80   - Installing pydantic-core (2.46.4)
+#10 42.48   - Installing pydantic-settings (2.15.0)
+#10 42.64   - Installing pygments (2.20.0)
+#10 42.86   - Installing pyjwt (2.15.1)
+#10 43.41   - Installing python-dateutil (2.9.0.post0)
+#10 43.60   - Installing python-dotenv (1.2.2)
+#10 44.00   - Installing python-multipart (0.0.32)
+#10 44.08   - Installing pyyaml (6.0.3)
+#10 44.37   - Installing redis (8.0.1)
+#10 44.92   - Installing referencing (0.37.0)
+#10 45.53   - Installing regex (2026.5.9)
+#10 46.48   - Installing requests (2.34.2)
+#10 46.56   - Installing requests-toolbelt (1.0.0)
+#10 46.57   - Installing rich (14.3.4)
+#10 47.10   - Installing rpds-py (2026.5.1)
+#10 47.28   - Installing s3transfer (0.19.2)
+#10 47.69   - Installing shellingham (1.5.4)
+#10 47.78   - Installing six (1.17.0)
+#10 47.84   - Installing sniffio (1.3.1)
+#10 47.97   - Installing soupsieve (2.9)
+#10 48.09   - Installing sqlalchemy (2.1.3)
+#10 48.21   - Installing sse-starlette (3.4.8)
+#10 48.35   - Installing starlette (1.3.1)
+#10 48.55   - Installing tenacity (9.1.4)
+#10 49.12   - Installing tiktoken (0.13.0)
+#10 49.15   - Installing tokenizers (0.22.2)
+#10 49.89   - Installing tqdm (4.68.3)
+#10 50.65   - Installing truststore (0.10.4)
+#10 50.76   - Installing typer (0.25.1)
+#10 50.96   - Installing typing-extensions (4.15.0)
+#10 51.19   - Installing typing-inspection (0.4.2)
+#10 51.29   - Installing urllib3 (2.7.0)
+#10 51.43   - Installing uuid-utils (0.17.0)
+#10 51.90   - Installing uvicorn (0.49.0)
+#10 51.93   - Installing websockets (15.0.1)
+#10 51.96   - Installing wrapt (2.5.0)
+#10 52.57   - Installing xxhash (3.8.1)
+#10 52.60   - Installing yarl (1.22.0)
+#10 52.63   - Installing zipp (4.1.0)
+#10 53.05   - Installing zstandard (0.25.0)
+#10 DONE 55.7s
+
+#11 [builder 6/6] COPY . .
+#11 DONE 2.7s
+
+#12 [runtime  3/14] COPY --from=builder /app/.venv .venv
+#12 DONE 7.9s
+
+#13 [runtime  4/14] COPY --from=builder /app/api api/
+#13 DONE 0.2s
+
+#14 [runtime  5/14] COPY --from=builder /app/core core/
+#14 DONE 0.1s
+
+#15 [runtime  6/14] COPY --from=builder /app/gateway gateway/
+#15 DONE 0.1s
+
+#16 [runtime  7/14] COPY --from=builder /app/ports ports/
+#16 DONE 0.1s
+
+#17 [runtime  8/14] COPY --from=builder /app/adapters adapters/
+#17 DONE 0.1s
+
+#18 [runtime  9/14] COPY --from=builder /app/workers workers/
+#18 DONE 0.1s
+
+#19 [runtime 10/14] COPY --from=builder /app/sandbox_agent sandbox_agent/
+#19 DONE 0.1s
+
+#20 [runtime 11/14] COPY --from=builder /app/config.py config.py
+#20 DONE 0.2s
+
+#21 [runtime 12/14] COPY --from=builder /app/alembic.ini alembic.ini
+#21 DONE 0.1s
+
+#22 [runtime 13/14] COPY --from=builder /app/migrations migrations/
+#22 DONE 0.1s
+
+#23 [runtime 14/14] COPY --from=builder /app/data data/
+#23 DONE 0.1s
+
+#24 exporting to image
+#24 exporting layers
+#24 exporting layers 24.4s done
+#24 exporting manifest sha256:e3afa27ea653dcceec9077fd4fb24637aa4f23af27e147abf677cfb0e7abe2f6 0.0s done
+#24 exporting config sha256:6a8a438096323f2cdcde5240014e0c84406a6a9090d4f7e64f3fe4f398d82450 0.0s done
+#24 exporting attestation manifest sha256:5a2ff2c4899b7d978c358ef62197cfaca5b8015bd61a66b2890383e2a2cd0544 0.0s done
+#24 exporting manifest list sha256:31d3e3052bffe380c09511decaf004505d00f49dd70417cabd5632968ba096d7
+#24 exporting manifest list sha256:31d3e3052bffe380c09511decaf004505d00f49dd70417cabd5632968ba096d7 0.0s done
+#24 naming to docker.io/library/gap-supply-chain:scan done
+#24 unpacking to docker.io/library/gap-supply-chain:scan
+#24 unpacking to docker.io/library/gap-supply-chain:scan 7.5s done
+#24 DONE 32.2s
+NAME            INSTALLED  FIXED IN                       TYPE    VULNERABILITY        SEVERITY    EPSS         RISK   
+jaraco-context  5.3.0      6.1.0                          python  GHSA-58pv-8j8x-9vj2  High        0.6% (49th)  0.5    
+httpx2          2.9.1      2.12.0                         python  GHSA-8xx6-hgc6-gc2m  High        0.6% (49th)  0.5    
+python          3.11.17    *3.13.10, 3.14.1, 3.15.0a2     binary  CVE-2025-12781       Medium      0.6% (45th)  0.3    
+mcp             2.0.0      2.2.0                          python  GHSA-84m7-p3x7-pcfv  Medium      0.5% (38th)  0.3    
+urllib3         2.7.0      2.8.0                          python  GHSA-vxq7-64xx-v4gw  High        0.3% (25th)  0.3    
+fsspec          2026.4.0   2026.6.0                       python  GHSA-27vj-qcqg-25rc  High        0.3% (23rd)  0.3    
+pip             24.0       26.1.2                         python  GHSA-wf93-45jw-7689  Medium      0.5% (38th)  0.3    
+pip             24.0       25.3                           python  GHSA-4xh5-x5gv-qwph  Medium      0.5% (39th)  0.3    
+wheel           0.45.1     0.46.2                         python  GHSA-8rrh-rw8j-w5fx  High        0.4% (27th)  0.3    
+python          3.11.17    *3.13.15, 3.14.7, 3.15.0a6     binary  CVE-2025-15366       Medium      0.4% (35th)  0.2    
+setuptools      79.0.1     83.0.0                         python  GHSA-h35f-9h28-mq5c  Medium      0.4% (33rd)  0.2    
+python          3.11.17    3.15.0a6                       binary  CVE-2025-15367       Medium      0.4% (30th)  0.2    
+langgraph-sdk   0.4.2      0.4.4                          python  GHSA-fvww-7h3r-vfhp  High        0.3% (15th)  0.2    
+urllib3         2.7.0      2.8.0                          python  GHSA-gh4c-6fx4-qh6g  Medium      0.3% (20th)  0.2    
+httpx2          2.9.1      2.10.0                         python  GHSA-f2fp-rgf2-35cp  Medium      0.3% (22nd)  0.2    
+httpx2          2.9.1      2.11.0                         python  GHSA-h4x7-gw46-3wm6  Medium      0.3% (23rd)  0.2    
+urllib3         2.7.0      2.8.0                          python  GHSA-8988-9cw3-xx77  High        0.2% (9th)   0.2    
+pip             24.0       26.2.0                         python  GHSA-qwm4-qh6w-59xr  Medium      0.3% (20th)  0.2    
+multidict       6.7.1      6.9.1                          python  GHSA-54p9-h82j-f925  Medium      0.3% (20th)  0.2    
+python          3.11.17    *3.13.13, 3.14.4, 3.15.0a8     binary  CVE-2026-3446        Medium      0.2% (12th)  0.1    
+httpx2          2.9.1      2.11.0                         python  GHSA-pf96-p4fj-6566  Medium      0.2% (11th)  0.1    
+pip             24.0       26.0                           python  GHSA-6vgw-5pg2-w6jp  Low         0.4% (37th)  0.1    
+python          3.11.17    3.15.0rc3                      binary  CVE-2026-12345       Medium      0.2% (7th)   < 0.1  
+python          3.11.17    *3.13.14, 3.14.5rc1, 3.15.0b1  binary  CVE-2026-6019        Medium      0.2% (10th)  < 0.1  
+httpcore2       2.9.1      2.10.0                         python  GHSA-7mj9-2mp8-4m2p  High        0.1% (1st)   < 0.1  
+httpx2          2.9.1      2.10.0                         python  GHSA-7mj9-2mp8-4m2p  High        0.1% (1st)   < 0.1  
+pip             24.0       26.1                           python  GHSA-jp4c-xjxw-mgf9  Medium      0.2% (6th)   < 0.1  
+pip             24.0       26.1                           python  GHSA-58qw-9mgm-455v  Medium      0.2% (7th)   < 0.1  
+python          3.11.17    *3.13.13, 3.14.4, 3.15.0a8     binary  CVE-2026-3479        Negligible  0.3% (15th)  < 0.1

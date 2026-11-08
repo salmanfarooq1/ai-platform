@@ -1,0 +1,34 @@
+docker.io/prom/prometheus@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2: Pulling from prom/prometheus
+5937650a3919: Pulling fs layer
+72dcf69f72aa: Pulling fs layer
+456bdf926fcd: Pulling fs layer
+ec1fd540d53f: Pulling fs layer
+53331f987f8e: Pulling fs layer
+e3f841be4001: Pulling fs layer
+1f7c3462f17e: Pulling fs layer
+606913744ff0: Pulling fs layer
+ab279a31ee5b: Pulling fs layer
+ab279a31ee5b: Download complete
+5937650a3919: Download complete
+456bdf926fcd: Download complete
+72dcf69f72aa: Download complete
+1f7c3462f17e: Download complete
+606913744ff0: Download complete
+e3f841be4001: Download complete
+72dcf69f72aa: Pull complete
+456bdf926fcd: Pull complete
+ec1fd540d53f: Download complete
+ec1fd540d53f: Pull complete
+53331f987f8e: Download complete
+53331f987f8e: Pull complete
+1f7c3462f17e: Pull complete
+e3f841be4001: Pull complete
+ab279a31ee5b: Pull complete
+606913744ff0: Pull complete
+5937650a3919: Pull complete
+Digest: sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+Status: Downloaded newer image for prom/prometheus@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+docker.io/prom/prometheus:v3.15.1@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+No vulnerabilities found
+
+candidate pull/scan exit=0

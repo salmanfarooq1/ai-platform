@@ -1,0 +1,21 @@
+unit: 884 passed; 0 failed/errors; 0 skipped
+integration/e2e: 835 passed; 0 failed/errors; 10 skipped
+Normalize only the generated audit-route UUID and the ten explicit MinIO -> SeaweedFS provider parameter identities.
+Observed baseline collected: 1591
+Final collected: 1729
+Removed baseline cases: 0
+Added cases: 138
+Added cases by module:
+  tests.contracts.test_cache_contract: 4
+  tests.unit.test_artifact_licences: 19
+  tests.unit.test_check_skips: 4
+  tests.unit.test_ci_env: 9
+  tests.unit.test_compose: 8
+  tests.unit.test_config_mode: 3
+  tests.unit.test_docs_links: 2
+  tests.unit.test_licence_gate: 12
+  tests.unit.test_mcp_compat: 5
+  tests.unit.test_preflight: 10
+  tests.unit.test_supply_chain_controls: 56
+  tests.unit.test_valkey_cache: 6
+PASS: every captured baseline identity retained; provider rename explicit; original assertions separately reviewed.

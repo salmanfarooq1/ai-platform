@@ -1,0 +1,11 @@
+ss                                                                       [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/integration/test_jobs.py:201: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+SKIPPED [1] tests/integration/test_worker_process.py:17: Postgres is not reachable at localhost:5432/postgres: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+2 skipped in 3.87s

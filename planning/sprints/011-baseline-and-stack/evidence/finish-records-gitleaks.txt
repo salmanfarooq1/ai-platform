@@ -1,0 +1,5 @@
+$ scratch/sprint011/scanners/gitleaks git --log-opts=--all --redact=100 --no-banner .
+10:41PM INF 161 commits scanned.
+10:41PM INF scanned ~10509963 bytes (10.51 MB) in 5.74s
+10:41PM INF no leaks found
+exit=0

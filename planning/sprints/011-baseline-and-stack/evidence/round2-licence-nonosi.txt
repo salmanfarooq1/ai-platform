@@ -1,0 +1,4 @@
+$ scripts/supply_chain/licence_gate.sh --fixture tests/fixtures/licence/non_osi
+seeded==1.0.0: licence not approved: BUSL-1.1
+
+EXIT_CODE=1

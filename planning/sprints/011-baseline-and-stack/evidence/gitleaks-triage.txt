@@ -1,0 +1,13 @@
+planning/sprints/003-identity-tenancy/evidence/admin-cli.txt 8
+key created: prefix=yzirg5f2 scopes=kb:read,query
+planning/sprints/003-identity-tenancy/evidence/qa-rls-admin-cli.txt 3
+key created: prefix=vsnr5y6v scopes=kb:read,query
+planning/sprints/003-identity-tenancy/evidence/qa-rls-admin-cli.txt 90
+key created: prefix=8bybu5kn scopes=kb:read,query
+planning/sprints/003-identity-tenancy/evidence/qa-attacks.txt 116
+JWT header algorithm: none
+Recorded response on following line: HTTP/1.1 401 Unauthorized
+core/ingestion/chunkers.py 18
+docstring example:   or model-specific). At 4 chars ≈ 1 token for English prose, chunk_size=1200
+scripts/lab_4.4_hybrid_chunking_strategy.py 18
+docstring example:   or model-specific). At 4 chars ≈ 1 token for English prose, chunk_size=1200

@@ -1,0 +1,58 @@
+[
+  {
+    "check": "SeaweedFS live artifact",
+    "verified_image_id": "sha256:2c05e29b20d6f1e68fceaa0817c7c26f220262a13bc2971f23d87e4e840d8072",
+    "consolidated_image_id": "sha256:bacb5c84e18064a2450c2014d253303af84087df436a406c176327dfa9419984",
+    "rootfs_layers_equal": true,
+    "platform_equal": true,
+    "runtime_config_equal": true
+  },
+  {
+    "check": "SeaweedFS init artifact",
+    "verified_image_id": "sha256:bacb5c84e18064a2450c2014d253303af84087df436a406c176327dfa9419984",
+    "consolidated_image_id": "sha256:cceb9b632093c2daf3b9ced1c479c4240f33a8ea4f815f59d4330268d4745221",
+    "rootfs_layers_equal": true,
+    "platform_equal": true,
+    "runtime_config_equal": true
+  },
+  {
+    "check": "Ollama smoke artifact",
+    "verified_image_id": "sha256:b3592e01488e94656d81d5592694172214a0a8ff700df27ce014a807e9bbc7ec",
+    "consolidated_image_id": "sha256:d0e8c202942f8189d44b23f9aaefce7ac615a880937ea0a93e7234d8bfad5607",
+    "rootfs_layers_equal": true,
+    "platform_equal": true,
+    "runtime_config_equal": true
+  },
+  {
+    "check": "Ollama init artifact",
+    "verified_image_id": "sha256:d0e8c202942f8189d44b23f9aaefce7ac615a880937ea0a93e7234d8bfad5607",
+    "consolidated_image_id": "sha256:63479a219a09c617f5ab8fb01b79195859206b44c6c71e770c3fc486fc3fdae2",
+    "rootfs_layers_equal": true,
+    "platform_equal": true,
+    "runtime_config_equal": true
+  },
+  {
+    "check": "Kafka live artifact",
+    "verified_image_id": "sha256:e850f3c91dcfdbd8631949f3e15386632808f32eb8d1dd643a627877d4790520",
+    "consolidated_image_id": "sha256:747b31802df78602da6b289fdf536e2b718bff0a918b24cf99d4a11cfa707cd7",
+    "rootfs_layers_equal": true,
+    "platform_equal": true,
+    "runtime_config_equal": true
+  },
+  {
+    "check": "Kafka init artifact",
+    "verified_image_id": "sha256:747b31802df78602da6b289fdf536e2b718bff0a918b24cf99d4a11cfa707cd7",
+    "consolidated_image_id": "sha256:c0d729329ba6b1bd30a1fc7d936a11bd1e33d5ae49f508224e11e3896f3ee05e",
+    "rootfs_layers_equal": true,
+    "platform_equal": true,
+    "runtime_config_equal": true
+  },
+  {
+    "check": "Worker/default boot artifact",
+    "verified_image_id": "sha256:d98e078cd3ed24079f7623a6a3ce7e6e5df441b313141907e9af480592f15989",
+    "consolidated_image_id": "sha256:c45c096eeb9f68ee1d80d34d339fab623bc72e07d19434adcfe486abdebdb62b",
+    "rootfs_layers_equal": true,
+    "platform_equal": true,
+    "runtime_config_equal": true
+  }
+]

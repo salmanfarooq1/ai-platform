@@ -1,0 +1,28 @@
+NAME                     INSTALLED        FIXED IN         TYPE  VULNERABILITY    SEVERITY  EPSS         RISK   
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-54873   High      0.5% (38th)  0.3    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-54873   High      0.5% (38th)  0.3    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-84782   High      0.4% (31st)  0.3    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-84782   High      0.4% (31st)  0.3    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-84784   High      0.4% (33rd)  0.3    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-84784   High      0.4% (33rd)  0.3    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-72897   High      0.3% (17th)  0.2    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-72897   High      0.3% (17th)  0.2    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-75806   Medium    0.4% (31st)  0.2    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-75806   Medium    0.4% (31st)  0.2    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-75804   Medium    0.4% (27th)  0.2    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-75804   Medium    0.4% (27th)  0.2    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-42772   Medium    0.3% (24th)  0.2    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-42772   Medium    0.3% (24th)  0.2    
+libpcre2-8-0             10.46-1~deb13u2  10.46-1~deb13u3  deb   CVE-2026-103111  High      0.2% (11th)  0.2    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-35189   Medium    0.3% (17th)  0.1    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-35189   Medium    0.3% (17th)  0.1    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-35191   Low       0.4% (28th)  0.1    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-35191   Low       0.4% (28th)  0.1    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-75805   Medium    0.2% (11th)  0.1    
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-75805   Medium    0.2% (11th)  0.1    
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-54875   Low       0.3% (20th)  < 0.1  
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-54875   Low       0.3% (20th)  < 0.1  
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-54872   Low       0.3% (16th)  < 0.1  
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-54872   Low       0.3% (16th)  < 0.1  
+libssl3t64               3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-77696   Low       0.2% (14th)  < 0.1  
+openssl-provider-legacy  3.5.7-1~deb13u2  3.5.7-1~deb13u3  deb   CVE-2026-77696   Low       0.2% (14th)  < 0.1

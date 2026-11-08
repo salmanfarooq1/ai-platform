@@ -1,0 +1,31 @@
+F....F.......                                                            [100%]
+=================================== FAILURES ===================================
+_______________ test_only_live_minio_skips_of_the_contract_pass ________________
+tests/unit/test_check_skips.py:30: in test_only_live_minio_skips_of_the_contract_pass
+    assert check_skips.check(report(tmp_path, seaweed_cases(10)), expect=10) == []
+E   AssertionError: assert ['unexpected ...fs.sh))', ...] == []
+E     
+E     Left contains 11 more items, first extra item: 'unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_0[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))'
+E     Use -v to get more diff
+_______________ test_the_command_exits_non_zero_on_a_bad_report ________________
+tests/unit/test_check_skips.py:58: in test_the_command_exits_non_zero_on_a_bad_report
+    assert check_skips.main([report(tmp_path, seaweed_cases(10)), "--expect", "10"]) == 0
+E   AssertionError: assert 1 == 0
+E    +  where 1 = <function main at 0x76217cd40cc0>(['/tmp/pytest-of-ubuntu/pytest-23/test_the_command_exits_non_zer0/report.xml', '--expect', '10'])
+E    +    where <function main at 0x76217cd40cc0> = check_skips.main
+----------------------------- Captured stdout call -----------------------------
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_0[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_1[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_2[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_3[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_4[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_5[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_6[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_7[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_8[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_9[seaweedfs] (live SeaweedFS not available; set S3_LIVE_ENDPOINT (scripts/verify/seaweedfs.sh))
+expected exactly 10 skips for tests.contracts.test_object_store_contract [seaweedfs, found 0
+=========================== short test summary info ============================
+FAILED tests/unit/test_check_skips.py::test_only_live_minio_skips_of_the_contract_pass
+FAILED tests/unit/test_check_skips.py::test_the_command_exits_non_zero_on_a_bad_report
+2 failed, 11 passed in 8.15s

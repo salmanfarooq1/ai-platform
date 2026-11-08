@@ -1,0 +1,7 @@
+Installing dependencies from lock file
+
+Package operations: 0 installs, 3 updates, 0 removals
+
+  - Updating anyio (4.13.0 -> 4.14.2)
+  - Downgrading mcp (2.2.0 -> 2.0.0)
+  - Downgrading mcp-types (2.2.0 -> 2.0.0)

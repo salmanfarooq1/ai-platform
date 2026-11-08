@@ -1,0 +1,8 @@
+mcp 2.0.0
+mcp-types 2.0.0
+anyio 4.14.2
+litellm 1.103.2
+pip-licenses 5.5.5
+cyclonedx-bom 7.5.0
+Poetry (version 2.3.3)
+v24.15.0

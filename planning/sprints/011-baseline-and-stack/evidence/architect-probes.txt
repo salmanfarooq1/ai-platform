@@ -1,0 +1,22 @@
+H1: UI-only dependency changes
+backend=False, frontend=True
+supply-chain condition: ${{ needs.changes.outputs.backend == 'true' }}
+REPRODUCED: the npm licence gate and SBOM job are skipped.
+
+M1: npm inventory completeness
+Declared direct production dependencies: 19
+empty: exit=0; licence gate ok: 0 packages
+incomplete: exit=0; licence gate ok: 1 packages
+REPRODUCED: successful validation does not prove inventory completeness.
+
+M2: digest text in a YAML comment
+Parsed image: example/probe:latest; checker exit=0
+all registry images have @sha256; local worker uses build only
+REPRODUCED: a mutable image passes when its comment contains digest-shaped text.
+
+M3: independent supply-chain results after a licence failure
+Generate validated SBOMs: if=implicit success()
+actions/upload-artifact@v4: if=implicit success()
+Install checksum-verified scanners: if=implicit success()
+No unaccepted fixable critical image findings: if=implicit success()
+REPRODUCED: the known licence failure prevents SBOM upload and image scanning in this job.

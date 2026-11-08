@@ -1,0 +1,4 @@
+sprint011-postgres 113.6MiB / 15.44GiB
+sprint011-redis 14.39MiB / 15.44GiB
+sprint011-postgres pgvector/pgvector:0.8.7-pg16 127.0.0.1:15432->5432/tcp
+sprint011-redis redis/redis-stack-server:7.4.0-v8 127.0.0.1:16379->6379/tcp

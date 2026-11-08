@@ -1,0 +1,6 @@
+ Container sprint011-stack-kafka-1  Recreate
+ Container sprint011-stack-kafka-1  Recreated
+ Container sprint011-stack-kafka-1  Starting
+ Container sprint011-stack-kafka-1  Started
+ Container sprint011-stack-kafka-1  Waiting
+ Container sprint011-stack-kafka-1  Healthy

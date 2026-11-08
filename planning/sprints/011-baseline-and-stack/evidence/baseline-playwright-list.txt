@@ -1,0 +1,84 @@
+Listing tests:
+  [setup] › auth.setup.ts:8:1 › sign in once and keep the session cookie
+  [chromium] › a11y.spec.ts:22:5 › axe, light theme › landing page
+  [chromium] › a11y.spec.ts:28:5 › axe, light theme › How it works
+  [chromium] › a11y.spec.ts:33:5 › axe, light theme › Overview
+  [chromium] › a11y.spec.ts:42:5 › axe, light theme › Requests, with the drawer open on a denied request
+  [chromium] › a11y.spec.ts:50:5 › axe, light theme › Requests, the list
+  [chromium] › a11y.spec.ts:55:5 › axe, light theme › the walkthrough, after both requests ran
+  [chromium] › a11y.spec.ts:62:5 › axe, light theme › the command palette, open
+  [chromium] › a11y.spec.ts:68:5 › axe, light theme › the session menu, open
+  [chromium] › a11y.spec.ts:74:5 › axe, light theme › Ask, with an answer
+  [chromium] › a11y.spec.ts:81:5 › axe, light theme › Ask, with a denial
+  [chromium] › a11y.spec.ts:88:5 › axe, light theme › Decisions, with a denied decision open
+  [chromium] › a11y.spec.ts:96:5 › axe, light theme › Decisions, with a decision open
+  [chromium] › a11y.spec.ts:22:5 › axe, dark theme › landing page
+  [chromium] › a11y.spec.ts:28:5 › axe, dark theme › How it works
+  [chromium] › a11y.spec.ts:33:5 › axe, dark theme › Overview
+  [chromium] › a11y.spec.ts:42:5 › axe, dark theme › Requests, with the drawer open on a denied request
+  [chromium] › a11y.spec.ts:50:5 › axe, dark theme › Requests, the list
+  [chromium] › a11y.spec.ts:55:5 › axe, dark theme › the walkthrough, after both requests ran
+  [chromium] › a11y.spec.ts:62:5 › axe, dark theme › the command palette, open
+  [chromium] › a11y.spec.ts:68:5 › axe, dark theme › the session menu, open
+  [chromium] › a11y.spec.ts:74:5 › axe, dark theme › Ask, with an answer
+  [chromium] › a11y.spec.ts:81:5 › axe, dark theme › Ask, with a denial
+  [chromium] › a11y.spec.ts:88:5 › axe, dark theme › Decisions, with a denied decision open
+  [chromium] › a11y.spec.ts:96:5 › axe, dark theme › Decisions, with a decision open
+  [chromium] › governance.spec.ts:11:5 › A6 governed ask, across the real API › signed out › allow: sign in, ask, open the call in Decisions, see Allowed and the policy version
+  [chromium] › governance.spec.ts:34:5 › A6 governed ask, across the real API › signed out › an unauthenticated visit to /app is sent to sign-in, and a bad key shows the error code
+  [chromium] › governance.spec.ts:42:5 › A6 governed ask, across the real API › signed out › sign out ends the session
+  [chromium] › governance.spec.ts:51:3 › A6 governed ask, across the real API › deny: a knowledge base the policy does not allow shows Denied and its reason code
+  [chromium] › governance.spec.ts:65:3 › A6 governed ask, across the real API › decisions filters narrow the table and the empty state explains itself
+  [chromium] › governance.spec.ts:78:3 › A10 parity: Ask, Library and System work in the new UI › Ask in agent mode returns an answer with a verdict and evidence
+  [chromium] › governance.spec.ts:87:3 › A10 parity: Ask, Library and System work in the new UI › Agent runs shows the execution id and the status the runtime reports for a run just made
+  [chromium] › governance.spec.ts:103:3 › A10 parity: Ask, Library and System work in the new UI › Library lists the ingested document
+  [chromium] › governance.spec.ts:109:3 › A10 parity: Ask, Library and System work in the new UI › System shows healthy services and the mode
+  [chromium] › governance.spec.ts:116:3 › A10 parity: Ask, Library and System work in the new UI › History links an ask to its decision trace
+  [chromium] › governance.spec.ts:125:3 › A10 parity: Ask, Library and System work in the new UI › Policies, Keys, Usage and Agent runs render real data
+  [chromium] › jobs.spec.ts:12:3 › A6 a document goes from upload to a cited answer › upload, watch the Library reach Ready, then ask a question that cites it
+  [chromium] › landing.spec.ts:9:3 › A7 landing page: build output › the WebGL code is its own chunk and no /app chunk contains it
+  [chromium] › landing.spec.ts:33:3 › A7 landing page: motion on › the WebGL chunk loads after first paint, and the scroll story pins
+  [chromium] › landing.spec.ts:60:3 › A7 landing page: motion on › scrolling moves the story from the first panel to the last
+  [chromium] › landing.spec.ts:77:3 › A7 landing page: reduced motion › no GSAP, no WebGL, the poster is shown and every story step is visible
+  [chromium] › landing.spec.ts:101:3 › 005b landing page: copy and sections › the headline and subline are exact, and the hero is built from real components labelled as examples
+  [chromium] › landing.spec.ts:111:3 › 005b landing page: copy and sections › has the use cases, the one reason the gateway sits outside the agent, and no problem section
+  [chromium] › landing.spec.ts:124:3 › 005b landing page: copy and sections › How it works is a public page without GSAP or WebGL
+  [chromium] › polish.spec.ts:23:3 › A4 (a) the walkthrough › shows an allowed and a blocked request side by side, the blocked one at the guardrails stage
+  [chromium] › polish.spec.ts:54:3 › A4 (a) the first run › a new browser opens the walkthrough first, and the Overview after that
+  [chromium] › polish.spec.ts:69:3 › A4 (b) the governance line in Ask › shows "Checked by policy v1 ..." and the line opens the request drawer
+  [chromium] › polish.spec.ts:87:3 › A4 (b) the governance line in Ask › a denied ask shows the governance line too
+  [chromium] › polish.spec.ts:96:3 › A4 (c) Overview › the blocked number opens the request list filtered to deny
+  [chromium] › polish.spec.ts:121:3 › A4 (c) Overview › shows the numbers and the top deny reasons with plain titles
+  [chromium] › polish.spec.ts:132:3 › A4 (d) the command palette › Cmd or Ctrl plus K jumps to a request id
+  [chromium] › polish.spec.ts:146:3 › A4 (d) the command palette › goes to a screen by name, and Escape closes it
+  [chromium] › polish.spec.ts:160:3 › A4 (e) a deny shows its plain sentence and the policy field › in Ask, in the request drawer and in the decision detail
+  [chromium] › polish.spec.ts:184:3 › Requests page and the session menu › console reads are left out unless "Include console views" is on
+  [chromium] › polish.spec.ts:199:3 › Requests page and the session menu › the session menu shows who you are, the tenant and the scopes, and switches the theme
+  [chromium] › polish.spec.ts:213:3 › Requests page and the session menu › an unknown request id says so in the drawer
+  [chromium] › polish.spec.ts:224:3 › signed out › /how-it-works is public and /app/requests asks for sign-in
+  [chromium] › preview.spec.ts:6:1 › read-only preview: continue without a key, see the mode chip, cannot add documents
+  [chromium] › responsive.spec.ts:12:1 › landing page fits a phone
+  [chromium] › responsive.spec.ts:19:1 › how it works fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/walkthrough fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/requests fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/ask fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/decisions fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/library fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/policies fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/keys fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/usage fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/runs fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/system fits a phone
+  [chromium] › responsive.spec.ts:26:3 › /app/history fits a phone
+  [chromium] › sandbox.spec.ts:19:3 › A6 sandbox events on the Agent runs timeline › a run where the sandbox blocked a network call and a file read shows both, as denials, in time order next to the decisions
+  [chromium] › sandbox.spec.ts:48:3 › A6 sandbox events on the Agent runs timeline › a clean run shows a start and an exit, no denials, and says nothing was blocked
+  [chromium] › sandbox.spec.ts:58:3 › A6 sandbox events on the Agent runs timeline › the run list shows both runs as finished, and a run with no sandbox keeps the request trace
+  [chromium] › sandbox.spec.ts:67:5 › A6 sandbox events on the Agent runs timeline › the sandbox timeline has no serious accessibility violations, light theme
+  [chromium] › sandbox.spec.ts:67:5 › A6 sandbox events on the Agent runs timeline › the sandbox timeline has no serious accessibility violations, dark theme
+  [chromium] › trust.spec.ts:24:3 › A7 the Trust page › a receipt verifies as valid, and a tampered one as invalid
+  [chromium] › trust.spec.ts:49:3 › A7 the Trust page › the decision drawer links to the check, which runs on arrival
+  [chromium] › trust.spec.ts:58:3 › A7 the Trust page › retention and the recorded eval gate run show
+  [chromium] › trust.spec.ts:67:5 › A7 the Trust page › axe is clean, light theme, after a verification
+  [chromium] › trust.spec.ts:67:5 › A7 the Trust page › axe is clean, dark theme, after a verification
+Total: 82 tests in 10 files

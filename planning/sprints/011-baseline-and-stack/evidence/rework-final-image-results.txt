@@ -1,0 +1,11 @@
+Final individual image evidence; the earlier full independent runner aggregate exit=1.
+Application rebuild, Docker-local Ollama completion and the newly verified Prometheus pin supersede their earlier results.
+application: PASS; rework-certifi-image.txt; build/scan exit=0
+grafana/grafana:13.2.2@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0: FAIL; rework-independent/images.log; scanner exit=2
+ollama/ollama:0.34.4@sha256:8262851b2846b87c649eddf3e76beb270c52f4d1bc94559f47efde16b0841551: FAIL; rework-ollama-local-complete.txt; scanner exit=2
+pgvector/pgvector:0.8.7-pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a: FAIL; rework-independent/images.log; scanner exit=2
+prom/prometheus:v3.15.1@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2: PASS; rework-prometheus-new-candidate.txt; scanner exit=0
+redis/redis-stack-server:7.4.0-v8@sha256:798ab84d9f266936b034ab11c4d04a2b8e4b441884c5aa7d17ac951eefdf742a: PASS; rework-independent/images.log; scanner exit=0
+redpandadata/redpanda:v24.2.7@sha256:82a69763bef8d8b55ea5a520fa1b38f993908ef68946819ca1aed43541824c48: FAIL; rework-independent/images.log; scanner exit=2
+All 7 final images have completed individual scan results.
+Image gate aggregate: FAIL; four upstream images retain critical findings; no advisory ignored.

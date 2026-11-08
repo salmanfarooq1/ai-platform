@@ -1,0 +1,17 @@
+Immutable image: sha256:b3592e01488e94656d81d5592694172214a0a8ff700df27ce014a807e9bbc7ec
+Application:         grype
+Version:             0.119.0
+BuildDate:           2026-09-17T16:17:07Z
+GitCommit:           b6f5194537747ee7f705f4113069ac9eb269919f
+GitDescription:      v0.119.0
+Platform:            linux/amd64
+GoVersion:           go1.26.3
+Compiler:            gc
+Syft Version:        v1.52.0
+Supported DB Schema: 6
+Path:      /cache/db/6/vulnerability.db
+Schema:    v6.1.10
+Built:     2026-10-21T06:31:02Z
+From:      https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-21T00:28:41Z_1792564262.tar.zst?checksum=sha256%3Afe51ed05fd0bf2e0642a362b75b245caf0da0eabb92b26a543e061f9873ec2ba
+Status:    valid
+exit= 0

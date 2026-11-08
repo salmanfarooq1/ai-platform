@@ -1,0 +1,372 @@
+
+> ai-platform-ui@2.0.0 tokens:check
+> node scripts/build-tokens.mjs --check
+
+
+css
+✔︎ /tmp/tokens-O78kFM/tokens.css
+No drift: src/styles/tokens.css is exactly what tokens/tokens.json generates.
+
+> ai-platform-ui@2.0.0 lint
+> eslint . --max-warnings 0
+
+
+> ai-platform-ui@2.0.0 typecheck
+> tsc --noEmit
+
+
+> ai-platform-ui@2.0.0 test
+> vitest --run
+
+
+ RUN  v2.1.9 /home/ubuntu/ai-platform/ui
+
+ ✓ src/lib/reasons.test.tsx (7 tests) 592ms
+   ✓ the reason hooks > fetches the catalogue once and caches it 411ms
+ ✓ src/styles/tokens.test.ts (7 tests) 522ms
+ ✓ src/components/governance/run-steps.test.tsx (11 tests) 3908ms
+   ✓ RunSteps > lists the gateway decisions and the sandbox events of a run in one rail, in the order given 2715ms
+   ✓ RunSteps > shows a blocked network call and a blocked file read as a deny state with a word, an icon and the detail 416ms
+   ✓ RunSteps > shows a gateway deny next to the sandbox events with the failing stage and the catalogue sentence 362ms
+ ✓ src/components/ui/ui.test.tsx (10 tests) 4038ms
+   ✓ Button > is ink by default, not the seal color 1722ms
+   ✓ Segmented > is a labelled single-select radio group 487ms
+   ✓ Dialog > opens, names itself, and closes with Escape 979ms
+ ✓ src/features/overview/overview.test.tsx (9 tests) 4809ms
+   ✓ OverviewTiles > shows checked, blocked, deny rate and budget used, and each links to its filtered records 907ms
+   ✓ TopDenyReasons > lists the reasons with the catalogue title, sentence and count 1809ms
+   ✓ OverviewPage > loads the overview and sends the blocked number to the deny-filtered list 1337ms
+ ✓ src/features/walkthrough/walkthrough.test.tsx (8 tests) 5694ms
+   ✓ WalkthroughPage > runs one allowed and one blocked request and shows both side by side, the blocked one at the guardrails stage 2743ms
+   ✓ WalkthroughPage > treats "no passage matched" as allowed by the gateway, and still shows the trace 1004ms
+   ✓ WalkthroughPage > shows the error state for a 404 not_found when the request detail cannot be loaded 546ms
+   ✓ WalkthroughPage > shows the error state for a 404 not_found when the request detail holds no allow decision 470ms
+   ✓ WalkthroughPage > shows the error state for a 404 not_found when the request detail holds no decisions 398ms
+ ✓ src/components/governance/governance.test.tsx (15 tests) 6616ms
+   ✓ VerdictBadge > shows an icon, a word and the verdict for each state 591ms
+   ✓ TraceTimeline > lists the steps oldest first with action, resource, stage and time to the next step 1780ms
+   ✓ TraceTimeline > marks the denied step and shows its reason code 398ms
+   ✓ Receipt > shows the ids, policy version, tenant and the input hash in mono 520ms
+   ✓ Receipt > shows "none" for a missing hash or policy version, and has a copy button for each value 887ms
+   ✓ Receipt > copies a value to the clipboard 1658ms
+   ✓ DecisionsTable states > rows: one row per decision with verdict, resource and policy version, and a link to the detail 304ms
+ ✓ src/features/runs/runs-page.test.tsx (11 tests) 7046ms
+   ✓ RunsPage > lists each run with its execution id and the status the runtime reports 2792ms
+   ✓ RunsPage > shows the full execution id and the status of the selected run next to its steps 1035ms
+   ✓ RunsPage > a run with no execution id or status still renders honestly 317ms
+   ✓ RunsPage > opens a run when its time is clicked 658ms
+   ✓ RunsPage > reads each run status and duration from the runs endpoint, and polls it only while a run is active 405ms
+   ✓ RunsPage > shows the sandbox events next to the gateway decisions for a sandboxed run, and says what the sandbox stopped 590ms
+   ✓ RunsPage > says the sandbox blocked nothing when it did not 377ms
+   ✓ RunsPage > keeps the request trace for a run that has no sandbox events, or whose record cannot be read 570ms
+ ✓ src/app/command-palette.test.tsx (15 tests) 9062ms
+   ✓ buildPaletteItems > offers to open a typed request id, and lists matching recent requests first 590ms
+   ✓ CommandPalette > typing ../x and pressing Enter never navigates outside /app/requests/ 2144ms
+   ✓ CommandPalette > typing <script>alert(1)</script> and pressing Enter never navigates outside /app/requests/ 1869ms
+   ✓ CommandPalette > typing %2F..%2F and pressing Enter never navigates outside /app/requests/ 552ms
+   ✓ CommandPalette > is a combobox over a listbox, named for what it does 524ms
+   ✓ CommandPalette > goes to a screen with the arrow keys and Enter 933ms
+   ✓ CommandPalette > jumps to a request id 1132ms
+   ✓ CommandPalette > opens a typed id even when it is not in the recent list 932ms
+ ✓ src/features/requests/requests.test.tsx (10 tests) 7879ms
+   ✓ RequestsTable > lists one row per request with outcome, checks, the stage that stopped it and the policy 2756ms
+   ✓ RequestsTable > loading shows skeleton rows, empty says how to fill it, error shows the code and retries 762ms
+   ✓ RequestDrawer > opens as a dialog with the verdict, the deny emphasis, the stage trace and a receipt link per decision 1314ms
+   ✓ RequestDrawer > has no deny callout for an allowed request 406ms
+   ✓ RequestDrawer > says so for a request id that is not found, and shows the error code for any other failure 380ms
+   ✓ RequestDrawer > closes with Escape 304ms
+   ✓ RequestsPage > asks for console views only when "Include console views" is on 878ms
+   ✓ RequestsPage > filters to denied requests from the URL and opens a row in the drawer 769ms
+ ✓ src/features/trust/trust.test.tsx (10 tests) 9722ms
+   ✓ Trust page > verifies a decision id: fetches the receipt, checks it, shows valid, each check and the chain position 5182ms
+   ✓ Trust page > shows invalid with the failing check, as a word and an icon, for a tampered pasted receipt 1145ms
+   ✓ Trust page > refuses text that is not JSON without calling the API 959ms
+   ✓ Trust page > opens from a decision link and runs the check once 359ms
+   ✓ Trust page > shows the API error code for an unknown decision 527ms
+   ✓ Trust page > shows a tenant override, the eval history with pass and fail words, and the Grafana link 572ms
+ ✓ src/features/library/library-page.test.tsx (6 tests) 11543ms
+   ✓ LibraryPage ingest status > shows a queued document that is not in the registry yet, and a ready one 1252ms
+   ✓ LibraryPage ingest status > shows how far a running job is 2082ms
+   ✓ LibraryPage ingest status > shows the error code and a plain sentence for a failed job and for a dead one 379ms
+   ✓ LibraryPage ingest status > a document whose latest job succeeded is Ready 345ms
+   ✓ LibraryPage ingest status > polls every 2 seconds while a job is active and stops when none is 5200ms
+   ✓ LibraryPage ingest status > reads the registry again when the last job ends 2271ms
+ ✓ src/api/client.test.ts (9 tests) 185ms
+ ✓ src/features/ask/ask-run.test.tsx (3 tests) 10322ms
+   ✓ Ask in Agent mode with a slow run > shows a quiet "Still working" state while it polls the run, then the answer 6269ms
+   ✓ Ask in Agent mode with a slow run > a run that failed becomes an error, not a silent empty answer 2293ms
+   ✓ Ask in Agent mode with a slow run > an answer that arrives at once (200) never polls 1750ms
+ ✓ src/features/auth/signin-page.test.tsx (3 tests) 4374ms
+   ✓ SignInPage destination > opens the walkthrough the first time, and remembers it 3227ms
+   ✓ SignInPage destination > opens the Overview after the walkthrough has been seen 678ms
+   ✓ SignInPage destination > returns to the page that was asked for, whatever the first-run rule says 445ms
+stdout | src/styles/contrast.test.ts > ACCESSIBILITY.md contrast pairs > every pair meets its minimum in the light theme
+contrast, light theme
+light text-primary    on bg-canvas      16.12:1  (min 4.5)  Body text on the page
+light text-primary    on bg-surface     17.28:1  (min 4.5)  Text on cards, tables and drawers
+light text-primary    on bg-muted       15.02:1  (min 4.5)  Text in inputs and table heads
+light text-primary    on bg-selected    15.32:1  (min 4.5)  Text in a selected row or active nav item
+light text-secondary  on bg-selected     5.85:1  (min 4.5)  Secondary text in a selected row or the active palette option
+light text-tertiary   on bg-selected     4.87:1  (min 4.5)  Quiet labels in a selected row
+light text-secondary  on bg-canvas       6.16:1  (min 4.5)  Secondary text on the page
+light text-secondary  on bg-surface      6.60:1  (min 4.5)  Secondary text on cards
+light text-secondary  on bg-muted        5.74:1  (min 4.5)  Secondary text in inputs and table heads
+light text-tertiary   on bg-canvas       5.12:1  (min 4.5)  Placeholders and hints on the page
+light text-tertiary   on bg-surface      5.49:1  (min 4.5)  Placeholders and hints on cards
+light text-tertiary   on bg-muted        4.77:1  (min 4.5)  Placeholders in inputs
+light text-on-ink     on ink            17.28:1  (min 4.5)  Label on a primary button
+light text-on-ink     on ink-hover      12.06:1  (min 4.5)  Label on a hovered primary button
+light seal            on bg-canvas       6.81:1  (min 4.5)  Links on the page
+light seal            on bg-surface      7.30:1  (min 4.5)  Links on cards, and the focus ring
+light seal            on bg-muted        6.35:1  (min 4.5)  Links on quiet fills
+light seal            on bg-selected     6.48:1  (min 4.5)  Links in a selected row
+light allow           on bg-surface      6.38:1  (min 4.5)  Allowed verdict text
+light deny            on bg-surface      5.74:1  (min 4.5)  Denied verdict text
+light escalate        on bg-surface      5.85:1  (min 4.5)  Needs-approval verdict text
+light allow           on allow-tint      5.51:1  (min 4.5)  Allowed badge
+light deny            on deny-tint       4.90:1  (min 4.5)  Denied badge and the deny callout heading
+light escalate        on escalate-tint   5.08:1  (min 4.5)  Needs-approval badge
+light text-primary    on deny-tint      14.77:1  (min 4.5)  Sentence in the deny callout
+light text-secondary  on deny-tint       5.64:1  (min 4.5)  Labels in the deny callout
+light deny            on bg-muted        4.99:1  (min 4.5)  Deny text on a quiet fill
+
+stdout | src/styles/contrast.test.ts > ACCESSIBILITY.md contrast pairs > every pair meets its minimum in the dark theme
+contrast, dark theme
+dark  text-primary    on bg-canvas      15.45:1  (min 4.5)  Body text on the page
+dark  text-primary    on bg-surface     14.31:1  (min 4.5)  Text on cards, tables and drawers
+dark  text-primary    on bg-muted       13.06:1  (min 4.5)  Text in inputs and table heads
+dark  text-primary    on bg-selected    11.67:1  (min 4.5)  Text in a selected row or active nav item
+dark  text-secondary  on bg-selected     5.32:1  (min 4.5)  Secondary text in a selected row or the active palette option
+dark  text-tertiary   on bg-selected     4.76:1  (min 4.5)  Quiet labels in a selected row
+dark  text-secondary  on bg-canvas       7.05:1  (min 4.5)  Secondary text on the page
+dark  text-secondary  on bg-surface      6.53:1  (min 4.5)  Secondary text on cards
+dark  text-secondary  on bg-muted        5.96:1  (min 4.5)  Secondary text in inputs and table heads
+dark  text-tertiary   on bg-canvas       6.31:1  (min 4.5)  Placeholders and hints on the page
+dark  text-tertiary   on bg-surface      5.84:1  (min 4.5)  Placeholders and hints on cards
+dark  text-tertiary   on bg-muted        5.33:1  (min 4.5)  Placeholders in inputs
+dark  text-on-ink     on ink            15.45:1  (min 4.5)  Label on a primary button
+dark  text-on-ink     on ink-hover      17.05:1  (min 4.5)  Label on a hovered primary button
+dark  seal            on bg-canvas       8.00:1  (min 4.5)  Links on the page
+dark  seal            on bg-surface      7.41:1  (min 4.5)  Links on cards, and the focus ring
+dark  seal            on bg-muted        6.76:1  (min 4.5)  Links on quiet fills
+dark  seal            on bg-selected     6.04:1  (min 4.5)  Links in a selected row
+dark  allow           on bg-surface      9.01:1  (min 4.5)  Allowed verdict text
+dark  deny            on bg-surface      6.78:1  (min 4.5)  Denied verdict text
+dark  escalate        on bg-surface      9.08:1  (min 4.5)  Needs-approval verdict text
+dark  allow           on allow-tint      6.84:1  (min 4.5)  Allowed badge
+dark  deny            on deny-tint       5.43:1  (min 4.5)  Denied badge and the deny callout heading
+dark  escalate        on escalate-tint   6.84:1  (min 4.5)  Needs-approval badge
+dark  text-primary    on deny-tint      11.44:1  (min 4.5)  Sentence in the deny callout
+dark  text-secondary  on deny-tint       5.22:1  (min 4.5)  Labels in the deny callout
+dark  deny            on bg-muted        6.20:1  (min 4.5)  Deny text on a quiet fill
+
+ ✓ src/styles/contrast.test.ts (3 tests) 88ms
+ ✓ src/features/library/job-status.test.ts (4 tests) 32ms
+ ✓ src/features/auth/signin-form.test.tsx (4 tests) 4965ms
+   ✓ SignInForm > keeps the submit button disabled until a key is typed, and masks the key 3414ms
+   ✓ SignInForm > submits the trimmed key 716ms
+   ✓ SignInForm > shows the error message, code and request id when the key is rejected 560ms
+ ✓ src/app/session.test.tsx (1 test) 299ms
+ ✓ src/styles/color-guard.test.ts (2 tests) 47ms
+ ✓ src/components/governance/deny-callout.test.tsx (6 tests) 756ms
+   ✓ DenyCalloutView (deny emphasis) > names the failing stage in red, with an icon and the word Denied 413ms
+ ✓ src/features/ask/ask.test.tsx (5 tests) 1960ms
+   ✓ AnswerView > shows the verdict, confidence, evidence and the receipt link 1663ms
+ ✓ src/components/governance/trace-deny.test.tsx (4 tests) 2196ms
+   ✓ TraceTimeline deny emphasis > shows the failing stage in red and the plain sentence on the denied step 547ms
+   ✓ DecisionDetailView > adds the deny callout and a link to the whole request for a denied decision 1325ms
+ ✓ src/features/ask/governance-line.test.tsx (6 tests) 1849ms
+   ✓ GovernanceLine > links the line to the request drawer 1385ms
+   ✓ GovernanceLine > says the record is not available, with the error code, when the lookup fails 372ms
+ ✓ src/styles/eslint-colour-guard.test.ts (32 tests) 13957ms
+   ✓ eslint colour guard > a real colour fails: const s = { color: '#fff' } 12381ms
+ ✓ src/app/session-menu.test.tsx (4 tests) 4771ms
+   ✓ SessionMenu > shows who you are, the tenant and the scopes 2529ms
+   ✓ SessionMenu > says when the session is a read-only preview 603ms
+   ✓ SessionMenu > sets the theme and remembers it 1257ms
+   ✓ SessionMenu > signs out 367ms
+ ✓ src/features/ask/ask-page.test.tsx (2 tests) 2078ms
+   ✓ AskPage knowledge base field > starts on the first knowledge base the policy allows 1339ms
+   ✓ AskPage knowledge base field > does not fill the field in once the person has focused it, even if the config reply is late 733ms
+
+ Test Files  27 passed (27)
+      Tests  207 passed (207)
+   Start at  12:07:27
+   Duration  126.22s (transform 15.59s, setup 38.57s, collect 659.94s, tests 119.31s, environment 331.40s, prepare 21.26s)
+
+
+> ai-platform-ui@2.0.0 build
+> tsc --noEmit && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 5629 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                  0.99 kB │ gzip:   0.55 kB
+dist/assets/Geist-Variable-Bj2R_7yk.woff2       69.65 kB
+dist/assets/GeistMono-Variable-Dispecij.woff2   71.37 kB
+dist/assets/index-CVeUUI9o.css                  32.28 kB │ gzip:   7.60 kB
+dist/assets/time-range-BpH6G2fq.js               0.21 kB │ gzip:   0.19 kB
+dist/assets/walkthrough-store-CMuV9Tm6.js        0.22 kB │ gzip:   0.16 kB
+dist/assets/stages-UorP1m-x.js                   0.27 kB │ gzip:   0.21 kB
+dist/assets/density-D1tfL_P2.js                  0.30 kB │ gzip:   0.22 kB
+dist/assets/select-CKV7g3dK.js                   0.40 kB │ gzip:   0.28 kB
+dist/assets/input-OJBjDF-w.js                    0.66 kB │ gzip:   0.39 kB
+dist/assets/governance-text-DYvVFh2U.js          0.73 kB │ gzip:   0.44 kB
+dist/assets/reasons-DUU1lU9r.js                  0.96 kB │ gzip:   0.52 kB
+dist/assets/useInfiniteQuery-Knctk5j5.js         1.16 kB │ gzip:   0.49 kB
+dist/assets/receipt-Dg9_WeAf.js                  1.27 kB │ gzip:   0.66 kB
+dist/assets/history-page-Dnmy7HAQ.js             1.57 kB │ gzip:   0.80 kB
+dist/assets/X.es-xqfVfXNV.js                     1.95 kB │ gzip:   0.66 kB
+dist/assets/keys-page-MwmkPBXF.js                1.95 kB │ gzip:   0.90 kB
+dist/assets/hero-scene-DlO9yN3w.js               1.99 kB │ gzip:   1.06 kB
+dist/assets/deny-callout-BF7vJ_3w.js             2.11 kB │ gzip:   0.82 kB
+dist/assets/trace-timeline-B005JbbG.js           2.22 kB │ gzip:   1.02 kB
+dist/assets/copy-value-Ubyob4ZV.js               2.44 kB │ gzip:   0.98 kB
+dist/assets/signin-page-DRehPXxu.js              2.49 kB │ gzip:   1.27 kB
+dist/assets/policies-page-DfR5y3ST.js            2.64 kB │ gzip:   1.20 kB
+dist/assets/system-page-CYCw2mvn.js              2.81 kB │ gzip:   1.08 kB
+dist/assets/useMutation-_1MumFZX.js              3.24 kB │ gzip:   1.32 kB
+dist/assets/segmented-_ajG1Hu3.js                3.40 kB │ gzip:   1.38 kB
+dist/assets/marketing-shell-myhsLpY9.js          3.89 kB │ gzip:   1.58 kB
+dist/assets/usage-page-Ctc2JX8_.js               5.64 kB │ gzip:   1.87 kB
+dist/assets/how-it-works-page-DHOsDFHC.js        5.83 kB │ gzip:   2.29 kB
+dist/assets/walkthrough-page-fDXBVTYT.js         5.86 kB │ gzip:   2.33 kB
+dist/assets/overview-page-CperTTsJ.js            6.93 kB │ gzip:   2.47 kB
+dist/assets/decisions-page-Clwg4aRb.js           7.82 kB │ gzip:   3.01 kB
+dist/assets/states-SDGLwnuv.js                   8.79 kB │ gzip:   2.59 kB
+dist/assets/verdict-badge-xwEqZnzL.js           10.32 kB │ gzip:   2.84 kB
+dist/assets/requests-page-2Yyq09aK.js           10.38 kB │ gzip:   3.79 kB
+dist/assets/library-page-Bekviqpg.js            11.88 kB │ gzip:   4.42 kB
+dist/assets/trust-page-DvZETYkY.js              16.29 kB │ gzip:   5.04 kB
+dist/assets/landing-page-ollr17UI.js            17.99 kB │ gzip:   6.08 kB
+dist/assets/runs-page-DuOq6HK1.js               21.86 kB │ gzip:   7.12 kB
+dist/assets/gsap-CcIkNsPr.js                   122.93 kB │ gzip:  48.91 kB
+dist/assets/react-CxfcT2zT.js                  171.48 kB │ gzip:  56.23 kB
+dist/assets/ask-page-BMgEViMW.js               186.86 kB │ gzip:  56.83 kB
+dist/assets/index-BwceccnQ.js                  248.39 kB │ gzip:  76.38 kB
+dist/assets/webgl-gc836SuQ.js                  878.61 kB │ gzip: 235.14 kB
+✓ built in 2m 50s
+
+> ai-platform-ui@2.0.0 chunk-report
+> node scripts/chunk-report.mjs
+
+Chunks (raw and gzip), largest last
+app/shared  time-range-BpH6G2fq.js                           0.2 kB     0.2 kB
+app/shared  walkthrough-store-CMuV9Tm6.js                    0.2 kB     0.2 kB
+app/shared  stages-UorP1m-x.js                               0.3 kB     0.2 kB
+app/shared  density-D1tfL_P2.js                              0.3 kB     0.2 kB
+app/shared  select-CKV7g3dK.js                               0.4 kB     0.3 kB
+app/shared  input-OJBjDF-w.js                                0.6 kB     0.4 kB
+app/shared  governance-text-DYvVFh2U.js                      0.7 kB     0.4 kB
+app/shared  reasons-DUU1lU9r.js                              0.9 kB     0.5 kB
+app/shared  useInfiniteQuery-Knctk5j5.js                     1.1 kB     0.5 kB
+app/shared  receipt-Dg9_WeAf.js                              1.2 kB     0.6 kB
+app/shared  history-page-Dnmy7HAQ.js                         1.5 kB     0.8 kB
+app/shared  X.es-xqfVfXNV.js                                 1.9 kB     0.6 kB
+app/shared  keys-page-MwmkPBXF.js                            1.9 kB     0.9 kB
+marketing   hero-scene-DlO9yN3w.js                           1.9 kB     1.0 kB
+app/shared  deny-callout-BF7vJ_3w.js                         2.1 kB     0.8 kB
+app/shared  trace-timeline-B005JbbG.js                       2.2 kB     1.0 kB
+app/shared  copy-value-Ubyob4ZV.js                           2.4 kB     1.0 kB
+app/shared  signin-page-DRehPXxu.js                          2.4 kB     1.2 kB
+app/shared  policies-page-DfR5y3ST.js                        2.6 kB     1.2 kB
+app/shared  system-page-CYCw2mvn.js                          2.7 kB     1.1 kB
+app/shared  useMutation-_1MumFZX.js                          3.2 kB     1.3 kB
+app/shared  segmented-_ajG1Hu3.js                            3.3 kB     1.4 kB
+marketing   marketing-shell-myhsLpY9.js                      3.8 kB     1.5 kB
+app/shared  usage-page-Ctc2JX8_.js                           5.5 kB     1.8 kB
+marketing   how-it-works-page-DHOsDFHC.js                    5.7 kB     2.2 kB
+app/shared  walkthrough-page-fDXBVTYT.js                     5.7 kB     2.3 kB
+app/shared  overview-page-CperTTsJ.js                        6.8 kB     2.4 kB
+app/shared  decisions-page-Clwg4aRb.js                       7.6 kB     2.9 kB
+app/shared  states-SDGLwnuv.js                               8.6 kB     2.5 kB
+app/shared  verdict-badge-xwEqZnzL.js                       10.1 kB     2.8 kB
+app/shared  requests-page-2Yyq09aK.js                       10.1 kB     3.7 kB
+app/shared  library-page-Bekviqpg.js                        11.6 kB     4.3 kB
+app/shared  trust-page-DvZETYkY.js                          15.9 kB     4.9 kB
+marketing   landing-page-ollr17UI.js                        17.6 kB     5.9 kB
+app/shared  runs-page-DuOq6HK1.js                           21.3 kB     6.9 kB
+marketing   gsap-CcIkNsPr.js                               120.1 kB    47.8 kB
+app/shared  react-CxfcT2zT.js                              167.5 kB    54.9 kB
+app/shared  ask-page-BMgEViMW.js                           182.5 kB    55.5 kB
+app/shared  index-BwceccnQ.js                              242.6 kB    74.6 kB
+marketing   webgl-gc836SuQ.js                              858.0 kB   229.6 kB
+
+total app/shared 728.0 kB, total marketing 1007.1 kB, 40 chunks
+
+Each route is its own chunk
+ok   /                  landing-page-ollr17UI.js (17.6 kB)
+ok   /how-it-works      how-it-works-page-DHOsDFHC.js (5.7 kB)
+ok   /signin            signin-page-DRehPXxu.js (2.4 kB)
+ok   /app               overview-page-CperTTsJ.js (6.8 kB)
+ok   /app/walkthrough   walkthrough-page-fDXBVTYT.js (5.7 kB)
+ok   /app/ask           ask-page-BMgEViMW.js (182.5 kB)
+ok   /app/library       library-page-Bekviqpg.js (11.6 kB)
+ok   /app/history       history-page-Dnmy7HAQ.js (1.5 kB)
+ok   /app/requests      requests-page-2Yyq09aK.js (10.1 kB)
+ok   /app/decisions     decisions-page-Clwg4aRb.js (7.6 kB)
+ok   /app/policies      policies-page-DfR5y3ST.js (2.6 kB)
+ok   /app/keys          keys-page-MwmkPBXF.js (1.9 kB)
+ok   /app/usage         usage-page-Ctc2JX8_.js (5.5 kB)
+ok   /app/runs          runs-page-DuOq6HK1.js (21.3 kB)
+ok   /app/trust         trust-page-DvZETYkY.js (15.9 kB)
+ok   /app/system        system-page-CYCw2mvn.js (2.7 kB)
+
+No GSAP or WebGL in the chunks that load under /app (every chunk outside the marketing group)
+checked 34 chunks, grep for: WebGLRenderer|@react-three|THREE\.|ScrollTrigger|SplitText|gsap\.registerPlugin|getContext\(["']webgl
+ok   index.html preloads no marketing chunk
+
+Where GSAP and WebGL live
+     landing-page-ollr17UI.js
+     gsap-CcIkNsPr.js
+     webgl-gc836SuQ.js
+
+PASS
+
+> ai-platform-ui@2.0.0 copy-check
+> node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/copy-check.mjs
+
+1. Headline and subline
+ok   headline: "Your agents can only ever do less."
+ok   subline: "Control what your agents can do. See everything they did."
+ok   landing-page.tsx renders HEADLINE and SUBLINE from claims.ts
+
+2. No long dash or en dash
+ok   101 files scanned, none holds U+2014 or U+2013
+
+3. Banned words and "demo" wording
+ok   94 UI files scanned for \b(elevate[sd]?|seamless(ly)?|unleash(es|ed)?|next-gen(eration)?)\b and \bdemo
+
+4. Every landing claim maps to the may-claim list
+ok   may-claim list has 13 items
+ok   [capabilities] "One gateway for every call"
+       -> may-claim 1: One gateway for every model, tool and knowledge-base call. Agent code does not import the model clie...
+ok   [capabilities] "Policies that only narrow"
+       -> may-claim 2: Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token lim...
+ok   [capabilities] "A record for every call"
+       -> may-claim 3: A decision record for every call, allow or deny, with a reason, the policy version and an input hash...
+ok   [capabilities] "Tenants kept apart by the database"
+       -> may-claim 4: Tenant isolation enforced by the database.
+ok   [capabilities] "Closed when in doubt"
+       -> may-claim 5: Fail closed: if a check or the decision record cannot be written, the call is denied.
+ok   [capabilities] "Limits and budgets"
+       -> may-claim 6: Rate limits, daily token budgets and a daily cost cap per tenant.
+ok   [capabilities] "Read-only previews"
+       -> may-claim 7: Read-only preview sessions. The API key stays on the server in a secure cookie session.
+ok   [capabilities] "Works with agent clients over MCP"
+       -> may-claim 8: Works over MCP for agent clients.
+ok   [use cases] "An internal knowledge assistant over company documents"
+       -> may-claim 2: Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token lim...
+ok   [use cases] "An agent with tool access"
+       -> may-claim 2: Tenant policies that can only narrow access (knowledge bases, tools, models, tool-call and token lim...
+ok   [use cases] "A team that must see what its agents did"
+       -> may-claim 3: A decision record for every call, allow or deny, with a reason, the policy version and an input hash...
+ok   [why outside the agent] "Why the gateway sits outside the agent"
+       -> may-claim 1: One gateway for every model, tool and knowledge-base call. Agent code does not import the model clie...
+
+5. Nothing from the must-not-claim list on the public pages
+ok   12 landing files scanned for \b(approvals?|approve[sd]?|uptime|availability|customers?|testimonials?|customer logos?|logo wall|kafka|openshell|sandbox(ed)?|pii|redaction|opa|enterprise-grade|trusted by)\b
+
+PASS

@@ -1,0 +1,2 @@
+Sprint image-pull process: ['17295', '909', 'docker']
+Registry pull exceeded the 900-second bound; terminating only this sprint-owned client. The image gate remains failed.

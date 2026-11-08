@@ -1,0 +1,6 @@
+unit: 817 passed, 0 failed/errors, 0 skipped
+integration/e2e: 831 passed, 0 failed/errors, 10 skipped
+Observed baseline collected: 1591
+Final collected: 1658
+Removed baseline cases: 2
+Added cases: 69

@@ -1,0 +1,4 @@
+Fresh isolated volume: sprint011-prometheus-compat-1fa425e6; no existing platform volume mounted.
+ed38ba6d29fec0c094a909048e84426ced2b698beacf88d35012587dee02e2d6
+{"status":"success","data":{"resultType":"vector","result":[]}}Flag --time has been deprecated, use --timeout instead
+sprint011-prom-compat-old

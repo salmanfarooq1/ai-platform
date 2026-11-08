@@ -1,0 +1,46 @@
+ Network sprint011-seaweed-final_default  Creating
+ Network sprint011-seaweed-final_default  Created
+ Volume "sprint011-seaweed-final_seaweedfs_data"  Creating
+ Volume "sprint011-seaweed-final_seaweedfs_data"  Created
+ Container sprint011-seaweed-final-seaweedfs-1  Creating
+ Container sprint011-seaweed-final-seaweedfs-1  Created
+ Container sprint011-seaweed-final-seaweedfs-1  Starting
+ Container sprint011-seaweed-final-seaweedfs-1  Started
+ Container sprint011-seaweed-final-seaweedfs-1  Waiting
+ Container sprint011-seaweed-final-seaweedfs-1  Healthy
+compose_up_exit_status=0
+ Container sprint011-seaweed-final-seaweedfs-1  Running
+{
+  "version":  1,
+  "locations":  [
+    {
+      "locationPrefix":  "/buckets/",
+      "collection":  "",
+      "replication":  "",
+      "ttl":  "",
+      "diskType":  "",
+      "fsync":  false,
+      "volumeGrowthCount":  1,
+      "readOnly":  false,
+      "dataCenter":  "",
+      "rack":  "",
+      "dataNode":  "",
+      "maxFileNameLength":  0,
+      "disableChunkDeletion":  false,
+      "wormGracePeriodSeconds":  "0",
+      "wormRetentionTimeSeconds":  "0"
+    }
+  ]
+}
+create bucket under /buckets
+created bucket gap-final-security
+bucket owner: platform-local
+init_exit_status=0
+..........                                                               [100%]
+10 passed, 20 deselected in 4.28s
+contract_exit_status=0
+Presigned SigV4 PUT and GET passed; SHA-256 6b74231eda8c98cbfc8bd5140816e6b8db6a18b24fa535448f297132d3a54e41
+presign_exit_status=0
+image_id=sha256:2c05e29b20d6f1e68fceaa0817c7c26f220262a13bc2971f23d87e4e840d8072
+container_id=4b5412e57473acb4a359c2547d58fd7dbce7f6fb94b641b41c8531a64f09f1f2
+final_status=0

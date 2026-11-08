@@ -1,0 +1,3 @@
+npm inventory: 264 identities; 27 absent optional packages; private root ai-platform-ui@2.0.0 excluded
+Collected installed optional artifact: @emnapi/runtime@1.11.3
+Collected installed optional artifact: @img/sharp-wasm32@0.35.5

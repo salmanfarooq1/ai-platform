@@ -1,0 +1,10 @@
+prometheus, version 3.15.1 (branch: HEAD, revision: bae3eced0a5369e050e83ea73bc381d7c4b1a719)
+  build user:       root@03bc6b0f3ef7
+  build date:       20261021-13:31:17
+  go version:       go1.27.3
+  platform:         linux/amd64
+  tags:             netgo,builtinassets
+2026-10-21T14:04:11.99362206Z {"io.prometheus.image.variant":"busybox","maintainer":"The Prometheus Authors <prometheus-developers@googlegroups.com>","org.opencontainers.image.authors":"The Prometheus Authors","org.opencontainers.image.description":"The Prometheus monitoring system and time series database","org.opencontainers.image.documentation":"https://prometheus.io/docs","org.opencontainers.image.licenses":"Apache License 2.0","org.opencontainers.image.source":"https://github.com/prometheus/prometheus","org.opencontainers.image.title":"Prometheus","org.opencontainers.image.url":"https://github.com/prometheus/prometheus","org.opencontainers.image.vendor":"Prometheus"}
+Checking /etc/prometheus/prometheus.yml
+ SUCCESS: /etc/prometheus/prometheus.yml is valid prometheus config file syntax
+

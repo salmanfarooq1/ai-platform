@@ -1,0 +1,8 @@
+adapters/pg_knowledge.py:46:        # Compatibility name: this is Postgres full-text ts_rank, not true BM25.
+adapters/pg_knowledge.py:66:                       ts_rank(fts_vector, $1) AS bm25_score
+adapters/pg_knowledge.py:70:                ORDER BY bm25_score DESC
+adapters/pg_knowledge.py:84:                "bm25_score": r["bm25_score"],  # Public compatibility key for ts_rank.
+docs/adr/0005-ports-and-adapters.md:51:`KnowledgeStore.search_bm25` uses Postgres full-text `ts_rank` ranking. It is keyword search, not true BM25. The port and public `bm25_only` and `bm25_score` names remain for compatibility. Valkey Search replaces the local Redis Stack implementation behind the existing `CachePort`.
+docs/architecture.md:104:- **Search** is hybrid: keyword search (Postgres full-text `ts_rank`) and pgvector similarity, merged with reciprocal rank fusion. An optional cross-encoder reranker runs where the image includes it. The names `bm25_only` and `bm25_score` remain compatibility values; this ranking is not true BM25. Answers carry citations and a confidence level, and a low score refuses to answer.
+api/services/retriever.py:21:    # Compatibility names: the keyword leg uses Postgres full-text ts_rank ranking.
+keyword_naming_match_exit_status=0

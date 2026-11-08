@@ -1,0 +1,4 @@
+Final SeaweedFS artifact signed URL recheck; non-default credentials loaded from the owned container environment and omitted.
+Presigned SigV4 PUT and GET passed; SHA-256 6b74231eda8c98cbfc8bd5140816e6b8db6a18b24fa535448f297132d3a54e41
+Presigned changed-key and expired GET requests both denied with HTTP 403
+exit_status=0

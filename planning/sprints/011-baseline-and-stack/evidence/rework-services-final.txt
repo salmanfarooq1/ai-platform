@@ -1,0 +1,6 @@
+ Container sprint011-postgres  Starting
+ Container sprint011-redis  Starting
+ Container sprint011-redis  Started
+ Container sprint011-postgres  Started
+postgres 15432 /var/run/postgresql:5432 - accepting connections
+redis 16379 PONG

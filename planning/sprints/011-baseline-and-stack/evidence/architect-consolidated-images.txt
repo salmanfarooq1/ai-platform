@@ -1,0 +1,840 @@
+command=scripts/supply_chain/image_scan.sh
+config=scripts/supply_chain/grype.yaml; ignore=[]; only-fixed; fail-on critical
+DB auto-update disabled; same valid captured database used for component scans
+Application:         grype
+Version:             0.119.0
+BuildDate:           2026-09-17T16:17:07Z
+GitCommit:           b6f5194537747ee7f705f4113069ac9eb269919f
+GitDescription:      v0.119.0
+Platform:            linux/amd64
+GoVersion:           go1.26.3
+Compiler:            gc
+Syft Version:        v1.52.0
+Supported DB Schema: 6
+Path:      /home/ubuntu/.cache/grype/db/6/vulnerability.db
+Schema:    v6.1.10
+Built:     2026-10-21T06:31:02Z
+From:      https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-21T00:28:41Z_1792564262.tar.zst?checksum=sha256%3Afe51ed05fd0bf2e0642a362b75b245caf0da0eabb92b26a543e061f9873ec2ba
+Status:    valid
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 4.68kB 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#2 DONE 2.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 279B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [builder 1/6] FROM docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#5 resolve docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89 0.1s done
+#5 DONE 0.1s
+
+#4 [internal] load build context
+#4 transferring context: 172.88MB 5.0s
+#4 transferring context: 187.48MB 5.8s done
+#4 DONE 5.8s
+
+#6 [builder 2/6] RUN pip install --no-cache-dir pipx &&     pipx install poetry==2.3.3
+#6 CACHED
+
+#7 [builder 3/6] WORKDIR /app
+#7 CACHED
+
+#8 [builder 4/6] COPY pyproject.toml poetry.lock ./
+#8 DONE 0.6s
+
+#9 [builder 5/6] RUN --mount=type=cache,id=gap-poetry,target=/root/.cache/pypoetry     if [ "false" = "true" ]; then         poetry install --only main,rerank --no-root;     else         poetry install --only main --no-root;     fi
+#9 3.978 Creating virtualenv ai-platform in /app/.venv
+#9 5.047 Installing dependencies from lock file
+#9 6.221 
+#9 6.221 Package operations: 129 installs, 0 updates, 0 removals
+#9 6.221 
+#9 6.222   - Installing aiohappyeyeballs (2.6.1)
+#9 6.224   - Installing aiohttp (3.14.3)
+#9 6.227   - Installing aiokafka (0.14.0)
+#9 6.232   - Installing aiosignal (1.4.0)
+#9 6.971   - Installing alembic (1.20.0)
+#9 7.015   - Installing annotated-doc (0.0.4)
+#9 7.356   - Installing annotated-types (0.7.0)
+#9 7.657   - Installing anyio (4.14.2)
+#9 7.831   - Installing asgiref (3.12.1)
+#9 8.080   - Installing async-timeout (5.0.1)
+#9 8.182   - Installing asyncpg (0.31.0)
+#9 8.186   - Installing attrs (25.4.0)
+#9 8.231   - Installing beautifulsoup4 (4.15.0)
+#9 8.261   - Installing boto3 (1.43.108)
+#9 8.575   - Installing botocore (1.43.108)
+#9 8.757   - Installing certifi (2026.10.19)
+#9 9.111   - Installing cffi (2.1.0)
+#9 9.148   - Installing charset-normalizer (3.4.7)
+#9 9.655   - Installing click (8.3.3)
+#9 9.750   - Installing cryptography (50.0.2)
+#9 10.16   - Installing distro (1.9.0)
+#9 10.17   - Installing fastapi (0.137.0)
+#9 10.46   - Installing fastuuid (0.14.0)
+#9 10.94   - Installing filelock (3.29.4)
+#9 11.05   - Installing frozenlist (1.8.0)
+#9 11.56   - Installing fsspec (2026.4.0)
+#9 11.57   - Installing googleapis-common-protos (1.75.5)
+#9 12.15   - Installing groq (1.5.0)
+#9 12.38   - Installing h11 (0.16.0)
+#9 12.88   - Installing h2 (4.4.1)
+#9 13.37   - Installing hf-xet (1.5.1)
+#9 13.39   - Installing hiredis (3.4.0)
+#9 13.53   - Installing hpack (4.2.0)
+#9 14.02   - Installing httpcore (1.0.9)
+#9 14.02   - Installing httpcore2 (2.9.1)
+#9 14.37   - Installing httpx (0.28.1)
+#9 14.50   - Installing httpx2 (2.9.1)
+#9 14.76   - Installing huggingface-hub (1.16.1)
+#9 14.83   - Installing hyperframe (6.1.0)
+#9 14.94   - Installing idna (3.18)
+#9 15.10   - Installing importlib-metadata (8.9.0)
+#9 15.22   - Installing jinja2 (3.1.6)
+#9 15.43   - Installing jiter (0.14.0)
+#9 15.83   - Installing jmespath (1.1.0)
+#9 15.89   - Installing jsonpatch (1.33)
+#9 16.22   - Installing jsonpointer (3.1.1)
+#9 16.33   - Installing jsonschema (4.26.0)
+#9 16.39   - Installing jsonschema-specifications (2025.9.1)
+#9 16.46   - Installing langchain-core (1.6.6)
+#9 16.71   - Installing langchain-litellm (0.7.2)
+#9 16.76   - Installing langchain-protocol (0.0.18)
+#9 17.16   - Installing langgraph (1.2.10)
+#9 17.18   - Installing langgraph-checkpoint (4.1.1)
+#9 17.75   - Installing langgraph-prebuilt (1.1.0)
+#9 17.99   - Installing langgraph-sdk (0.4.2)
+#9 18.07   - Installing langsmith (0.10.15)
+#9 18.19   - Installing litellm (1.103.2)
+#9 18.52   - Installing mako (1.4.3)
+#9 19.25   - Installing markdown-it-py (4.2.0)
+#9 20.40   - Installing markupsafe (3.0.3)
+#9 20.80   - Installing mcp (2.2.0)
+#9 21.73   - Installing mcp-types (2.2.0)
+#9 22.28   - Installing mdurl (0.1.2)
+#9 22.67   - Installing multidict (6.7.1)
+#9 22.79   - Installing numpy (2.4.2)
+#9 23.19   - Installing openai (2.43.0)
+#9 27.91   - Installing opentelemetry-api (1.45.0)
+#9 28.83   - Installing opentelemetry-exporter-http-transport (0.66b0)
+#9 29.38   - Installing opentelemetry-exporter-otlp-common (0.66b0)
+#9 29.85   - Installing opentelemetry-exporter-otlp-proto-common (1.45.0)
+#9 30.94   - Installing opentelemetry-exporter-otlp-proto-http (1.45.0)
+#9 31.50   - Installing opentelemetry-exporter-prometheus (0.66b0)
+#9 31.96   - Installing opentelemetry-instrumentation (0.66b0)
+#9 32.43   - Installing opentelemetry-instrumentation-asgi (0.66b0)
+#9 32.86   - Installing opentelemetry-instrumentation-fastapi (0.66b0)
+#9 33.37   - Installing opentelemetry-proto (1.45.0)
+#9 34.26   - Installing opentelemetry-sdk (1.45.0)
+#9 34.51   - Installing opentelemetry-semantic-conventions (0.66b0)
+#9 35.34   - Installing opentelemetry-util-http (0.66b0)
+#9 35.73   - Installing orjson (3.11.9)
+#9 36.15   - Installing ormsgpack (1.12.2)
+#9 36.19   - Installing packaging (26.0)
+#9 36.60   - Installing pgvector (0.4.2)
+#9 36.68   - Installing prometheus-client (0.26.0)
+#9 37.34   - Installing propcache (0.4.1)
+#9 37.43   - Installing protobuf (7.36.2)
+#9 37.82   - Installing psycopg2-binary (2.9.11)
+#9 37.84   - Installing pycparser (3.0)
+#9 38.26   - Installing pydantic (2.13.4)
+#9 38.35   - Installing pydantic-core (2.46.4)
+#9 39.24   - Installing pydantic-settings (2.15.0)
+#9 39.33   - Installing pygments (2.20.0)
+#9 39.38   - Installing pyjwt (2.15.1)
+#9 39.49   - Installing python-dateutil (2.9.0.post0)
+#9 39.74   - Installing python-dotenv (1.2.2)
+#9 39.97   - Installing python-multipart (0.0.32)
+#9 40.13   - Installing pyyaml (6.0.3)
+#9 40.35   - Installing redis (8.1.0)
+#9 40.79   - Installing referencing (0.37.0)
+#9 41.11   - Installing regex (2026.5.9)
+#9 41.68   - Installing requests (2.34.2)
+#9 41.93   - Installing requests-toolbelt (1.0.0)
+#9 42.30   - Installing rich (14.3.4)
+#9 42.42   - Installing rpds-py (2026.5.1)
+#9 43.00   - Installing s3transfer (0.19.2)
+#9 43.39   - Installing shellingham (1.5.4)
+#9 43.40   - Installing six (1.17.0)
+#9 43.55   - Installing sniffio (1.3.1)
+#9 43.67   - Installing soupsieve (2.9)
+#9 43.71   - Installing sqlalchemy (2.1.3)
+#9 43.81   - Installing sse-starlette (3.4.8)
+#9 44.19   - Installing starlette (1.3.1)
+#9 44.30   - Installing tenacity (9.1.4)
+#9 44.72   - Installing tiktoken (0.13.0)
+#9 44.80   - Installing tokenizers (0.22.2)
+#9 45.54   - Installing tqdm (4.68.3)
+#9 46.26   - Installing truststore (0.10.4)
+#9 46.32   - Installing typer (0.25.1)
+#9 46.53   - Installing typing-extensions (4.15.0)
+#9 46.82   - Installing typing-inspection (0.4.2)
+#9 46.85   - Installing urllib3 (2.7.0)
+#9 47.09   - Installing uuid-utils (0.17.0)
+#9 47.30   - Installing uvicorn (0.49.0)
+#9 47.38   - Installing websockets (15.0.1)
+#9 47.47   - Installing wrapt (2.5.0)
+#9 48.22   - Installing xxhash (3.8.1)
+#9 48.27   - Installing yarl (1.22.0)
+#9 48.31   - Installing zipp (4.1.0)
+#9 48.92   - Installing zstandard (0.25.0)
+#9 DONE 50.8s
+
+#10 [builder 6/6] COPY . .
+#10 DONE 1.1s
+
+#11 [runtime  2/14] WORKDIR /app
+#11 CACHED
+
+#12 [runtime  3/14] COPY --from=builder /app/.venv .venv
+#12 DONE 9.7s
+
+#13 [runtime  4/14] COPY --from=builder /app/api api/
+#13 DONE 0.5s
+
+#14 [runtime  5/14] COPY --from=builder /app/core core/
+#14 DONE 0.2s
+
+#15 [runtime  6/14] COPY --from=builder /app/gateway gateway/
+#15 DONE 0.2s
+
+#16 [runtime  7/14] COPY --from=builder /app/ports ports/
+#16 DONE 0.2s
+
+#17 [runtime  8/14] COPY --from=builder /app/adapters adapters/
+#17 DONE 0.2s
+
+#18 [runtime  9/14] COPY --from=builder /app/workers workers/
+#18 DONE 0.2s
+
+#19 [runtime 10/14] COPY --from=builder /app/sandbox_agent sandbox_agent/
+#19 DONE 0.1s
+
+#20 [runtime 11/14] COPY --from=builder /app/config.py config.py
+#20 DONE 0.2s
+
+#21 [runtime 12/14] COPY --from=builder /app/alembic.ini alembic.ini
+#21 DONE 0.1s
+
+#22 [runtime 13/14] COPY --from=builder /app/migrations migrations/
+#22 DONE 0.2s
+
+#23 [runtime 14/14] COPY --from=builder /app/data data/
+#23 DONE 0.3s
+
+#24 exporting to image
+#24 exporting layers
+#24 exporting layers 37.6s done
+#24 exporting manifest sha256:2239329f9da24b8d69a6a09d71dfb2296e2d958e300c27461e2253e2dba35639 0.0s done
+#24 exporting config sha256:98262c9eb1bbd015b360cc69e63566c9626632493d8e25605219a2bf43064cc4 0.0s done
+#24 exporting attestation manifest sha256:b454bc6d785ebe065993439e0279f4c927f0b87b8c93f462094cb0859f567c36
+#24 exporting attestation manifest sha256:b454bc6d785ebe065993439e0279f4c927f0b87b8c93f462094cb0859f567c36 0.1s done
+#24 exporting manifest list sha256:d98e078cd3ed24079f7623a6a3ce7e6e5df441b313141907e9af480592f15989 0.0s done
+#24 naming to docker.io/library/gap-supply-chain:scan done
+#24 unpacking to docker.io/library/gap-supply-chain:scan
+#24 unpacking to docker.io/library/gap-supply-chain:scan 13.2s done
+#24 DONE 51.1s
+Scanning docker:gap-supply-chain:scan
+Image gate passed: docker:gap-supply-chain:scan
+#1 [internal] load local bake definitions
+#1 reading from stdin 370B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.82kB 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+#3 DONE 1.7s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 279B done
+#4 DONE 0.0s
+
+#5 [4/8] ADD --checksum=sha256:9c82c86f051f3372445ecdbae5068ccc39dbc423ba8f779eaa84549fef1cfc77 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libcrypto3-3.5.9-r0.apk
+#5 DONE 0.0s
+
+#6 [6/8] ADD --checksum=sha256:b7e30bda67ab5eeadf45ebb1e745f3ca685a84b89477ae8b487bc7c5275fd27e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/openssl-3.5.9-r0.apk /tmp/security-upgrade/aarch64/openssl-3.5.9-r0.apk
+#6 DONE 0.0s
+
+#7 [5/8] ADD --checksum=sha256:b5ad11f5955b3b7ddfd8c32e8c1fdd79878d208bb4dfa9bbd8f35ddc59187242 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libssl3-3.5.9-r0.apk
+#7 DONE 0.0s
+
+#8 [3/8] ADD --checksum=sha256:80332be2dcd7a9a0408a1eeca8efd4b66adf8f79d1e99d7022d3be4a34433c4a https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/openssl-3.5.9-r0.apk /tmp/security-upgrade/x86_64/openssl-3.5.9-r0.apk
+#8 DONE 0.0s
+
+#9 [7/8] ADD --checksum=sha256:cdb3762116994f767cd1da423fa8004bd36b2e3802e3a1343786a40f00a5030e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libssl3-3.5.9-r0.apk
+#9 DONE 0.0s
+
+#10 [2/8] ADD --checksum=sha256:3b0bd7aaac36d49216f47d025f303dafb6da8d05bd258f71900d3b6156d36012 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libcrypto3-3.5.9-r0.apk
+#10 DONE 0.0s
+
+#11 [1/8] FROM docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+#11 resolve docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837 0.1s done
+#11 DONE 0.1s
+
+#12 [5/8] ADD --checksum=sha256:b5ad11f5955b3b7ddfd8c32e8c1fdd79878d208bb4dfa9bbd8f35ddc59187242 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libssl3-3.5.9-r0.apk
+#12 CACHED
+
+#13 [6/8] ADD --checksum=sha256:b7e30bda67ab5eeadf45ebb1e745f3ca685a84b89477ae8b487bc7c5275fd27e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/openssl-3.5.9-r0.apk /tmp/security-upgrade/aarch64/openssl-3.5.9-r0.apk
+#13 CACHED
+
+#14 [7/8] ADD --checksum=sha256:cdb3762116994f767cd1da423fa8004bd36b2e3802e3a1343786a40f00a5030e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libssl3-3.5.9-r0.apk
+#14 CACHED
+
+#15 [2/8] ADD --checksum=sha256:3b0bd7aaac36d49216f47d025f303dafb6da8d05bd258f71900d3b6156d36012 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libcrypto3-3.5.9-r0.apk
+#15 CACHED
+
+#16 [3/8] ADD --checksum=sha256:80332be2dcd7a9a0408a1eeca8efd4b66adf8f79d1e99d7022d3be4a34433c4a https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/openssl-3.5.9-r0.apk /tmp/security-upgrade/x86_64/openssl-3.5.9-r0.apk
+#16 CACHED
+
+#17 [4/8] ADD --checksum=sha256:9c82c86f051f3372445ecdbae5068ccc39dbc423ba8f779eaa84549fef1cfc77 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libcrypto3-3.5.9-r0.apk
+#17 CACHED
+
+#18 [8/8] RUN set -eu;     arch="$(apk --print-arch)";     case "$arch" in x86_64|aarch64) ;; *) echo "Unsupported APK architecture" >&2; exit 1 ;; esac;     cd /tmp/security-upgrade;     apk add --no-network --no-cache "$arch/"*.apk;     cd /;     rm -rf /tmp/security-upgrade
+#18 CACHED
+
+#19 exporting to image
+#19 exporting layers 0.0s done
+#19 exporting manifest sha256:bf8b9b6e5a1001cc99726979b4dfb6e2da945a979d18fdfa68c5695b77aaee8d done
+#19 exporting config sha256:59da7dff9d974098e8423c5640ddab4023bb4bf8c627a2f2da73fc8ba9160d3a done
+#19 exporting attestation manifest sha256:e3405e57b872f4239d31344833c3bcbf8132536919f4a909fb4e5669ffdf23a0
+#19 exporting attestation manifest sha256:e3405e57b872f4239d31344833c3bcbf8132536919f4a909fb4e5669ffdf23a0 0.0s done
+#19 exporting manifest list sha256:747b31802df78602da6b289fdf536e2b718bff0a918b24cf99d4a11cfa707cd7 0.0s done
+#19 naming to docker.io/library/gap-supply-chain-kafka:latest done
+#19 unpacking to docker.io/library/gap-supply-chain-kafka:latest 0.1s done
+#19 DONE 0.5s
+
+#20 resolving provenance for metadata file
+#20 DONE 0.0s
+ kafka  Built
+Scanning docker:gap-supply-chain-kafka
+Image gate passed: docker:gap-supply-chain-kafka
+#1 [internal] load local bake definitions
+#1 reading from stdin 657B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.82kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+#3 DONE 0.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 279B done
+#4 DONE 0.0s
+
+#5 [2/8] ADD --checksum=sha256:3b0bd7aaac36d49216f47d025f303dafb6da8d05bd258f71900d3b6156d36012 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libcrypto3-3.5.9-r0.apk
+#5 DONE 0.0s
+
+#6 [5/8] ADD --checksum=sha256:b5ad11f5955b3b7ddfd8c32e8c1fdd79878d208bb4dfa9bbd8f35ddc59187242 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libssl3-3.5.9-r0.apk
+#6 DONE 0.0s
+
+#7 [4/8] ADD --checksum=sha256:9c82c86f051f3372445ecdbae5068ccc39dbc423ba8f779eaa84549fef1cfc77 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libcrypto3-3.5.9-r0.apk
+#7 DONE 0.0s
+
+#8 [7/8] ADD --checksum=sha256:cdb3762116994f767cd1da423fa8004bd36b2e3802e3a1343786a40f00a5030e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libssl3-3.5.9-r0.apk
+#8 DONE 0.0s
+
+#9 [3/8] ADD --checksum=sha256:80332be2dcd7a9a0408a1eeca8efd4b66adf8f79d1e99d7022d3be4a34433c4a https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/openssl-3.5.9-r0.apk /tmp/security-upgrade/x86_64/openssl-3.5.9-r0.apk
+#9 DONE 0.0s
+
+#10 [6/8] ADD --checksum=sha256:b7e30bda67ab5eeadf45ebb1e745f3ca685a84b89477ae8b487bc7c5275fd27e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/openssl-3.5.9-r0.apk /tmp/security-upgrade/aarch64/openssl-3.5.9-r0.apk
+#10 DONE 0.0s
+
+#11 [1/8] FROM docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+#11 resolve docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837 0.1s done
+#11 DONE 0.1s
+
+#12 [3/8] ADD --checksum=sha256:80332be2dcd7a9a0408a1eeca8efd4b66adf8f79d1e99d7022d3be4a34433c4a https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/openssl-3.5.9-r0.apk /tmp/security-upgrade/x86_64/openssl-3.5.9-r0.apk
+#12 CACHED
+
+#13 [4/8] ADD --checksum=sha256:9c82c86f051f3372445ecdbae5068ccc39dbc423ba8f779eaa84549fef1cfc77 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libcrypto3-3.5.9-r0.apk
+#13 CACHED
+
+#14 [5/8] ADD --checksum=sha256:b5ad11f5955b3b7ddfd8c32e8c1fdd79878d208bb4dfa9bbd8f35ddc59187242 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libssl3-3.5.9-r0.apk
+#14 CACHED
+
+#15 [6/8] ADD --checksum=sha256:b7e30bda67ab5eeadf45ebb1e745f3ca685a84b89477ae8b487bc7c5275fd27e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/openssl-3.5.9-r0.apk /tmp/security-upgrade/aarch64/openssl-3.5.9-r0.apk
+#15 CACHED
+
+#16 [7/8] ADD --checksum=sha256:cdb3762116994f767cd1da423fa8004bd36b2e3802e3a1343786a40f00a5030e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libssl3-3.5.9-r0.apk
+#16 CACHED
+
+#17 [2/8] ADD --checksum=sha256:3b0bd7aaac36d49216f47d025f303dafb6da8d05bd258f71900d3b6156d36012 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libcrypto3-3.5.9-r0.apk
+#17 CACHED
+
+#18 [8/8] RUN set -eu;     arch="$(apk --print-arch)";     case "$arch" in x86_64|aarch64) ;; *) echo "Unsupported APK architecture" >&2; exit 1 ;; esac;     cd /tmp/security-upgrade;     apk add --no-network --no-cache "$arch/"*.apk;     cd /;     rm -rf /tmp/security-upgrade
+#18 CACHED
+
+#19 exporting to image
+#19 exporting layers 0.0s done
+#19 exporting manifest sha256:bf8b9b6e5a1001cc99726979b4dfb6e2da945a979d18fdfa68c5695b77aaee8d done
+#19 exporting config sha256:59da7dff9d974098e8423c5640ddab4023bb4bf8c627a2f2da73fc8ba9160d3a done
+#19 exporting attestation manifest sha256:f8c6afa514114f54019a58890ad3d5b324c4028c09145507aa6dbc7796d5e2d4
+#19 exporting attestation manifest sha256:f8c6afa514114f54019a58890ad3d5b324c4028c09145507aa6dbc7796d5e2d4 0.1s done
+#19 exporting manifest list sha256:c0d729329ba6b1bd30a1fc7d936a11bd1e33d5ae49f508224e11e3896f3ee05e 0.0s done
+#19 naming to docker.io/library/gap-supply-chain-kafka-topics:latest done
+#19 unpacking to docker.io/library/gap-supply-chain-kafka-topics:latest
+#19 unpacking to docker.io/library/gap-supply-chain-kafka-topics:latest 0.1s done
+#19 DONE 0.4s
+
+#20 resolving provenance for metadata file
+#20 DONE 0.0s
+ kafka-topics  Built
+Scanning docker:gap-supply-chain-kafka-topics
+Image gate passed: docker:gap-supply-chain-kafka-topics
+#1 [internal] load local bake definitions
+#1 reading from stdin 374B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.10kB 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132
+#3 DONE 1.7s
+
+#4 [internal] load metadata for docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#4 DONE 1.7s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 279B done
+#5 DONE 0.0s
+
+#6 [security-build 2/7] ADD --checksum=sha256:f94b72d6dda09b5e509f09120a7eeede75fbef26c01c674418f089c8da21fc19 https://proxy.golang.org/github.com/ollama/ollama/@v/v0.40.7.zip /tmp/source.zip
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 160B 0.0s done
+#7 DONE 0.1s
+
+#8 [stage-1 1/7] FROM docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#8 resolve docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b 0.1s done
+#8 DONE 0.1s
+
+#9 [security-build 1/7] FROM docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132
+#9 resolve docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132 0.1s done
+#9 DONE 0.1s
+
+#10 [stage-1 4/7] COPY --from=security-build /out/notices /usr/share/doc/ollama-security/notices
+#10 CACHED
+
+#11 [stage-1 3/7] COPY --from=security-build /out/build-info.txt /usr/share/doc/ollama-security/build-info.txt
+#11 CACHED
+
+#12 [stage-1 6/7] COPY docker/ollama/security.go.mod /usr/share/doc/ollama-security/go.mod
+#12 CACHED
+
+#13 [security-build 5/7] COPY docker/ollama/security.go.mod go.mod
+#13 CACHED
+
+#14 [stage-1 5/7] COPY --from=security-build /src/github.com/ollama/ollama@v0.40.7/LICENSE /usr/share/doc/ollama-security/UPSTREAM-LICENSE
+#14 CACHED
+
+#15 [security-build 3/7] RUN python3 -c "import zipfile; z=zipfile.ZipFile('/tmp/source.zip'); z.extractall('/src')"
+#15 CACHED
+
+#16 [security-build 7/7] RUN --mount=type=cache,id=gap-ollama-go-mod,target=/go/pkg/mod     --mount=type=cache,id=gap-ollama-go-build,target=/root/.cache/go-build     sha256sum go.mod go.sum > /tmp/input-locks.sha256 &&     go mod download && sha256sum -c /tmp/input-locks.sha256 && go mod verify &&     go build -mod=readonly -trimpath -buildmode=pie       -ldflags='-w -s -X github.com/ollama/ollama/version.Version=0.40.7' -o /out/ollama . &&     sha256sum -c /tmp/input-locks.sha256 &&     go version -m /out/ollama > /out/build-info.txt &&     mkdir -p /out/notices && cp /usr/local/go/LICENSE /out/notices/Go-LICENSE &&     for module in net crypto mod sync sys term text; do       directory=$(go list -m -f '{{.Dir}}' golang.org/x/$module);       cp "$directory/LICENSE" "/out/notices/golang.org-x-$module-LICENSE";     done
+#16 CACHED
+
+#17 [security-build 2/7] ADD --checksum=sha256:f94b72d6dda09b5e509f09120a7eeede75fbef26c01c674418f089c8da21fc19 https://proxy.golang.org/github.com/ollama/ollama/@v/v0.40.7.zip /tmp/source.zip
+#17 CACHED
+
+#18 [stage-1 2/7] COPY --from=security-build /out/ollama /usr/bin/ollama
+#18 CACHED
+
+#19 [security-build 4/7] WORKDIR /src/github.com/ollama/ollama@v0.40.7
+#19 CACHED
+
+#20 [security-build 6/7] COPY docker/ollama/security.go.sum go.sum
+#20 CACHED
+
+#21 [stage-1 7/7] COPY docker/ollama/security.go.sum /usr/share/doc/ollama-security/go.sum
+#21 CACHED
+
+#22 exporting to image
+#22 exporting layers 0.0s done
+#22 exporting manifest sha256:888f56c100b6a73869a16663931463a81581b1d9d004e9274db28b15358eecfe done
+#22 exporting config sha256:6cf9d43383fb95ae43abe82e1228b3f18737ba8902a196df6426cd8f231dfbe3 done
+#22 exporting attestation manifest sha256:6f3262eb97a4eff1ea4025a3f0e687362d6290d96bdad3c4774dec0e70eb33ff 0.1s done
+#22 exporting manifest list sha256:d0e8c202942f8189d44b23f9aaefce7ac615a880937ea0a93e7234d8bfad5607
+#22 exporting manifest list sha256:d0e8c202942f8189d44b23f9aaefce7ac615a880937ea0a93e7234d8bfad5607 0.0s done
+#22 naming to docker.io/library/gap-supply-chain-ollama:latest done
+#22 unpacking to docker.io/library/gap-supply-chain-ollama:latest 0.0s done
+#22 DONE 0.3s
+
+#23 resolving provenance for metadata file
+#23 DONE 0.0s
+ ollama  Built
+Scanning docker:gap-supply-chain-ollama
+Image gate passed: docker:gap-supply-chain-ollama
+#1 [internal] load local bake definitions
+#1 reading from stdin 658B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.10kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132
+#3 ...
+
+#4 [internal] load metadata for docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#4 DONE 1.7s
+
+#3 [internal] load metadata for docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132
+#3 DONE 2.0s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 279B done
+#5 DONE 0.0s
+
+#6 [security-build 2/7] ADD --checksum=sha256:f94b72d6dda09b5e509f09120a7eeede75fbef26c01c674418f089c8da21fc19 https://proxy.golang.org/github.com/ollama/ollama/@v/v0.40.7.zip /tmp/source.zip
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 160B done
+#7 DONE 0.0s
+
+#8 [stage-1 1/7] FROM docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#8 resolve docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#8 resolve docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b 0.1s done
+#8 DONE 0.1s
+
+#9 [security-build 1/7] FROM docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132
+#9 resolve docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132 0.1s done
+#9 DONE 0.1s
+
+#10 [stage-1 4/7] COPY --from=security-build /out/notices /usr/share/doc/ollama-security/notices
+#10 CACHED
+
+#11 [security-build 3/7] RUN python3 -c "import zipfile; z=zipfile.ZipFile('/tmp/source.zip'); z.extractall('/src')"
+#11 CACHED
+
+#12 [security-build 6/7] COPY docker/ollama/security.go.sum go.sum
+#12 CACHED
+
+#13 [security-build 7/7] RUN --mount=type=cache,id=gap-ollama-go-mod,target=/go/pkg/mod     --mount=type=cache,id=gap-ollama-go-build,target=/root/.cache/go-build     sha256sum go.mod go.sum > /tmp/input-locks.sha256 &&     go mod download && sha256sum -c /tmp/input-locks.sha256 && go mod verify &&     go build -mod=readonly -trimpath -buildmode=pie       -ldflags='-w -s -X github.com/ollama/ollama/version.Version=0.40.7' -o /out/ollama . &&     sha256sum -c /tmp/input-locks.sha256 &&     go version -m /out/ollama > /out/build-info.txt &&     mkdir -p /out/notices && cp /usr/local/go/LICENSE /out/notices/Go-LICENSE &&     for module in net crypto mod sync sys term text; do       directory=$(go list -m -f '{{.Dir}}' golang.org/x/$module);       cp "$directory/LICENSE" "/out/notices/golang.org-x-$module-LICENSE";     done
+#13 CACHED
+
+#14 [security-build 4/7] WORKDIR /src/github.com/ollama/ollama@v0.40.7
+#14 CACHED
+
+#15 [security-build 5/7] COPY docker/ollama/security.go.mod go.mod
+#15 CACHED
+
+#16 [stage-1 5/7] COPY --from=security-build /src/github.com/ollama/ollama@v0.40.7/LICENSE /usr/share/doc/ollama-security/UPSTREAM-LICENSE
+#16 CACHED
+
+#17 [security-build 2/7] ADD --checksum=sha256:f94b72d6dda09b5e509f09120a7eeede75fbef26c01c674418f089c8da21fc19 https://proxy.golang.org/github.com/ollama/ollama/@v/v0.40.7.zip /tmp/source.zip
+#17 CACHED
+
+#18 [stage-1 3/7] COPY --from=security-build /out/build-info.txt /usr/share/doc/ollama-security/build-info.txt
+#18 CACHED
+
+#19 [stage-1 2/7] COPY --from=security-build /out/ollama /usr/bin/ollama
+#19 CACHED
+
+#20 [stage-1 6/7] COPY docker/ollama/security.go.mod /usr/share/doc/ollama-security/go.mod
+#20 CACHED
+
+#21 [stage-1 7/7] COPY docker/ollama/security.go.sum /usr/share/doc/ollama-security/go.sum
+#21 CACHED
+
+#22 exporting to image
+#22 exporting layers 0.0s done
+#22 exporting manifest sha256:888f56c100b6a73869a16663931463a81581b1d9d004e9274db28b15358eecfe done
+#22 exporting config sha256:6cf9d43383fb95ae43abe82e1228b3f18737ba8902a196df6426cd8f231dfbe3 done
+#22 exporting attestation manifest sha256:b93e2e304e0508dfa02d820525d8fa046a0354d01dd496c3493a638712f50905 0.1s done
+#22 exporting manifest list sha256:63479a219a09c617f5ab8fb01b79195859206b44c6c71e770c3fc486fc3fdae2
+#22 exporting manifest list sha256:63479a219a09c617f5ab8fb01b79195859206b44c6c71e770c3fc486fc3fdae2 0.0s done
+#22 naming to docker.io/library/gap-supply-chain-ollama-pull:latest done
+#22 unpacking to docker.io/library/gap-supply-chain-ollama-pull:latest 0.1s done
+#22 DONE 0.4s
+
+#23 resolving provenance for metadata file
+#23 DONE 0.1s
+ ollama-pull  Built
+Scanning docker:gap-supply-chain-ollama-pull
+Image gate passed: docker:gap-supply-chain-ollama-pull
+#1 [internal] load local bake definitions
+#1 reading from stdin 386B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.04kB 0.0s done
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/golang:1.26.9-alpine3.23@sha256:6750308561953d451210ed1a8086d36c8c8bdcbf672d38d9d0d424b8a7a0216c
+#3 DONE 0.1s
+
+#4 [internal] load metadata for docker.io/chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882
+#4 DONE 1.8s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 279B 0.0s done
+#5 DONE 0.0s
+
+#6 [builder 2/7] ADD --checksum=sha256:d7a1ef1072bed62b4d23c0fa160d7cca1ce4013b191081166865651af8e7c10d https://proxy.golang.org/github.com/seaweedfs/seaweedfs/@v/v0.0.0-20260914013155-c5073360007d.zip /tmp/seaweedfs.zip
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 DONE 0.0s
+
+#8 [stage-1 1/3] FROM docker.io/chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882
+#8 resolve docker.io/chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882 0.1s done
+#8 DONE 0.1s
+
+#9 [builder 1/7] FROM docker.io/library/golang:1.26.9-alpine3.23@sha256:6750308561953d451210ed1a8086d36c8c8bdcbf672d38d9d0d424b8a7a0216c
+#9 resolve docker.io/library/golang:1.26.9-alpine3.23@sha256:6750308561953d451210ed1a8086d36c8c8bdcbf672d38d9d0d424b8a7a0216c 0.1s done
+#9 DONE 0.1s
+
+#7 [internal] load build context
+#7 transferring context: 318.07kB 0.0s done
+#7 DONE 0.1s
+
+#10 [builder 5/7] COPY docker/seaweedfs/security.go.mod ./go.mod
+#10 CACHED
+
+#11 [builder 6/7] COPY docker/seaweedfs/security.go.sum ./go.sum
+#11 CACHED
+
+#12 [stage-1 2/3] COPY --from=builder /out/weed /usr/bin/weed
+#12 CACHED
+
+#13 [builder 3/7] RUN unzip -q /tmp/seaweedfs.zip -d /source
+#13 CACHED
+
+#14 [builder 4/7] WORKDIR /source/github.com/seaweedfs/seaweedfs@v0.0.0-20260914013155-c5073360007d
+#14 CACHED
+
+#15 [builder 2/7] ADD --checksum=sha256:d7a1ef1072bed62b4d23c0fa160d7cca1ce4013b191081166865651af8e7c10d https://proxy.golang.org/github.com/seaweedfs/seaweedfs/@v/v0.0.0-20260914013155-c5073360007d.zip /tmp/seaweedfs.zip
+#15 CACHED
+
+#16 [builder 7/7] RUN --mount=type=cache,target=/go/pkg/mod     --mount=type=cache,target=/root/.cache/go-build     sha256sum go.mod go.sum > /tmp/module-inputs.sha256 &&     go mod download -x && go mod verify && sha256sum -c /tmp/module-inputs.sha256 &&     CGO_ENABLED=0 go build -mod=readonly -trimpath       -ldflags="-s -w -extldflags -static -X github.com/seaweedfs/seaweedfs/weed/util/version.COMMIT=c5073360007d"       -o /out/weed ./weed &&     mkdir -p /out/licenses && cp LICENSE /out/licenses/seaweedfs-LICENSE &&     for notice in LICENSE PATENTS NOTICE AUTHORS CONTRIBUTORS; do       if [ -f "/usr/local/go/$notice" ]; then cp "/usr/local/go/$notice" "/out/licenses/go-$notice"; fi;     done &&     for module in crypto mod net sync sys term text tools; do       module_dir="$(go list -mod=readonly -m -f '{{.Dir}}' "golang.org/x/$module")";       for notice in LICENSE PATENTS NOTICE AUTHORS CONTRIBUTORS; do         if [ -f "$module_dir/$notice" ]; then cp "$module_dir/$notice" "/out/licenses/$module-$notice"; fi;       done;     done
+#16 CACHED
+
+#17 [stage-1 3/3] COPY --from=builder /out/licenses /usr/share/licenses/security-rebuild
+#17 CACHED
+
+#18 exporting to image
+#18 exporting layers 0.1s done
+#18 exporting manifest sha256:8d963a5ae2c8074f1eb92062dcb874c42141025080bce44ef2fd7691ff1b8c8a 0.0s done
+#18 exporting config sha256:21ba4e717292f43f7cea80eef7003b8b82bddc4a258a3b5213433cc9b4c83fed 0.0s done
+#18 exporting attestation manifest sha256:15c5823bb195da553651cb7beb18e843d6f5fc30a59c835a1d9a6eff697dfa8d
+#18 exporting attestation manifest sha256:15c5823bb195da553651cb7beb18e843d6f5fc30a59c835a1d9a6eff697dfa8d 0.1s done
+#18 exporting manifest list sha256:bacb5c84e18064a2450c2014d253303af84087df436a406c176327dfa9419984 0.0s done
+#18 naming to docker.io/library/gap-supply-chain-seaweedfs:latest done
+#18 unpacking to docker.io/library/gap-supply-chain-seaweedfs:latest 0.1s done
+#18 DONE 0.4s
+
+#19 resolving provenance for metadata file
+#19 DONE 0.0s
+ seaweedfs  Built
+Scanning docker:gap-supply-chain-seaweedfs
+Image gate passed: docker:gap-supply-chain-seaweedfs
+#1 [internal] load local bake definitions
+#1 reading from stdin 679B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.04kB 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882
+#3 DONE 0.1s
+
+#4 [internal] load metadata for docker.io/library/golang:1.26.9-alpine3.23@sha256:6750308561953d451210ed1a8086d36c8c8bdcbf672d38d9d0d424b8a7a0216c
+#4 DONE 0.1s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 279B done
+#5 DONE 0.0s
+
+#6 [builder 2/7] ADD --checksum=sha256:d7a1ef1072bed62b4d23c0fa160d7cca1ce4013b191081166865651af8e7c10d https://proxy.golang.org/github.com/seaweedfs/seaweedfs/@v/v0.0.0-20260914013155-c5073360007d.zip /tmp/seaweedfs.zip
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 DONE 0.0s
+
+#8 [builder 1/7] FROM docker.io/library/golang:1.26.9-alpine3.23@sha256:6750308561953d451210ed1a8086d36c8c8bdcbf672d38d9d0d424b8a7a0216c
+#8 resolve docker.io/library/golang:1.26.9-alpine3.23@sha256:6750308561953d451210ed1a8086d36c8c8bdcbf672d38d9d0d424b8a7a0216c 0.1s done
+#8 DONE 0.1s
+
+#9 [stage-1 1/3] FROM docker.io/chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882
+#9 resolve docker.io/chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882 0.1s done
+#9 DONE 0.1s
+
+#7 [internal] load build context
+#7 transferring context: 170B done
+#7 DONE 0.0s
+
+#10 [builder 6/7] COPY docker/seaweedfs/security.go.sum ./go.sum
+#10 CACHED
+
+#11 [builder 5/7] COPY docker/seaweedfs/security.go.mod ./go.mod
+#11 CACHED
+
+#12 [builder 2/7] ADD --checksum=sha256:d7a1ef1072bed62b4d23c0fa160d7cca1ce4013b191081166865651af8e7c10d https://proxy.golang.org/github.com/seaweedfs/seaweedfs/@v/v0.0.0-20260914013155-c5073360007d.zip /tmp/seaweedfs.zip
+#12 CACHED
+
+#13 [builder 7/7] RUN --mount=type=cache,target=/go/pkg/mod     --mount=type=cache,target=/root/.cache/go-build     sha256sum go.mod go.sum > /tmp/module-inputs.sha256 &&     go mod download -x && go mod verify && sha256sum -c /tmp/module-inputs.sha256 &&     CGO_ENABLED=0 go build -mod=readonly -trimpath       -ldflags="-s -w -extldflags -static -X github.com/seaweedfs/seaweedfs/weed/util/version.COMMIT=c5073360007d"       -o /out/weed ./weed &&     mkdir -p /out/licenses && cp LICENSE /out/licenses/seaweedfs-LICENSE &&     for notice in LICENSE PATENTS NOTICE AUTHORS CONTRIBUTORS; do       if [ -f "/usr/local/go/$notice" ]; then cp "/usr/local/go/$notice" "/out/licenses/go-$notice"; fi;     done &&     for module in crypto mod net sync sys term text tools; do       module_dir="$(go list -mod=readonly -m -f '{{.Dir}}' "golang.org/x/$module")";       for notice in LICENSE PATENTS NOTICE AUTHORS CONTRIBUTORS; do         if [ -f "$module_dir/$notice" ]; then cp "$module_dir/$notice" "/out/licenses/$module-$notice"; fi;       done;     done
+#13 CACHED
+
+#14 [stage-1 2/3] COPY --from=builder /out/weed /usr/bin/weed
+#14 CACHED
+
+#15 [builder 3/7] RUN unzip -q /tmp/seaweedfs.zip -d /source
+#15 CACHED
+
+#16 [builder 4/7] WORKDIR /source/github.com/seaweedfs/seaweedfs@v0.0.0-20260914013155-c5073360007d
+#16 CACHED
+
+#17 [stage-1 3/3] COPY --from=builder /out/licenses /usr/share/licenses/security-rebuild
+#17 CACHED
+
+#18 exporting to image
+#18 exporting layers 0.0s done
+#18 exporting manifest sha256:8d963a5ae2c8074f1eb92062dcb874c42141025080bce44ef2fd7691ff1b8c8a done
+#18 exporting config sha256:21ba4e717292f43f7cea80eef7003b8b82bddc4a258a3b5213433cc9b4c83fed done
+#18 exporting attestation manifest sha256:a8f86902026b1c220ab36c52460f79b0267b325eb811301bfbc632ab82acfbb0 0.1s done
+#18 exporting manifest list sha256:cceb9b632093c2daf3b9ced1c479c4240f33a8ea4f815f59d4330268d4745221
+#18 exporting manifest list sha256:cceb9b632093c2daf3b9ced1c479c4240f33a8ea4f815f59d4330268d4745221 0.0s done
+#18 naming to docker.io/library/gap-supply-chain-seaweedfs-init:latest done
+#18 unpacking to docker.io/library/gap-supply-chain-seaweedfs-init:latest 0.0s done
+#18 DONE 0.4s
+
+#19 resolving provenance for metadata file
+#19 DONE 0.0s
+ seaweedfs-init  Built
+Scanning docker:gap-supply-chain-seaweedfs-init
+Image gate passed: docker:gap-supply-chain-seaweedfs-init
+#1 [internal] load local bake definitions
+#1 reading from stdin 360B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 4.68kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#3 DONE 1.6s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 279B done
+#4 DONE 0.0s
+
+#5 [builder 1/6] FROM docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#5 resolve docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89 0.0s done
+#5 DONE 0.1s
+
+#6 [internal] load build context
+#6 transferring context: 186.96MB 4.4s done
+#6 DONE 4.4s
+
+#7 [builder 2/6] RUN pip install --no-cache-dir pipx &&     pipx install poetry==2.3.3
+#7 CACHED
+
+#8 [builder 3/6] WORKDIR /app
+#8 CACHED
+
+#9 [builder 4/6] COPY pyproject.toml poetry.lock ./
+#9 CACHED
+
+#10 [builder 5/6] RUN --mount=type=cache,id=gap-poetry,target=/root/.cache/pypoetry     if [ "false" = "true" ]; then         poetry install --only main,rerank --no-root;     else         poetry install --only main --no-root;     fi
+#10 CACHED
+
+#11 [builder 6/6] COPY . .
+#11 DONE 1.2s
+
+#12 [runtime 10/14] COPY --from=builder /app/sandbox_agent sandbox_agent/
+#12 CACHED
+
+#13 [runtime  2/14] WORKDIR /app
+#13 CACHED
+
+#14 [runtime  6/14] COPY --from=builder /app/gateway gateway/
+#14 CACHED
+
+#15 [runtime  8/14] COPY --from=builder /app/adapters adapters/
+#15 CACHED
+
+#16 [runtime 11/14] COPY --from=builder /app/config.py config.py
+#16 CACHED
+
+#17 [runtime  5/14] COPY --from=builder /app/core core/
+#17 CACHED
+
+#18 [runtime  7/14] COPY --from=builder /app/ports ports/
+#18 CACHED
+
+#19 [runtime  9/14] COPY --from=builder /app/workers workers/
+#19 CACHED
+
+#20 [runtime  3/14] COPY --from=builder /app/.venv .venv
+#20 CACHED
+
+#21 [runtime 12/14] COPY --from=builder /app/alembic.ini alembic.ini
+#21 CACHED
+
+#22 [runtime 13/14] COPY --from=builder /app/migrations migrations/
+#22 CACHED
+
+#23 [runtime  4/14] COPY --from=builder /app/api api/
+#23 CACHED
+
+#24 [runtime 14/14] COPY --from=builder /app/data data/
+#24 CACHED
+
+#25 exporting to image
+#25 exporting layers 0.0s done
+#25 exporting manifest sha256:2239329f9da24b8d69a6a09d71dfb2296e2d958e300c27461e2253e2dba35639 done
+#25 exporting config sha256:98262c9eb1bbd015b360cc69e63566c9626632493d8e25605219a2bf43064cc4 done
+#25 exporting attestation manifest sha256:711a7f614802b3062022835ff22f7a78689e49ec1ddb2b5ddbe4d98a0325ecec 0.1s done
+#25 exporting manifest list sha256:c45c096eeb9f68ee1d80d34d339fab623bc72e07d19434adcfe486abdebdb62b
+#25 exporting manifest list sha256:c45c096eeb9f68ee1d80d34d339fab623bc72e07d19434adcfe486abdebdb62b 0.0s done
+#25 naming to docker.io/library/gap-supply-chain-worker:latest done
+#25 unpacking to docker.io/library/gap-supply-chain-worker:latest 0.1s done
+#25 DONE 0.4s
+
+#26 resolving provenance for metadata file
+#26 DONE 0.0s
+ worker  Built
+Scanning docker:gap-supply-chain-worker
+Image gate passed: docker:gap-supply-chain-worker
+docker.io/grafana/grafana@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b: Pulling from grafana/grafana
+Digest: sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b
+Status: Image is up to date for grafana/grafana@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b
+docker.io/grafana/grafana:13.2.4-distroless-slim@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b
+Scanning docker:grafana/grafana:13.2.4-distroless-slim@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b
+Image gate passed: docker:grafana/grafana:13.2.4-distroless-slim@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b
+docker.io/pgvector/pgvector@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972: Pulling from pgvector/pgvector
+Digest: sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
+Status: Image is up to date for pgvector/pgvector@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
+docker.io/pgvector/pgvector:0.8.7-pg16-trixie@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
+Scanning docker:pgvector/pgvector:0.8.7-pg16-trixie@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
+Image gate passed: docker:pgvector/pgvector:0.8.7-pg16-trixie@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
+docker.io/prom/prometheus@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2: Pulling from prom/prometheus
+Digest: sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+Status: Image is up to date for prom/prometheus@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+docker.io/prom/prometheus:v3.15.1@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+Scanning docker:prom/prometheus:v3.15.1@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+Image gate passed: docker:prom/prometheus:v3.15.1@sha256:fa3302279710be2f21a8301ec17a8b4f2301fd829bd113839b3b6b02b6f191a2
+docker.io/valkey/valkey-bundle@sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660: Pulling from valkey/valkey-bundle
+Digest: sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660
+Status: Image is up to date for valkey/valkey-bundle@sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660
+docker.io/valkey/valkey-bundle:9.1.3@sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660
+Scanning docker:valkey/valkey-bundle:9.1.3@sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660
+Image gate passed: docker:valkey/valkey-bundle:9.1.3@sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660
+Image scan completed: status=0
+
+consolidated_exit=0

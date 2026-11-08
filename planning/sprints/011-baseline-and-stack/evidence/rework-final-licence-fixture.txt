@@ -1,0 +1,3 @@
+seeded==1.0.0: licence not approved: BUSL-1.1
+
+seeded fixture exit=1 (expected nonzero)

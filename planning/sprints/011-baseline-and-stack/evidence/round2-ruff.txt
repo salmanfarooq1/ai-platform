@@ -1,0 +1,4 @@
+$ poetry run ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e scripts/docs scripts/supply_chain scripts/ci
+All checks passed!
+
+EXIT_CODE=0

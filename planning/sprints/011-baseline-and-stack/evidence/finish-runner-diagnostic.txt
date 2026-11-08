@@ -1,0 +1,5 @@
+executable /usr/local/bin/python
+asyncpg 0.31.0
+child_import_exit 0
+child_asyncpg 0.31.0
+child_error 

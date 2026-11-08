@@ -1,0 +1,17 @@
+$ poetry check --lock
+All set!
+exit=0
+$ scripts/supply_chain/export_locks.sh (refresh exact exports)
+main.txt: 131 hash-locked requirements
+dev.txt: 166 hash-locked requirements
+hash exports match poetry.lock
+exit=0
+$ scripts/supply_chain/export_locks.sh --check
+main.txt: 131 hash-locked requirements
+dev.txt: 166 hash-locked requirements
+hash exports match poetry.lock
+exit=0
+$ poetry run python scripts/supply_chain/check_exports.py requirements/main.txt requirements/dev.txt
+main.txt: 131 hash-locked requirements
+dev.txt: 166 hash-locked requirements
+exit=0

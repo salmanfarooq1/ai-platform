@@ -1,0 +1,2 @@
+npm inventory: 236 identities; 0 absent optional packages; private root ai-platform-ui@2.0.0 excluded
+licence gate ok: 236 packages

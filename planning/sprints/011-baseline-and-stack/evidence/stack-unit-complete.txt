@@ -1,0 +1,10 @@
+......................F..............                                    [100%]
+=================================== FAILURES ===================================
+______________ test_the_product_docs_have_no_broken_link_or_path _______________
+tests/unit/test_docs_links.py:25: in test_the_product_docs_have_no_broken_link_or_path
+    assert not problems, "\n".join(problems)
+E   AssertionError: CONTRIBUTING.md: path does not exist (`sbom/checks/images/`)
+E   assert not ['CONTRIBUTING.md: path does not exist (`sbom/checks/images/`)']
+=========================== short test summary info ============================
+FAILED tests/unit/test_docs_links.py::test_the_product_docs_have_no_broken_link_or_path
+1 failed, 36 passed in 12.92s

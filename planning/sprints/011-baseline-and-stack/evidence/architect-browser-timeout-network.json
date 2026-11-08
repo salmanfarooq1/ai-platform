@@ -1,0 +1,86 @@
+{
+  "context": "Failed sandbox timeline assertion; trace retained privately in ignored scratch. Headers, cookies, URL queries and response bodies excluded. The trace records one slow reason-code response and one unfinished decision request; resource pressure is separately observed, not inferred proof of a root cause.",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/v1/session",
+      "status": 200,
+      "duration_ms": 48.562999999999995,
+      "timings": {
+        "dns": -1,
+        "connect": -1,
+        "ssl": -1,
+        "send": 0,
+        "wait": 44.391,
+        "receive": 4.172
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/health",
+      "status": 200,
+      "duration_ms": 104.673,
+      "timings": {
+        "dns": -1,
+        "connect": -1,
+        "ssl": -1,
+        "send": 0,
+        "wait": 92.161,
+        "receive": 12.512
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/decisions",
+      "status": 200,
+      "duration_ms": 142.898,
+      "timings": {
+        "dns": -1,
+        "connect": -1,
+        "ssl": -1,
+        "send": 0,
+        "wait": 133.007,
+        "receive": 9.891
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/agent/runs",
+      "status": 200,
+      "duration_ms": 149.17600000000002,
+      "timings": {
+        "dns": -1,
+        "connect": -1,
+        "ssl": -1,
+        "send": 0,
+        "wait": 141.727,
+        "receive": 7.449
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/reason-codes",
+      "status": 200,
+      "duration_ms": 8929.164999999999,
+      "timings": {
+        "dns": -1,
+        "connect": -1,
+        "ssl": -1,
+        "send": 0,
+        "wait": 8922.408,
+        "receive": 6.757
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/decisions/ca5f4266-65b4-4b1c-b6ce-167c61ecfaa9",
+      "status": -1,
+      "duration_ms": -1,
+      "timings": {
+        "send": -1,
+        "wait": -1,
+        "receive": -1
+      }
+    }
+  ]
+}

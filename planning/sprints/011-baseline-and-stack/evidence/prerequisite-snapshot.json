@@ -1,0 +1,20 @@
+{
+  "status": "accepted_for_local_successor",
+  "snapshot": "/home/ubuntu/ai-platform-snapshots/011-accepted-v3",
+  "manifest_sha256": "3d4fba9e9b652213765951762b89a48a301fddc73b1458328efc74475026d5f7",
+  "source_files": 1789,
+  "reviewed_deletions": [
+    "docker-compose.prod.yml",
+    "planning/COMMIT_PLAN.md"
+  ],
+  "backend_passed": 1719,
+  "backend_allowed_skips": 10,
+  "backend_added": 138,
+  "backend_removed": 0,
+  "ui_unit_passed": 207,
+  "browser_passed": 82,
+  "immutable_image_scans_passed": 12,
+  "supplemental_filesystem_secret_scan_exit": 0,
+  "filesystem_scan_sha256": "265449f2cffceda1d8dd1aa40bcdd7dda49f3d57ccf56ddf4f2482753c83b78a",
+  "note": "Validation annex is outside the hashed source members to avoid self-referential manifests. Remote CI and human commits/landing remain pending."
+}

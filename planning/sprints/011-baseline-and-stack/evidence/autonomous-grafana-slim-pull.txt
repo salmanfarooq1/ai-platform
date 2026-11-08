@@ -1,0 +1,79 @@
+docker.io/grafana/grafana@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b: Pulling from grafana/grafana
+23e3a7fc1bb6: Pulling fs layer
+d82bc7a76a83: Pulling fs layer
+68e4cd60e60f: Pulling fs layer
+0783a66ae749: Pulling fs layer
+efae86a3fb38: Pulling fs layer
+411e1c946a02: Pulling fs layer
+799f0e3f433d: Pulling fs layer
+592851850278: Pulling fs layer
+1e2a702453fb: Pulling fs layer
+57c6bb4e9051: Pulling fs layer
+0d36a03cc409: Pulling fs layer
+18ef589153b7: Pulling fs layer
+e4793266f9e7: Pulling fs layer
+499e79f6002a: Pulling fs layer
+1177ae520313: Pulling fs layer
+b84bc69f1cbd: Pulling fs layer
+5b3013706a46: Pulling fs layer
+7e7bfd057be8: Pulling fs layer
+bf8083c5c1ec: Pulling fs layer
+9d2753d762cc: Pulling fs layer
+d557676654e5: Pulling fs layer
+0f8b424aa0b9: Pulling fs layer
+9f264f58b3ef: Pulling fs layer
+260bd2d0bca5: Pulling fs layer
+6eb6b82e579b: Pulling fs layer
+6eb6b82e579b: Already exists
+23e3a7fc1bb6: Already exists
+68e4cd60e60f: Download complete
+799f0e3f433d: Download complete
+0783a66ae749: Download complete
+efae86a3fb38: Download complete
+0f8b424aa0b9: Download complete
+411e1c946a02: Download complete
+d82bc7a76a83: Download complete
+592851850278: Download complete
+57c6bb4e9051: Download complete
+499e79f6002a: Download complete
+9d2753d762cc: Download complete
+d557676654e5: Download complete
+1e2a702453fb: Download complete
+18ef589153b7: Download complete
+0d36a03cc409: Download complete
+e4793266f9e7: Download complete
+b84bc69f1cbd: Download complete
+5b3013706a46: Download complete
+b84bc69f1cbd: Pull complete
+5b3013706a46: Pull complete
+9f264f58b3ef: Download complete
+260bd2d0bca5: Download complete
+1177ae520313: Download complete
+bf8083c5c1ec: Download complete
+7e7bfd057be8: Download complete
+0f8b424aa0b9: Pull complete
+d82bc7a76a83: Pull complete
+9d2753d762cc: Pull complete
+d557676654e5: Pull complete
+0d36a03cc409: Pull complete
+e4793266f9e7: Pull complete
+9f264f58b3ef: Pull complete
+1177ae520313: Pull complete
+bf8083c5c1ec: Pull complete
+7e7bfd057be8: Pull complete
+68e4cd60e60f: Pull complete
+799f0e3f433d: Pull complete
+0783a66ae749: Pull complete
+efae86a3fb38: Pull complete
+411e1c946a02: Pull complete
+592851850278: Pull complete
+57c6bb4e9051: Pull complete
+499e79f6002a: Pull complete
+1e2a702453fb: Pull complete
+260bd2d0bca5: Pull complete
+6eb6b82e579b: Pull complete
+18ef589153b7: Pull complete
+23e3a7fc1bb6: Pull complete
+Digest: sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b
+Status: Downloaded newer image for grafana/grafana@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b
+docker.io/grafana/grafana:13.2.4-distroless-slim@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b

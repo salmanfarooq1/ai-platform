@@ -1,0 +1,75 @@
+
+> ai-platform-ui@2.0.0 e2e
+> npm run build && playwright test
+
+
+> ai-platform-ui@2.0.0 build
+> tsc --noEmit && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 5629 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                  0.99 kB │ gzip:   0.55 kB
+dist/assets/Geist-Variable-Bj2R_7yk.woff2       69.65 kB
+dist/assets/GeistMono-Variable-Dispecij.woff2   71.37 kB
+dist/assets/index-CVeUUI9o.css                  32.28 kB │ gzip:   7.60 kB
+dist/assets/time-range-BpH6G2fq.js               0.21 kB │ gzip:   0.19 kB
+dist/assets/walkthrough-store-CMuV9Tm6.js        0.22 kB │ gzip:   0.16 kB
+dist/assets/stages-UorP1m-x.js                   0.27 kB │ gzip:   0.21 kB
+dist/assets/density-D1tfL_P2.js                  0.30 kB │ gzip:   0.22 kB
+dist/assets/select-CKV7g3dK.js                   0.40 kB │ gzip:   0.28 kB
+dist/assets/input-OJBjDF-w.js                    0.66 kB │ gzip:   0.39 kB
+dist/assets/governance-text-DYvVFh2U.js          0.73 kB │ gzip:   0.44 kB
+dist/assets/reasons-DUU1lU9r.js                  0.96 kB │ gzip:   0.52 kB
+dist/assets/useInfiniteQuery-Knctk5j5.js         1.16 kB │ gzip:   0.49 kB
+dist/assets/receipt-Dg9_WeAf.js                  1.27 kB │ gzip:   0.66 kB
+dist/assets/history-page-Dnmy7HAQ.js             1.57 kB │ gzip:   0.80 kB
+dist/assets/X.es-xqfVfXNV.js                     1.95 kB │ gzip:   0.66 kB
+dist/assets/keys-page-MwmkPBXF.js                1.95 kB │ gzip:   0.90 kB
+dist/assets/hero-scene-DlO9yN3w.js               1.99 kB │ gzip:   1.06 kB
+dist/assets/deny-callout-BF7vJ_3w.js             2.11 kB │ gzip:   0.82 kB
+dist/assets/trace-timeline-B005JbbG.js           2.22 kB │ gzip:   1.02 kB
+dist/assets/copy-value-Ubyob4ZV.js               2.44 kB │ gzip:   0.98 kB
+dist/assets/signin-page-DRehPXxu.js              2.49 kB │ gzip:   1.27 kB
+dist/assets/policies-page-DfR5y3ST.js            2.64 kB │ gzip:   1.20 kB
+dist/assets/system-page-CYCw2mvn.js              2.81 kB │ gzip:   1.08 kB
+dist/assets/useMutation-_1MumFZX.js              3.24 kB │ gzip:   1.32 kB
+dist/assets/segmented-_ajG1Hu3.js                3.40 kB │ gzip:   1.38 kB
+dist/assets/marketing-shell-myhsLpY9.js          3.89 kB │ gzip:   1.58 kB
+dist/assets/usage-page-Ctc2JX8_.js               5.64 kB │ gzip:   1.87 kB
+dist/assets/how-it-works-page-DHOsDFHC.js        5.83 kB │ gzip:   2.29 kB
+dist/assets/walkthrough-page-fDXBVTYT.js         5.86 kB │ gzip:   2.33 kB
+dist/assets/overview-page-CperTTsJ.js            6.93 kB │ gzip:   2.47 kB
+dist/assets/decisions-page-Clwg4aRb.js           7.82 kB │ gzip:   3.01 kB
+dist/assets/states-SDGLwnuv.js                   8.79 kB │ gzip:   2.59 kB
+dist/assets/verdict-badge-xwEqZnzL.js           10.32 kB │ gzip:   2.84 kB
+dist/assets/requests-page-2Yyq09aK.js           10.38 kB │ gzip:   3.79 kB
+dist/assets/library-page-Bekviqpg.js            11.88 kB │ gzip:   4.42 kB
+dist/assets/trust-page-DvZETYkY.js              16.29 kB │ gzip:   5.04 kB
+dist/assets/landing-page-ollr17UI.js            17.99 kB │ gzip:   6.08 kB
+dist/assets/runs-page-DuOq6HK1.js               21.86 kB │ gzip:   7.12 kB
+dist/assets/gsap-CcIkNsPr.js                   122.93 kB │ gzip:  48.91 kB
+dist/assets/react-CxfcT2zT.js                  171.48 kB │ gzip:  56.23 kB
+dist/assets/ask-page-BMgEViMW.js               186.86 kB │ gzip:  56.83 kB
+dist/assets/index-BwceccnQ.js                  248.39 kB │ gzip:  76.38 kB
+dist/assets/webgl-gc836SuQ.js                  878.61 kB │ gzip: 235.14 kB
+✓ built in 30.94s
+[2m[WebServer] [22mTraceback (most recent call last):
+[2m[WebServer] [22m  File "/home/ubuntu/ai-platform/scripts/e2e/serve.py", line 270, in <module>
+[2m[WebServer] [22m    sys.exit(main())
+[2m[WebServer] [22m             ^^^^^^
+[2m[WebServer] [22m  File "/home/ubuntu/ai-platform/scripts/e2e/serve.py", line 209, in main
+[2m[WebServer] [22m    harness.ensure_app_role()
+[2m[WebServer] [22m  File "/home/ubuntu/ai-platform/tests/harness.py", line 46, in ensure_app_role
+[2m[WebServer] [22m    conn = psycopg2.connect(ADMIN_URL)
+[2m[WebServer] [22m           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2m[WebServer] [22m  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/psycopg2/__init__.py", line 122, in connect
+[2m[WebServer] [22m    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+[2m[WebServer] [22m           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2m[WebServer] [22mpsycopg2.OperationalError: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection timed out
+[2m[WebServer] [22m	Is the server running on that host and accepting TCP/IP connections?
+[2m[WebServer] [22m
+Error: Process from config.webServer was not able to start. Exit code: 1
+

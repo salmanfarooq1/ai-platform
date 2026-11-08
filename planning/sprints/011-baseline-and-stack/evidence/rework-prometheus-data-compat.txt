@@ -1,0 +1,8 @@
+Only dedicated smoke volume sprint011-prometheus-compat-1fa425e6 is used; all existing platform volumes are untouched.
+sprint011-prom-compat-old
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"prometheus_build_info","branch":"HEAD","goarch":"amd64","goos":"linux","goversion":"go1.26.6","instance":"127.0.0.1:9090","job":"self","revision":"d7598b7141418fa35be2b5ec5d0fefb634199610","tags":"netgo,builtinassets","version":"3.14.0"},"value":[1792593940.782,"1"]}]}}
+sprint011-prom-compat-old
+90ff89ddc051483af1dd1d99d062a6d7e3f74e6d928953e652bf665b82ac9bf0
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{"branch":"HEAD","goarch":"amd64","goos":"linux","goversion":"go1.26.6","instance":"127.0.0.1:9090","job":"self","revision":"d7598b7141418fa35be2b5ec5d0fefb634199610","tags":"netgo,builtinassets","version":"3.14.0"},"value":[1792593943.218,"1"]}]}}
+PASS: candidate replays the old WAL and queries metrics written by 3.14.0.
+sprint011-prom-compat-new

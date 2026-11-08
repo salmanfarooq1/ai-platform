@@ -1,0 +1,76 @@
+NAME                 INSTALLED       FIXED IN                                             TYPE          VULNERABILITY        SEVERITY  EPSS          RISK   
+jackson-databind     2.21.2          2.21.4                                               java-archive  GHSA-rmj7-2vxq-3g9f  High      1.2% (68th)   1.0    
+p11-kit              0.25.5-r2       0.26.2-r0                                            apk           CVE-2026-2100        High      1.3% (69th)   0.9    
+p11-kit-trust        0.25.5-r2       0.26.2-r0                                            apk           CVE-2026-2100        High      1.3% (69th)   0.9    
+jackson-databind     2.21.2          2.21.4                                               java-archive  GHSA-j3rv-43j4-c7qm  High      1.0% (62nd)   0.8    
+jline-remote-telnet  3.30.4          3.30.14                                              java-archive  GHSA-2r2c-cx56-8933  High      0.9% (58th)   0.7    
+jline-remote-telnet  3.30.4          3.30.14                                              java-archive  GHSA-47qp-hqvx-6r3f  High      0.9% (58th)   0.7    
+libexpat             2.7.5-r0        2.8.4-r0                                             apk           CVE-2026-66046       High      0.7% (53rd)   0.6    
+jetty-security       12.0.34         12.0.36                                              java-archive  GHSA-2fvj-hgj9-j2gr  High      0.6% (49th)   0.5    
+log4j-api            2.25.4          2.25.5                                               java-archive  GHSA-qv9r-c865-cp47  Medium    0.8% (56th)   0.5    
+jackson-databind     2.21.2          2.21.6                                               java-archive  GHSA-q4xh-88c3-wmh7  High      0.6% (46th)   0.4    
+libexpat             2.7.5-r0        2.9.0-r0                                             apk           CVE-2026-77214       High      0.5% (44th)   0.4    
+jackson-core         2.21.2          2.21.7                                               java-archive  GHSA-p6pp-m3f8-5c89  High      0.5% (44th)   0.4    
+jackson-databind     2.21.2          2.21.6                                               java-archive  GHSA-gx83-3vf8-gh7j  Medium    0.7% (53rd)   0.4    
+jackson-core         2.21.2          2.21.4                                               java-archive  GHSA-r7wm-3cxj-wff9  High      0.5% (38th)   0.4    
+jline-builtins       3.30.4          3.30.15                                              java-archive  GHSA-r2xf-8xr9-62gw  High      0.5% (41st)   0.4    
+jackson-core         2.21.2          2.21.7                                               java-archive  GHSA-7hhh-6rmp-j9qf  High      0.5% (41st)   0.4    
+libexpat             2.7.5-r0        2.8.1-r0                                             apk           CVE-2026-45186       High      0.5% (40th)   0.4    
+jackson-databind     2.21.2          2.21.7                                               java-archive  GHSA-cxp5-3px4-pw24  High      0.4% (37th)   0.3    
+jackson-databind     2.21.2          2.21.7                                               java-archive  GHSA-wv8q-qhhj-9h54  High      0.4% (37th)   0.3    
+libexpat             2.7.5-r0        2.8.5-r0                                             apk           CVE-2026-93990       High      0.4% (33rd)   0.3    
+libexpat             2.7.5-r0        2.8.1-r0                                             apk           CVE-2026-41080       High      0.4% (32nd)   0.3    
+libexpat             2.7.5-r0        2.8.4-r0                                             apk           CVE-2026-76641       High      0.4% (27th)   0.3    
+zlib                 1.3.2-r0        1.3.2-r1                                             apk           CVE-2026-85091       High      0.4% (27th)   0.3    
+jackson-databind     2.21.2          2.21.6                                               java-archive  GHSA-wjgm-6hv5-3cvf  Medium    0.5% (43rd)   0.3    
+lz4-java             1.10.2          1.11.1                                               java-archive  GHSA-xx22-p4ch-683r  Medium    0.5% (39th)   0.3    
+jline-builtins       3.30.4          3.30.15                                              java-archive  GHSA-ph9c-7hw9-vhhw  Medium    0.4% (36th)   0.2    
+jackson-databind     2.21.2          2.21.4                                               java-archive  GHSA-3pjw-73gf-8qr5  Medium    0.4% (35th)   0.2    
+openjdk              21.0.11+10-LTS  1.8.0_502, 8.0.502, 11.0.32, 17.0.20, *21.0.12, ...  binary        CVE-2026-41254       High      0.4% (28th)   0.2    
+sqlite-libs          3.51.2-r0       3.53.4-r0                                            apk           CVE-2026-11822       High      0.3% (20th)   0.2    
+jackson-databind     2.21.2          2.21.4                                               java-archive  GHSA-9fxm-vc8v-hj55  Medium    0.4% (37th)   0.2    
+jackson-databind     2.21.2          2.21.5                                               java-archive  GHSA-5jmj-h7xm-6q6v  Medium    0.4% (37th)   0.2    
+jackson-databind     2.21.2          2.21.5                                               java-archive  GHSA-5gvw-p9qm-jgwh  Medium    0.4% (31st)   0.2    
+libexpat             2.7.5-r0        2.8.4-r0                                             apk           CVE-2026-76956       High      0.3% (20th)   0.2    
+jackson-databind     2.21.2          2.21.4                                               java-archive  GHSA-rcqc-6cw3-h962  Medium    0.4% (27th)   0.2    
+jackson-databind     2.21.2          2.21.4                                               java-archive  GHSA-5hh8-q8hv-fr38  Medium    0.4% (31st)   0.2    
+openjdk              21.0.11+10-LTS  1.8.0_502, 8.0.502, 11.0.32, 17.0.20, *21.0.12, ...  binary        CVE-2026-47063       High      0.3% (16th)   0.2    
+lz4-java             1.10.2          1.11.2                                               java-archive  GHSA-4v53-57pg-c464  Medium    0.4% (29th)   0.2    
+lz4-java             1.10.2          1.11.4                                               java-archive  GHSA-gm45-99xc-r7wv  Medium    0.4% (29th)   0.2    
+lz4-java             1.10.2          1.11.2                                               java-archive  GHSA-6cx8-rjf8-pr8g  Medium    0.4% (29th)   0.2    
+libexpat             2.7.5-r0        2.9.0-r0                                             apk           CVE-2026-102633      Medium    0.3% (26th)   0.2    
+jackson-databind     2.21.2          2.21.4                                               java-archive  GHSA-hgj6-7826-r7m5  Medium    0.4% (29th)   0.2    
+openjdk              21.0.11+10-LTS  1.8.0_504, 8.0.504, 11.0.32.1, *21.0.12.1, ...       binary        CVE-2026-61308       Medium    0.3% (22nd)   0.2    
+jetty-server         12.0.34         12.0.36                                              java-archive  GHSA-f4v5-65jj-pcr2  Medium    0.3% (21st)   0.2    
+jetty-util           12.0.34         12.0.35                                              java-archive  GHSA-w7x5-g22v-xqhr  Medium    0.3% (24th)   0.2    
+openjdk              21.0.11+10-LTS  1.8.0_502, 8.0.502, 11.0.32, 17.0.20, *21.0.12, ...  binary        CVE-2026-60147       Medium    0.3% (19th)   0.2    
+jackson-databind     2.21.2          2.21.5                                               java-archive  GHSA-vvgp-rfg2-7rr6  Medium    0.3% (22nd)   0.2    
+jetty-server         12.0.34         12.0.35                                              java-archive  GHSA-7p3p-8qv8-m2vh  Medium    0.3% (22nd)   0.2    
+openjdk              21.0.11+10-LTS  1.8.0_502, 8.0.502, 11.0.32, 17.0.20, *21.0.12, ...  binary        CVE-2026-46968       Medium    0.3% (20th)   0.2    
+openjdk              21.0.11+10-LTS  1.8.0_502, 8.0.502, 11.0.32, 17.0.20, *21.0.12, ...  binary        CVE-2026-47021       Medium    0.3% (21st)   0.2    
+openjdk              21.0.11+10-LTS  11.0.32, 17.0.20, *21.0.12, 25.0.4, ...              binary        CVE-2026-46917       Medium    0.3% (20th)   0.1    
+openjdk              21.0.11+10-LTS  1.8.0_502, 8.0.502, 11.0.32, 17.0.20, *21.0.12, ...  binary        CVE-2026-47027       Medium    0.3% (20th)   0.1    
+openjdk              21.0.11+10-LTS  1.8.0_504, 8.0.504, 11.0.32.1, *21.0.12.1, ...       binary        CVE-2026-70907       Medium    0.3% (19th)   0.1    
+sqlite-libs          3.51.2-r0       3.53.4-r0                                            apk           CVE-2026-11824       High      0.2% (6th)    0.1    
+lz4-java             1.10.2          1.11.4                                               java-archive  GHSA-343h-94h5-c4wr  Low       0.3% (25th)   0.1    
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56406       Medium    0.2% (6th)    0.1    
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56407       Medium    0.2% (6th)    0.1    
+openjdk              21.0.11+10-LTS  1.8.0_502, 8.0.502, 11.0.32, 17.0.20, *21.0.12, ...  binary        CVE-2026-47059       Low       0.3% (21st)   0.1    
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56403       Medium    0.2% (5th)    < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-50219       Medium    0.2% (7th)    < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56412       Medium    0.2% (7th)    < 0.1  
+openjdk              21.0.11+10-LTS  1.8.0_504, 8.0.504, 11.0.32.1, *21.0.12.1, ...       binary        CVE-2026-60589       Low       0.3% (17th)   < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56131       Medium    0.2% (6th)    < 0.1  
+openjdk              21.0.11+10-LTS  1.8.0_502, 8.0.502, 11.0.32, 17.0.20, *21.0.12, ...  binary        CVE-2026-47010       Low       0.3% (15th)   < 0.1  
+libexpat             2.7.5-r0        2.8.4-r0                                             apk           CVE-2026-76957       High      0.1% (1st)    < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56404       Medium    0.1% (2nd)    < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56410       Medium    0.1% (2nd)    < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56411       Medium    0.1% (2nd)    < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56405       Medium    0.1% (1st)    < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56408       Medium    0.1% (1st)    < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56409       Medium    0.1% (1st)    < 0.1  
+jline-reader         3.30.4          3.30.15                                              java-archive  GHSA-5q95-hrpc-m3w3  Medium    0.1% (1st)    < 0.1  
+lz4-java             1.10.2          1.11.4                                               java-archive  GHSA-mcr4-qmvw-px4g  High      < 0.1% (0th)  < 0.1  
+libexpat             2.7.5-r0        2.8.2-r0                                             apk           CVE-2026-56132       Medium    0.1% (0th)    < 0.1  
+jackson-databind     2.21.2          2.21.5                                               java-archive  GHSA-mhm7-754m-9p8w  Medium    N/A           N/A    
+libpng               1.6.58-r1       1.6.59-r0                                            apk           CVE-2026-46675       Unknown   N/A           N/A

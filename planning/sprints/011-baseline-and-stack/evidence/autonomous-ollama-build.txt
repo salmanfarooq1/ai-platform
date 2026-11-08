@@ -1,0 +1,94 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.96kB 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#2 ...
+
+#3 [internal] load metadata for docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132
+#3 DONE 0.2s
+
+#2 [internal] load metadata for docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#2 DONE 2.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context:
+#4 transferring context: 279B 0.0s done
+#4 DONE 0.3s
+
+#5 [security-build 2/7] ADD --checksum=sha256:f94b72d6dda09b5e509f09120a7eeede75fbef26c01c674418f089c8da21fc19 https://proxy.golang.org/github.com/ollama/ollama/@v/v0.40.7.zip /tmp/source.zip
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 DONE 0.0s
+
+#7 [stage-1 1/7] FROM docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#7 resolve docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#7 ...
+
+#6 [internal] load build context
+#6 transferring context: 25.80kB 0.1s done
+#6 DONE 0.2s
+
+#7 [stage-1 1/7] FROM docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b
+#7 resolve docker.io/ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b 0.2s done
+#7 DONE 0.8s
+
+#8 [security-build 1/7] FROM docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132
+#8 resolve docker.io/library/golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132 0.2s done
+#8 DONE 1.3s
+
+#5 [security-build 2/7] ADD --checksum=sha256:f94b72d6dda09b5e509f09120a7eeede75fbef26c01c674418f089c8da21fc19 https://proxy.golang.org/github.com/ollama/ollama/@v/v0.40.7.zip /tmp/source.zip
+#5 DONE 6.7s
+
+#9 [security-build 2/7] ADD --checksum=sha256:f94b72d6dda09b5e509f09120a7eeede75fbef26c01c674418f089c8da21fc19 https://proxy.golang.org/github.com/ollama/ollama/@v/v0.40.7.zip /tmp/source.zip
+#9 DONE 1.0s
+
+#10 [security-build 3/7] RUN python3 -c "import zipfile; z=zipfile.ZipFile('/tmp/source.zip'); z.extractall('/src')"
+#10 DONE 2.5s
+
+#11 [security-build 4/7] WORKDIR /src/github.com/ollama/ollama@v0.40.7
+#11 DONE 0.3s
+
+#12 [security-build 5/7] COPY docker/ollama/security.go.mod go.mod
+#12 DONE 0.2s
+
+#13 [security-build 6/7] COPY docker/ollama/security.go.sum go.sum
+#13 DONE 0.2s
+
+#14 [security-build 7/7] RUN --mount=type=cache,id=gap-ollama-go-mod,target=/go/pkg/mod     --mount=type=cache,id=gap-ollama-go-build,target=/root/.cache/go-build     go mod download && go mod verify &&     go build -mod=readonly -trimpath -buildmode=pie       -ldflags='-w -s -X github.com/ollama/ollama/version.Version=0.40.7' -o /out/ollama . &&     go version -m /out/ollama > /out/build-info.txt &&     mkdir -p /out/notices && cp /usr/local/go/LICENSE /out/notices/Go-LICENSE &&     for module in net crypto mod sync sys term text; do       directory=$(go list -m -f '{{.Dir}}' golang.org/x/$module);       cp "$directory/LICENSE" "/out/notices/golang.org-x-$module-LICENSE";     done
+#14 91.53 all modules verified
+#14 DONE 322.7s
+
+#15 [stage-1 2/7] COPY --from=security-build /out/ollama /usr/bin/ollama
+#15 DONE 0.2s
+
+#16 [stage-1 3/7] COPY --from=security-build /out/build-info.txt /usr/share/doc/ollama-security/build-info.txt
+#16 DONE 0.1s
+
+#17 [stage-1 4/7] COPY --from=security-build /out/notices /usr/share/doc/ollama-security/notices
+#17 DONE 0.1s
+
+#18 [stage-1 5/7] COPY --from=security-build /src/github.com/ollama/ollama@v0.40.7/LICENSE /usr/share/doc/ollama-security/UPSTREAM-LICENSE
+#18 DONE 0.1s
+
+#19 [stage-1 6/7] COPY docker/ollama/security.go.mod /usr/share/doc/ollama-security/go.mod
+#19 DONE 0.2s
+
+#20 [stage-1 7/7] COPY docker/ollama/security.go.sum /usr/share/doc/ollama-security/go.sum
+#20 DONE 0.2s
+
+#21 exporting to image
+#21 exporting layers
+#21 exporting layers 3.1s done
+#21 exporting manifest sha256:888f56c100b6a73869a16663931463a81581b1d9d004e9274db28b15358eecfe 0.0s done
+#21 exporting config sha256:6cf9d43383fb95ae43abe82e1228b3f18737ba8902a196df6426cd8f231dfbe3 0.0s done
+#21 exporting attestation manifest sha256:4a799a4b84e344aa324dbe1723077a59d8d6181591dfc407b943527e9761bb2e 0.1s done
+#21 exporting manifest list sha256:1aad7d9a620d919f44dc5e9b39c2a7db992c4f51cea852d722402b8b03593cf4
+#21 exporting manifest list sha256:1aad7d9a620d919f44dc5e9b39c2a7db992c4f51cea852d722402b8b03593cf4 0.0s done
+#21 naming to docker.io/library/sprint011-ollama-security:latest 0.0s done
+#21 unpacking to docker.io/library/sprint011-ollama-security:latest
+#21 unpacking to docker.io/library/sprint011-ollama-security:latest 0.6s done
+#21 DONE 4.0s

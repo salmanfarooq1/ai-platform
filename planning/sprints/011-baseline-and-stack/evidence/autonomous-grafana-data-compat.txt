@@ -1,0 +1,39 @@
+command=docker run -d --name
+75c9263a3d69079e1b5b2fe684175720d2d78a83b43a30f71becdc8284e1253e
+
+exit=0
+health={"database": "ok", "version": "12.0.2", "commit": "5bda17e7c1cb313eb96266f2fdda73a6b35c3977"}
+created={"folderUid": "", "id": 2, "slug": "persisted-upgrade-probe", "status": "success", "uid": "upgrade-probe", "url": "/d/upgrade-probe/persisted-upgrade-probe", "version": 1}
+old persisted id=2 uid=upgrade-probe
+command=docker stop --timeout 30
+sprint011-grafana-compat-96cae9-old
+
+exit=0
+command=docker run --rm --network
+
+exit=0
+pre-upgrade snapshot SHA256=6a83fbd373c897821ca02180647eea703c2159df37aaac857e2469cffb976989
+command=docker run -d --name
+b4ad7bbad9d4ed6d47f1ce400a937c12b91beda1ce6581bee2b2b89882e9d174
+
+exit=0
+health={"database": "ok", "version": "13.2.4", "commit": "0e79aef9d91abf3bdadae9af15763029072fb45b"}
+PASS:13.2.4 preserved old12.0.2 dashboard identity and content
+command=docker stop --timeout 30
+sprint011-grafana-compat-96cae9-new
+
+exit=0
+command=docker run --rm --network
+
+exit=0
+command=docker run -d --name
+982a8aba532b53123155012dfaaa35c66b9b242267a637fcf43cb607f16e9620
+
+exit=0
+health={"database": "ok", "version": "12.0.2", "commit": "5bda17e7c1cb313eb96266f2fdda73a6b35c3977"}
+PASS: old12.0.2 runs against restored pre-upgrade snapshot, never the migrated database
+command=docker stop --timeout 30
+sprint011-grafana-compat-96cae9-rollback
+
+exit=0
+Only uniquely named test-owned volumes used; no customer grafana_data was mounted. Private runtime credentials/backups stay outside the repository.

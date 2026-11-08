@@ -1,0 +1,128 @@
+F.FF..F....F.                                                            [100%]
+=================================== FAILURES ===================================
+____________________ test_public_preview_disables_reranker _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x717ff3cda750>
+
+    @pytest.mark.unit
+    def test_public_preview_disables_reranker(monkeypatch):
+        monkeypatch.setenv("MODE", "public-preview")
+        # Sprint 002: hosted modes require explicit DSNs (no placeholder defaults).
+        monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
+        monkeypatch.setenv("REDIS_URL", "redis://cache.example.test:6379")
+        monkeypatch.setenv("RECEIPT_SIGNING_KEY", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")  # hosted modes need one (Sprint 008)
+        reloaded = importlib.reload(config)
+>       assert reloaded.FEATURES["reranker_enabled"] is False
+E       assert True is False
+
+tests/unit/test_config_mode.py:25: AssertionError
+___________________________ test_unknown_mode_raises ___________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x717ff3c64490>
+
+    @pytest.mark.unit
+    def test_unknown_mode_raises(monkeypatch):
+        monkeypatch.setenv("MODE", "demo")
+>       with pytest.raises(ValueError, match="public-preview"):
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_config_mode.py:39: Failed
+________________________ test_real_env_beats_env_local _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-1/test_real_env_beats_env_local0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x717ff0480390>
+
+    @pytest.mark.unit
+    def test_real_env_beats_env_local(tmp_path, monkeypatch):
+        from core.settings import get_settings
+    
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / ".env.local").write_text("MODE=prod\n")
+        monkeypatch.setenv("MODE", "local")
+        get_settings.cache_clear()
+>       assert get_settings().mode == "local"
+               ^^^^^^^^^^^^^^
+
+/home/ubuntu/ai-platform/tests/unit/test_config_mode.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    @lru_cache(maxsize=1)
+    def get_settings() -> Settings:
+        """Build and cache the settings. Raises SettingsError with a readable message."""
+        _load_env_files()
+        try:
+            return Settings()
+        except ValidationError as exc:
+            lines = []
+            for err in exc.errors():
+                loc = ".".join(str(p).upper() for p in err["loc"]) or "settings"
+                msg = str(err["msg"]).removeprefix("Value error, ")
+                lines.append(f"  - {loc}: {msg}" if loc != "settings" else f"  - {msg}")
+>           raise SettingsError("Invalid configuration:\n" + "\n".join(lines)) from None
+E           core.settings.SettingsError: Invalid configuration:
+E             - RECEIPT_SIGNING_KEY must be set when MODE=prod
+
+/home/ubuntu/ai-platform/core/settings.py:446: SettingsError
+______________ test_the_product_docs_have_no_broken_link_or_path _______________
+
+    def test_the_product_docs_have_no_broken_link_or_path():
+>       problems = checker.check()
+                   ^^^^^^^^^^^^^^^
+
+tests/unit/test_docs_links.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/docs/check_links.py:91: in check
+    """Problems found in one file, as `file: what` lines."""
+                    ^^^^^^^^^^^^^^^^^^^^^^
+scripts/docs/check_links.py:68: in check_file
+    ???
+scripts/docs/check_links.py:60: in _known_names
+    ???
+scripts/docs/check_links.py:60: in <setcomp>
+    ???
+        
+../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:968: in rglob
+    for p in selector.select_from(self):
+../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:408: in _select_from
+    for p in successor_select(starting_point, is_dir, exists, scandir):
+../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:355: in _select_from
+    with scandir(parent_path) as scandir_it:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/ubuntu/ai-platform/.codex')
+
+    def _scandir(self):
+        # bpo-24132: a future version of pathlib will support subclassing of
+        # pathlib.Path to customize how the filesystem is accessed. This
+        # includes scandir(), which is used to implement glob().
+>       return os.scandir(self)
+               ^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/ubuntu/ai-platform/.codex'
+
+../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:938: FileNotFoundError
+______________________ test_git_ignored_paths_are_skipped ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-1/test_git_ignored_paths_are_ski0')
+
+    def test_git_ignored_paths_are_skipped(tmp_path):
+        _tree(tmp_path, "[ok](other.md)")
+        subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+        (tmp_path / ".gitignore").write_text("docs/learning_docs/\n")
+        ignored = tmp_path / "docs" / "learning_docs"
+        ignored.mkdir()
+        (ignored / "broken.md").write_text("[bad](missing.md)")
+>       assert checker.check(tmp_path) == []
+E       AssertionError: assert ['docs/learni...(missing.md)'] == []
+E         
+E         Left contains one more item: 'docs/learning_docs/broken.md: broken link (missing.md)'
+E         Use -v to get more diff
+
+tests/unit/test_docs_links.py:78: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_config_mode.py::test_public_preview_disables_reranker
+FAILED tests/unit/test_config_mode.py::test_unknown_mode_raises - Failed: DID...
+FAILED tests/unit/test_config_mode.py::test_real_env_beats_env_local - core.s...
+FAILED tests/unit/test_docs_links.py::test_the_product_docs_have_no_broken_link_or_path
+FAILED tests/unit/test_docs_links.py::test_git_ignored_paths_are_skipped - As...
+5 failed, 8 passed in 18.02s

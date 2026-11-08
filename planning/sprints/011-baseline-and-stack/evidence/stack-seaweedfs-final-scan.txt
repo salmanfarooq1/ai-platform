@@ -1,0 +1,24 @@
+image_reference=docker:sha256:2c05e29b20d6f1e68fceaa0817c7c26f220262a13bc2971f23d87e4e840d8072
+image_id=sha256:2c05e29b20d6f1e68fceaa0817c7c26f220262a13bc2971f23d87e4e840d8072
+scanner_path=scratch/sprint011/scanners/grype
+Application:         grype
+Version:             0.119.0
+BuildDate:           2026-09-17T16:17:07Z
+GitCommit:           b6f5194537747ee7f705f4113069ac9eb269919f
+GitDescription:      v0.119.0
+Platform:            linux/amd64
+GoVersion:           go1.26.3
+Compiler:            gc
+Syft Version:        v1.52.0
+Supported DB Schema: 6
+e02ba25615668c6bae03473e3c6493b6dfffc2e4e419f65f9bd62555ac10cd0e  scratch/sprint011/scanners/grype
+Path:      /home/ubuntu/.cache/grype/db/6/vulnerability.db
+Schema:    v6.1.10
+Built:     2026-10-21T06:31:02Z
+From:      https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-10-21T00:28:41Z_1792564262.tar.zst?checksum=sha256%3Afe51ed05fd0bf2e0642a362b75b245caf0da0eabb92b26a543e061f9873ec2ba
+Status:    valid
+policy=scripts/supply_chain/grype.yaml --only-fixed --fail-on critical
+exit_status=0
+sbom_path=planning/sprints/011-baseline-and-stack/evidence/stack-seaweedfs-final-sbom.cdx.json
+6467649a7a7cd0905362288fb3996b0c6cb247e09d3b483e0e6ea2ca87f8585f  planning/sprints/011-baseline-and-stack/evidence/stack-seaweedfs-final-sbom.cdx.json
+scan_result=pass: Grype exit 0 under fixed-critical threshold; the CycloneDX report lists 2 high and 1 medium fixed findings, no critical finding. Policy ignore list remains empty.

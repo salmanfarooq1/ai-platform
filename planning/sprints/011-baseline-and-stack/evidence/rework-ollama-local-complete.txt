@@ -1,0 +1,98 @@
+Same pinned image, verified scanner and advisory database; Docker-local completion capture.
+[0832] ERROR discovered vulnerabilities at or above the severity threshold
+NAME                 INSTALLED                 FIXED IN                       TYPE       VULNERABILITY        SEVERITY  EPSS         RISK   
+stdlib               go1.26.0                  1.25.8, *1.26.1                go-module  GO-2026-4601         High      0.8% (56th)  0.6    
+stdlib               go1.26.0                  1.25.10, *1.26.3               go-module  GO-2026-4918         High      0.8% (55th)  0.6    
+golang.org/x/crypto  v0.43.0                   0.52.0                         go-module  GHSA-rm3j-f69w-wqmq  Critical  0.6% (49th)  0.6    
+golang.org/x/net     v0.46.0                   0.55.0                         go-module  GO-2026-5026         High      0.7% (52nd)  0.5    
+stdlib               go1.26.0                  1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-5026         High      0.7% (52nd)  0.5    
+golang.org/x/net     v0.46.0                   0.60.0                         go-module  GO-2026-6612         Critical  0.6% (46th)  0.5    
+stdlib               go1.26.0                  1.26.9                         go-module  GO-2026-6612         Critical  0.6% (46th)  0.5    
+stdlib               go1.26.0                  1.26.1                         go-module  GO-2026-4599         High      0.6% (49th)  0.5    
+golang.org/x/crypto  v0.43.0                   0.52.0                         go-module  GHSA-w879-237q-wc7r  High      0.6% (48th)  0.5    
+stdlib               go1.26.0                  1.25.9, *1.26.2                go-module  GO-2026-4870         High      0.6% (48th)  0.5    
+golang.org/x/crypto  v0.43.0                   0.52.0                         go-module  GHSA-q4h4-gmj2-qvw2  High      0.6% (48th)  0.5    
+golang.org/x/image   v0.22.0                   0.42.0                         go-module  GO-2026-4961         High      0.6% (48th)  0.5    
+stdlib               go1.26.0                  1.25.10, *1.26.3               go-module  GO-2026-4971         High      0.6% (48th)  0.5    
+stdlib               go1.26.0                  1.25.9, *1.26.2                go-module  GO-2026-4947         High      0.6% (48th)  0.5    
+golang.org/x/image   v0.22.0                   0.43.0                         go-module  GO-2026-5061         High      0.6% (48th)  0.5    
+stdlib               go1.26.0                  1.25.11, *1.26.4               go-module  GO-2026-5037         High      0.6% (47th)  0.4    
+golang.org/x/crypto  v0.43.0                   0.52.0                         go-module  GHSA-89gr-r52h-f8rx  Critical  0.5% (40th)  0.4    
+golang.org/x/net     v0.46.0                   0.60.0                         go-module  GO-2026-6603         High      0.6% (46th)  0.4    
+stdlib               go1.26.0                  1.26.9                         go-module  GO-2026-6603         High      0.6% (46th)  0.4    
+stdlib               go1.26.0                  1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6088         High      0.6% (46th)  0.4    
+stdlib               go1.26.0                  1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6089         High      0.6% (46th)  0.4    
+stdlib               go1.26.0                  1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6090         High      0.6% (46th)  0.4    
+stdlib               go1.26.0                  1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-5972         High      0.6% (46th)  0.4    
+golang.org/x/net     v0.46.0                   0.60.0                         go-module  GO-2026-6611         High      0.6% (46th)  0.4    
+stdlib               go1.26.0                  1.26.9                         go-module  GO-2026-6611         High      0.6% (46th)  0.4    
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-66046       Medium    0.7% (53rd)  0.4    
+golang.org/x/text    v0.30.0                   0.39.0                         go-module  GO-2026-5970         High      0.5% (39th)  0.4    
+golang.org/x/net     v0.46.0                   0.60.0                         go-module  GO-2026-6617         High      0.4% (34th)  0.3    
+stdlib               go1.26.0                  1.26.9                         go-module  GO-2026-6617         High      0.4% (34th)  0.3    
+golang.org/x/image   v0.22.0                   0.45.0                         go-module  GO-2026-6222         High      0.4% (34th)  0.3    
+stdlib               go1.26.0                  *1.26.9, 1.27.2                go-module  GO-2026-6608         High      0.4% (33rd)  0.3    
+stdlib               go1.26.0                  1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6218         Medium    0.5% (44th)  0.3    
+stdlib               go1.26.0                  *1.26.9, 1.27.2                go-module  GO-2026-6607         High      0.4% (32nd)  0.3    
+libssl3t64           3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-84782       High      0.4% (31st)  0.3    
+openssl              3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-84782       High      0.4% (31st)  0.3    
+stdlib               go1.26.0                  *1.26.9, 1.27.2                go-module  GO-2026-6609         High      0.4% (30th)  0.3    
+stdlib               go1.26.0                  1.26.2                         go-module  GO-2026-4866         High      0.3% (26th)  0.3    
+stdlib               go1.26.0                  1.25.9, *1.26.2                go-module  GO-2026-4946         High      0.4% (27th)  0.3    
+stdlib               go1.26.0                  *1.26.9, 1.27.2                go-module  GO-2026-6613         High      0.3% (22nd)  0.2    
+stdlib               go1.26.0                  *1.26.9, 1.27.2                go-module  GO-2026-6605         High      0.3% (22nd)  0.2    
+stdlib               go1.26.0                  1.26.9                         go-module  GO-2026-6610         High      0.3% (21st)  0.2    
+stdlib               go1.26.0                  1.25.10, *1.26.3               go-module  GO-2026-4980         Medium    0.4% (32nd)  0.2    
+stdlib               go1.26.0                  1.25.10, *1.26.3               go-module  GO-2026-4976         Medium    0.4% (34th)  0.2    
+stdlib               go1.26.0                  1.25.11, *1.26.4               go-module  GO-2026-5039         Medium    0.4% (34th)  0.2    
+perl-base            5.38.2-3.2ubuntu0.4       5.38.2-3.2ubuntu0.6            deb        CVE-2026-19487       Medium    0.4% (34th)  0.2    
+stdlib               go1.26.0                  1.25.12, *1.26.5, 1.27.0-rc.2  go-module  GO-2026-5856         Medium    0.4% (30th)  0.2    
+stdlib               go1.26.0                  1.25.8, *1.26.1                go-module  GO-2026-4603         Medium    0.3% (26th)  0.2    
+stdlib               go1.26.0                  1.25.10, *1.26.3               go-module  GO-2026-4982         Medium    0.3% (25th)  0.2    
+stdlib               go1.26.0                  1.26.1                         go-module  GO-2026-4600         Medium    0.3% (25th)  0.2    
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-76641       Medium    0.4% (27th)  0.2    
+stdlib               go1.26.0                  1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6091         Medium    0.3% (22nd)  0.2    
+stdlib               go1.26.0                  1.25.9, *1.26.2                go-module  GO-2026-4865         Medium    0.3% (20th)  0.2    
+perl-base            5.38.2-3.2ubuntu0.4       5.38.2-3.2ubuntu0.6            deb        CVE-2026-15534       Medium    0.3% (16th)  0.1    
+libssl3t64           3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-75806       Low       0.4% (31st)  0.1    
+openssl              3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-75806       Low       0.4% (31st)  0.1    
+stdlib               go1.26.0                  *1.26.9, 1.27.2                go-module  GO-2026-6599         Medium    0.2% (9th)   0.1    
+stdlib               go1.26.0                  *1.26.9, 1.27.2                go-module  GO-2026-6600         Medium    0.2% (9th)   0.1    
+libx11-6             2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-88806       Medium    0.2% (9th)   < 0.1  
+libx11-data          2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-88806       Medium    0.2% (9th)   < 0.1  
+libx11-xcb1          2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-88806       Medium    0.2% (9th)   < 0.1  
+libx11-6             2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-94283       Medium    0.2% (9th)   < 0.1  
+libx11-data          2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-94283       Medium    0.2% (9th)   < 0.1  
+libx11-xcb1          2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-94283       Medium    0.2% (9th)   < 0.1  
+libxml2              2.9.14+dfsg-1.3ubuntu3.9  2.9.14+dfsg-1.3ubuntu3.10      deb        CVE-2026-86143       Medium    0.2% (8th)   < 0.1  
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-72522       Medium    0.2% (8th)   < 0.1  
+libxml2              2.9.14+dfsg-1.3ubuntu3.9  2.9.14+dfsg-1.3ubuntu3.10      deb        CVE-2026-86144       Medium    0.2% (7th)   < 0.1  
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-56131       Medium    0.2% (6th)   < 0.1  
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-56406       Medium    0.2% (6th)   < 0.1  
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-56407       Medium    0.2% (6th)   < 0.1  
+libxml2              2.9.14+dfsg-1.3ubuntu3.9  2.9.14+dfsg-1.3ubuntu3.10      deb        CVE-2026-76781       Medium    0.2% (5th)   < 0.1  
+libssl3t64           3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-35189       Low       0.3% (17th)  < 0.1  
+openssl              3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-35189       Low       0.3% (17th)  < 0.1  
+libssl3t64           3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-54872       Low       0.3% (16th)  < 0.1  
+openssl              3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-54872       Low       0.3% (16th)  < 0.1  
+libxml2              2.9.14+dfsg-1.3ubuntu3.9  2.9.14+dfsg-1.3ubuntu3.10      deb        CVE-2026-86142       Medium    0.2% (4th)   < 0.1  
+libssl3t64           3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-77696       Low       0.2% (14th)  < 0.1  
+openssl              3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-77696       Low       0.2% (14th)  < 0.1  
+libssl3t64           3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-75805       Low       0.2% (11th)  < 0.1  
+openssl              3.0.13-0ubuntu3.15        3.0.13-0ubuntu3.16             deb        CVE-2026-75805       Low       0.2% (11th)  < 0.1  
+libxml2              2.9.14+dfsg-1.3ubuntu3.9  2.9.14+dfsg-1.3ubuntu3.10      deb        CVE-2026-86138       Medium    0.1% (2nd)   < 0.1  
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-56410       Medium    0.1% (2nd)   < 0.1  
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-56411       Medium    0.1% (2nd)   < 0.1  
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-56409       Medium    0.1% (1st)   < 0.1  
+libx11-6             2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-94285       Medium    0.1% (1st)   < 0.1  
+libx11-data          2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-94285       Medium    0.1% (1st)   < 0.1  
+libx11-xcb1          2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-94285       Medium    0.1% (1st)   < 0.1  
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-76957       Medium    0.1% (1st)   < 0.1  
+libx11-6             2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-94284       Medium    0.1% (0th)   < 0.1  
+libx11-data          2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-94284       Medium    0.1% (0th)   < 0.1  
+libx11-xcb1          2:1.8.7-1build1           2:1.8.7-1ubuntu0.1             deb        CVE-2026-94284       Medium    0.1% (0th)   < 0.1  
+libexpat1            2.6.1-2ubuntu0.5          2.6.1-2ubuntu0.6               deb        CVE-2026-56132       Medium    0.1% (0th)   < 0.1  
+stdlib               go1.26.0                  1.25.8, *1.26.1                go-module  GO-2026-4602         Low       0.1% (1st)   < 0.1
+
+Container exit: 2
+Wait status: 0

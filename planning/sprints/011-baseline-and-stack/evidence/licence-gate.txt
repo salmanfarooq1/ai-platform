@@ -1,0 +1,4 @@
+numpy==2.4.2: licence not approved: BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
+seeded==1.0.0: licence not approved: BUSL-1.1
+licence gate ok: 1 packages
+MIT

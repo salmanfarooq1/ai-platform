@@ -1,0 +1,16 @@
+$ Poetry 2.3.3: --version
+Poetry (version 2.3.3)
+
+exit=0
+$ Poetry 2.3.3: check --lock
+All set!
+
+exit=0
+$ Poetry 2.3.3: export --only main --format requirements.txt --output /tmp/s011-exports-review-ppw4wgh3/main.txt
+
+exit=0
+main export matches committed proposal: True
+$ Poetry 2.3.3: export --with dev --format requirements.txt --output /tmp/s011-exports-review-ppw4wgh3/dev.txt
+
+exit=0
+dev export matches committed proposal: True

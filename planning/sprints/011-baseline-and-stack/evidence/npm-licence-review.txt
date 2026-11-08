@@ -1,0 +1,6 @@
+caniuse-lite@1.0.30001814 : CC-BY-4.0
+geist@1.7.2 : MIT*
+gsap@3.15.0 : Custom: https://gsap.com/standard-license.
+webgl-constants@1.1.1 : MIT*
+production packages inspected: 262
+unapproved metadata entries: 4

@@ -1,0 +1,16 @@
+postgres (PostgreSQL) 16.15 (Debian 16.15-1.pgdg13+2)
+ldd (Debian GLIBC 2.41-12+deb13u4) 2.41
+comment = 'vector data type and ivfflat and hnsw access methods'
+default_version = '0.8.7'
+module_pathname = '$libdir/vector'
+relocatable = true
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: PostgreSQL
+Source: https://www.postgresql.org/ftp/source/
+
+### PostgreSQL copyrights ###
+
+Files: *
+Copyright: Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
+           Portions Copyright (c) 1994, The Regents of the University of California
+License: PostgreSQL

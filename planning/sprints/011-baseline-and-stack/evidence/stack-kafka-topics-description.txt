@@ -1,0 +1,24 @@
+Topic: platform.gateway.purge.dlq	TopicId: TXf8A_BRQ8Kjlc3lJFCTvw	PartitionCount: 3	ReplicationFactor: 1	Configs: min.insync.replicas=1,retention.ms=604800000
+	Topic: platform.gateway.purge.dlq	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.gateway.purge.dlq	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.gateway.purge.dlq	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+Topic: platform.gateway.decision	TopicId: 9o-FTNYlQsieS43MdJmIwA	PartitionCount: 3	ReplicationFactor: 1	Configs: min.insync.replicas=1,retention.ms=604800000
+	Topic: platform.gateway.decision	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.gateway.decision	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.gateway.decision	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+Topic: platform.gateway.purge	TopicId: O02rL5FzSEmIAajFaVUSiA	PartitionCount: 3	ReplicationFactor: 1	Configs: min.insync.replicas=1,retention.ms=604800000
+	Topic: platform.gateway.purge	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.gateway.purge	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.gateway.purge	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+Topic: platform.ingest.completed	TopicId: qCaZXDIZQ_Cl5qyRNShQlw	PartitionCount: 3	ReplicationFactor: 1	Configs: min.insync.replicas=1,retention.ms=604800000
+	Topic: platform.ingest.completed	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.ingest.completed	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.ingest.completed	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+Topic: platform.ingest.completed.dlq	TopicId: sU4_Kn8CQs2eV1fD7ubTag	PartitionCount: 3	ReplicationFactor: 1	Configs: min.insync.replicas=1,retention.ms=604800000
+	Topic: platform.ingest.completed.dlq	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.ingest.completed.dlq	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.ingest.completed.dlq	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+Topic: platform.gateway.decision.dlq	TopicId: fgKOvlHHS1qAyIxAftk0LQ	PartitionCount: 3	ReplicationFactor: 1	Configs: min.insync.replicas=1,retention.ms=604800000
+	Topic: platform.gateway.decision.dlq	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.gateway.decision.dlq	Partition: 1	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 
+	Topic: platform.gateway.decision.dlq	Partition: 2	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 

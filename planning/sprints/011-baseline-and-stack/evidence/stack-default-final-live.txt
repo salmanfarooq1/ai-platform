@@ -1,0 +1,32 @@
+Isolated default Compose live boot; no user dotenv or env_file loaded.
+project=sprint011-default-final
+sanitized_compose_copy=scratch/sprint011/default-live/docker-compose.yml (ignored scratch/ path)
+worker_image_reference=sha256:d98e078cd3ed24079f7623a6a3ce7e6e5df441b313141907e9af480592f15989
+worker_image_id_before_start=sha256:d98e078cd3ed24079f7623a6a3ce7e6e5df441b313141907e9af480592f15989
+credentials=generated per run and omitted; database DSNs redacted
+profiles=models,streams,lake,observability not enabled
+compose_config_exit_status=0
+default_compose_services=postgres,valkey,worker
+default_service_set=PASS
+worker_env_file_removed=true
+worker_build_removed=true
+worker_compose_image=sha256:d98e078cd3ed24079f7623a6a3ce7e6e5df441b313141907e9af480592f15989
+postgres_valkey_up_wait_exit_status=0
+create_fresh_database_as_postgres_exit_status=0
+migration_command=containerized Alembic upgrade using MIGRATION_DATABASE_URL; its value and DSN were omitted
+owner_migrations_in_app_image_exit_status=0
+default_up_wait_exit_status=0
+compose_ps_services_exit_status=0
+running_compose_services=postgres,valkey,worker
+service=postgres container=sprint011-default-final-postgres-1 state=running health=healthy image_id=sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972 published_ports=127.0.0.1:46969->5432/tcp
+service=valkey container=sprint011-default-final-valkey-1 state=running health=healthy image_id=sha256:dd30c59c2b2a598e83308095220a31d6d93d64c40a839c702cb1e98c8e220660 published_ports=127.0.0.1:47747->6379/tcp
+service=worker container=sprint011-default-final-worker-1 state=running health=healthy image_id=sha256:d98e078cd3ed24079f7623a6a3ce7e6e5df441b313141907e9af480592f15989 published_ports=none
+worker_image_identity=PASS
+owned_project_volume_list_exit_status=0
+fresh_project_volumes=sprint011-default-final_objects,sprint011-default-final_pgdata_trixie,sprint011-default-final_valkey_data
+no_kafka_running=true
+model_requests=none; models profile stayed disabled and no weights were downloaded
+all_default_services_healthy=true
+secrets_or_dsn_passwords_printed=no
+own_project_stop_exit_status=0
+owned_volumes_preserved=yes (no down or volume removal issued)

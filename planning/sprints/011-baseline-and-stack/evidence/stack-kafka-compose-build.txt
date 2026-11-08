@@ -1,0 +1,108 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 672B done
+#1 DONE 0.0s
+
+#2 [kafka internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.82kB 0.0s done
+#2 DONE 0.1s
+
+#3 [kafka-topics internal] load metadata for docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+#3 DONE 0.1s
+
+#4 [kafka internal] load .dockerignore
+#4 transferring context:
+#4 transferring context: 279B 0.0s done
+#4 DONE 0.0s
+
+#5 [kafka 2/8] ADD --checksum=sha256:3b0bd7aaac36d49216f47d025f303dafb6da8d05bd258f71900d3b6156d36012 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libcrypto3-3.5.9-r0.apk
+#5 DONE 0.0s
+
+#6 [kafka 7/8] ADD --checksum=sha256:cdb3762116994f767cd1da423fa8004bd36b2e3802e3a1343786a40f00a5030e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libssl3-3.5.9-r0.apk
+#6 DONE 0.0s
+
+#7 [kafka 6/8] ADD --checksum=sha256:b7e30bda67ab5eeadf45ebb1e745f3ca685a84b89477ae8b487bc7c5275fd27e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/openssl-3.5.9-r0.apk /tmp/security-upgrade/aarch64/openssl-3.5.9-r0.apk
+#7 DONE 0.0s
+
+#8 [kafka 5/8] ADD --checksum=sha256:b5ad11f5955b3b7ddfd8c32e8c1fdd79878d208bb4dfa9bbd8f35ddc59187242 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libssl3-3.5.9-r0.apk
+#8 DONE 0.0s
+
+#9 [kafka 4/8] ADD --checksum=sha256:9c82c86f051f3372445ecdbae5068ccc39dbc423ba8f779eaa84549fef1cfc77 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libcrypto3-3.5.9-r0.apk
+#9 DONE 0.0s
+
+#10 [kafka 3/8] ADD --checksum=sha256:80332be2dcd7a9a0408a1eeca8efd4b66adf8f79d1e99d7022d3be4a34433c4a https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/openssl-3.5.9-r0.apk /tmp/security-upgrade/x86_64/openssl-3.5.9-r0.apk
+#10 DONE 0.0s
+
+#11 [kafka-topics 1/8] FROM docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+#11 resolve docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837 0.1s done
+#11 resolve docker.io/apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837 0.1s done
+#11 DONE 0.1s
+
+#12 [kafka-topics 7/8] ADD --checksum=sha256:cdb3762116994f767cd1da423fa8004bd36b2e3802e3a1343786a40f00a5030e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libssl3-3.5.9-r0.apk
+#12 CACHED
+
+#13 [kafka-topics 2/8] ADD --checksum=sha256:3b0bd7aaac36d49216f47d025f303dafb6da8d05bd258f71900d3b6156d36012 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libcrypto3-3.5.9-r0.apk
+#13 CACHED
+
+#14 [kafka-topics 3/8] ADD --checksum=sha256:80332be2dcd7a9a0408a1eeca8efd4b66adf8f79d1e99d7022d3be4a34433c4a https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/openssl-3.5.9-r0.apk /tmp/security-upgrade/x86_64/openssl-3.5.9-r0.apk
+#14 CACHED
+
+#15 [kafka-topics 4/8] ADD --checksum=sha256:9c82c86f051f3372445ecdbae5068ccc39dbc423ba8f779eaa84549fef1cfc77 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libcrypto3-3.5.9-r0.apk
+#15 CACHED
+
+#16 [kafka-topics 5/8] ADD --checksum=sha256:b5ad11f5955b3b7ddfd8c32e8c1fdd79878d208bb4dfa9bbd8f35ddc59187242 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libssl3-3.5.9-r0.apk
+#16 CACHED
+
+#17 [kafka-topics 6/8] ADD --checksum=sha256:b7e30bda67ab5eeadf45ebb1e745f3ca685a84b89477ae8b487bc7c5275fd27e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/openssl-3.5.9-r0.apk /tmp/security-upgrade/aarch64/openssl-3.5.9-r0.apk
+#17 CACHED
+
+#18 [kafka-topics 8/8] RUN set -eu;     arch="$(apk --print-arch)";     case "$arch" in x86_64|aarch64) ;; *) echo "Unsupported APK architecture" >&2; exit 1 ;; esac;     cd /tmp/security-upgrade;     apk add --no-network --no-cache "$arch/"*.apk;     cd /;     rm -rf /tmp/security-upgrade
+#18 CACHED
+
+#13 [kafka 2/8] ADD --checksum=sha256:3b0bd7aaac36d49216f47d025f303dafb6da8d05bd258f71900d3b6156d36012 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libcrypto3-3.5.9-r0.apk
+#13 CACHED
+
+#15 [kafka 4/8] ADD --checksum=sha256:9c82c86f051f3372445ecdbae5068ccc39dbc423ba8f779eaa84549fef1cfc77 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libcrypto3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libcrypto3-3.5.9-r0.apk
+#15 CACHED
+
+#12 [kafka 7/8] ADD --checksum=sha256:cdb3762116994f767cd1da423fa8004bd36b2e3802e3a1343786a40f00a5030e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/aarch64/libssl3-3.5.9-r0.apk
+#12 CACHED
+
+#14 [kafka 3/8] ADD --checksum=sha256:80332be2dcd7a9a0408a1eeca8efd4b66adf8f79d1e99d7022d3be4a34433c4a https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/openssl-3.5.9-r0.apk /tmp/security-upgrade/x86_64/openssl-3.5.9-r0.apk
+#14 CACHED
+
+#16 [kafka 5/8] ADD --checksum=sha256:b5ad11f5955b3b7ddfd8c32e8c1fdd79878d208bb4dfa9bbd8f35ddc59187242 https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libssl3-3.5.9-r0.apk /tmp/security-upgrade/x86_64/libssl3-3.5.9-r0.apk
+#16 CACHED
+
+#17 [kafka 6/8] ADD --checksum=sha256:b7e30bda67ab5eeadf45ebb1e745f3ca685a84b89477ae8b487bc7c5275fd27e https://dl-cdn.alpinelinux.org/alpine/v3.23/main/aarch64/openssl-3.5.9-r0.apk /tmp/security-upgrade/aarch64/openssl-3.5.9-r0.apk
+#17 CACHED
+
+#19 [kafka] exporting to image
+#19 exporting layers 0.1s done
+#19 exporting manifest sha256:bf8b9b6e5a1001cc99726979b4dfb6e2da945a979d18fdfa68c5695b77aaee8d done
+#19 exporting config sha256:59da7dff9d974098e8423c5640ddab4023bb4bf8c627a2f2da73fc8ba9160d3a 0.0s done
+#19 exporting attestation manifest sha256:a5e991b4e4b9b503162242c6f76e0b915113f8df8d1eb8df3de931cc995681c6
+#19 exporting attestation manifest sha256:a5e991b4e4b9b503162242c6f76e0b915113f8df8d1eb8df3de931cc995681c6 0.2s done
+#19 exporting manifest list sha256:e850f3c91dcfdbd8631949f3e15386632808f32eb8d1dd643a627877d4790520
+#19 exporting manifest list sha256:e850f3c91dcfdbd8631949f3e15386632808f32eb8d1dd643a627877d4790520 0.2s done
+#19 naming to docker.io/library/sprint011-stack-kafka:latest
+#19 naming to docker.io/library/sprint011-stack-kafka:latest 0.0s done
+#19 unpacking to docker.io/library/sprint011-stack-kafka:latest 0.2s done
+#19 DONE 1.0s
+
+#20 [kafka-topics] exporting to image
+#20 exporting layers 0.1s done
+#20 exporting manifest sha256:bf8b9b6e5a1001cc99726979b4dfb6e2da945a979d18fdfa68c5695b77aaee8d 0.0s done
+#20 exporting config sha256:59da7dff9d974098e8423c5640ddab4023bb4bf8c627a2f2da73fc8ba9160d3a 0.0s done
+#20 exporting attestation manifest sha256:d83c86b0ad20c87de776fcd0e4065cb3c1b6a0b197977eda0af77475e1406912 0.3s done
+#20 exporting manifest list sha256:721bbd4a88da59c150117e2855e2779a28568488ec808f9183466d0ed938baf6 0.0s done
+#20 naming to docker.io/library/sprint011-stack-kafka-topics:latest 0.0s done
+#20 unpacking to docker.io/library/sprint011-stack-kafka-topics:latest 0.2s done
+#20 DONE 1.2s
+
+#21 [kafka] resolving provenance for metadata file
+#21 DONE 0.1s
+
+#22 [kafka-topics] resolving provenance for metadata file
+#22 DONE 0.0s
+ kafka-topics  Built
+ kafka  Built

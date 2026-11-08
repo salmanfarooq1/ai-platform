@@ -1,0 +1,73 @@
+.ss.ss.ss.ss.ss.ss.ss.ss.ss.ss.ss.ss..s.s.s.s.s.ssssss......s........... [  4%]
+..s...s...s...s...s........s.s.s.s.s.s.s.s.s.s...............s..s..s..s. [  9%]
+.........sssss..s..................sssssssssssssssssssssssssssssssssssss [ 13%]
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 18%]
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 22%]
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 27%]
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 31%]
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 36%]
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 40%]
+sssssssssssssssssssss.....s.sss...ss.sssssssssssssssssssssssssssssssssss [ 45%]
+ssssssssssssssssssssssssssssssssss.sssssssssssssssssssssssssssssssssssss [ 49%]
+ssssssssssssssssssssssssssssss.ssssssssss.sssssss....................... [ 54%]
+.................................................F.F.................... [ 58%]
+................F....................................................... [ 63%]
+........................................................................ [ 67%]
+........................................................................ [ 72%]
+........................................................................ [ 76%]
+........................................................................ [ 81%]
+........................................................................ [ 85%]
+........................................................................ [ 90%]
+........................................................................ [ 95%]
+........................................................................ [ 99%]
+.......                                                                  [100%]
+=================================== FAILURES ===================================
+____________________ test_public_preview_disables_reranker _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x71737c053c90>
+
+    @pytest.mark.unit
+    def test_public_preview_disables_reranker(monkeypatch):
+        monkeypatch.setenv("MODE", "public-preview")
+        # Sprint 002: hosted modes require explicit DSNs (no placeholder defaults).
+        monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
+        monkeypatch.setenv("REDIS_URL", "redis://cache.example.test:6379")
+        monkeypatch.setenv("RECEIPT_SIGNING_KEY", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")  # hosted modes need one (Sprint 008)
+        reloaded = importlib.reload(config)
+>       assert reloaded.FEATURES["reranker_enabled"] is False
+E       assert True is False
+
+tests/unit/test_config_mode.py:25: AssertionError
+___________________________ test_unknown_mode_raises ___________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x717377706810>
+
+    @pytest.mark.unit
+    def test_unknown_mode_raises(monkeypatch):
+        monkeypatch.setenv("MODE", "demo")
+>       with pytest.raises(ValueError, match="public-preview"):
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_config_mode.py:39: Failed
+______________ test_the_product_docs_have_no_broken_link_or_path _______________
+
+    def test_the_product_docs_have_no_broken_link_or_path():
+        problems = checker.check()
+>       assert not problems, "\n".join(problems)
+E       AssertionError: docs/learning_docs/week1_learnings.md: path does not exist (`scripts/lab_1.5_integration_test.py`)
+E         docs/learning_docs/week3_learnings.md: path does not exist (`schema.sql`)
+E         docs/learning_docs/week3_learnings.md: path does not exist (`bulk_ops.py`)
+E       assert not ['docs/learning_docs/week1_learnings.md: path does not exist (`scripts/lab_1.5_integration_test.py`)', 'docs/learning_....md: path does not exist (`schema.sql`)', 'docs/learning_docs/week3_learnings.md: path does not exist (`bulk_ops.py`)']
+
+tests/unit/test_docs_links.py:24: AssertionError
+=============================== warnings summary ===============================
+tests/contracts/test_llm_contract.py::test_complete_returns_a_typed_completion[fake]
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_config_mode.py::test_public_preview_disables_reranker
+FAILED tests/unit/test_config_mode.py::test_unknown_mode_raises - Failed: DID...
+FAILED tests/unit/test_docs_links.py::test_the_product_docs_have_no_broken_link_or_path
+3 failed, 878 passed, 710 skipped, 1 warning in 146.56s (0:02:26)

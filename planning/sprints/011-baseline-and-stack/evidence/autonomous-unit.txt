@@ -1,0 +1,56 @@
+........................................................................ [  8%]
+.............F....F..................................................... [ 16%]
+........................................................................ [ 25%]
+........................................................................ [ 33%]
+........................................................................ [ 41%]
+........................................................................ [ 50%]
+........................................................................ [ 58%]
+........................................................................ [ 66%]
+.....F.................................................................. [ 75%]
+........................................................................ [ 83%]
+........................................................................ [ 91%]
+........................................................................ [100%]
+=================================== FAILURES ===================================
+_______________ test_only_live_minio_skips_of_the_contract_pass ________________
+tests/unit/test_check_skips.py:30: in test_only_live_minio_skips_of_the_contract_pass
+    assert check_skips.check(report(tmp_path, minio_cases(10)), expect=10) == []
+E   AssertionError: assert ['unexpected ...io.sh))', ...] == []
+E     
+E     Left contains 11 more items, first extra item: 'unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_0[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))'
+E     Use -v to get more diff
+_______________ test_the_command_exits_non_zero_on_a_bad_report ________________
+tests/unit/test_check_skips.py:58: in test_the_command_exits_non_zero_on_a_bad_report
+    assert check_skips.main([report(tmp_path, minio_cases(10)), "--expect", "10"]) == 0
+E   AssertionError: assert 1 == 0
+E    +  where 1 = <function main at 0x7de57f80e160>(['/tmp/pytest-of-ubuntu/pytest-21/test_the_command_exits_non_zer0/report.xml', '--expect', '10'])
+E    +    where <function main at 0x7de57f80e160> = check_skips.main
+----------------------------- Captured stdout call -----------------------------
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_0[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_1[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_2[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_3[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_4[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_5[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_6[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_7[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_8[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+unexpected or ambiguous skip: tests.contracts.test_object_store_contract::test_case_9[minio] (live MinIO not available here (image not pullable); set MINIO_ENDPOINT (scripts/verify/minio.sh))
+expected exactly 10 skips for tests.contracts.test_object_store_contract [seaweedfs, found 0
+__ test_prometheus_and_grafana_only_run_under_the_profile_with_pinned_images ___
+tests/unit/test_observability_profile.py:23: in test_prometheus_and_grafana_only_run_under_the_profile_with_pinned_images
+    assert re.search(r":v?\d+\.\d+\.\d+@sha256:[0-9a-f]{64}$", image), f"{image} needs a version and digest"
+E   AssertionError: grafana/grafana:13.2.4-distroless-slim@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b needs a version and digest
+E   assert None
+E    +  where None = <function search at 0x7de5b82c9ee0>(':v?\\d+\\.\\d+\\.\\d+@sha256:[0-9a-f]{64}$', 'grafana/grafana:13.2.4-distroless-slim@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b')
+E    +    where <function search at 0x7de5b82c9ee0> = re.search
+=============================== warnings summary ===============================
+tests/unit/test_eval_gate.py::test_the_suite_scores_what_the_baseline_says
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_check_skips.py::test_only_live_minio_skips_of_the_contract_pass
+FAILED tests/unit/test_check_skips.py::test_the_command_exits_non_zero_on_a_bad_report
+FAILED tests/unit/test_observability_profile.py::test_prometheus_and_grafana_only_run_under_the_profile_with_pinned_images
+3 failed, 861 passed, 845 deselected, 1 warning in 151.44s (0:02:31)

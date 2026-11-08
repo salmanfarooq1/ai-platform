@@ -1,0 +1,4 @@
+go version go1.27.3 linux/amd64
+go: downloading golang.org/x/net v0.60.0
+go: downloading golang.org/x/crypto v0.52.0
+go: golang.org/x/net@v0.60.0 requires golang.org/x/crypto@v0.57.0, not golang.org/x/crypto@v0.52.0

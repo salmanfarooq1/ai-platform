@@ -1,0 +1,64 @@
+Final integration runner: python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+Network: sprint011a_default; only the existing isolated stores; no published test-runner ports.
+Mounted locked site-packages read-only; repository mounted for JUnit output.
+Store configuration: TEST_DATABASE_ADMIN_URL and TEST_REDIS_URL; values omitted.
+Loopback-only network guard remains unchanged. Scratch proxy source follows.
+Proxy SHA256: b0fe2af2488457641b6ee12b8ff9986df244b5da12216c8a55e8214a3d079872
+"""Run unchanged network-guarded tests beside stores via loopback-only proxies."""
+import asyncio
+import socket
+import subprocess
+import sys
+import time
+
+
+async def proxy():
+    async def handle(reader, writer, host, port):
+        upstream = None
+        try:
+            remote_reader, upstream = await asyncio.open_connection(host, port)
+
+            async def copy(source, destination):
+                while data := await source.read(65536):
+                    destination.write(data)
+                    await destination.drain()
+                destination.close()
+
+            await asyncio.gather(copy(reader, upstream), copy(remote_reader, writer))
+        except (ConnectionError, OSError):
+            pass
+        finally:
+            writer.close()
+            if upstream:
+                upstream.close()
+
+    servers = []
+    for local_port, host, port in ((15432, 'postgres', 5432), (16379, 'redis', 6379)):
+        async def accepted(reader, writer, host=host, port=port):
+            await handle(reader, writer, host, port)
+        servers.append(await asyncio.start_server(accepted, '127.0.0.1', local_port))
+    await asyncio.gather(*(server.serve_forever() for server in servers))
+
+
+if sys.argv[1:] == ['proxy']:
+    asyncio.run(proxy())
+else:
+    process = subprocess.Popen([sys.executable, __file__, 'proxy'])
+    try:
+        for _ in range(100):
+            try:
+                with socket.create_connection(('127.0.0.1', 16379), timeout=1):
+                    break
+            except OSError:
+                time.sleep(0.1)
+        else:
+            raise RuntimeError('Local test proxy did not become ready')
+        raise SystemExit(subprocess.call([sys.executable, '-m', 'pytest', *sys.argv[1:]]))
+    finally:
+        process.terminate()
+        process.wait(timeout=10)
+3.11.17 (main, Oct  6 2026, 02:01:58) [GCC 12.2.0]
+mcp 2.2.0
+mcp-types 2.2.0
+certifi 2026.10.19
+litellm 1.103.2

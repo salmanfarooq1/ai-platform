@@ -1,0 +1,25 @@
+default: postgres, valkey, worker
+  postgres: 127.0.0.1:5432->5432
+  valkey: 127.0.0.1:6379->6379
+Configuration and loopback bindings passed.
+models: ollama, ollama-pull, postgres, valkey, worker
+  ollama: 127.0.0.1:11434->11434
+  postgres: 127.0.0.1:5432->5432
+  valkey: 127.0.0.1:6379->6379
+Configuration and loopback bindings passed.
+streams: kafka, kafka-topics, postgres, valkey, worker
+  kafka: 127.0.0.1:19092->19092
+  postgres: 127.0.0.1:5432->5432
+  valkey: 127.0.0.1:6379->6379
+Configuration and loopback bindings passed.
+lake: postgres, seaweedfs, seaweedfs-init, valkey, worker
+  postgres: 127.0.0.1:5432->5432
+  seaweedfs: 127.0.0.1:8333->8333
+  valkey: 127.0.0.1:6379->6379
+Configuration and loopback bindings passed.
+observability: grafana, postgres, prometheus, valkey, worker
+  grafana: 127.0.0.1:3000->3000
+  postgres: 127.0.0.1:5432->5432
+  prometheus: 127.0.0.1:9090->9090
+  valkey: 127.0.0.1:6379->6379
+Configuration and loopback bindings passed.

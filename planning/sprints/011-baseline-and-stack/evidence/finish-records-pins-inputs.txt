@@ -1,0 +1,17 @@
+Final recipe and image inputs; image references are captured by finish-records-docs-pins.txt.
+
+Ollama security rebuild:
+- docker/ollama/Dockerfile uses golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132 and ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b.
+- Source: github.com/ollama/ollama v0.40.7 ZIP, SHA-256 f94b72d6dda09b5e509f09120a7eeede75fbef26c01c674418f089c8da21fc19 (Docker ADD checksum).
+- Frozen modules: docker/ollama/security.go.mod SHA-256 cc55009218a2fe05e8a7b27769a9da92bee463a4f99dc903f1587ce764b3db41; security.go.sum SHA-256 477573ba007075eb68d4de001cb600047a87741ffdeb90d584a521b1ccd67049.
+- Build sets GOTOOLCHAIN=local; checks lock hashes before/after download, runs go mod verify, builds -mod=readonly, records go version -m and copies Go/module notices.
+- Final scan and SBOM: architect-ollama-final-scan.txt and architect-ollama-final.cdx.json; final scan status/result also in architect-ollama-final-scan-result.json.
+
+SeaweedFS security rebuild:
+- docker/seaweedfs/Dockerfile uses golang:1.26.9-alpine3.23@sha256:6750308561953d451210ed1a8086d36c8c8bdcbf672d38d9d0d424b8a7a0216c and chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882.
+- Source: github.com/seaweedfs/seaweedfs v0.0.0-20260914013155-c5073360007d ZIP, SHA-256 d7a1ef1072bed62b4d23c0fa160d7cca1ce4013b191081166865651af8e7c10d (Docker ADD checksum; commit c5073360007d).
+- Frozen modules: docker/seaweedfs/security.go.mod SHA-256 88eb615c8c576e12e99804af92379f3ffbd46afebd79853f55f3a2c4848a594d; security.go.sum SHA-256 3e75f11d11bc5b7fdb8350530272180e3ee1573865e220e5a5881bc80c8d203f. Selected security closure in lock: golang.org/x/net v0.60.0, golang.org/x/crypto v0.57.0; evidence stack-seaweed-module-delta.diff.
+- Build sets GOTOOLCHAIN=local, verifies downloaded modules and lock hashes, builds -mod=readonly, copies licenses/notices.
+- Final scan/SBOM: stack-seaweedfs-final-scan.txt and stack-seaweedfs-final-sbom.cdx.json.
+
+Age/release-date record: the current pin evidence has no primary project release dates for Go toolchains 1.27.3 / 1.26.9, Ollama 0.40.7, or the selected x/net 0.60.0 / x/crypto 0.57.0 closure. No age exception is asserted here; root review should attach verified primary dates or flag any qualifying under-two-week pin explicitly. Registry publication metadata is not treated as a project release date.

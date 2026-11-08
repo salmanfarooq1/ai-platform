@@ -1,0 +1,183 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Playwright.Dockerfile
+#1 transferring dockerfile: 676B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/gap-supply-chain:scan
+#2 DONE 0.1s
+
+#3 [internal] load metadata for mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a
+#3 DONE 0.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 269B 0.0s done
+#4 DONE 0.0s
+
+#5 [stage-1 1/7] FROM mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a
+#5 resolve mcr.microsoft.com/playwright:v1.56.1-noble@sha256:f1e7e01021efd65dd1a2c56064be399f3e4de00fd021ac561325f2bfbb2b837a 0.1s done
+#5 DONE 0.1s
+
+#6 [backend 1/1] FROM docker.io/library/gap-supply-chain:scan@sha256:525896a9923a19e5ec82d8b68959a044543e3e608ddd98decd56f99ed134b457
+#6 resolve docker.io/library/gap-supply-chain:scan@sha256:525896a9923a19e5ec82d8b68959a044543e3e608ddd98decd56f99ed134b457 0.1s done
+#6 CACHED
+
+#7 [stage-1 2/7] COPY --from=backend /usr/local /usr/local
+#7 CACHED
+
+#8 [stage-1 3/7] RUN python3.11 -m venv /opt/tools && /opt/tools/bin/pip install poetry==2.3.3
+#8 CACHED
+
+#9 [internal] load build context
+#9 transferring context: 68B done
+#9 DONE 0.0s
+
+#10 [stage-1 4/7] COPY --from=backend /app/.venv /app/.venv
+#10 DONE 5.8s
+
+#11 [stage-1 5/7] WORKDIR /workspace
+#11 DONE 0.3s
+
+#12 [stage-1 6/7] COPY pyproject.toml poetry.lock ./
+#12 DONE 0.1s
+
+#13 [stage-1 7/7] RUN poetry install --only main,dev,supply-chain
+#13 5.245 Installing dependencies from lock file
+#13 6.426 
+#13 6.426 Package operations: 58 installs, 0 updates, 0 removals
+#13 6.426 
+#13 6.433   - Installing arrow (1.4.0)
+#13 6.435   - Installing asgi-lifespan (2.1.0)
+#13 6.437   - Installing ast-serialize (0.12.1)
+#13 6.440   - Installing backoff (2.2.1)
+#13 6.444   - Installing boolean-py (5.0)
+#13 6.465   - Installing chardet (7.6.0)
+#13 6.474   - Installing coverage (7.15.2)
+#13 6.475   - Installing cyclonedx-bom (7.5.0)
+#13 6.484   - Installing cyclonedx-python-lib (11.12.0)
+#13 6.501   - Installing deepeval (4.0.8)
+#13 6.510   - Installing execnet (2.1.2)
+#13 6.514   - Installing defusedxml (0.7.1)
+#13 6.528   - Installing fqdn (1.6.0)
+#13 6.549   - Installing grpcio (1.82.1)
+#13 6.636   - Installing hypothesis (6.168.3)
+#13 6.644   - Installing iniconfig (2.3.0)
+#13 9.724   - Installing isoduration (20.11.0)
+#13 9.842   - Installing lark (1.3.1)
+#13 9.899   - Installing librt (0.16.0)
+#13 10.17   - Installing license-expression (30.4.4)
+#13 10.34   - Installing lxml (6.1.3)
+#13 10.66   - Installing mypy (2.4.0)
+#13 10.70   - Installing mypy-extensions (1.1.0)
+#13 11.23   - Installing nest-asyncio (1.6.0)
+#13 12.03   - Installing packageurl-python (0.17.6)
+#13 12.28   - Installing pathspec (1.1.1)
+#13 12.41   - Installing pip-licenses (5.5.5)
+#13 12.89   - Installing pip-requirements-parser (32.0.1)
+#13 13.90   - Installing pluggy (1.6.0)
+#13 14.18   - Installing portalocker (3.2.0)
+#13 14.24   - Installing posthog (7.22.0)
+#13 14.56   - Installing prettytable (3.18.0)
+#13 14.74   - Installing prompt-toolkit (3.0.52)
+#13 14.77   - Installing py-serializable (2.1.0)
+#13 14.94   - Installing pyfiglet (1.0.4)
+#13 15.31   - Installing pyparsing (3.3.2)
+#13 15.88   - Installing pytest (9.1.1)
+#13 16.13   - Installing pytest-asyncio (1.4.0)
+#13 16.18   - Installing pytest-cov (7.1.0)
+#13 16.28   - Installing pytest-repeat (0.9.4)
+#13 16.38   - Installing pytest-rerunfailures (16.4)
+#13 17.57   - Installing pytest-xdist (3.8.0)
+#13 17.83   - Installing questionary (2.1.1)
+#13 17.85   - Installing rfc3339-validator (0.1.4)
+#13 17.90   - Installing rfc3986-validator (0.1.1)
+#13 18.11   - Installing rfc3987-syntax (1.1.0)
+#13 18.48   - Installing ruff (0.16.0)
+#13 19.56   - Installing sentry-sdk (2.64.0)
+#13 19.81   - Installing setuptools (83.0.0)
+#13 20.13   - Installing sortedcontainers (2.4.0)
+#13 20.46   - Installing tabulate (0.9.0)
+#13 20.69   - Installing types-psycopg2 (2.9.21.20260911)
+#13 21.28   - Installing types-requests (2.33.0.20260906)
+#13 21.84   - Installing tzdata (2026.5)
+#13 22.40   - Installing uri-template (1.3.0)
+#13 23.12   - Installing wcwidth (0.8.2)
+#13 24.19   - Installing webcolors (25.10.0)
+#13 24.46   - Installing wheel (0.47.0)
+#13 144.8 
+#13 144.8   TimeoutError
+#13 144.8 
+#13 144.8   The read operation timed out
+#13 144.8 
+#13 144.8   at /usr/local/lib/python3.11/ssl.py:1166 in read
+#13 144.8       1162│         if self._sslobj is None:
+#13 144.8       1163│             raise ValueError("Read on closed or unwrapped SSL socket.")
+#13 144.8       1164│         try:
+#13 144.8       1165│             if buffer is not None:
+#13 144.8     → 1166│                 return self._sslobj.read(len, buffer)
+#13 144.8       1167│             else:
+#13 144.8       1168│                 return self._sslobj.read(len)
+#13 144.8       1169│         except SSLError as x:
+#13 144.8       1170│             if x.args[0] == SSL_ERROR_EOF and self.suppress_ragged_eofs:
+#13 144.8 
+#13 144.8 The following error occurred when trying to handle this error:
+#13 144.8 
+#13 144.8 
+#13 144.8   ReadTimeoutError
+#13 144.8 
+#13 144.8   HTTPSConnectionPool(host='files.pythonhosted.org', port=443): Read timed out.
+#13 144.8 
+#13 144.8   at /opt/tools/lib/python3.11/site-packages/urllib3/response.py:934 in _error_catcher
+#13 144.9        930│ 
+#13 144.9        931│             except SocketTimeout as e:
+#13 144.9        932│                 # FIXME: Ideally we'd like to include the url in the ReadTimeoutError but
+#13 144.9        933│                 # there is yet no clean way to get at it from this context.
+#13 144.9     →  934│                 raise ReadTimeoutError(self._pool, None, "Read timed out.") from e  # type: ignore[arg-type]
+#13 144.9        935│ 
+#13 144.9        936│             except BaseSSLError as e:
+#13 144.9        937│                 # SSL errors related to framing/MAC get wrapped and reraised here
+#13 144.9        938│                 raise SSLError(e) from e
+#13 144.9 
+#13 144.9 The following error occurred when trying to handle this error:
+#13 144.9 
+#13 144.9 
+#13 144.9   ConnectionError
+#13 144.9 
+#13 144.9   HTTPSConnectionPool(host='files.pythonhosted.org', port=443): Read timed out.
+#13 144.9 
+#13 144.9   at /opt/tools/lib/python3.11/site-packages/requests/models.py:943 in generate
+#13 145.0        939│                     raise ChunkedEncodingError(e)
+#13 145.0        940│                 except DecodeError as e:
+#13 145.0        941│                     raise ContentDecodingError(e)
+#13 145.0        942│                 except ReadTimeoutError as e:
+#13 145.0     →  943│                     raise ConnectionError(e)
+#13 145.0        944│                 except SSLError as e:
+#13 145.0        945│                     raise RequestsSSLError(e)
+#13 145.0        946│             else:
+#13 145.0        947│                 # Standard file-like object.
+#13 145.0 
+#13 145.0 Cannot install mypy.
+#13 145.0 
+#13 145.0 Warning: The file chosen for install of deepeval 4.0.8 (deepeval-4.0.8-py3-none-any.whl) is yanked. Reason for being yanked: Broken login flow; use 4.0.9
+#13 ERROR: process "/bin/sh -c poetry install --only main,dev,supply-chain" did not complete successfully: exit code: 1
+------
+ > [stage-1 7/7] RUN poetry install --only main,dev,supply-chain:
+145.0        942│                 except ReadTimeoutError as e:
+145.0     →  943│                     raise ConnectionError(e)
+145.0        944│                 except SSLError as e:
+145.0        945│                     raise RequestsSSLError(e)
+145.0        946│             else:
+145.0        947│                 # Standard file-like object.
+145.0 
+145.0 Cannot install mypy.
+145.0 
+145.0 Warning: The file chosen for install of deepeval 4.0.8 (deepeval-4.0.8-py3-none-any.whl) is yanked. Reason for being yanked: Broken login flow; use 4.0.9
+------
+Playwright.Dockerfile:10
+--------------------
+   8 |     WORKDIR /workspace
+   9 |     COPY pyproject.toml poetry.lock ./
+  10 | >>> RUN poetry install --only main,dev,supply-chain
+  11 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c poetry install --only main,dev,supply-chain" did not complete successfully: exit code: 1

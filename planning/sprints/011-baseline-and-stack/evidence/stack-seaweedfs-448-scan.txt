@@ -1,0 +1,21 @@
+NAME              INSTALLED  FIXED IN         TYPE       VULNERABILITY   SEVERITY  EPSS         RISK  
+golang.org/x/net  v0.58.0    0.60.0           go-module  GO-2026-6612    Critical  0.6% (46th)  0.5   
+stdlib            go1.26.8   1.26.9           go-module  GO-2026-6612    Critical  0.6% (46th)  0.5   
+golang.org/x/net  v0.58.0    0.60.0           go-module  GO-2026-6603    High      0.6% (46th)  0.4   
+stdlib            go1.26.8   1.26.9           go-module  GO-2026-6603    High      0.6% (46th)  0.4   
+golang.org/x/net  v0.58.0    0.60.0           go-module  GO-2026-6611    High      0.6% (46th)  0.4   
+stdlib            go1.26.8   1.26.9           go-module  GO-2026-6611    High      0.6% (46th)  0.4   
+golang.org/x/net  v0.58.0    0.60.0           go-module  GO-2026-6617    High      0.4% (34th)  0.3   
+stdlib            go1.26.8   1.26.9           go-module  GO-2026-6617    High      0.4% (34th)  0.3   
+stdlib            go1.26.8   *1.26.9, 1.27.2  go-module  GO-2026-6608    High      0.4% (33rd)  0.3   
+stdlib            go1.26.8   *1.26.9, 1.27.2  go-module  GO-2026-6607    High      0.4% (32nd)  0.3   
+stdlib            go1.26.8   *1.26.9, 1.27.2  go-module  GO-2026-6609    High      0.4% (30th)  0.3   
+zlib              1.3.2-r0   1.3.2-r1         apk        CVE-2026-85091  High      0.4% (27th)  0.3   
+stdlib            go1.26.8   *1.26.9, 1.27.2  go-module  GO-2026-6613    High      0.3% (22nd)  0.2   
+stdlib            go1.26.8   *1.26.9, 1.27.2  go-module  GO-2026-6605    High      0.3% (22nd)  0.2   
+golang.org/x/net  v0.58.0    0.60.0           go-module  GO-2026-6610    High      0.3% (21st)  0.2   
+stdlib            go1.26.8   1.26.9           go-module  GO-2026-6610    High      0.3% (21st)  0.2   
+nghttp2-libs      1.69.0-r0  1.70.0-r0        apk        CVE-2026-58055  Medium    0.3% (15th)  0.1   
+stdlib            go1.26.8   *1.26.9, 1.27.2  go-module  GO-2026-6599    Medium    0.2% (9th)   0.1   
+stdlib            go1.26.8   *1.26.9, 1.27.2  go-module  GO-2026-6600    Medium    0.2% (9th)   0.1
+[0209] ERROR discovered vulnerabilities at or above the severity threshold

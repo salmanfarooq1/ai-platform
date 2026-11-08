@@ -1,0 +1,100 @@
+EE                                                                       [100%]
+==================================== ERRORS ====================================
+_________ ERROR at setup of test_sign_in_is_rate_limited_by_client_ip __________
+/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pytest_asyncio/plugin.py:558: in setup
+    ???
+/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pytest_asyncio/plugin.py:926: in pytest_fixture_setup
+    ???
+/home/ubuntu/ai-platform/tests/db_fixtures.py:71: in clean_state
+    ???
+tests/harness.py:81: in require_redis
+    client.ping()
+/usr/local/lib/python3.11/site-packages/redis/commands/core.py:2031: in ping
+    return self.execute_command("PING", **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/client.py:798: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/client.py:804: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/utils.py:258: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/connection.py:3163: in get_connection
+    connection.connect()
+/usr/local/lib/python3.11/site-packages/redis/connection.py:1007: in connect
+    self.retry.call_with_retry(
+/usr/local/lib/python3.11/site-packages/redis/retry.py:120: in call_with_retry
+    return do()
+           ^^^^
+/usr/local/lib/python3.11/site-packages/redis/connection.py:1008: in <lambda>
+    lambda: self.connect_check_health(
+/usr/local/lib/python3.11/site-packages/redis/connection.py:1034: in connect_check_health
+    sock = self._connect()
+           ^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/connection.py:1546: in _connect
+    for res in socket.getaddrinfo(
+/home/ubuntu/ai-platform/tests/conftest.py:84: in guarded_getaddrinfo
+    ???
+E   tests.fakes.NetworkBlockedError: Test tried to resolve 'redis'. Only loopback is allowed.
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Trust baseline: the decision hash chain, retention, eval runs and the metrics reads (Sprint 008).
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Sandboxed agent runs: the sandbox event log and the run tokens (Sprint 009).
+_ ERROR at setup of test_the_worker_process_starts_reports_health_and_stops_on_sigterm _
+/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pytest_asyncio/plugin.py:558: in setup
+    ???
+/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pytest_asyncio/plugin.py:926: in pytest_fixture_setup
+    ???
+/home/ubuntu/ai-platform/tests/db_fixtures.py:71: in clean_state
+    ???
+tests/harness.py:81: in require_redis
+    client.ping()
+/usr/local/lib/python3.11/site-packages/redis/commands/core.py:2031: in ping
+    return self.execute_command("PING", **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/client.py:798: in execute_command
+    return self._execute_command(*args, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/client.py:804: in _execute_command
+    conn = self.connection or pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/utils.py:258: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/connection.py:3163: in get_connection
+    connection.connect()
+/usr/local/lib/python3.11/site-packages/redis/connection.py:1007: in connect
+    self.retry.call_with_retry(
+/usr/local/lib/python3.11/site-packages/redis/retry.py:120: in call_with_retry
+    return do()
+           ^^^^
+/usr/local/lib/python3.11/site-packages/redis/connection.py:1008: in <lambda>
+    lambda: self.connect_check_health(
+/usr/local/lib/python3.11/site-packages/redis/connection.py:1034: in connect_check_health
+    sock = self._connect()
+           ^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/redis/connection.py:1546: in _connect
+    for res in socket.getaddrinfo(
+/home/ubuntu/ai-platform/tests/conftest.py:84: in guarded_getaddrinfo
+    ???
+E   tests.fakes.NetworkBlockedError: Test tried to resolve 'redis'. Only loopback is allowed.
+============================= slowest 2 durations ==============================
+1.19s setup    tests/e2e/test_web_edge.py::test_sign_in_is_rate_limited_by_client_ip
+0.09s teardown tests/integration/test_worker_process.py::test_the_worker_process_starts_reports_health_and_stops_on_sigterm
+=========================== short test summary info ============================
+ERROR tests/e2e/test_web_edge.py::test_sign_in_is_rate_limited_by_client_ip
+ERROR tests/integration/test_worker_process.py::test_the_worker_process_starts_reports_health_and_stops_on_sigterm
+2 errors in 3.46s
+
+runtime regression exit=1

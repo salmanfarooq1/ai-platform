@@ -1,0 +1,36 @@
+Non-default generated credentials; values are not recorded.
+ Container sprint011-stack-seaweedfs-1  Recreate
+ Container sprint011-stack-seaweedfs-1  Recreated
+ Container sprint011-stack-seaweedfs-1  Starting
+ Container sprint011-stack-seaweedfs-1  Started
+ Container sprint011-stack-seaweedfs-1  Waiting
+ Container sprint011-stack-seaweedfs-1  Healthy
+ Container sprint011-stack-seaweedfs-1  Running
+{
+  "version": 1,
+  "locations": [
+    {
+      "locationPrefix": "/buckets/",
+      "collection": "",
+      "replication": "",
+      "ttl": "",
+      "diskType": "",
+      "fsync": false,
+      "volumeGrowthCount": 1,
+      "readOnly": false,
+      "dataCenter": "",
+      "rack": "",
+      "dataNode": "",
+      "maxFileNameLength": 0,
+      "disableChunkDeletion": false,
+      "wormGracePeriodSeconds": "0",
+      "wormRetentionTimeSeconds": "0"
+    }
+  ]
+}
+create bucket under /buckets
+created bucket gap-local
+bucket owner: platform-local
+..........                                                               [100%]
+10 passed, 20 deselected in 3.58s
+Presigned SigV4 PUT and GET passed; SHA-256 6b74231eda8c98cbfc8bd5140816e6b8db6a18b24fa535448f297132d3a54e41

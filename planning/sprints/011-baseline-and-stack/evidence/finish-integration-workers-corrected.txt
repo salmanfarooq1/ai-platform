@@ -1,0 +1,9 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+______ test_the_worker_process_starts_reports_health_and_stops_on_sigterm ______
+tests/integration/test_worker_process.py:39: in test_the_worker_process_starts_reports_health_and_stops_on_sigterm
+    assert health.exists() and row.status == "failed" and row.error_code == "object_missing"
+E   AssertionError: assert (False)
+E    +  where False = exists()
+E    +    where exists = PosixPath('/tmp/pytest-of-root/pytest-0/test_the_worker_process_starts0/health').exists
+1 failed, 1 passed in 49.83s

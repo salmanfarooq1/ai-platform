@@ -1,0 +1,19 @@
+ Container sprint011-stack-kafka-1  Running
+WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+Created topic platform.gateway.decision.
+WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+Created topic platform.gateway.decision.dlq.
+WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+Created topic platform.ingest.completed.
+WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+Created topic platform.ingest.completed.dlq.
+WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+Created topic platform.gateway.purge.
+WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+Created topic platform.gateway.purge.dlq.
+platform.gateway.decision
+platform.gateway.decision.dlq
+platform.gateway.purge
+platform.gateway.purge.dlq
+platform.ingest.completed
+platform.ingest.completed.dlq

@@ -1,0 +1,18 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_npm_metadata_exception_never_matches_a_different_package_name[npm:fixture_name] _
+tests/unit/test_licence_gate.py:69: in test_npm_metadata_exception_never_matches_a_different_package_name
+    with pytest.raises(ValueError, match="not approved"):
+E   Failed: DID NOT RAISE ValueError
+----------------------------- Captured stderr call -----------------------------
+licence gate ok: 1 packages
+_ test_npm_metadata_exception_never_matches_a_different_package_name[npm:fixture.name] _
+tests/unit/test_licence_gate.py:69: in test_npm_metadata_exception_never_matches_a_different_package_name
+    with pytest.raises(ValueError, match="not approved"):
+E   Failed: DID NOT RAISE ValueError
+----------------------------- Captured stderr call -----------------------------
+licence gate ok: 1 packages
+=========================== short test summary info ============================
+FAILED tests/unit/test_licence_gate.py::test_npm_metadata_exception_never_matches_a_different_package_name[npm:fixture_name]
+FAILED tests/unit/test_licence_gate.py::test_npm_metadata_exception_never_matches_a_different_package_name[npm:fixture.name]
+2 failed, 10 deselected in 4.74s

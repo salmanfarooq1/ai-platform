@@ -1,0 +1,15 @@
+
+==================================== ERRORS ====================================
+_____________ ERROR collecting tests/unit/test_ui_proxy_config.py ______________
+tests/unit/test_ui_proxy_config.py:10: in <module>
+    NGINX = (ROOT / "ui" / "nginx.conf").read_text()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/workspace/ui/nginx.conf'
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+859 deselected, 1 error in 35.60s

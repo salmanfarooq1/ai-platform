@@ -1,0 +1,102 @@
+........................................................................ [  4%]
+.............................................................s..s..s..s. [  8%]
+.........sssss..s....................................................... [ 13%]
+........................................................................ [ 17%]
+......................................F
+=================================== FAILURES ===================================
+_ test_7_an_mcp_tool_denied_by_policy_is_an_mcp_error_and_a_decision_row_exists _
+
+app = <fastapi.applications.FastAPI object at 0x734a341c48d0>
+client = <httpx.AsyncClient object at 0x734a2e57a190>
+pool = <asyncpg.pool.Pool object at 0x734a3492af80>
+[test credential fixture redacted]
+database_url = 'postgresql://postgres:postgres@localhost:15432/gap_test_f280361f'
+fake_llm = <tests.fakes.FakeLLM object at 0x734a2ec9dcd0>
+fake_embeddings = <tests.fakes.FakeEmbeddings object at 0x734a2ec9d890>
+
+    async def test_7_an_mcp_tool_denied_by_policy_is_an_mcp_error_and_a_decision_row_exists(app, client, pool, tenant_a, database_url, fake_llm, fake_embeddings):
+        publish(database_url, tenant_a, {**ALL, "allowed_kbs": ["legal"]})
+    
+        reply = await _mcp_call(app, client, tenant_a.headers("full"), "search_documents", {"query": "retention", "namespace": "kyc_aml"})
+        result = reply["result"]
+        assert result["isError"] is True
+        text = result["content"][0]["text"]
+>       assert "kb_not_allowed" in text and "retention" not in text.replace("kb_not_allowed", "")  # reason yes, query no
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert ('kb_not_allowed' in 'Error executing tool search_documents')
+
+tests/e2e/test_gateway_e2e.py:274: AssertionError
+----------------------------- Captured stderr call -----------------------------
+ERROR [mcp.server.mcpserver.server] Tool 'search_documents' raised an unexpected exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/tools/base.py", line 176, in run
+    result = await self.fn_metadata.call_fn(self.fn, self.is_async, validated, pass_directly)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/utilities/func_metadata.py", line 163, in call_fn
+    return await fn(**kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/ai-platform/api/mcp/tools.py", line 89, in search_documents
+    await gate(
+  File "/home/ubuntu/ai-platform/api/mcp/context.py", line 62, in gate
+    await require(ctx, action)
+  File "/home/ubuntu/ai-platform/gateway/enforce.py", line 96, in require
+    raise GatewayDenied(decision)
+gateway.types.GatewayDenied: policy: kb_not_allowed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/server.py", line 433, in _handle_call_tool
+    return await self.call_tool(params.name, params.arguments or {}, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/server.py", line 539, in call_tool
+    return await self._tool_manager.call_tool(name, arguments, context, convert_result=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/tools/tool_manager.py", line 87, in call_tool
+    return await tool.run(arguments, context, convert_result=convert_result)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/tools/base.py", line 210, in run
+    raise UnexpectedToolError(f"Error executing tool {self.name}") from exc
+mcp.server.mcpserver.exceptions.UnexpectedToolError: Error executing tool search_documents
+------------------------------ Captured log call -------------------------------
+ERROR    mcp.server.mcpserver.server:server.py:446 Tool 'search_documents' raised an unexpected exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/tools/base.py", line 176, in run
+    result = await self.fn_metadata.call_fn(self.fn, self.is_async, validated, pass_directly)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/utilities/func_metadata.py", line 163, in call_fn
+    return await fn(**kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/ai-platform/api/mcp/tools.py", line 89, in search_documents
+    await gate(
+  File "/home/ubuntu/ai-platform/api/mcp/context.py", line 62, in gate
+    await require(ctx, action)
+  File "/home/ubuntu/ai-platform/gateway/enforce.py", line 96, in require
+    raise GatewayDenied(decision)
+gateway.types.GatewayDenied: policy: kb_not_allowed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/server.py", line 433, in _handle_call_tool
+    return await self.call_tool(params.name, params.arguments or {}, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/server.py", line 539, in call_tool
+    return await self._tool_manager.call_tool(name, arguments, context, convert_result=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/tools/tool_manager.py", line 87, in call_tool
+    return await tool.run(arguments, context, convert_result=convert_result)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/tools/base.py", line 210, in run
+    raise UnexpectedToolError(f"Error executing tool {self.name}") from exc
+mcp.server.mcpserver.exceptions.UnexpectedToolError: Error executing tool search_documents
+=============================== warnings summary ===============================
+tests/contracts/test_llm_contract.py::test_complete_returns_a_typed_completion[fake]
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/e2e/test_gateway_e2e.py::test_7_an_mcp_tool_denied_by_policy_is_an_mcp_error_and_a_decision_row_exists
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 316 passed, 10 skipped, 1 warning in 819.42s (0:13:39)

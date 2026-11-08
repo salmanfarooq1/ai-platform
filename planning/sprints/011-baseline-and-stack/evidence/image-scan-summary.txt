@@ -1,0 +1,19 @@
+Captured source: image-scan-before-timeout.txt
+Image gate passed: docker:gap-supply-chain:scan
+Image gate failed: docker:grafana/grafana:13.2.2@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0 (exit 2)
+Image gate failed: docker:pgvector/pgvector:0.8.7-pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a (exit 2)
+Image gate failed: docker:prom/prometheus:v3.14.0@sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0 (exit 2)
+Image gate passed: docker:redis/redis-stack-server:7.4.0-v8@sha256:798ab84d9f266936b034ab11c4d04a2b8e4b441884c5aa7d17ac951eefdf742a
+Image gate failed: docker:redpandadata/redpanda:v24.2.7@sha256:82a69763bef8d8b55ea5a520fa1b38f993908ef68946819ca1aed43541824c48 (exit 2)
+Completed wrapper status captured: False
+
+Captured source: image-scan.txt
+Image gate passed: docker:gap-supply-chain:scan
+Completed wrapper status captured: False
+
+Captured source: image-scan-ollama-retry.txt
+pull exit=0
+Completed wrapper status captured: False
+
+Four completed individual scans rejected fixable critical findings; no full image gate pass is established.
+The corrected full-run attempt and the Ollama scan were interrupted before completion.

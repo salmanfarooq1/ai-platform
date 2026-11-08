@@ -1,0 +1,108 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+______ test_expected_gateway_denial_exposes_only_catalogued_reason[tool] _______
+tests/unit/test_mcp_compat.py:36: in test_expected_gateway_denial_exposes_only_catalogued_reason
+    with pytest.raises(ToolError, match="^Error executing tool denied: kb_not_allowed$"):
+E   AssertionError: 
+E   - Error executing tool denied
+E   + Error executing tool denied: kb_not_allowed
+E   ?                            ++++++++++++++++
+____ test_expected_gateway_denial_exposes_only_catalogued_reason[resource] _____
+tests/unit/test_mcp_compat.py:40: in test_expected_gateway_denial_exposes_only_catalogued_reason
+    with pytest.raises(ResourceError, match="^kb_not_allowed$"):
+E   AssertionError: 
+E   - Error reading resource test://denied
+E   + kb_not_allowed
+__ test_unexpected_exception_is_masked_in_response_and_application_logs[tool] __
+tests/unit/test_mcp_compat.py:65: in test_unexpected_exception_is_masked_in_response_and_application_logs
+    assert sentinel not in caplog.text
+E   AssertionError: assert 'SENTINEL_PR...EPTION_VALUE' not in 'ERROR    mc...ol failing\n'
+E     
+E     'SENTINEL_PRIVATE_EXCEPTION_VALUE' is contained here:
+E       imeError: SENTINEL_PRIVATE_EXCEPTION_VALUE
+E       
+E       The above exception was the direct cause of the following exception:
+E       
+E       Traceback (most recent call last):...
+E     
+E     ...Full output truncated (12 lines hidden), use '-vv' to show
+------------------------------ Captured log call -------------------------------
+ERROR    mcp.server.mcpserver.server:server.py:446 Tool 'failing' raised an unexpected exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/tools/base.py", line 176, in run
+    result = await self.fn_metadata.call_fn(self.fn, self.is_async, validated, pass_directly)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/utilities/func_metadata.py", line 163, in call_fn
+    return await fn(**kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/ai-platform/tests/unit/test_mcp_compat.py", line 51, in failing
+    raise RuntimeError(sentinel)
+RuntimeError: SENTINEL_PRIVATE_EXCEPTION_VALUE
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/server.py", line 433, in _handle_call_tool
+    return await self.call_tool(params.name, params.arguments or {}, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/server.py", line 539, in call_tool
+    return await self._tool_manager.call_tool(name, arguments, context, convert_result=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/tools/tool_manager.py", line 87, in call_tool
+    return await tool.run(arguments, context, convert_result=convert_result)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/tools/base.py", line 210, in run
+    raise UnexpectedToolError(f"Error executing tool {self.name}") from exc
+mcp.server.mcpserver.exceptions.UnexpectedToolError: Error executing tool failing
+_ test_unexpected_exception_is_masked_in_response_and_application_logs[resource] _
+tests/unit/test_mcp_compat.py:65: in test_unexpected_exception_is_masked_in_response_and_application_logs
+    assert sentinel not in caplog.text
+E   AssertionError: assert 'SENTINEL_PR...EPTION_VALUE' not in 'ERROR    mc...://failing\n'
+E     
+E     'SENTINEL_PRIVATE_EXCEPTION_VALUE' is contained here:
+E       imeError: SENTINEL_PRIVATE_EXCEPTION_VALUE
+E       
+E       The above exception was the direct cause of the following exception:
+E       
+E       Traceback (most recent call last):...
+E     
+E     ...Full output truncated (6 lines hidden), use '-vv' to show
+------------------------------ Captured log call -------------------------------
+ERROR    mcp.server.mcpserver.server:server.py:462 Resource 'test://failing' raised an unexpected exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/server.py", line 600, in read_resource
+    content = cast(object, await resource.read())
+                           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/resources/types.py", line 84, in read
+    result = await fn()
+             ^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/pydantic/_internal/_validate_call.py", line 35, in wrapper_function
+    return await wrapper(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/ai-platform/tests/unit/test_mcp_compat.py", line 51, in failing
+    raise RuntimeError(sentinel)
+RuntimeError: SENTINEL_PRIVATE_EXCEPTION_VALUE
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/server.py", line 459, in _handle_read_resource
+    results = await self.read_resource(params.uri, context)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/lib/python3.11/site-packages/mcp/server/mcpserver/server.py", line 607, in read_resource
+    raise UnexpectedResourceError(f"Error reading resource {uri}") from exc
+mcp.server.mcpserver.exceptions.UnexpectedResourceError: Error reading resource test://failing
+__________ test_registered_tool_does_not_log_private_provider_failure __________
+tests/unit/test_mcp_compat.py:95: in test_registered_tool_does_not_log_private_provider_failure
+    assert result.is_error
+E   assert False
+E    +  where False = CallToolResult(meta=None, content=[TextContent(type='text', text='{"error": "SENTINEL_PRIVATE_PROVIDER_VALUE"}', annot... structured_content={'result': '{"error": "SENTINEL_PRIVATE_PROVIDER_VALUE"}'}, is_error=False, result_type='complete').is_error
+------------------------------ Captured log call -------------------------------
+ERROR    api.mcp.tools:tools.py:57 [mcp/list_namespaces] SENTINEL_PRIVATE_PROVIDER_VALUE
+=========================== short test summary info ============================
+FAILED tests/unit/test_mcp_compat.py::test_expected_gateway_denial_exposes_only_catalogued_reason[tool]
+FAILED tests/unit/test_mcp_compat.py::test_expected_gateway_denial_exposes_only_catalogued_reason[resource]
+FAILED tests/unit/test_mcp_compat.py::test_unexpected_exception_is_masked_in_response_and_application_logs[tool]
+FAILED tests/unit/test_mcp_compat.py::test_unexpected_exception_is_masked_in_response_and_application_logs[resource]
+FAILED tests/unit/test_mcp_compat.py::test_registered_tool_does_not_log_private_provider_failure
+5 failed in 17.79s

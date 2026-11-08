@@ -1,0 +1,166 @@
+FF..FFFFFFFFFF..FFF...FF...FF...F                                        [100%]
+=================================== FAILURES ===================================
+______ test_supply_chain_condition_covers_dependency_changes[paths0-True] ______
+tests/unit/test_supply_chain_controls.py:39: in test_supply_chain_condition_covers_dependency_changes
+    assert job_runs(workflow["jobs"]["supply-chain"]["if"], backend, frontend) is expected
+E   assert False is True
+E    +  where False = job_runs("${{ needs.changes.outputs.backend == 'true' }}", 'false', 'true')
+______ test_supply_chain_condition_covers_dependency_changes[paths1-True] ______
+tests/unit/test_supply_chain_controls.py:39: in test_supply_chain_condition_covers_dependency_changes
+    assert job_runs(workflow["jobs"]["supply-chain"]["if"], backend, frontend) is expected
+E   assert False is True
+E    +  where False = job_runs("${{ needs.changes.outputs.backend == 'true' }}", 'false', 'true')
+_________ test_missing_scope_does_not_skip_required_control[--failure] _________
+tests/unit/test_supply_chain_controls.py:46: in test_missing_scope_does_not_skip_required_control
+    assert job_runs(job["if"], backend, frontend, result)
+E   assert False
+E    +  where False = job_runs("${{ needs.changes.outputs.backend == 'true' }}", '', '', 'failure')
+_________ test_missing_scope_does_not_skip_required_control[--success] _________
+tests/unit/test_supply_chain_controls.py:46: in test_missing_scope_does_not_skip_required_control
+    assert job_runs(job["if"], backend, frontend, result)
+E   assert False
+E    +  where False = job_runs("${{ needs.changes.outputs.backend == 'true' }}", '', '', 'success')
+_ test_npm_cli_requires_exact_installed_production_inventory[inventory0-False---npm-metadata] _
+tests/unit/test_supply_chain_controls.py:90: in test_npm_cli_requires_exact_installed_production_inventory
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: licence gate ok: 0 packages
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...st-10/test_npm_cli_requires_exact_in0/metadata.json'], returncode=0, stdout='', stderr='licence gate ok: 0 packages\n').returncode
+_ test_npm_cli_requires_exact_installed_production_inventory[inventory0-False---npm-ignored] _
+tests/unit/test_supply_chain_controls.py:90: in test_npm_cli_requires_exact_installed_production_inventory
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: 
+E     licence gate ok: 0 packages
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...-10/test_npm_cli_requires_exact_in1/metadata.json'], returncode=0, stdout='\n', stderr='licence gate ok: 0 packages\n').returncode
+_ test_npm_cli_requires_exact_installed_production_inventory[inventory1-False---npm-metadata] _
+tests/unit/test_supply_chain_controls.py:90: in test_npm_cli_requires_exact_installed_production_inventory
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: licence gate ok: 1 packages
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...st-10/test_npm_cli_requires_exact_in2/metadata.json'], returncode=0, stdout='', stderr='licence gate ok: 1 packages\n').returncode
+_ test_npm_cli_requires_exact_installed_production_inventory[inventory1-False---npm-ignored] _
+tests/unit/test_supply_chain_controls.py:90: in test_npm_cli_requires_exact_installed_production_inventory
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: 
+E     licence gate ok: 1 packages
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...-10/test_npm_cli_requires_exact_in3/metadata.json'], returncode=0, stdout='\n', stderr='licence gate ok: 1 packages\n').returncode
+_ test_npm_cli_requires_exact_installed_production_inventory[inventory2-False---npm-metadata] _
+tests/unit/test_supply_chain_controls.py:90: in test_npm_cli_requires_exact_installed_production_inventory
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: licence gate ok: 2 packages
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...st-10/test_npm_cli_requires_exact_in4/metadata.json'], returncode=0, stdout='', stderr='licence gate ok: 2 packages\n').returncode
+_ test_npm_cli_requires_exact_installed_production_inventory[inventory2-False---npm-ignored] _
+tests/unit/test_supply_chain_controls.py:90: in test_npm_cli_requires_exact_installed_production_inventory
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: 
+E     licence gate ok: 2 packages
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...-10/test_npm_cli_requires_exact_in5/metadata.json'], returncode=0, stdout='\n', stderr='licence gate ok: 2 packages\n').returncode
+_ test_npm_cli_requires_exact_installed_production_inventory[inventory3-False---npm-metadata] _
+tests/unit/test_supply_chain_controls.py:90: in test_npm_cli_requires_exact_installed_production_inventory
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: licence gate ok: 3 packages
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...st-10/test_npm_cli_requires_exact_in6/metadata.json'], returncode=0, stdout='', stderr='licence gate ok: 3 packages\n').returncode
+_ test_npm_cli_requires_exact_installed_production_inventory[inventory3-False---npm-ignored] _
+tests/unit/test_supply_chain_controls.py:90: in test_npm_cli_requires_exact_installed_production_inventory
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: 
+E     licence gate ok: 3 packages
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...-10/test_npm_cli_requires_exact_in7/metadata.json'], returncode=0, stdout='\n', stderr='licence gate ok: 3 packages\n').returncode
+_____ test_missing_required_installation_fails_even_with_complete_metadata _____
+tests/unit/test_supply_chain_controls.py:100: in test_missing_required_installation_fails_even_with_complete_metadata
+    assert result.returncode != 0
+E   AssertionError: assert 0 != 0
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...st-10/test_missing_required_installa0/metadata.json'], returncode=0, stdout='', stderr='licence gate ok: 2 packages\n').returncode
+_ test_only_parsed_image_references_count[compose-example/probe:latest # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False] _
+tests/unit/test_supply_chain_controls.py:128: in test_only_parsed_image_references_count
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: docker-compose.yml:3: image: example/probe:latest # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+E     all registry images have @sha256; local worker uses build only
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nall registry images have @sha256; local worker uses build only\n', stderr='').returncode
+_ test_only_parsed_image_references_count[compose-"example/probe:latest" # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False] _
+tests/unit/test_supply_chain_controls.py:128: in test_only_parsed_image_references_count
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: docker-compose.yml:3: image: "example/probe:latest" # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+E     all registry images have @sha256; local worker uses build only
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nall registry images have @sha256; local worker uses build only\n', stderr='').returncode
+_ test_only_parsed_image_references_count[workflow-example/probe:latest # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False] _
+tests/unit/test_supply_chain_controls.py:128: in test_only_parsed_image_references_count
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: .github/workflows/tests.yml:5: image: example/probe:latest # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+E     all registry images have @sha256; local worker uses build only
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nall registry images have @sha256; local worker uses build only\n', stderr='').returncode
+_ test_only_parsed_image_references_count[workflow-"example/probe:latest" # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False] _
+tests/unit/test_supply_chain_controls.py:128: in test_only_parsed_image_references_count
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: .github/workflows/tests.yml:5: image: "example/probe:latest" # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+E     all registry images have @sha256; local worker uses build only
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nall registry images have @sha256; local worker uses build only\n', stderr='').returncode
+_ test_only_parsed_image_references_count[dockerfile-example/probe:latest # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False] _
+tests/unit/test_supply_chain_controls.py:128: in test_only_parsed_image_references_count
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: Dockerfile:3: FROM --platform=linux/amd64 example/probe:latest # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+E     all registry images have @sha256; local worker uses build only
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nall registry images have @sha256; local worker uses build only\n', stderr='').returncode
+_ test_only_parsed_image_references_count[dockerfile-"example/probe:latest" # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False] _
+tests/unit/test_supply_chain_controls.py:128: in test_only_parsed_image_references_count
+    assert (result.returncode == 0) is valid, result.stdout + result.stderr
+E   AssertionError: Dockerfile:3: FROM --platform=linux/amd64 "example/probe:latest" # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+E     all registry images have @sha256; local worker uses build only
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-h4DdYFhm-py3.11/bin/python', '/tmp/pytest...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nall registry images have @sha256; local worker uses build only\n', stderr='').returncode
+_____ test_licence_failure_keeps_independent_controls_and_upload_eligible ______
+tests/unit/test_supply_chain_controls.py:134: in test_licence_failure_keeps_independent_controls_and_upload_eligible
+    shutil.copy(SOURCE / "scripts/supply_chain/run_checks.sh", chain / "run_checks.sh")
+../.pyenv/versions/3.11.0/lib/python3.11/shutil.py:419: in copy
+    copyfile(src, dst, follow_symlinks=follow_symlinks)
+../.pyenv/versions/3.11.0/lib/python3.11/shutil.py:256: in copyfile
+    with open(src, 'rb') as fsrc:
+         ^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/ubuntu/ai-platform/scratch/sprint011/rework-before/scripts/supply_chain/run_checks.sh'
+=========================== short test summary info ============================
+FAILED tests/unit/test_supply_chain_controls.py::test_supply_chain_condition_covers_dependency_changes[paths0-True]
+FAILED tests/unit/test_supply_chain_controls.py::test_supply_chain_condition_covers_dependency_changes[paths1-True]
+FAILED tests/unit/test_supply_chain_controls.py::test_missing_scope_does_not_skip_required_control[--failure]
+FAILED tests/unit/test_supply_chain_controls.py::test_missing_scope_does_not_skip_required_control[--success]
+FAILED tests/unit/test_supply_chain_controls.py::test_npm_cli_requires_exact_installed_production_inventory[inventory0-False---npm-metadata]
+FAILED tests/unit/test_supply_chain_controls.py::test_npm_cli_requires_exact_installed_production_inventory[inventory0-False---npm-ignored]
+FAILED tests/unit/test_supply_chain_controls.py::test_npm_cli_requires_exact_installed_production_inventory[inventory1-False---npm-metadata]
+FAILED tests/unit/test_supply_chain_controls.py::test_npm_cli_requires_exact_installed_production_inventory[inventory1-False---npm-ignored]
+FAILED tests/unit/test_supply_chain_controls.py::test_npm_cli_requires_exact_installed_production_inventory[inventory2-False---npm-metadata]
+FAILED tests/unit/test_supply_chain_controls.py::test_npm_cli_requires_exact_installed_production_inventory[inventory2-False---npm-ignored]
+FAILED tests/unit/test_supply_chain_controls.py::test_npm_cli_requires_exact_installed_production_inventory[inventory3-False---npm-metadata]
+FAILED tests/unit/test_supply_chain_controls.py::test_npm_cli_requires_exact_installed_production_inventory[inventory3-False---npm-ignored]
+FAILED tests/unit/test_supply_chain_controls.py::test_missing_required_installation_fails_even_with_complete_metadata
+FAILED tests/unit/test_supply_chain_controls.py::test_only_parsed_image_references_count[compose-example/probe:latest # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False]
+FAILED tests/unit/test_supply_chain_controls.py::test_only_parsed_image_references_count[compose-"example/probe:latest" # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False]
+FAILED tests/unit/test_supply_chain_controls.py::test_only_parsed_image_references_count[workflow-example/probe:latest # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False]
+FAILED tests/unit/test_supply_chain_controls.py::test_only_parsed_image_references_count[workflow-"example/probe:latest" # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False]
+FAILED tests/unit/test_supply_chain_controls.py::test_only_parsed_image_references_count[dockerfile-example/probe:latest # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False]
+FAILED tests/unit/test_supply_chain_controls.py::test_only_parsed_image_references_count[dockerfile-"example/probe:latest" # @sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-False]
+FAILED tests/unit/test_supply_chain_controls.py::test_licence_failure_keeps_independent_controls_and_upload_eligible
+20 failed, 13 passed in 10.74s

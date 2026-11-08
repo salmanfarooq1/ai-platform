@@ -1,0 +1,5 @@
+current 1.103.2
+lock-bearing revisions inspected 17
+historical versions ['1.103.2', '1.89.2']
+affected revisions []
+installed enterprise paths []

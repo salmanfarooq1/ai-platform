@@ -1,0 +1,7 @@
+..                                                                       [100%]
+============================= slowest 2 durations ==============================
+23.59s call     tests/integration/test_worker_process.py::test_the_worker_process_starts_reports_health_and_stops_on_sigterm
+9.67s setup    tests/e2e/test_web_edge.py::test_sign_in_is_rate_limited_by_client_ip
+2 passed in 35.20s
+
+runtime regression exit=0

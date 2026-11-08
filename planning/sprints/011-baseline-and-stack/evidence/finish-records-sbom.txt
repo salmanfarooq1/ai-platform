@@ -1,0 +1,4 @@
+$ scripts/supply_chain/sbom.sh
+sbom/npm.cdx.json: spec 1.6, 651 components; strict schema validation passed
+sbom/python.cdx.json: spec 1.6, 225 components; strict schema validation passed
+exit=0
