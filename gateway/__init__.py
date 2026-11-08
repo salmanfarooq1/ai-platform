@@ -5,8 +5,11 @@ A top-level package so it can split into its own service later. This module re-e
 from gateway.boundary import BoundaryWidenError, ExecutionBoundary, build_boundary
 from gateway.context import build_context
 from gateway.enforce import enforce, require
+from gateway.estimate import estimate_tokens
 from gateway.guardrails import check_output
+from gateway.limits import LIMITED_PATHS, record_cost, record_usage
 from gateway.policy import PolicyDocument, PolicyEngine, PolicyError, PythonPolicyEngine, load_active_policy
+from gateway.reasons import REASONS
 from gateway.types import (
     Action,
     ActionKind,
@@ -20,5 +23,6 @@ from gateway.types import (
 __all__ = [
     "Action", "ActionKind", "BoundaryWidenError", "Decision", "DependencyUnavailable", "EnforcementContext",
     "ExecutionBoundary", "GatewayDenied", "GatewayRuntime", "PolicyDocument", "PolicyEngine", "PolicyError",
-    "PythonPolicyEngine", "build_boundary", "build_context", "check_output", "enforce", "load_active_policy", "require",
+    "PythonPolicyEngine", "LIMITED_PATHS", "REASONS", "build_boundary", "build_context", "check_output",
+    "enforce", "estimate_tokens", "load_active_policy", "record_cost", "record_usage", "require",
 ]

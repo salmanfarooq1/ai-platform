@@ -2,9 +2,12 @@
 from dataclasses import dataclass
 
 from ports.cache import CachePort
+from ports.data_access import DataAccess
 from ports.embeddings import EmbeddingPort
 from ports.events import EventBus
+from ports.evidence import DecisionSink, EvidenceLookup
 from ports.knowledge import KnowledgeStore
+from ports.lineage import LineageEmitter
 from ports.llm import ChatModelPort, LLMPort
 from ports.objects import ObjectStore
 from ports.runtime import AgentRuntime
@@ -20,3 +23,7 @@ class Adapters:
     objects: ObjectStore
     events: EventBus
     runtime: AgentRuntime
+    decisions: DecisionSink
+    evidence: EvidenceLookup
+    data: DataAccess
+    lineage: LineageEmitter

@@ -52,10 +52,23 @@ def _tenant_id(cur: Any, slug: str) -> UUID:
     return UUID(str(row[0]))
 
 
-def create_tenant(conn: PgConnection, slug: str, name: str | None = None, default_kb: bool = True) -> UUID:
+def create_tenant(
+    conn: PgConnection, slug: str, name: str | None = None, *, default_kb: bool = True, deploy_shape: str,
+) -> UUID:
     if not slug or not slug.replace("-", "").replace("_", "").isalnum():
         raise AdminError("tenant slug must be letters, digits, '-' or '_'")
+    if deploy_shape not in {"single_tenant", "multi_tenant"}:
+        raise AdminError("deploy shape must be single_tenant or multi_tenant")
     with conn.cursor() as cur:
+        if deploy_shape == "single_tenant":
+            cur.execute("SELECT pg_advisory_xact_lock(847204, 12)")
+            cur.execute("SELECT count(*) FROM public.tenants")
+            count_row = cur.fetchone()
+            if count_row is None:
+                raise AdminError("tenant count is unavailable")
+            count = int(count_row[0])
+            if count >= 1:
+                raise AdminError("single_tenant deploy shape already contains a tenant; set DEPLOY_SHAPE=multi_tenant to add another")
         cur.execute("INSERT INTO tenants (slug, name) VALUES (%s, %s) RETURNING id", (slug, name or slug))
         tenant_id = _returned_id(cur)
         if default_kb:

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from core.identity.models import Principal
-from ports import CachePort, EventBus
+from ports import CachePort, DecisionSink, EventBus
 
 if TYPE_CHECKING:
     from gateway.boundary import ExecutionBoundary
@@ -22,6 +22,7 @@ class ActionKind(str, Enum):
     FEEDBACK_WRITE = "feedback.write"
     ANALYTICS_READ = "analytics.read"
     AUDIT_READ = "audit.read"
+    SYSTEM_READ = "system.read"
 
 
 @dataclass(frozen=True)
@@ -89,6 +90,8 @@ class GatewayRuntime:
 
     pool: Any
     cache: CachePort
+    decisions: DecisionSink
+    enabled_modules: frozenset[str]
     events: EventBus | None = None
 
 
@@ -108,3 +111,4 @@ class EnforcementContext:
     halted: str | None = None  # set by the agent when a denial ends its loop
     # The run this request belongs to (ADR-0009). Written into every decision the run causes.
     execution_id: UUID | None = None
+    required_module: str | None = None

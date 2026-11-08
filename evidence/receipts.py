@@ -2,7 +2,7 @@
 
 A receipt says: this decision was recorded, at this position of the tenant's chain, and the platform signed it. The
 signed text (`canonical`) is the canonical JSON of `{"chain": {prev_hash, row_hash, position}, "decision": record}`,
-where the record is `gateway.chain.decision_record`. It holds no input text: only the SHA-256 on the row.
+where the record is `evidence.chain.decision_record`. It holds no input text: only the SHA-256 on the row.
 
 Keys: the active private key comes from `RECEIPT_SIGNING_KEY` (base64, 32 raw bytes). In `local` mode with no key, a
 key is generated at startup and only its `key_id` is logged; receipts signed with it stop verifying after a restart.
@@ -23,9 +23,9 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
-from gateway.chain import Check, canonical_json, compute_row_hash, decision_record
+from evidence.chain import Check, canonical_json, compute_row_hash, decision_record, normalize_record
 
-logger = logging.getLogger("gateway.receipts")
+logger = logging.getLogger("evidence.receipts")
 
 ALG = "Ed25519"
 
@@ -145,7 +145,7 @@ def verify_checkpoints(
 
 def signed_text(record: Mapping[str, Any], chain: Mapping[str, Any]) -> str:
     return canonical_json({"chain": {"prev_hash": chain["prev_hash"], "row_hash": chain["row_hash"], "position": chain["position"]},
-                           "decision": record})
+                           "decision": normalize_record(record)})
 
 
 def sign_receipt(keyring: Keyring, record: Mapping[str, Any], chain: Mapping[str, Any]) -> dict[str, str]:
@@ -165,6 +165,7 @@ def record_of(decision: Mapping[str, Any]) -> dict[str, Any]:
         outcome=decision["outcome"], stage=decision["stage"], reason=decision["reason"],
         policy_version=decision.get("policy_version"), input_sha256=decision.get("input_sha256"),
         execution_id=decision.get("execution_id"), created_at=decision["created_at"],
+        record_version=decision.get("record_version", 1), extensions=decision.get("extensions", {}),
     )
 
 
@@ -185,7 +186,7 @@ def verify_receipt(receipt: Mapping[str, Any], public_keys: Mapping[str, bytes])
         rebuilt = signed_text(record, chain)
         prev_hash, row_hash = str(chain["prev_hash"]), str(chain["row_hash"])
         parsed = True
-    except (KeyError, TypeError, ValueError, AttributeError):
+    except (KeyError, TypeError, ValueError, AttributeError, RecursionError):
         record, rebuilt, prev_hash, row_hash, parsed = {}, "", "", "", False
     alg = receipt.get("alg")
     checks.append(Check("alg", alg == ALG, f"algorithm {alg}" if alg == ALG else f"algorithm {alg!r} is not {ALG}"))
@@ -204,10 +205,13 @@ def verify_receipt(receipt: Mapping[str, Any], public_keys: Mapping[str, bytes])
             Ed25519PublicKey.from_public_bytes(raw).verify(base64.b64decode(str(receipt.get("signature")), validate=True),
                                                            canonical.encode("utf-8"))
             signature_ok, detail = True, "the signature is valid"
-        except (InvalidSignature, binascii.Error, ValueError):
+        except (InvalidSignature, binascii.Error, ValueError, TypeError):
             detail = "the signature does not match the signed text"
     checks.append(Check("signature", signature_ok, detail))
-    hash_ok = parsed and compute_row_hash(record, prev_hash) == row_hash
+    try:
+        hash_ok = parsed and compute_row_hash(record, prev_hash) == row_hash
+    except (TypeError, ValueError):
+        hash_ok = False
     checks.append(Check(
         "row_hash", hash_ok,
         "the row hash is the hash of the decision and the previous hash" if hash_ok

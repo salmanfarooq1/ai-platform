@@ -15,8 +15,9 @@ from adapters.litellm_chat import LitellmChat
 from adapters.litellm_embeddings import LitellmEmbeddings
 from adapters.litellm_llm import LitellmLLM
 from adapters.local_object_store import LocalObjectStore
-from adapters.openshell_driver import OpenShellSdkDriver
-from adapters.openshell_runtime import OpenShellAgentRuntime, SandboxConfig
+from adapters.local_runtime import build_local_runtime as build_local_runtime
+from adapters.noop_modules import DisabledDataAccess, DroppingLineageEmitter
+from adapters.pg_evidence import PgDecisionSink, PgEvidenceLookup
 from adapters.pg_knowledge import PgKnowledgeStore
 from adapters.pg_outbox_events import OutboxEventBus
 from adapters.redis_cache import RedisCache
@@ -24,9 +25,9 @@ from adapters.s3_object_store import S3ObjectStore
 from core.database.tenant import DbPool
 from core.settings import Settings
 from gateway.context import context_to_payload
-from ports import Adapters, AgentRuntime, EgressRule, EventBus, ObjectStore, Runner, SandboxDriver, SandboxLimits
+from ports import Adapters, AgentRuntime, EventBus, ObjectStore, Runner
 
-PORT_NAMES = ("llm", "chat", "embeddings", "knowledge", "cache", "objects", "events", "runtime")
+PORT_NAMES = ("llm", "chat", "embeddings", "knowledge", "cache", "objects", "events", "runtime", "decisions", "evidence", "data", "lineage")
 
 
 def _object_store(settings: Settings) -> ObjectStore:
@@ -38,29 +39,6 @@ def _object_store(settings: Settings) -> ObjectStore:
             region=settings.s3_region,
         )
     return LocalObjectStore(settings.object_store_dir)
-
-
-def build_local_runtime(
-    settings: Settings, *, runner: Runner | None, pool: DbPool, sandbox_driver: SandboxDriver | None = None,
-) -> AgentRuntime:
-    """The runtime that executes a run where it is claimed: inside a worker (or the API, for `inprocess`).
-
-    `AGENT_RUNTIME=openshell` runs each run in a sandbox (`adapters/openshell_runtime.py`); every other value runs it as
-    a task of this process. A test passes `sandbox_driver` to put a fake sandbox behind the same runtime.
-    """
-    if settings.agent_runtime != "openshell":
-        return InProcessAgentRuntime(runner)
-    egress = settings.sandbox_egress()
-    if egress is None:  # settings validation guarantees it; this keeps the type honest
-        raise ValueError("SANDBOX_GATEWAY_URL is not a usable URL")
-    driver = sandbox_driver or OpenShellSdkDriver(
-        endpoint=settings.openshell_endpoint, workspace=settings.openshell_workspace, image=settings.openshell_image,
-    )
-    return OpenShellAgentRuntime(driver, pool, SandboxConfig(
-        gateway_url=str(settings.sandbox_gateway_url), egress=EgressRule(*egress),
-        limits=SandboxLimits(settings.sandbox_cpu, settings.sandbox_memory, settings.sandbox_wall_seconds),
-        work_dir=settings.sandbox_work_dir, read_only=settings.sandbox_read_only, network_binaries=settings.sandbox_network_binaries_list,
-    ))
 
 
 def build_adapters(
@@ -101,6 +79,16 @@ def build_adapters(
             return JobAgentRuntime(pool, serialize_context=context_to_payload)
         return InProcessAgentRuntime(agent_runner)
 
+    def decisions() -> PgDecisionSink:
+        if pool is None:
+            raise ValueError("the decision sink needs a pool")
+        return PgDecisionSink(pool)
+
+    def evidence_lookup() -> PgEvidenceLookup:
+        if pool is None:
+            raise ValueError("the evidence lookup needs a pool")
+        return PgEvidenceLookup(pool)
+
     return Adapters(
         llm=pick("llm", lambda: LitellmLLM(config.MODEL_PRICING)),
         chat=pick("chat", lambda: LitellmChat(str(settings.llm_model))),
@@ -111,4 +99,8 @@ def build_adapters(
         objects=pick("objects", lambda: _object_store(settings)),
         events=pick("events", events),
         runtime=pick("runtime", runtime),
+        decisions=pick("decisions", decisions),
+        evidence=pick("evidence", evidence_lookup),
+        data=pick("data", DisabledDataAccess),
+        lineage=pick("lineage", DroppingLineageEmitter),
     )

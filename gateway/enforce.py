@@ -6,7 +6,7 @@ deny with reason `internal_error` (fail closed). Every call writes one decision 
 import logging
 from collections.abc import Awaitable, Callable, Sequence
 
-from gateway import record
+from gateway.module_stage import module_check
 from gateway.stages import (
     boundary_check,
     cost_cap,
@@ -17,6 +17,7 @@ from gateway.stages import (
     token_budget,
 )
 from gateway.types import Action, ActionKind, Decision, EnforcementContext, GatewayDenied
+from ports import DecisionEntry
 
 logger = logging.getLogger("gateway.enforce")
 
@@ -24,6 +25,7 @@ Stage = Callable[[EnforcementContext, Action], Awaitable[Decision | None]]
 
 STAGES: Sequence[tuple[str, Stage]] = (
     ("principal", principal_present),
+    ("module", module_check),
     ("boundary", boundary_check),
     ("policy", policy),
     ("guardrails", guardrails_input),
@@ -67,7 +69,25 @@ async def enforce(ctx: EnforcementContext, action: Action, stages: Sequence[tupl
         logger.error("enforce failed, denying (action=%s)", action.kind.value, exc_info=True)
         decision = Decision(allowed=False, stage="enforce", reason="internal_error", message="The request could not be authorised.")
     try:
-        await record.write_decision(ctx, action, decision)
+        tenant_id = ctx.principal.tenant_id if ctx.principal else ctx.boundary.tenant_id
+        if tenant_id is None:
+            raise RuntimeError("no tenant to record the decision under")
+        entry = DecisionEntry(
+            tenant_id=tenant_id,
+            principal_id=ctx.principal.id if ctx.principal else None,
+            request_id=ctx.request_id,
+            trace_id=ctx.trace_id,
+            action=action.kind.value,
+            resource=action.resource,
+            outcome="allow" if decision.allowed else "deny",
+            stage=decision.stage,
+            reason=decision.reason,
+            policy_version=decision.policy_version,
+            input_sha256=action.input_hash,
+            execution_id=ctx.execution_id,
+            extensions={},
+        )
+        await ctx.runtime.decisions.write(entry, ctx.runtime.events)
     except Exception:
         logger.error(
             "decision not recorded: action=%s outcome=%s stage=%s reason=%s",

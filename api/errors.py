@@ -99,6 +99,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 # Gateway deny reasons that keep their own status and error code. Every other deny is 403 `policy_denied`.
 _DENY_STATUS: dict[str, int] = {
+    "module_disabled": 404,
     "rate_limit_exceeded": 429,
     "daily_token_budget_exceeded": 429,
     "cost_cap_exceeded": 429,

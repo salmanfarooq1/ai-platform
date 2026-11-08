@@ -204,10 +204,12 @@ async def execution_tenant(pool: Pool, execution_id: UUID) -> UUID | None:
 
 # ---------------------------------------------------------------------------------------------- workers
 
-async def claim(pool: Pool, worker_id: str, lease_seconds: int) -> tuple[UUID, UUID] | None:
-    """Claim one job for `lease_seconds`. Returns `(job_id, tenant_id)` or None when nothing is ready. Two workers
+async def claim(
+    pool: Pool, worker_id: str, lease_seconds: int, allowed_kinds: tuple[str, ...],
+) -> tuple[UUID, UUID] | None:
+    """Claim an enabled job for `lease_seconds`. Empty `allowed_kinds` claims nothing. Returns `(job_id, tenant_id)` or None when nothing is ready. Two workers
     calling at once never get the same job (`FOR UPDATE SKIP LOCKED`)."""
-    row = await pool.fetchrow("SELECT claimed_id, claimed_tenant FROM jobs_claim($1, $2)", worker_id, lease_seconds)
+    row = await pool.fetchrow("SELECT claimed_id, claimed_tenant FROM jobs_claim($1, $2, $3::text[])", worker_id, lease_seconds, list(allowed_kinds))
     if row is None or row["claimed_id"] is None:
         return None
     return row["claimed_id"], row["claimed_tenant"]

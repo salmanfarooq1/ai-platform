@@ -15,6 +15,7 @@ from pydantic import Field, SecretStr, ValidationError, field_validator, model_v
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Mode = Literal["local", "public-preview", "prod"]
+DeployShape = Literal["single_tenant", "multi_tenant"]
 
 # The app connects as the non-privileged role `gap_app` (row-level security applies to it).
 # Migrations and the admin CLI connect as the owner role (MIGRATION_DATABASE_URL).
@@ -55,6 +56,13 @@ class Settings(BaseSettings):
     """Typed view of the environment. Field names equal env var names (case-insensitive)."""
 
     model_config = SettingsConfigDict(extra="ignore", case_sensitive=False)
+
+    deploy_shape: DeployShape = Field(
+        default="single_tenant", description="Tenant deployment shape: one tenant by default, or `multi_tenant` for multiple tenants.",
+    )
+    enabled_modules: str = Field(
+        default="all", description="Comma-separated enabled modules, or `all`; the gateway module is always required.",
+    )
 
     mode: Mode = Field(
         default="local",
@@ -287,6 +295,14 @@ class Settings(BaseSettings):
     )
     otel_service_name: str = Field(default="ai-platform-api", description="Service name on exported traces.")
 
+    @field_validator("enabled_modules")
+    @classmethod
+    def _validate_enabled_modules(cls, value: str) -> str:
+        from core.modules import parse_enabled_modules
+
+        enabled = parse_enabled_modules(value)
+        return "all" if value.strip() == "all" else ",".join(sorted(enabled))
+
     @field_validator("preview_principal_id", mode="before")
     @classmethod
     def _blank_preview_principal_is_unset(cls, value: Any) -> Any:
@@ -358,6 +374,13 @@ class Settings(BaseSettings):
         self.llm_model = self.llm_model or _LLM_MODEL_DEFAULTS[self.mode]
         self.embed_model = self.embed_model or _EMBED_MODEL_DEFAULTS[self.mode]
         return self
+
+    @property
+    def enabled_module_names(self) -> frozenset[str]:
+        """Enabled module set, already validated against the platform registry."""
+        from core.modules import parse_enabled_modules
+
+        return parse_enabled_modules(self.enabled_modules)
 
     @property
     def database_dsn(self) -> str:

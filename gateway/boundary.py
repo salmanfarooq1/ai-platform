@@ -18,17 +18,17 @@ WILDCARD = "*"
 # What each scope grants, before any tenant policy narrows the resources.
 SCOPE_ACTIONS: dict[str, frozenset[str]] = {
     # tool.call is granted to the read scopes because every MCP tool and resource is a gated tool call.
-    Scope.KB_READ.value: frozenset({ActionKind.KB_READ.value, ActionKind.TOOL_CALL.value, ActionKind.ANALYTICS_READ.value}),
+    Scope.KB_READ.value: frozenset({ActionKind.KB_READ.value, ActionKind.TOOL_CALL.value, ActionKind.ANALYTICS_READ.value, ActionKind.SYSTEM_READ.value}),
     # ingest embeds the file, so writing needs the embedding model too
-    Scope.KB_WRITE.value: frozenset({ActionKind.KB_WRITE.value, ActionKind.MODEL_INVOKE.value}),
+    Scope.KB_WRITE.value: frozenset({ActionKind.KB_WRITE.value, ActionKind.MODEL_INVOKE.value, ActionKind.SYSTEM_READ.value}),
     Scope.QUERY.value: frozenset({
-        ActionKind.KB_READ.value, ActionKind.MODEL_INVOKE.value, ActionKind.TOOL_CALL.value, ActionKind.FEEDBACK_WRITE.value,
+        ActionKind.KB_READ.value, ActionKind.MODEL_INVOKE.value, ActionKind.TOOL_CALL.value, ActionKind.FEEDBACK_WRITE.value, ActionKind.SYSTEM_READ.value,
     }),
     Scope.AGENT.value: frozenset({
-        ActionKind.AGENT_RUN.value, ActionKind.TOOL_CALL.value, ActionKind.MODEL_INVOKE.value, ActionKind.KB_READ.value,
+        ActionKind.AGENT_RUN.value, ActionKind.TOOL_CALL.value, ActionKind.MODEL_INVOKE.value, ActionKind.KB_READ.value, ActionKind.SYSTEM_READ.value,
     }),
     # The governance console reads decisions, policies, principals and usage. No resource-level narrowing applies.
-    Scope.AUDIT_READ.value: frozenset({ActionKind.AUDIT_READ.value}),
+    Scope.AUDIT_READ.value: frozenset({ActionKind.AUDIT_READ.value, ActionKind.SYSTEM_READ.value}),
     Scope.ADMIN.value: frozenset(k.value for k in ActionKind),
 }
 

@@ -19,7 +19,9 @@ async def gateway_context(request: Request, principal: Principal = Depends(authe
     request.state.gateway_headers = headers  # FinOps puts these on the response
     request_id = str(getattr(request.state, "request_id", None) or current_request_id())
     trace_id = str(getattr(request.state, "trace_id", None) or current_trace_id())
-    ctx = await build_context(runtime_of(request), principal, request_id, trace_id, headers)
+    route = request.scope.get("route")
+    required_module = getattr(route, "required_module", None)
+    ctx = await build_context(runtime_of(request), principal, request_id, trace_id, headers, required_module)
     return ctx
 
 

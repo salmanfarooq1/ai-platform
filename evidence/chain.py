@@ -17,14 +17,18 @@ import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from types import MappingProxyType
 from typing import Any
 from uuid import UUID
+
+from evidence.extensions import validate_extensions
 
 # The fields that make a decision record, in the order of the `gateway_decisions` columns.
 RECORD_FIELDS = (
     "id", "tenant_id", "principal_id", "request_id", "action", "resource", "outcome", "stage", "reason",
     "policy_version", "input_sha256", "execution_id", "created_at",
 )
+EMPTY_EXTENSIONS: Mapping[str, Any] = MappingProxyType({})
 
 
 def genesis_hash(tenant_id: UUID | str) -> str:
@@ -48,14 +52,35 @@ def decision_record(
     *, id: UUID | str, tenant_id: UUID | str, principal_id: UUID | str | None, request_id: str, action: str,
     resource: str | None, outcome: str, stage: str, reason: str, policy_version: int | None,
     input_sha256: str | None, execution_id: UUID | str | None, created_at: datetime | str,
+    record_version: int = 1, extensions: Mapping[str, Any] = EMPTY_EXTENSIONS,
 ) -> dict[str, Any]:
     """The record that is hashed and signed. Ids are lower-case text, the time is `format_time`."""
-    return {
+    if type(record_version) is not int or record_version not in (1, 2):
+        raise ValueError("unsupported decision record version")
+    if not isinstance(extensions, Mapping):
+        raise ValueError("extensions must be a JSON object")
+    if record_version == 1 and extensions:
+        raise ValueError("version 1 cannot carry unsigned extensions")
+    owned = validate_extensions(extensions)
+    record: dict[str, Any] = {
         "id": str(id), "tenant_id": str(tenant_id), "principal_id": _text(principal_id), "request_id": request_id,
         "action": action, "resource": resource, "outcome": outcome, "stage": stage, "reason": reason,
         "policy_version": policy_version, "input_sha256": input_sha256, "execution_id": _text(execution_id),
         "created_at": format_time(created_at),
     }
+    if record_version == 2:
+        record.update(record_version=2, extensions=owned)
+    return record
+
+
+def normalize_record(record: Mapping[str, Any]) -> dict[str, Any]:
+    """Project canonical export fields explicitly, preserving legacy v1 bytes."""
+    if set(record) - {*RECORD_FIELDS, "record_version", "extensions"}:
+        raise ValueError("unsupported canonical decision field")
+    return decision_record(
+        **{key: record[key] for key in RECORD_FIELDS},
+        record_version=record.get("record_version", 1), extensions=record.get("extensions", EMPTY_EXTENSIONS),
+    )
 
 
 def canonical_json(value: Any) -> str:
@@ -99,7 +124,11 @@ def verify_chain(rows: Sequence[ChainRow], anchors: Mapping[int, str]) -> list[C
         problems_link.append(f"position {first.position} does not follow the checkpoint at {first.position - 1}")
     previous = first
     for row in rows:
-        if compute_row_hash(row.record, row.prev_hash) != row.row_hash:
+        try:
+            hash_ok = compute_row_hash(normalize_record(row.record), row.prev_hash) == row.row_hash
+        except (KeyError, TypeError, ValueError, AttributeError, RecursionError):
+            hash_ok = False
+        if not hash_ok:
             problems_hash.append(f"position {row.position}: the row hash does not match its record")
         if row is not first:
             if row.position != previous.position + 1:

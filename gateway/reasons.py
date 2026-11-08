@@ -86,6 +86,7 @@ _ENTRIES = (
         "decision_unrecorded", "Decision not recorded",
         "The decision could not be written to the audit log, so the call was stopped.", None, "record",
     ),
+    ReasonInfo("module_disabled", "Module unavailable", "This capability is not enabled for this edition.", None, "module"),
 )
 
 REASONS: dict[str, ReasonInfo] = {r.code: r for r in _ENTRIES}

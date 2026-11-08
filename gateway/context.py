@@ -18,6 +18,7 @@ async def build_context(
     request_id: str,
     trace_id: str,
     headers: dict[str, str] | None = None,
+    required_module: str | None = None,
 ) -> EnforcementContext:
     """The boundary is fixed here for the whole request (a policy change mid-request does not apply).
 
@@ -37,6 +38,7 @@ async def build_context(
         boundary=boundary,
         runtime=runtime,
         headers=headers if headers is not None else {},
+        required_module=required_module,
     )
 
 
@@ -54,6 +56,7 @@ def context_to_payload(ctx: EnforcementContext) -> dict[str, Any]:
         "trace_id": ctx.trace_id,
         "boundary": ctx.boundary.to_payload(),
         "execution_id": str(ctx.execution_id) if ctx.execution_id else None,
+        "required_module": ctx.required_module,
     }
 
 
@@ -69,6 +72,7 @@ def context_from_payload(runtime: GatewayRuntime, body: dict[str, Any]) -> Enfor
         principal=principal, request_id=body["request_id"], trace_id=body["trace_id"],
         boundary=ExecutionBoundary.from_payload(body["boundary"]), runtime=runtime,
         execution_id=UUID(body["execution_id"]) if body.get("execution_id") else None,
+        required_module=body.get("required_module"),
     )
 
 
@@ -85,13 +89,14 @@ async def count_run_tool_calls(runtime: GatewayRuntime, tenant_id: UUID, executi
 
 async def run_context(
     runtime: GatewayRuntime, principal: Principal, boundary: dict[str, Any], execution_id: UUID,
-    request_id: str, trace_id: str,
+    request_id: str, trace_id: str, required_module: str | None = "agents",
 ) -> EnforcementContext:
     """The context of one call a sandboxed agent makes. The boundary is the one the run was accepted with (it travelled
     in the run token), so a policy published since then does not change a run that is already going (strict rule 3)."""
     ctx = EnforcementContext(
         principal=principal, request_id=request_id, trace_id=trace_id,
         boundary=ExecutionBoundary.from_payload(boundary), runtime=runtime, execution_id=execution_id,
+        required_module=required_module,
     )
     ctx.tool_calls = await count_run_tool_calls(runtime, principal.tenant_id, execution_id)
     return ctx
