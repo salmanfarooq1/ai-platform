@@ -38,3 +38,27 @@ def test_unknown_mode_raises(monkeypatch):
     monkeypatch.setenv("MODE", "demo")
     with pytest.raises(ValueError, match="public-preview"):
         importlib.reload(config)
+
+
+@pytest.mark.unit
+def test_real_env_beats_env_local(tmp_path, monkeypatch):
+    from core.settings import get_settings
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".env.local").write_text("MODE=prod\n")
+    monkeypatch.setenv("MODE", "local")
+    get_settings.cache_clear()
+    assert get_settings().mode == "local"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("mode,enabled", [("local", True), ("public-preview", False)])
+def test_modes_with_env_local_present(tmp_path, monkeypatch, mode, enabled):
+    monkeypatch.delenv("LOG_LEVEL", raising=False)
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".env.local").write_text("LOG_LEVEL=DEBUG\n")
+    monkeypatch.setenv("MODE", mode)
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
+    monkeypatch.setenv("REDIS_URL", "redis://cache.example.test:6379")
+    monkeypatch.setenv("RECEIPT_SIGNING_KEY", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+    assert importlib.reload(config).FEATURES["reranker_enabled"] is enabled

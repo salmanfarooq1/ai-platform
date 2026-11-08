@@ -695,7 +695,9 @@ async def test_an_mcp_session_enforces_tool_scopes_end_to_end(app, make_client, 
         await reader.post(endpoint, json={"jsonrpc": "2.0", "method": "notifications/initialized"})
         for rid, tool, args in ((2, "list_namespaces", {}), (3, "search_documents", {"query": "retention", "namespace": "legal"})):
             await reader.post(endpoint, json={"jsonrpc": "2.0", "id": rid, "method": "tools/call", "params": {"name": tool, "arguments": args}})
-        await eventually(lambda: '"id":3' in sse.text.replace(" ", ""))
+        # Tool requests dispatch concurrently; the fast denial may precede the database-backed listing.
+        # Keep the same deadline and require both replies before asserting their unchanged contents.
+        await eventually(lambda: all(f'"id":{rid}' in sse.text.replace(" ", "") for rid in (2, 3)))
         replies = {r["id"]: json.loads(r["result"]["content"][0]["text"]) for r in
                    (json.loads(line.removeprefix("data: ")) for line in sse.text.splitlines() if line.startswith("data: {"))
                    if r.get("id") in (2, 3)}

@@ -1,0 +1,2 @@
+# image-ref|CVE|package|profile|expires YYYY-MM-DD|reason
+apache/kafka:4.3.1@sha256:1111111111111111111111111111111111111111111111111111111111111111|CVE-2026-12345|openssl|streams|expires 2026-11-20|Forbidden default exception.

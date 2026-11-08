@@ -1,7 +1,7 @@
-"""One contract for every `ObjectStore`: local filesystem, the S3 adapter over a fake client, and a live MinIO.
+"""ObjectStore contract: local filesystem, fake S3 client and live SeaweedFS.
 
-The live MinIO run needs `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY` and `MINIO_BUCKET` (see
-scripts/verify/minio.sh). Without them that parameter is skipped with a reason: the image could not be pulled here.
+The live parameter needs S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY and S3_LIVE_BUCKET.
+Run scripts/verify/seaweedfs.sh for its captured live acceptance checks.
 """
 import hashlib
 import os
@@ -13,7 +13,7 @@ from adapters.s3_object_store import S3ObjectStore
 from ports import ObjectNotFound
 from tests.fakes import FakeS3Client
 
-MINIO = ("MINIO_ENDPOINT", "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "MINIO_BUCKET")
+S3_LIVE = ("S3_LIVE_ENDPOINT", "S3_LIVE_ACCESS_KEY", "S3_LIVE_SECRET_KEY", "S3_LIVE_BUCKET")
 
 
 class Harness:
@@ -33,20 +33,20 @@ def _s3_fake(tmp_path):
     return Harness(S3ObjectStore("bucket", client), lambda: client.put_calls)
 
 
-def _minio(tmp_path):
-    missing = [name for name in MINIO if not os.environ.get(name)]
+def _seaweedfs(tmp_path):
+    missing = [name for name in S3_LIVE if not os.environ.get(name)]
     if missing:
-        pytest.skip(f"live MinIO not available here (image not pullable); set {', '.join(missing)} (scripts/verify/minio.sh)")
+        pytest.skip(f"live SeaweedFS not configured; set {', '.join(missing)} (scripts/verify/seaweedfs.sh)")
     store = S3ObjectStore.from_settings(
-        endpoint_url=os.environ["MINIO_ENDPOINT"], bucket=os.environ["MINIO_BUCKET"],
-        access_key_id=os.environ["MINIO_ACCESS_KEY"], secret_access_key=os.environ["MINIO_SECRET_KEY"], region="us-east-1",
+        endpoint_url=os.environ["S3_LIVE_ENDPOINT"], bucket=os.environ["S3_LIVE_BUCKET"],
+        access_key_id=os.environ["S3_LIVE_ACCESS_KEY"], secret_access_key=os.environ["S3_LIVE_SECRET_KEY"], region="us-east-1",
     )
     return Harness(store, lambda: -1)  # a live bucket has no write counter: the "written once" check is skipped
 
 
-@pytest.fixture(params=["local", "s3-fake-client", "minio"])
+@pytest.fixture(params=["local", "s3-fake-client", "seaweedfs"])
 def env(request, tmp_path):
-    return {"local": _local, "s3-fake-client": _s3_fake, "minio": _minio}[request.param](tmp_path)
+    return {"local": _local, "s3-fake-client": _s3_fake, "seaweedfs": _seaweedfs}[request.param](tmp_path)
 
 
 async def test_put_returns_the_sha256_of_the_bytes_and_get_returns_them(env):

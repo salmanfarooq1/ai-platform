@@ -1,4 +1,4 @@
-"""One contract for every `CachePort`: the Redis adapter (real Redis Stack) and the in-memory fake."""
+"""One contract for every `CachePort`: the Redis wire adapter on Valkey Search and the fake."""
 from uuid import uuid4
 
 import pytest
@@ -55,6 +55,18 @@ async def test_delete_and_expire_never_fail_on_a_missing_key(cache):
 
 async def test_ping_succeeds_on_a_live_cache(cache):
     await cache.ping()
+
+
+async def test_index_create_is_idempotent_on_valkey(cache):
+    await cache.ensure_semantic_index()
+    await cache.ensure_semantic_index()
+
+
+async def test_return_fetches_unindexed_fields(cache):
+    await _store(cache, response='{"answer": "unindexed response"}')
+    hit = await _lookup(cache, text=QUERY)
+    assert hit is not None
+    assert hit.response == '{"answer": "unindexed response"}' and hit.query == QUERY
 
 
 async def _store(cache, tenant=A, namespace="legal", text=QUERY, response='{"answer": "A"}', model=MODEL, mode="hybrid", rerank=False, top_k=5):

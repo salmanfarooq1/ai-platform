@@ -1,0 +1,9 @@
+[
+  {
+    "classname": "tests.contracts.test_object_store_contract",
+    "name_contains": "[seaweedfs",
+    "reason_prefix": "live SeaweedFS not configured",
+    "count": 10,
+    "why": "Live S3 is verified separately by scripts/verify/seaweedfs.sh; the local and fake S3 contracts always run."
+  }
+]

@@ -242,7 +242,11 @@ async def test_the_session_expires_at_the_absolute_cap_and_the_ttl_slides_on_use
     assert await redis_raw.exists(key) == 0
 
 
-async def test_sign_in_is_rate_limited_by_client_ip(anon_client, tenant_a):
+async def test_sign_in_is_rate_limited_by_client_ip(anon_client, tenant_a, monkeypatch):
+    from types import SimpleNamespace
+
+    # All attempts must share a fixed window, regardless of database latency.
+    monkeypatch.setattr("api.web_edge.routes.time", SimpleNamespace(time=lambda: 1_800_000_030))
     for _ in range(10):
         resp = await anon_client.post("/v1/session", json={"api_key": "gap_nope_" + "a" * 30})
         assert resp.status_code == 401

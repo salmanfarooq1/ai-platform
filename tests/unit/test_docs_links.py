@@ -1,5 +1,6 @@
 """Every relative link and every backticked repo path in the product docs resolves."""
 import importlib.util
+import subprocess
 
 import pytest
 
@@ -65,3 +66,23 @@ def test_urls_anchors_routes_models_globs_and_code_fences_are_allowed(tmp_path):
 def test_generated_blocks_are_skipped(tmp_path):
     body = "<!-- BEGIN GENERATED: x -->\n`core/gone.py`\n<!-- END GENERATED: x -->\n"
     assert checker.check_file(_tree(tmp_path, body), tmp_path) == []
+
+
+def test_git_ignored_paths_are_skipped(tmp_path):
+    _tree(tmp_path, "[ok](other.md)")
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    (tmp_path / ".gitignore").write_text("docs/learning_docs/\n")
+    ignored = tmp_path / "docs" / "learning_docs"
+    ignored.mkdir()
+    (ignored / "broken.md").write_text("[bad](missing.md)")
+    assert checker.check(tmp_path) == []
+    assert "broken.md" not in checker._known_names(tmp_path)
+
+
+def test_outside_git_no_paths_are_ignored(tmp_path):
+    _tree(tmp_path, "[ok](other.md)")
+    (tmp_path / ".gitignore").write_text("docs/learning_docs/\n")
+    ignored = tmp_path / "docs" / "learning_docs"
+    ignored.mkdir()
+    (ignored / "broken.md").write_text("[bad](missing.md)")
+    assert checker.check(tmp_path)

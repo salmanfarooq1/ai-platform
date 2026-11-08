@@ -20,11 +20,11 @@ def test_prometheus_and_grafana_only_run_under_the_profile_with_pinned_images():
         service = COMPOSE["services"][name]
         assert service["profiles"] == ["observability"], name
         image = service["image"]
-        assert re.search(r":v?\d+\.\d+\.\d+$", image), f"{image} is not pinned to a version"
+        assert re.search(r":v?\d+\.\d+\.\d+(?:-[a-z0-9]+)*@sha256:[0-9a-f]{64}$", image), f"{image} needs a version and digest"
         assert "latest" not in image
         assert all(p.startswith("127.0.0.1:") for p in service["ports"]), "ports must bind to localhost only"
     # nothing else is behind the profile, and the core services are not
-    assert all("profiles" not in COMPOSE["services"][n] for n in ("postgres", "redis", "worker"))
+    assert all("profiles" not in COMPOSE["services"][n] for n in ("postgres", "valkey", "worker"))
 
 
 def test_prometheus_scrapes_the_api_and_the_worker_and_holds_no_credential():
