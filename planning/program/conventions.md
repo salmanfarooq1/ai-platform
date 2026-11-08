@@ -21,7 +21,9 @@ Every sprint includes the applicable UI in the same sprint as its backend and co
 
 ## Modules and editions
 - `ENABLED_MODULES` values: `gateway`, `evidence`, `agents`, `data`, `lineage`, `insights`, or `all`. `insights` needs `data`; startup refuses it alone. The `insights` value and the Data edition's `insights` part start in 029. Before then Data is `gateway,data,lineage`. `gateway` is always on.
-- Editions: Gateway (`gateway`), Assurance (`gateway,evidence`), Agents (`gateway,agents`), Data (`gateway,data,lineage,insights`), Full (`all`).
+- Module sets (CI profiles, built in 012): Gateway (`gateway`), Assurance (`gateway,evidence`), Agents (`gateway,agents`), Data (`gateway,data,lineage,insights`), Full (`all`).
+- Editions sold (re-plan 2026-11-08): **Gateway** (`gateway,evidence`), **Gateway + Data** (`gateway,evidence,data,lineage,insights`), **Full** (`all`). The CI matrix keeps the five module sets.
+- Optional services follow ADR-0035: a port, one setting read in `adapters/registry.py`, and a parity test on the same contract suite.
 - Packages: `evidence/` (012), `dataplane/` (021), `lineage/` (025), `insights/` (029). Other modules may import the `gateway` package API (`gateway/__init__.py`) but not its internals.
 
 ## Scopes (credentials)

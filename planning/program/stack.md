@@ -21,7 +21,7 @@ Checked on 2026-11-02 against the Sprint 012 Compose and Poetry lock pins, plus 
 | Grafana | `12.0.2` | `grafana/grafana:13.2.4-distroless-slim` | AGPL-3.0 | 011 | Unmodified, optional profile only. |
 | MCP SDK | `mcp >=2,<3` | `mcp==2.2.0` | MIT | 011 | Supports protocol 2026-07-28. |
 | aiokafka | `0.14.0` | `0.14.0` | Apache-2.0 | — | |
-| OpenShell | 0.1.2 | 0.1.2, re-checked per sprint | Apache-2.0 | — | Alpha. Telemetry off. OpenShell-Community was archived on 2026-10-07. |
+| OpenShell | 0.1.2 | ≥ 0.1.7, re-checked at 027 start (UNV) | Apache-2.0 | 027 | Alpha. Telemetry off. Behind `AGENT_RUNTIME`. 0.1.6 requires gateway auth; 0.1.7 emits OCSF 1.8.0 only. OpenShell-Community was archived on 2026-10-07. |
 
 ## Models (Sprint 013)
 | Use | Default on CPU | With a GPU (8 GB+) | Size | Licence |
@@ -48,11 +48,12 @@ The 019 Builder confirms the official Ollama library tag and supply-chain rule b
 | sqlglot (SQL parse and rewrite) | UNV pin | — | MIT | 021 |
 | dbt-core / dbt-duckdb | `1.12.5` / `1.11.0` | 2026-09-15 / 2026-08-07 | Apache-2.0 | 022 |
 | OpenLineage | `openlineage-python==1.53.0`, `openlineage-dbt==1.53.0` | 2026-09-01 | Apache-2.0 | 022, 025 |
-| Debezium | `quay.io/debezium/connect:3.6.2.Final` | 2026-09-18 | Apache-2.0 | 022 |
 | datacontract-cli | `1.2.4` (re-check), its `duckdb` extra must match the DuckDB pin | 2026-09/10 | MIT | 023 |
 | ODCS / ODPS | v3.2.0 / v1.1.0 | 2026-09 | Apache-2.0 | 023 |
 | ydata-profiling | `4.18.4` | 2026-04-22 | MIT | 023 |
-| dbt-metricflow | `0.15.0` (needs dbt-core ≥1.11,<1.13) | 2026-09-10 | Apache-2.0 | 025 |
+| dbt-metricflow | `0.15.0` (needs dbt-core ≥1.11,<1.13). Compile-only, behind our `MetricCompiler` interface. | 2026-09-10 | Apache-2.0 | 025 |
+| Open Semantic Interchange (OSI) metric format | spec version pinned at 025 start (UNV) | — | Apache-2.0 | 025 |
+| langgraph-checkpoint-postgres | pin at 027 start, same two-week rule (UNV) | — | MIT | 027 |
 | Vega-Lite / Vega / vega-embed (charts) | `vega-lite@6.4.1` / `vega@6.2.0` / `vega-embed@7.3.0` (the Vega-Lite and Vega builds that vl-convert 1.9.0 bundles, so browser and PDF charts match) | 2025-09-23 / — / 2026-09-23 | BSD-3 | 029 |
 | vl-convert-python (chart to SVG, offline) | `1.9.0.post1` (bundles Vega-Lite 6.4.1, Vega 6.2.0) | 2026-01-21 | BSD-3 | 029 |
 | WeasyPrint (HTML to PDF, offline) | `70.0` | 2026-09-08 | BSD-3 | 029 |
@@ -65,9 +66,9 @@ The 019 Builder confirms the official Ollama library tag and supply-chain rule b
 | spaCy model for Presidio | `en_core_web_lg`, version matched to spaCy, pre-fetched | — | MIT | 019 |
 | Docling | `docling==2.130.0`, models pre-fetched | 2026-09-22 | MIT | 026 |
 | Docling weights | layout model `docling-layout-heron` (Apache-2.0). TableFormer weights are tagged both CDLA-Permissive-2.0 and Apache-2.0; we use them under Apache-2.0 and record it in the 026 ADR, else table structure is off. | — | Apache-2.0 | 026 |
-| OPA | `openpolicyagent/opa:1.20.2-static` | 2026-09-03 | Apache-2.0 | 030 |
+| OPA (optional, `POLICY_ENGINE=opa`) | `openpolicyagent/opa:1.20.2-static` | 2026-09-03 | Apache-2.0 | 030 |
 | a2a-sdk | `1.1.5` | 2026-09-21 | Apache-2.0 | 028 |
-| Keycloak | `quay.io/keycloak/keycloak:26.7.4`. RFC 8693 delegation (`actor_token`, nested `act`) is a preview feature (`--features=token-exchange-delegation`). The 030 spike checks it. Decided 2026-10-11: platform-minted delegation tokens are the default; no preview features in the default stack. | 2026-09-16 | Apache-2.0 | 020 |
+| Keycloak (test issuer only, CI and nightly) | `quay.io/keycloak/keycloak:26.7.4`. RFC 8693 delegation (`actor_token`, nested `act`) is a preview feature (`--features=token-exchange-delegation`). The 030 spike checks it. Decided 2026-10-11: platform-minted delegation tokens are the default; no preview features in the default stack. | 2026-09-16 | Apache-2.0 | 020 |
 | py-spiffe (optional) | `spiffe==0.3.2` (re-check age at sprint start) | 2026-10-01 | Apache-2.0 | 020 |
 | Presidio | `presidio-analyzer==2.2.364`, `presidio-anonymizer==2.2.364`, spaCy model pre-fetched | 2026-07-22 | MIT | 019 |
 | COSE | `cwt==3.3.0`, or `cbor2==6.1.5` + `cryptography` (pycose is stale since 2023) | 2026-07 / 2026-10 | MIT | 017 |
@@ -83,16 +84,16 @@ Not checked against registries yet. Each is **UNV** until the sprint that adds i
 | Component | Use | Licence | Sprint |
 |---|---|---|---|
 | dlt (dlthub) | Batch and API sources (files, SQL databases, SaaS APIs) as a library. Core only; premium sources are commercial and not used. | Apache-2.0 | 022 |
-| Trino + OPA access control plugin | Federated adapter; row filters and masks enforced at the engine as defence in depth | Apache-2.0 | 021 (spike), 024 |
+| Trino + OPA access control plugin (optional) | Federated adapter behind `QUERY_ENGINE=trino`, built when a client needs it; DuckDB is the default | Apache-2.0 | on demand |
 | sqlglot | SQL parse and rewrite for every adapter | MIT | 021 |
-| Debezium Server or Kafka Connect | Client streams and CDC, optional profile | Apache-2.0 | 022 |
+| Postgres logical replication (`pgoutput`) or a dlt incremental source | Change capture, with a replication-slot WAL-growth monitor | PostgreSQL, Apache-2.0 | 022 |
 | Apicurio Registry (optional) | Schema registry for client streams | Apache-2.0 | 022 |
 | Valentine, bdikit (Magneto) | Schema matching for integration agents | Apache-2.0 (re-check) | 027 |
 | OpenMetadata / DataHub import | We call the client's catalog API; we run neither server | — | 023, 025 |
 | agentgateway | Optional proxy data plane; our engine is the external authorizer | Apache-2.0 (LF AAIF) | 028 (spike) |
 | OpenTofu | Infrastructure as code, one module per cloud. Plain HCL. | MPL-2.0 | 031 |
 | OpenBao + External Secrets Operator | Secrets manager and Kubernetes sync | MPL-2.0 / Apache-2.0 | 031 |
-| Keycloak 26.8.x | SCIM 2.0 supported and on by default from 26.8.0 (2026-10-01; inbound only). Replaces the 26.7.4 pin when 020 starts. | Apache-2.0 | 020 |
+| Keycloak 26.8.x (test issuer only) | SCIM 2.0 supported and on by default from 26.8.0 (2026-10-01; inbound only). Replaces the 26.7.4 pin when 020 starts. | Apache-2.0 | 020 |
 | pg_textsearch | True BM25 inside Postgres. Check it builds for our Postgres version. | PostgreSQL | 026 |
 | RAGAS, TruLens | Retrieval and grounding evals | Apache-2.0 / MIT | 026 |
 | Faker | Synthetic rows from a client schema (reference company variants) | MIT | 014 |
@@ -126,7 +127,11 @@ Not checked against registries yet. Each is **UNV** until the sprint that adds i
 | Marquez | No release since 2025-03. Lineage lives in Postgres. |
 | Superset, Metabase, Lightdash, Evidence, Rill | They read the warehouse with their own service account, which bypasses the gateway, grants and receipts. Metabase is also AGPL plus a commercial part. BI is built in as M6 Insights (029). A governed SQL endpoint for external tools gets a spike in 029. |
 | Delta Sharing server | Last image 2024. |
-| Trino as the default engine | 2–4 GB. Used only as the Federated adapter (021, 024), in its own profile. |
+| Trino as the default engine | 2–4 GB. DuckDB federates by default. Trino is an optional adapter, built on demand. |
+| Debezium | Needs Kafka Connect and about 1.5 GB more. Logical replication or dlt covers change capture (2026-11-08). |
+| Keycloak as the shipped IdP | Clients bring their own provider. We ship an OIDC client and SCIM 2.0; Keycloak is the test issuer (2026-11-08). |
+| LiteLLM proxy | An extra service. LiteLLM stays a library inside our gateway. |
+| A graph memory database | Memory stays in Postgres. |
 | Dagster, Airflow | Extra services. The job queue is generalised instead (022). Dagster is the upgrade path. |
 | Prompt Guard, Llama models | Llama licence, not OSI. |
 | Qwen3Guard | Only third-party GGUF builds in the Ollama library. Weak supply chain. |
@@ -145,10 +150,10 @@ Not checked against registries yet. Each is **UNV** until the sprint that adds i
 | `core` (default) | Postgres, Valkey, API, worker | ~2 GB |
 | `models` | Ollama, one chat model loaded (4B, 8k context), embeddings | ~4 GB |
 | `lake` | SeaweedFS, plus DuckDB `memory_limit` (default 1 GB) | ~1.5 GB |
-| `federation` | Trino (021, 024) | ~2–4 GB |
-| `streams` | Kafka, Debezium (optional) | ~1.5 GB |
-| `policy` | OPA | ~0.1 GB |
-| `identity` | Keycloak | ~1 GB |
+| `federation` | Trino (optional, on demand) | ~2–4 GB |
+| `streams` | Kafka (optional) | ~1 GB |
+| `policy` | OPA (optional) | ~0.1 GB |
+| `identity` | Keycloak (test issuer, CI and nightly only) | ~1 GB |
 | `guard` | Presidio guard service plus the selected 019 guard model. Measure the model's memory at sprint start. `OLLAMA_MAX_LOADED_MODELS=3` in this profile only. | To measure |
 | `mail` | Mailpit (local mail catcher) | ~0.05 GB |
 | `trust` | timestamp authority | ~0.1 GB |
@@ -156,7 +161,7 @@ Not checked against registries yet. Each is **UNV** until the sprint that adds i
 | Docling, while parsing | inside the worker | ~2–3 GB |
 | PDF reports, while rendering | WeasyPrint and vl-convert inside the worker | ~0.3 GB |
 
-The normal working set (`core`, `models`, `lake`, `policy`) is about 7.5 GB.
+The normal working set (`core`, `models`, `lake`) is about 7.4 GB.
 
 Peak per showcase journey, inside `memory=12GB`. These are the old journey names; 012 redefines the journeys for the new milestones, and each sprint measures them. The cloud track (031) may run on a VM, where this limit does not apply.
 | Journey | Profiles | Estimate |

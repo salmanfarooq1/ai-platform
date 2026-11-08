@@ -18,3 +18,4 @@ Copy `TEMPLATE.md` to `NNNN-slug.md`. Number ADRs in order and never reuse a num
 | [0010](0010-design-tokens-and-ink-paper-palette.md) | Design tokens and the ink-and-paper palette | Accepted |
 | [0011](0011-durable-jobs.md) | Durable jobs on Postgres | Accepted |
 | [0012](0012-receipts-and-hash-chain.md) | Signed receipts and the decision hash chain | Accepted |
+| [0035](0035-optional-infrastructure.md) | Optional infrastructure behind ports | Accepted |

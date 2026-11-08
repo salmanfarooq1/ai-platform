@@ -27,7 +27,7 @@ Proof from source row to agent answer: every answer can be traced back to the da
 
 **Integration first.**
 - Clients connect what they already have: agents, data sources, event streams and warehouses.
-- We use existing open-source connectors (dlt, Debezium, DuckDB extensions, Trino, MCP servers) and govern them. We do not rebuild the client's stack.
+- We use existing open-source connectors (dlt, Postgres logical replication, DuckDB extensions, MCP servers, and Trino or Kafka only when a client already runs them) and govern them. We do not rebuild the client's stack.
 - Integration agents inspect a new connection, read the schemas on both sides, and suggest mappings and issues. A human approves.
 
 **One way to govern every agent.** Our agents, the client's agents and external agents (Copilot, Claude Desktop, Cursor, LangChain apps) are treated the same:
@@ -37,18 +37,18 @@ Proof from source row to agent answer: every answer can be traced back to the da
   - Client agents run under default-deny egress.
   - External agents reach tools and data only through endpoints we own.
 
-**Gateway deployment modes** (016):
+**Gateway deployment modes** (016). Two are built: embedded and standalone proxy. Sidecar comes later, when a client asks (re-plan 2026-11-08):
 | Mode | When | How |
 |---|---|---|
 | Embedded | Our own agents and services, in process | `enforce()` as today |
-| Sidecar | Client agents in their cluster | The `authorize()` service next to the agent |
+| Sidecar (later) | Client agents in their cluster | The `authorize()` service next to the agent. Not built until a client asks. |
 | Standalone proxy | External agents, shared tools, LLM traffic | A proxy for MCP, the OpenAI-style API and A2A. Our engine is the only decision maker and record writer in every mode. The optional agentgateway data-plane spike is in 028. |
 
 **Data access adapters** (021). All of them sit behind `DataAccess`, take the same compiled grant and return the same receipt fields:
 | Adapter | Engine | Use |
 |---|---|---|
-| Direct | DuckDB ATTACH, read-only, locked | Client Postgres, MySQL, SQLite, files and Excel, read in place |
-| Federated | Trino with the OPA plugin | Many sources and joins. Trino enforces filters and masks as a second layer. |
+| Direct and federated (default, `QUERY_ENGINE=duckdb`) | DuckDB ATTACH, read-only, locked | Client Postgres, MySQL, SQLite, files and Excel, read in place, and joins across them |
+| Federated at scale (optional, `QUERY_ENGINE=trino`) | Trino, with the OPA plugin when `POLICY_ENGINE=opa` | Built only when a client's data is too large for DuckDB. Trino enforces filters and masks as a second layer. |
 | Lakehouse | DuckLake | Data we must hold: pipeline output, documents, extracted tables |
 | Native (optional) | The warehouse's own engine under a narrow read-only role | Snowflake, BigQuery or Databricks, when the client wants their native policies too |
 
@@ -84,14 +84,21 @@ The gateway cannot ship without the evidence core: `enforce()` fails closed when
 | `LineageEmitter` | M3, M4, M6 | M5 store | 012 drops/counts before producers; 022 adds durable spool, consumed in 025 |
 | `LineageLookup` | M4, M6 | M5 store (025) | returns "not linked" |
 | `QueryEngine` | M4 | DuckDB | — (internal to M4) |
-| `PolicyEngine` | M1 | Python engine (018), OPA (030) | — |
+| `PolicyEngine` | M1 | Python engine (018, default); OPA optional behind `POLICY_ENGINE=opa` (030) | — |
 
 `DataAccess` grows by sprint (methods listed in `conventions.md`). `ReportDelivery` (029) is a provider port inside M6, not a cross-module port. The inbox is part of the kernel.
 
 Rules: modules import only the kernel and `ports/`. Import-linter contracts in CI enforce this from Sprint 012. The gateway package API is the explicit public exception; its internals remain private. `ENABLED_MODULES` selects modules. Disabled modules hide their navigation group and return `module_disabled` on their routes.
 
-### Editions (functional labels)
+### Editions sold (re-plan 2026-11-08)
 | Edition | Modules |
+|---|---|
+| Gateway | Kernel + M1 + M2 (gateway with evidence and assurance) |
+| Gateway + Data | Gateway + M4 + M5 + M6 |
+| Full | everything, including M3 Agents |
+
+### Module sets (technical CI profiles)
+| Set | Modules |
 |---|---|
 | Gateway | Kernel + M1 (with evidence core) |
 | Assurance | Gateway + M2 |
@@ -99,7 +106,25 @@ Rules: modules import only the kernel and `ports/`. Import-linter contracts in C
 | Data | Gateway + M4 + M5 + M6 |
 | Full | everything |
 
-A CI matrix boots each edition and runs its smoke tests every sprint from 012.
+A CI matrix boots each module set and runs its smoke tests every sprint from 012. The three sold editions are built from these sets.
+
+### Optional infrastructure (re-plan 2026-11-08, ADR-0035)
+By default only Postgres, Valkey, the API and the worker run. Every other service is optional. It sits behind a port, one setting in `adapters/registry.py` selects it, and a parity test runs the same contract suite on the default and the option.
+| Setting | Default | Option |
+|---|---|---|
+| `QUERY_ENGINE` | `duckdb` | `trino` |
+| `POLICY_ENGINE` | `python` | `opa` |
+| `EVENT_BUS` | `outbox` | `kafka` |
+| `OBJECT_STORE` | `local` | `s3` |
+| `IDP` | `oidc` (any standard provider) | Keycloak only as the test issuer |
+| `AGENT_RUNTIME` | `openshell` (pinned) | `docker`, `gvisor` |
+
+### Agent shape (re-plan 2026-11-08)
+- Three parts: the **session log**, the **harness** and the **sandbox**. The session log is in Postgres, outside the harness and the sandbox, so a crashed harness or sandbox loses nothing.
+- Runs save state with the LangGraph checkpointer on our Postgres. An approval is a real interrupt and resume (027).
+- Skills are governed, versioned data. A human approves a skill before any run loads it (027).
+- A consolidation job in the worker proposes memory updates and skills from run logs. Every write goes through `enforce()` (028).
+- Outside harnesses register with us and use only our OpenAI-style endpoint and MCP (028).
 
 ## Target request path (ask-your-data)
 1. A user asks a question. The tenant comes from the credential.
@@ -147,6 +172,7 @@ These extend the 15 strict rules. Each is confirmed in the ADR named.
 10. **People and agents read through the same governed metric path.** Dashboards, reports and alerts render under the reader's own grants, never with the author's or a service identity. (ADR-0031)
 11. **No route around the gateway.** Every agent, ours or not, reaches tools, models and data only through the gateway. Each deployment mode states how other routes are closed, and a canary test proves it. (ADR-0023, revised)
 12. **Integrate before we ingest.** Read client data in place when we can. Copy into the lakehouse only what must be held, and say why in the pipeline definition. (ADR-0015, revised)
+13. **Optional infrastructure.** Only Postgres, Valkey, the API and the worker are required. Any other service sits behind a port, is chosen by one setting, and passes the same parity suite as the default. (ADR-0035)
 
 ## Planned ADRs
 | ADR | Title | Sprint |
@@ -155,7 +181,7 @@ These extend the 15 strict rules. Each is confirmed in the ADR named.
 | 0014 | Model choice (local or hosted), the provider register and the licence gate | 013 |
 | 0015 | Data access adapters (direct, federated, lakehouse), locked connections, gateway-only access | 021 |
 | 0016 | Pipelines on the job queue, dbt as the transform layer | 022 |
-| 0017 | Change data capture with Debezium, Kafka and our own sink | 022 |
+| 0017 | Change data capture with logical replication or dlt, the outbox, and optional Kafka | 022 |
 | 0018 | Data products and contracts, and the product lifecycle | 023 |
 | 0019 | Access grants, purpose and query rewriting | 024 |
 | 0020 | Lineage model and agent facets | 025 |
@@ -173,3 +199,4 @@ These extend the 15 strict rules. Each is confirmed in the ADR named.
 | 0032 | Local POC lifecycle, Compose bundle and backups | 015 |
 | 0033 | Documents, retrieval and grounding | 026 |
 | 0034 | Resilience, encryption at rest, keys, local transparency log and timestamping | 031 |
+| 0035 | Optional infrastructure behind ports (written 2026-11-08) | — |

@@ -26,7 +26,16 @@ Source: old 027, plus the agent part of old 030 and new scope (integration-data-
    - They suggest a mapping to the canonical model or the target contract (023), type fixes, keys, and quality issues. Valentine and bdikit (Magneto) produce candidates, and the model explains and ranks them.
    - The output is a proposal, never an applied change. A human approves it, and the approved mapping is versioned as generated dbt (022) or a contract change (023).
    - They run in the sandbox under the same taint rules. A template for them is registered for 028.
-6. **Evals.**
+6. **Saved run state** (re-plan 2026-11-08).
+   - The LangGraph Postgres checkpointer on our database, tenant-scoped with RLS. Checkpoints hold no secrets.
+   - A run resumes after a worker or sandbox crash from its last checkpoint. Test: kill the worker mid-run; the resumed run gives the same answer and no duplicate tool call.
+   - An approval (019) is a real interrupt: the run stops, the state is saved, and the approval resumes it. A denial ends it with a record.
+   - The run's session log (events and decision ids) lives in Postgres, outside the harness and the sandbox.
+7. **Skills as governed data.**
+   - A skill is a versioned procedure document with an owner, a hash, a scope and a status. Agents load skills on demand by name.
+   - An agent may propose a skill. It stays `proposed` until a human approves it. Only `approved` versions load, and each load is recorded.
+   - Proposer and approver are different identities.
+8. **Evals.**
    - A hand-verified set of 40+ questions on the reference company, scored by comparing result sets, plus abstention and leakage tests (masked columns never change answers).
    - A mapping set: known schema pairs with a gold mapping, scored on precision and recall.
    - Three CI tiers: PR (fake model), nightly (pinned local or hosted model at temperature 0), release (red team).
@@ -34,7 +43,8 @@ Source: old 027, plus the agent part of old 030 and new scope (integration-data-
 
 ## Out of scope
 - Auto-applying a mapping. Integration agents only suggest.
-- External agents and agent templates in general (028). Long-term memory (028).
+- External agents and agent templates in general (028). Long-term memory and the consolidation job (028).
+- Re-planned 2026-11-08: see "Re-plan 2026-11-08" in `planning/program/sprint-map.md` and ADR-0035.
 - Changed from old 027: guardrails, approvals and policy rules already exist (019, 018). Documents are searchable tools. Integration agents are new.
 
 ## Nav placement

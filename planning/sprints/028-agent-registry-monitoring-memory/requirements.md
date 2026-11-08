@@ -1,6 +1,6 @@
 # Sprint 028: Agent registry, monitoring and memory. Requirements
 
-Agents pillar (M3), with the Gateway (M1). One registry holds our agents, the client's agents and external agents. Agent templates and bring-your-own registration live there too. Agents are watched while they run and stopped when they go wrong. Their memory is governed data. This is a two-part sprint: part a covers items 1–4, part b covers items 5–7.
+Agents pillar (M3), with the Gateway (M1). One registry holds our agents, the client's agents and external agents. Agent templates and bring-your-own registration live there too. Agents are watched while they run and stopped when they go wrong. Their memory is governed data. This is a two-part sprint: part a covers items 1–4, part b covers items 5–9.
 
 Source: old 037, old 039, the tracing part of old 044, plus new scope (gateway-proxy-and-agents and data-pillar-retrieval-memory research notes).
 
@@ -34,11 +34,16 @@ Depends on: 027.
    - Writes are `memory.write` actions through policy. Untrusted sources get a low trust tier. Flagged writes are quarantined.
    - Recall filters by trust tier and purpose, and every read is recorded.
    - Token budget per run, with summarise-on-overflow. The summary keeps provenance links.
+   - **Consolidation job** in the existing worker, on a schedule. It reviews run session logs and proposes memory updates and new skills (027). Every write is a `memory.write` through `enforce()` with a trust tier; flagged writes are quarantined; skills stay `proposed` until a human approves. No new service, no model training.
 6. **Autonomy tiers and incidents.**
    - Tiers tighten automatically on guardrail hits, cost anomalies or eval regressions. Each change is a signed policy-change event. Loosening is a recorded human action.
    - Incident log in the EU AI Act Art. 73 shape. The deadlines are settings with placeholder defaults; 030 checks them.
-7. **ADRs.** ADR-0026 (A2A, cards, registry) and ADR-0028 (memory and autonomy).
-8. **Items moved from 016.**
+7. **Outside harnesses.**
+   - An open agent harness and an ADK agent register in the registry and reach models and tools only through our OpenAI-style endpoint and MCP.
+   - The journey proves it: a governed call succeeds with a record, and a direct call to the model or tool fails at the network canary.
+   - `AGENT_RUNTIME` selects the sandbox. OpenShell is pinned (≥ 0.1.7, re-checked at sprint start); `docker` is the fallback.
+8. **ADRs.** ADR-0026 (A2A, cards, registry) and ADR-0028 (memory and autonomy).
+9. **Items moved from 016.**
    - Spike on agentgateway as an optional data plane with `authorize()` as its external authorizer. Cache keys include every property used by the decision. Timeout, error and engine-down cases deny; otherwise keep the ASGI proxy as the data plane.
    - Compose (`internal: true`), Kubernetes NetworkPolicy and Cilium FQDN egress templates allow only the gateway, DNS and named services. A canary call from the agent network to an external address must fail. Record that external agents are governed by owning their tool endpoint.
    - Keep an allow-listed private MCP registry with signed manifests in the `server.json` shape. Deny unapproved entries, invalid signatures and registry URLs that fail the egress check.
@@ -46,7 +51,9 @@ Depends on: 027.
 ## Out of scope
 - Outbound A2A calls from our agents to outside agents.
 - A trace store and trace UI (Tempo, Jaeger). Traces go to the collector's file exporter.
-- Third-party memory frameworks (Mem0, Letta, Zep) as the store. Memory stays a governed Postgres table.
+- Third-party memory frameworks (Mem0, Letta, Zep) or a graph database as the store. Memory stays a governed Postgres table.
+- Model training or fine-tuning from run logs.
+- Re-planned 2026-11-08: see "Re-plan 2026-11-08" in `planning/program/sprint-map.md` and ADR-0035.
 - Changed from old 037 and 039: one registry for all agent kinds with templates, and runtime monitoring with breakers is new here, not at the end of the program.
 
 ## Nav placement

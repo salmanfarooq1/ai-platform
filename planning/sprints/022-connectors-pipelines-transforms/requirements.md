@@ -28,12 +28,14 @@ Source: old 017, old 018, old 019, old 020, plus new scope (integration-data-con
    - Generated projects only: no user SQL, macros or Python models. Typed template parameters. Vendored packages, with `dbt deps` offline.
    - Short-lived generated profiles. Incremental models take the writer lock.
    - Before the first production emitter, replace the 012 drop/count no-op with a durable tenant-scoped spool behind `LineageEmitter`, committed with the producer transaction. Add its forward migration, RLS/grants, event-id idempotency and restart/replay tests. The OpenLineage dbt spike goes through that port, spooled until 025 consumes it. `DO_NOT_TRACK=1`.
-6. **Client streams and CDC** (optional profile `streams`; from old 020).
-   - Two inputs: the client's own Kafka topics (SASL, ACLs, our consumer group), and CDC from a client Postgres through Debezium Server or Kafka Connect (`quay.io/debezium/connect:3.6.2.Final`, port 8083 never published, secrets through a config provider).
+6. **Change capture and client streams** (from old 020; no Debezium).
+   - CDC from a client Postgres through logical replication (`pgoutput`) read by our worker, or a dlt incremental source where the client prefers polling. No Kafka needed.
+   - A monitor on replication-slot WAL growth with a threshold setting. An alert fires before the client's disk is at risk, and an abandoned slot can be dropped by a recorded admin action.
+   - The client's own Kafka topics are an optional input only when `EVENT_BUS=kafka` (SASL, ACLs, our consumer group).
    - Our sink keeps the old 020 design:
      - micro-batches, dedupe by key, and a guard by source LSN
      - offsets stored in the same DuckLake transaction
-     - deletes, and the initial snapshot from `op=r` events
+     - deletes, and the initial snapshot from a consistent export at the slot's start LSN
      - an added column becomes an add; any other schema change quarantines the batch
      - the tenant comes from the registration, never from the message
    - The CDC source setup is documented for the client's DBA: replication-only role, filtered publication, heartbeat and a WAL growth alert.
@@ -43,13 +45,14 @@ Source: old 017, old 018, old 019, old 020, plus new scope (integration-data-con
 ## Out of scope
 - Contracts and breaking schema changes (023). Grants and masking (024). The lineage store (025).
 - User-written dbt code, or a dbt sandbox. An external orchestrator (Dagster, Airflow).
-- The Airbyte platform and connectors (ELv2, not OSI). Writing our own connector where a dlt or Debezium one exists.
+- The Airbyte platform and connectors (ELv2, not OSI). Writing our own connector where a dlt one exists. Debezium and Kafka Connect (re-plan 2026-11-08).
 - Kafka TLS between our own services (SASL only, as before).
 - Changed from old 017–020:
   - Connectors are dlt instead of hand-written.
-  - CDC and Kafka are an optional profile.
+  - CDC uses logical replication or dlt; Kafka is optional (2026-11-08).
   - Client Kafka topics are a new input.
   - Backups join the `poc` lifecycle.
+- Re-planned 2026-11-08: see "Re-plan 2026-11-08" in `planning/program/sprint-map.md` and ADR-0035.
 
 ## Nav placement
 - Data > Datasets: snapshots and "query as of".

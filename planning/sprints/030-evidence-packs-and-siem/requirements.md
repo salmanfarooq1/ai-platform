@@ -23,9 +23,8 @@ Depends on: none.
    - One machine-readable mapping file per framework: EU AI Act Art. 12, 14, 19, 26, 72, 73; ISO 42001 Annex A as a Statement of Applicability; NIST AI RMF and AI 600-1; SP 800-53 tags; OWASP ASI01–ASI10 and LLM Top 10 2026. Each row names the test or document that proves it, and an owner.
    - A release red-team summary (garak, PyRIT, Strix) goes into the pack.
 5. **Items moved from 018, 019 and 020.**
-   - Add the OPA runtime adapter and the two-engine parity suite.
+   - Add the optional OPA runtime adapter (`POLICY_ENGINE=opa`) and the two-engine parity suite. The Python engine stays the default.
    - Add the signed approval webhook and the AuthZEN approval profile.
-   - Wire SCIM deprovisioning so a disabled or deleted user loses console sessions and personal API keys within `IDENTITY_DEPROVISION_SECONDS`. Choose the mechanism in the blueprint.
    - Enforce a tenant IP allowlist in the app and at the 016 proxy. The edge overwrites forwarded headers.
    - Use SPIFFE-format run ids: `spiffe://<trust-domain>/tenant/<tenant_id>/run/<execution_id>`.
    - Run the Keycloak 26.8 token-exchange spike with `actor_token` on a throwaway profile. Build a Keycloak adapter only if nested delegation is no longer a preview feature. Preview features stay out of the default stack.
@@ -39,6 +38,7 @@ Depends on: none.
 - Legal advice or a claim of conformity. Pages say "mapped to", never "compliant with".
 - Sharing packs outside the platform. SIEM export, audit search, chargeback and showback (016 and 017).
 - Changed from old 042–044: this sprint keeps evidence packs and mappings and receives selected items moved from 018, 019 and 020.
+- Re-planned 2026-11-08: see "Re-plan 2026-11-08" in `planning/program/sprint-map.md` and ADR-0035.
 
 ## Nav placement
 - Evidence > Packs and Evidence > Frameworks.

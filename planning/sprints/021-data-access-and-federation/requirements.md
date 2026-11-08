@@ -20,8 +20,9 @@ Depends on: Sprint 018.
 3. **`DataAccess` adapters**, all behind one port, all taking the same compiled grant and returning the same receipt fields.
    - **Direct:** DuckDB (`duckdb==1.5.5`) `ATTACH ... (READ_ONLY)` to the client Postgres, MySQL or SQLite, and reads of files and Excel from an allowed path. The attach happens first. Then `enable_external_access=false`, no extension autoinstall or autoload, unsigned extensions refused, `memory_limit`, `threads`, a timeout, and `lock_configuration=true`. The Builder checks that this order works with each scanner and records it.
    - **Lakehouse:** DuckLake 1.0 for data we hold. One catalog for a single-tenant deploy, and one per tenant in multi-tenant deploys (catalog role separate from `gap_app`, data prefix and SeaweedFS identity per tenant, cross-tenant negative tests).
-   - **Federated (spike):** Trino with the OPA access-control plugin, in its own compose profile `federation`. The spike shows one join across two sources. Trino applies a row filter and a mask from our policy bundle. Results go in `evidence/spike-trino.md`. The full adapter lands in 024 if the spike passes.
-   - `duckdb` and the Trino client join the import-lint SDK list. New package `dataplane/`.
+   - **Federated (default, `QUERY_ENGINE=duckdb`):** first, before any other adapter work, prove one real join across a client Postgres and a SQLite file in one DuckDB session under the locked settings above. Record the plan, timings on medium data and memory in `evidence/duckdb-join.md`. If it fails, stop and bring it to the Architect.
+   - **Federated at scale (optional, `QUERY_ENGINE=trino`):** not built here. The `DataAccess` contract suite is written so a Trino adapter can be added later and must pass the same suite (ADR-0035).
+   - `duckdb` joins the import-lint SDK list. New package `dataplane/`.
 4. **Process model.** Reads run on a thread pool with a bounded connection cache keyed by tenant and connection. Heavy queries run on a query worker. No writes in this sprint.
 5. **Gateway.**
    - New action kind `data.read`, with `KNOWN_TOOLS` and reason codes updated.
@@ -39,6 +40,7 @@ Depends on: Sprint 018.
 - Native warehouse adapters (Snowflake, BigQuery, Databricks). The port allows them; they are built when a client needs one.
 - Agent access to data (027).
 - Read-in-place access comes first. The per-tenant catalog applies only to multi-tenant deploys.
+- Re-planned 2026-11-08: see "Re-plan 2026-11-08" in `planning/program/sprint-map.md` and ADR-0035. The Trino spike was replaced by the DuckDB join proof; Trino is optional.
 
 ## Nav placement
 - Data > Connections: list, add, test.

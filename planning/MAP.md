@@ -18,7 +18,7 @@ Owner view: the same content as an HTML page, https://claude.ai/artifact/X1Luqfs
 4. Standards over inventions: OpenAI-style API, MCP, A2A, AuthZEN, OpenLineage, ODCS, COSE/SCITT, OTel.
 5. Each work package names the milestone journey step it moves. Hygiene work is capped at about 20% of a sprint.
 6. No workaround in product code. A local workaround lives in `scratch/`, is labelled, and has an end date.
-Full rule set: `planning/program/vision-and-architecture.md` (12 program rules) and `AGENTS.md` (15 strict rules).
+Full rule set: `planning/program/vision-and-architecture.md` (13 program rules) and `AGENTS.md` (15 strict rules).
 
 ## Where the authority lives
 | Topic | Document |
@@ -26,7 +26,7 @@ Full rule set: `planning/program/vision-and-architecture.md` (12 program rules) 
 | Vision, modules, ports, request path, design rules | `planning/program/vision-and-architecture.md` |
 | Sprints 011 to 032 and milestone journeys | `planning/program/sprint-map.md` |
 | Console screens per sprint | `planning/program/ui-delivery.md`, `docs/design/` |
-| Architecture decisions | `docs/adr/` (0001 to 0012 written, 0013 to 0034 planned) |
+| Architecture decisions | `docs/adr/` (0001 to 0012 and 0035 written, 0013 to 0034 planned) |
 | Owner decisions and open questions | `planning/DECISIONS.md`, `planning/QUESTIONS.md` |
 | How builders work and are reviewed | `planning/program/builder-method.md`, `review.md` |
 | One sprint | `planning/sprints/NNN-slug/` (requirements, blueprint, acceptance, threat model, test spec, builder brief) |
@@ -37,23 +37,24 @@ Status: **built** (on `main`, QA signed) · **local** (built and verified, not c
 
 | Module | What it does | Status |
 |---|---|---|
-| Kernel | Postgres with forced RLS, Valkey, object store (local, S3, SeaweedFS), durable jobs and workers, outbox and optional Kafka, identity (API keys, JWT, sessions, run tokens), settings, metrics | built |
+| Kernel | Postgres with forced RLS, Valkey, object store (local, S3, SeaweedFS), durable jobs and workers, outbox (Kafka optional), identity (API keys, JWT, sessions, run tokens), settings, metrics | built |
 | Kernel: models | One model per mode through LiteLLM | built; pinned digests, hosted providers, region and data-use pins, breakers, admission check: 013 |
 | M1 Gateway: core | `enforce()` with principal, module, boundary, policy, input guardrails, rate, budget, cost stages; tenant JSON policy | built (module stage: local); per-stage evidence and model stage: 013 |
 | M1 Gateway: protocol front | MCP server for clients | built |
-| M1 Gateway: proxy | OpenAI-style API with streaming, MCP upstream proxy with credential brokering, agent registry, kill switch, showback, Gateway Test screen, latency target | planned 016 |
-| M1 Gateway: policy | Python engine as a pinned package, offline replay, purpose stage, AuthZEN API; signed images and pen test close MG | planned 018 (OPA: 030) |
+| M1 Gateway: proxy | Embedded and standalone modes (sidecar later), OpenAI-style API with streaming, stateless MCP, MCP upstream proxy with credential brokering, agent registry, kill switch, showback, Gateway Test screen, latency target | planned 016 |
+| M1 Gateway: policy | Python engine as a pinned package, offline replay, purpose stage, AuthZEN API; signed images and pen test close MG | planned 018 (optional OPA: 030) |
 | M1 Gateway: guardrails | Ordered guardrail chain in and out, Presidio, secrets, stream modes, guardrail console, approvals bound to the action hash, inbox | planned 019 (today: regex on KB reads and agent runs; model calls: 013) |
-| M1 Gateway: identity | OIDC sign-in (Keycloak), MFA, roles, subject-scoped policy, delegation tokens | planned 020 (SCIM, IP allowlist: 030) |
+| M1 Gateway: identity | OIDC client for any provider, SCIM 2.0, Entra group overage, roles, subject-scoped policy, delegation tokens; Keycloak only for tests | planned 020 (IP allowlist: 030) |
 | Evidence core | Decision record per call, per-tenant hash chain, Ed25519 receipts, offline verifier | built; record v2 with extensions: local |
 | M2 Evidence | COSE receipts, external anchor, audit search, SIEM export (OCSF) | planned 017; evidence packs 030; transparency log and KMS 031 |
 | M3 Agents | LangGraph agent, OpenShell sandbox, run tokens, agent runs page | built (thin agent) |
-| M3 Agents: registry and monitoring | A2A, signed Agent Cards, OTel GenAI spans, breakers, governed memory | planned 028 |
-| M4 Data plane | Direct, federated and lakehouse access, pipelines, products, contracts, grants by SQL rewrite | planned 021 to 024 |
-| M5 Lineage, semantic layer | OpenLineage, agent facets, MetricFlow | planned 025 |
+| M3 Agents: run state and skills | Checkpointed runs that resume after a crash, approval as interrupt and resume, governed skills a human approves | planned 027 |
+| M3 Agents: registry and monitoring | A2A, signed Agent Cards, OTel GenAI spans, breakers, governed memory, consolidation job, outside harnesses through the gateway | planned 028 |
+| M4 Data plane | Direct and federated access on DuckDB (Trino optional), lakehouse, CDC by logical replication or dlt, pipelines, products, contracts, grants by SQL rewrite | planned 021 to 024 |
+| M5 Lineage, semantic layer | OpenLineage, agent facets, OSI metric definitions compiled by MetricFlow | planned 025 |
 | Documents and grounding | Docling, BM25, ACL per chunk, abstention | planned 026 (today: hybrid retrieval, citations) |
 | M6 Insights | Metrics, dashboards and reports under the viewer's grants | planned 029 |
-| Editions | Gateway, Assurance, Agents, Data, Full; smoke test per edition | local (012) |
+| Editions | Sold: Gateway, Gateway + Data, Full. Five module sets as CI profiles with a smoke test each | sets built (012); sold editions: re-plan 2026-11-08 |
 | Console | Overview, Ask, Library, History, Requests, Decisions, Policies, Keys, Usage, Agent runs, Modules, Trust, System | built; Modules page: local |
 | Reference company and showcase | Personas and the M0 script (014); fictional distributor data (021) | next 014 |
 | POC lifecycle | Local `poc up/backup/down/status`, maintenance mode, restore drill (015); OpenTofu and cloud VM: cloud track, 031 at the latest | next 015 |
@@ -80,14 +81,15 @@ M0 journey steps today: modules off (done locally in 012) · deny by policy (don
 - No commit or push without the owner's go.
 - Gateway breadth (per-stage evidence, guardrails on model calls and output, OpenAI-style API with streaming, virtual models with breakers, MCP upstream proxy, Gateway Test screen, guardrail console, central sign-in, delegation tickets, spans per stage) goes into existing sprints as plain requirements, not new sprints (2026-10-30).
 - Planning docs describe our product in our own terms: no names of, or comparisons with, other codebases (2026-11-02).
+- 2026-11-08 re-plan (ADR-0035): only Postgres, Valkey, API and worker are required; every other service is optional behind a port, a setting and a parity test. No Debezium; Trino, OPA and Kafka optional; Keycloak test-only; three editions sold; sidecar later; lighter packs. Agents gain saved run state, governed skills, a consolidation job and governed outside harnesses.
 - 2026-11-02, after the planning audit (`scratch/planning-audit.md`): re-plan for the earliest sellable gateway (trim 014 and 015; gateway order 016, 019, 020, 017, 018; SIEM, signing and pen test pulled into MG). M0 stays local; the first real cloud run moves to a later milestone. Per-stage evidence and the model-call input guardrail go into 013. The old root plans are archived; the Architect drafts a product map; the D: disk file is compacted. Commits for 011 and 012 are prepared after 012 passes; the owner approves them.
 
 ## Open for the owner
-1. Sign off the re-planned sprint map and the 013 to 015 packs (diff to follow).
+1. Sign off the 2026-11-08 re-plan diff, then the lighter 013 to 015 packs.
 2. Shape the product map (end-state console) once the Architect's draft is ready.
 
-## Now (2026-11-02)
-- **012 closing.** Live tier 880 tests, 0 failed (two runs). Unit 990. Ruff, mypy and import contracts (6 kept) pass. All five editions pass their smoke tests. Modules page done (Vitest 220 x3). Remaining: modules browser journey, docs (WP7), evidence (WP8), container proof, full browser run.
-- **Re-plan drafted:** sprint map, 013 to 015 packs, later sprint requirements and program docs revised and reviewed by the Architect. Waiting for owner sign-off.
-- **Product map:** Architect draft after the re-plan.
+## Now (2026-11-08)
+- **011 and 012 committed locally** on `sprint/011-baseline-and-stack` and `sprint/012-pillars-and-boundaries`. Not pushed.
+- **Re-plan 2026-11-08 written:** sprint map, program docs, stack, ADR-0035 and the 016, 020 to 022, 024, 025, 027, 028 and 030 requirements. Waiting for owner sign-off.
+- **Next:** lighter 013 to 015 packs, then the owner's go for the 013 builder.
 - Environment: Docker data disk is on D: (needs at least 25 GB free; check before pulls). Docker Desktop does not start at sign-in; start it after a Windows restart. Local Playwright: `scratch/pw/run.sh`.
