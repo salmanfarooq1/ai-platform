@@ -1,6 +1,6 @@
 # Sprint 012: Pillars and boundaries. Requirements
 
-All pillars. Infrastructure plus a small UI change. Evidence core, cross-module ports, module registry with the three pillars, decision record v2, the default deploy shape, and the milestone journeys.
+All pillars. Infrastructure and its applicable UI. Evidence core, cross-module ports, module registry with the three pillars, decision record v2, the default deploy shape, and the milestone journeys.
 
 Source: old 013, plus owner direction on three pillars and single-tenant deployment. The current-code readiness decisions and exact port contracts are in `architect-disposition.md`; read it with this pack.
 
@@ -15,7 +15,7 @@ Source: old 013, plus owner direction on three pillars and single-tenant deploym
    - import-linter contracts in CI: modules import only the kernel and `ports/`; no module imports another module.
    - `ENABLED_MODULES`, validated in `core/settings.py`, and a module registry that registers routes, workers and nav.
    - `GET /v1/system/modules`, governed by new metadata-only `system.read` for every recognized credential scope. A disabled module answers `module_disabled` (new reason code).
-   - The sidebar and command palette share session-keyed nav that hides disabled modules; optional entries stay hidden while metadata is unavailable.
+   - The sidebar, command palette, Ask Agent controls and direct optional routes share session-keyed module metadata. Optional controls stay unavailable while metadata is unknown or off; every submit/retry checks availability. Never reroute an Agent question as Search. Existing Search/Library and basic Trust/receipt verification remain gateway foundation, including M2/M3 off.
 4. Decision record v2.
    - `record_version` and one canonical serialisation, with an extensible `extensions` map hashed in a fixed order.
    - Old records verify unchanged.

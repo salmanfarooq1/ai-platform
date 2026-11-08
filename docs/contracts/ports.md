@@ -1,6 +1,40 @@
 # Port interfaces
 
-For engineers who implement an adapter. Each section lists a port's methods and the types they use. The tables are generated from the Protocols in `ports/`, so they always match the code.
+For engineers who implement an adapter. Generated sections list provider port methods from `ports/`; the cross-module contracts below follow their Protocols and value records. `scripts/docs/generate.py` refreshes the generated sections.
+
+## DecisionSink
+Persists a gateway-independent decision entry and its optional transactional event publication. A failed write raises; there is no successful no-op implementation.
+
+```python
+async write(entry: DecisionEntry, events: EventBus | None = None) -> UUID
+```
+
+`DecisionEntry` carries `tenant_id: UUID`, `principal_id: UUID | None`, `request_id: str`, `trace_id: str`, `action: str`, `resource: str | None`, `outcome: Literal["allow", "deny"]`, `stage: str`, `reason: str`, `policy_version: int | None`, `input_sha256: str | None`, `execution_id: UUID | None`, and `extensions: Mapping[str, JsonValue]`. The sink creates the decision id, timestamp and chain position. It preserves the tenant chain lock and transactional outbox order.
+
+## EvidenceLookup
+Looks up a decision receipt link within a tenant. Unknown and foreign ids return the same unlinked value. The real lookup remains enabled when the Evidence module is off.
+
+```python
+async decision(tenant_id: UUID, decision_id: UUID) -> EvidenceRef
+```
+
+`EvidenceRef` is a frozen record with `linked: bool`, `decision_id: UUID | None = None`, and `href: str | None = None`.
+
+## DataAccess
+Reads a named resource after authorization has been established elsewhere. Tenant and resource arguments do not grant access. The current no-op raises `ModuleDisabled`; Sprint 012 has no real adapter.
+
+```python
+async read(*, tenant_id: UUID, resource: str) -> DataResult
+```
+
+`DataResult` is a frozen record with `columns: tuple[str, ...]`, `rows: tuple[Mapping[str, JsonValue], ...]`, and `snapshot_id: str | None = None`.
+
+## LineageEmitter
+Emits a CloudEvent and may receive its producer transaction. The optional no-op drops events and increments `dropped_count`; it does not claim publication. A later durable spool can commit with the producer's change.
+
+```python
+async emit(event: CloudEvent, *, tx: Any = None) -> None
+```
 
 ## EventBus
 Publishes and delivers CloudEvents. Adapters: in-process, Postgres outbox, Kafka.

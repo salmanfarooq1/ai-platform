@@ -15,7 +15,6 @@ The system and its strict rules are described in `docs/architecture.md`.
 - **Backend:** Python 3.11, Poetry 2.3.3, FastAPI with async `asyncpg`, Postgres 16 with pgvector, Valkey Search, LiteLLM, LangGraph, MCP.
 - **Stack:** Valkey, optional Apache Kafka (`streams`), SeaweedFS (`lake`), and local or hosted models (`models`). Service security rebuilds use pinned inputs and are scanned as final artifacts.
 - **UI:** Vite with React 18 and TypeScript (strict), Tailwind and shadcn/ui, TanStack Query, in `ui/`. Playwright tests are in `ui/e2e/`.
-- **Hosting:** Render free tier (`render.yaml`). The database is Neon Postgres.
 - **Modes:** the `MODE` env var is `local`, `public-preview` or `prod`.
 
 ## Repo map
@@ -52,8 +51,8 @@ poetry run python -m workers              # run a worker: ingestion and agent ru
 cd ui && npm ci && npm run dev            # run UI on :5173 (Vite proxies /v1 to :8000)
 poetry run pytest -m unit -q              # unit tests (no external services)
 poetry run pytest -m "integration or e2e" -q -rs  # real Postgres + Valkey, fake LLM; skips with a reason if they are down
-poetry run ruff check api core gateway ports adapters workers sandbox_agent tests scripts/e2e   # lint
-poetry run mypy                           # typecheck (api/ core/ gateway/ ports/ adapters/ workers/ sandbox_agent/ config.py; strict for ports/, adapters/ and sandbox_agent/)
+poetry run ruff check api core gateway evidence ports adapters workers sandbox_agent tests scripts/e2e scripts/docs   # lint
+poetry run mypy                           # typecheck (api/ core/ gateway/ evidence/ ports/ adapters/ workers/ sandbox_agent/ config.py; strict for evidence/, ports/, adapters/ and sandbox_agent/)
 poetry run python scripts/update_openapi.py  # refresh docs/api/openapi.json after an intended API change (unit test fails on drift)
 scripts/check_no_ddl.sh                   # no CREATE/ALTER TABLE outside migrations/
 scripts/supply_chain/licence_gate.sh      # OSI licence gate (install --with supply-chain)

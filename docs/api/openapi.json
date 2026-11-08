@@ -485,6 +485,11 @@
             ],
             "title": "Execution Id"
           },
+          "extensions": {
+            "additionalProperties": true,
+            "title": "Extensions",
+            "type": "object"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -533,6 +538,10 @@
           "reason": {
             "title": "Reason",
             "type": "string"
+          },
+          "record_version": {
+            "title": "Record Version",
+            "type": "integer"
           },
           "request_id": {
             "title": "Request Id",
@@ -588,6 +597,8 @@
           "policy_version",
           "tenant",
           "input_sha256",
+          "record_version",
+          "extensions",
           "trace"
         ],
         "title": "DecisionDetail",
@@ -1233,6 +1244,99 @@
           "total_cost"
         ],
         "title": "ModelUsage",
+        "type": "object"
+      },
+      "ModuleInfo": {
+        "properties": {
+          "always_on": {
+            "title": "Always On",
+            "type": "boolean"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "nav_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nav Group"
+          },
+          "pillar": {
+            "enum": [
+              "platform",
+              "gateway",
+              "data",
+              "agents"
+            ],
+            "title": "Pillar",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "label",
+          "pillar",
+          "description",
+          "enabled",
+          "nav_group",
+          "always_on"
+        ],
+        "title": "ModuleInfo",
+        "type": "object"
+      },
+      "ModuleList": {
+        "properties": {
+          "deploy_shape": {
+            "enum": [
+              "single_tenant",
+              "multi_tenant"
+            ],
+            "title": "Deploy Shape",
+            "type": "string"
+          },
+          "edition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edition"
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/ModuleInfo"
+            },
+            "title": "Modules",
+            "type": "array"
+          }
+        },
+        "required": [
+          "edition",
+          "deploy_shape",
+          "modules"
+        ],
+        "title": "ModuleList",
         "type": "object"
       },
       "Overview": {
@@ -4318,6 +4422,33 @@
         "summary": "Start Preview",
         "tags": [
           "session"
+        ]
+      }
+    },
+    "/v1/system/modules": {
+      "get": {
+        "description": "Return edition and module availability after identity and scope authorization.",
+        "operationId": "get_modules_v1_system_modules_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuleList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Modules",
+        "tags": [
+          "system"
         ]
       }
     },

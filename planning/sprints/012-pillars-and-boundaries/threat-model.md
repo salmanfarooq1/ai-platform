@@ -22,7 +22,7 @@
 | T8 | Turning M2 off replaces recording with a successful no-op. | Repudiation | Evidence core and real decision/lookup adapters are mandatory in every production edition. Only a synthetic raising sink is used for failure tests. | Gateway-only edition writes and retrieves real decisions; sink failure remains 503. |
 
 ## Abuse cases
-- A client calls `/v1/sandbox/runs/...` or `/v1/mcp/sse` on a Gateway edition. It gets 404 `module_disabled` and a deny row.
+- An authenticated client with the required scope calls `/v1/mcp/sse` on a Gateway edition; a sandbox request additionally needs a valid matching run grant. Each gets recorded 404 `module_disabled`. Missing credentials/scopes and out-of-run tokens retain 401/403 before module disclosure.
 - A future sprint adds an extension key with a float score. The registry refuses it at write time, so it never reaches the chain.
 
 ## OWASP items in scope

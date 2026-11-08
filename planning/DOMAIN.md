@@ -26,3 +26,11 @@ It runs **governed agents on business data**. Agents answer questions and do tas
 | Receipt | The audit record for each request: policy version, model route and content hashes. It never holds raw content. |
 | Mode | `local`, `public-preview` or `prod`. It selects the external services used. |
 | Walking skeleton | The thinnest correct version of a feature, with what was deferred named and a seam left for it. |
+| Module | A registered capability with its own optional routes, transports or job handlers. |
+| Pillar | One of the platform's organizing areas: Platform, Gateway, Data or Agents. |
+| Edition | A named set of enabled modules, such as Gateway, Assurance, Agents, Data or Full. |
+| Deploy shape | The tenant-count mode selected for an installation: `single_tenant` or `multi_tenant`. |
+| Module stage | The gateway check after principal authorization that denies actions belonging to disabled modules. |
+| Record version | The version of the canonical decision fields used to hash and verify a decision record. |
+| Extension | A registered, schema-checked value included in a version 2 decision record's hash. |
+| Evidence core | The package that writes decision records, maintains their hash chain and builds receipts. |

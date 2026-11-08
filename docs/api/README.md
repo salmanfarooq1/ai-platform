@@ -124,4 +124,5 @@ Every allow and deny carries one of these codes. The table is generated from `ga
 | `dependency_unavailable` | rate | Service unavailable | A service the check needs was down, so the call was stopped. Try again shortly. | none | 503 `dependency_unavailable` |
 | `internal_error` | enforce | Internal error | A check failed unexpectedly, so the call was stopped. | none | 403 `policy_denied` |
 | `decision_unrecorded` | record | Decision not recorded | The decision could not be written to the audit log, so the call was stopped. | none | 503 `decision_unrecorded` |
+| `module_disabled` | module | Module unavailable | This capability is not enabled for this edition. | none | 404 `module_disabled` |
 <!-- END GENERATED: reason-codes -->

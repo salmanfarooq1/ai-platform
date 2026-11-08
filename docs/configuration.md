@@ -96,6 +96,7 @@ This table is generated from `core/settings.py` by `scripts/docs/generate.py`. D
 
 | Setting | Default | Secret | Purpose |
 |---|---|---|---|
+| `ENABLED_MODULES` | `all` | no | Comma-separated enabled modules, or `all`; the gateway module is always required. |
 | `AGENT_RUNTIME` | `queued` | no | Agent runtime: `queued` runs each agent run as a job in a worker, `openshell` runs it in an OpenShell sandbox started by a worker, `inprocess` runs it in the API process. |
 | `AGENT_SYNC_WAIT_SECONDS` | `25.0` | no | How long `POST /v1/agent/query` waits for the worker before it answers 202 with the execution id. |
 | `SANDBOX_GATEWAY_URL` | unset | no | Address of this API as the sandbox sees it. It is the only host the sandbox may connect to, and it must not be loopback. Required when `AGENT_RUNTIME=openshell`. |
@@ -150,6 +151,7 @@ This table is generated from `core/settings.py` by `scripts/docs/generate.py`. D
 
 | Setting | Default | Secret | Purpose |
 |---|---|---|---|
+| `DEPLOY_SHAPE` | `single_tenant` | no | Tenant deployment shape: one tenant by default, or `multi_tenant` for multiple tenants. |
 | `JWT_JWKS_URL` | unset | no | JWKS URL for JWT verification with asymmetric keys. Set only one of this and `JWT_SECRET`. |
 | `JWT_SECRET` | unset | yes | HS256 secret for JWT verification, at least 32 characters. Set only one of this and `JWT_JWKS_URL`. |
 | `JWT_ISSUER` | unset | no | Expected JWT issuer. Required when JWT verification is on. |

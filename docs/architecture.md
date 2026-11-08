@@ -40,16 +40,25 @@ The platform is a modular monolith ([ADR-0001](adr/0001-modular-monolith.md)). T
 | Package | Responsibility |
 |---|---|
 | `api/` | The FastAPI app: middleware, `/v1` routes, the LangGraph agent (`api/agent/`), the MCP server (`api/mcp/`), the web edge session (`api/web_edge/`), the error format (`api/errors.py`) |
-| `gateway/` | `enforce()` and its stages, the execution boundary, tenant policies, the reason catalogue, decision records, the hash chain and receipts |
+| `gateway/` | `enforce()` and its stages, the execution boundary, tenant policies and the reason catalogue |
+| `evidence/` | Decision persistence, the per-tenant hash chain, receipts and extension validation |
 | `core/` | Validated settings (`core/settings.py`), database pool and tenant connections, identity (keys, JWT, run tokens), ingestion, the job queue SQL, metrics |
-| `ports/` | Typed interfaces to every external provider: LLM, chat model, embeddings, knowledge store, cache, object store, event bus, agent runtime, sandbox driver |
+| `ports/` | Typed interfaces to providers and cross-module contracts, including decision evidence, data access and lineage |
 | `adapters/` | The implementations behind the ports, and `adapters/registry.py`, which builds one bundle from settings at startup. Only this package imports a provider SDK. |
 | `workers/` | `python -m workers`: the job loop, the handlers (ingest, agent run, purge), the retention scheduler, the outbox relay and an optional metrics server |
 | `sandbox_agent/` | The standard-library program that runs inside an OpenShell sandbox and reaches the platform only through the sandbox routes |
-| `migrations/` | Alembic migrations `0001` to `0010` |
+| `migrations/` | Forward-only Alembic migrations |
 | `ui/` | The React and TypeScript console, workspace and public pages |
 
 The port interfaces are listed in [contracts/ports.md](contracts/ports.md). Import-lint tests enforce the package boundaries: only `adapters/` imports `litellm`, `boto3`, `redis`, `aiokafka` or `openshell`, and agent code never imports the model client directly ([ADR-0005](adr/0005-ports-and-adapters.md)).
+
+### Modules and editions
+
+`core/modules.py` is a metadata registry. It maps modules to pillars, optional routes, transports, job handlers and navigation groups without importing their implementations. The pillars are Platform, Gateway, Data and Agents. Gateway and Evidence belong to the Gateway pillar; Data and Lineage belong to Data; Agents belongs to Agents. The Platform pillar is the shared kernel. `ports/` imports no platform packages, `core/` imports no module implementations, and the evidence and gateway packages remain independent. The import-lint contracts enforce these rules ([ADR-0013](adr/0013-module-boundaries.md)).
+
+`ENABLED_MODULES` defaults to `all`; it can also name a comma-separated module set. Gateway is required, and unknown names fail startup validation. The editions map to Gateway (`gateway`), Assurance (`gateway,evidence`), Agents (`gateway,agents`), Data (`gateway,data,lineage`) and Full (`all`). The API and worker composition roots load optional routes, transports and job handlers only when their modules are enabled.
+
+The `module` stage runs after `principal`. It checks each action's module and any trusted route-module attribution. A disabled module is denied with `module_disabled`. Client input cannot set route-module attribution. See [ADR-0013](adr/0013-module-boundaries.md) for import contracts, deployment modes and deploy shape.
 
 ## 4. A request, step by step
 
@@ -164,3 +173,4 @@ Events are CloudEvents 1.0 ([ADR-0008](adr/0008-event-bus.md)). The types and th
 | Design tokens and the palette | [0010](adr/0010-design-tokens-and-ink-paper-palette.md) |
 | Durable jobs on Postgres | [0011](adr/0011-durable-jobs.md) |
 | Receipts and the hash chain | [0012](adr/0012-receipts-and-hash-chain.md) |
+| Module boundaries and editions | [0013](adr/0013-module-boundaries.md) |

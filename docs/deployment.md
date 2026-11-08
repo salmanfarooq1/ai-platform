@@ -16,6 +16,20 @@ For local deployment and upgrade work. It covers the images, database roles and 
 
 The API and workers are stateless. Run as many as needed: workers share the queue safely, and API processes share Postgres and Valkey.
 
+## Modules
+
+Set `ENABLED_MODULES` to the edition's module list. The default `all` enables every registered module. Gateway is always required.
+
+| Edition | `ENABLED_MODULES` |
+|---|---|
+| Gateway | `gateway` |
+| Assurance | `gateway,evidence` |
+| Agents | `gateway,agents` |
+| Data | `gateway,data,lineage` |
+| Full | `all` |
+
+Set `DEPLOY_SHAPE` to `single_tenant` or `multi_tenant`. It defaults to `single_tenant` for every edition. Use `multi_tenant` when the database contains or will contain more than one tenant. In `single_tenant`, API and worker startup refuses a database with multiple tenants, and the identity CLI serializes tenant creation and refuses a second tenant. Both shapes keep row-level security and tenant checks. See [ADR-0013](adr/0013-module-boundaries.md).
+
 ## Images
 
 ```bash

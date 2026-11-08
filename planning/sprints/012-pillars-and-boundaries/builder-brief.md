@@ -1,5 +1,5 @@
 # Sprint 012: Builder brief
-You are the Builder for Sprint 012 in /home/ubuntu/ai-platform, on branch `sprint/012-pillars-and-boundaries`. Infrastructure plus a small UI change, across all modules. Work autonomously. Stop conditions are in AGENTS.md: a strict-rule or blueprint conflict, a destructive action, a missing secret, or spending money. On one, log it in `planning/QUESTIONS.md` and `build-log.md`, skip only that item, and finish the rest.
+You are the Builder for Sprint 012 in /home/ubuntu/ai-platform, on branch `sprint/012-pillars-and-boundaries`. Infrastructure and its applicable UI, across all modules. Work autonomously. Stop conditions are in AGENTS.md: a strict-rule or blueprint conflict, a destructive action, a missing secret, or spending money. On one, log it in `planning/QUESTIONS.md` and `build-log.md`, skip only that item, and finish the rest.
 
 ## Read first
 - `AGENTS.md`, `planning/STATE.md`, `planning/DECISIONS.md`, `docs/architecture.md`, ADR-0005, ADR-0006, ADR-0012.
@@ -9,12 +9,12 @@ You are the Builder for Sprint 012 in /home/ubuntu/ai-platform, on branch `sprin
 - `.claude/skills/governed-design/SKILL.md` before any UI code.
 
 ## Build
-Order: ports and no-ops with contract suites; move the evidence core (pure move first, all tests green, then the sink); migration and record v2; registry (with `pillar`), settings (`ENABLED_MODULES`, `DEPLOY_SHAPE`) and the `module` stage; import-linter; UI; CI matrix; docs. Write a short plan in `build-log.md` first.
+Order: move the existing evidence core and update its imports, then capture the full green pure-move checkpoint before new behavior. Next add typed ports and no-ops with contract suites before implementing the sink; migration and record v2; registry (with `pillar`), settings (`ENABLED_MODULES`, `DEPLOY_SHAPE`) and the `module` stage; import-linter; UI; CI matrix; docs. Write a short plan in `build-log.md` first.
 
 ## Tests
 - **Baseline:** the numbers in Sprint 011's report.
 - The move must not change behaviour. Run the full suite after the pure move, before any new code, and save it as `evidence/after-move.txt`.
-- At the pure-move checkpoint, existing tests change only imports. Later fixture, injection, signature and setup changes may support the explicit new contracts; keep assertions and existing coverage. New module-stage and deploy-shape behavior needs explicit new expectations, never a silent relaxation.
+- At the pure-move checkpoint, existing tests change only imports and discovery paths needed to retain coverage of moved files. Later fixture, injection, signature and setup changes may support the explicit new contracts; keep assertions and existing coverage. New module-stage and deploy-shape behavior needs explicit new expectations, never a silent relaxation.
 - Every acceptance item has a named test in the blueprint. Fakes: the optional no-op adapters exercise disabled contracts. DecisionSink failure uses a synthetic raising adapter, never a successful no-op.
 - The migration test upgrades from the previous head with chained rows already in place.
 
@@ -32,6 +32,7 @@ Order: ports and no-ops with contract suites; move the evidence core (pure move 
 - **Migration:** the next free number after the previous sprint's head (0010 at the start of 011). Forward only. Include deploy-shape probe and filtered claim-function grants, not only decision columns. Never edit an older migration.
 - **Container:** the runtime Dockerfile copies package directories explicitly. Add `evidence/` and prove a real Gateway-only application-image boot/decision; a source-checkout smoke would miss an omitted package.
 - **Decided:** the gateway package API is importable by every module (see blueprint). Export estimate_tokens, record_cost, record_usage, LIMITED_PATHS, REASONS and context_from_payload as needed; remove agent/MCP imports of gateway internals. The new module stage runs after principal. `/v1/system/modules` uses new metadata-only `system.read`, granted by every recognized existing credential scope with scope-union authentication. No KB/model/audit privilege is widened. Update the three exact scope-action expectations explicitly for this addition and retain old assertions. SideNav and CommandPalette share the session-keyed filtered navigation.
+- **UI completeness:** read disposition item 11. The existing Ask Agent selector and direct Agent runs URL need module-aware behavior now, beyond sidebar/palette hiding. Search/Library/History and basic Trust/receipt verification stay gateway foundation. Preserve existing scope-denial journeys and never automatically turn an Agent submission into Search.
 - **ADR-0013** covers module boundaries, cross-module ports, decision record v2, the pillars, the deploy shape, and the target gateway deployment modes (built in 016).
 - **Deploy shape:** the default is `single_tenant` because a client install serves one client. Do not remove or weaken any RLS policy or tenant check. The shape gates startup and serialized tenant creation. There is no existing tenant switcher to remove; preserve the identity display.
 

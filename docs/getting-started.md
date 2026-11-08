@@ -19,25 +19,27 @@ bash scripts/setup_db.sh
 
 `setup_db.sh` creates the `rag_platform` database, makes sure the app role `gap_app` exists, and applies every migration as the owner role. It prints `SETUP_DONE` at the end.
 
-## 2. Create a tenant, a principal and a key
+## 2. Create a principal and a key for the seeded tenant
+
+A fresh database migration creates the `default` tenant and its `legal` knowledge base. Use them for the first setup:
 
 ```bash
 I="poetry run python scripts/admin/identity.py"
-$I create-tenant acme                                  # also creates the knowledge base `default`
-$I create-kb acme legal --description "Legal documents"
-$I create-principal acme service me                    # prints the principal id
+$I create-principal default service me                  # prints the principal id
 $I create-key <principal-id> --scopes query kb:read kb:write agent audit:read
 export GAP_KEY=<the key printed above>
 ```
 
 The key is printed once. Only its hash is stored. The scopes are explained in [api/README.md](api/README.md#scopes).
 
-Give the tenant a policy that allows only the `default` knowledge base:
+The default deploy shape is `single_tenant`, so a fresh installation starts with this one tenant. Set `DEPLOY_SHAPE=multi_tenant` for a platform that must create additional tenants, then use `create-tenant` before creating a principal and key for each tenant.
+
+Give the seeded tenant a policy that allows only its `legal` knowledge base:
 
 ```bash
-echo '{"allowed_kbs": ["default"], "allowed_tools": "*", "allowed_models": "*"}' > policy.json
-$I set-policy acme policy.json
-$I show-policy acme
+echo '{"allowed_kbs": ["legal"], "allowed_tools": "*", "allowed_models": "*"}' > policy.json
+$I set-policy default policy.json
+$I show-policy default
 ```
 
 ## 3. Run the API and a worker
@@ -53,7 +55,7 @@ Ingestion and agent runs are jobs, and the worker runs them. It also relays even
 
 ```bash
 curl localhost:8000/health
-curl -H "Authorization: Bearer $GAP_KEY" "localhost:8000/v1/documents?namespace=default"
+curl -H "Authorization: Bearer $GAP_KEY" "localhost:8000/v1/documents?namespace=legal"
 curl -X POST -H "Authorization: Bearer $GAP_KEY" -H 'Content-Type: application/json' \
      -d '{"query": "retention rules", "namespace": "legal"}' localhost:8000/v1/search
 curl -H "Authorization: Bearer $GAP_KEY" "localhost:8000/v1/decisions?limit=5"
@@ -70,7 +72,7 @@ What you see:
 This step needs a reachable embedding model and a completion model.
 
 ```bash
-curl -X POST -H "Authorization: Bearer $GAP_KEY" -F "file=@policy.md" "localhost:8000/v1/ingest?namespace=default"
+curl -X POST -H "Authorization: Bearer $GAP_KEY" -F "file=@policy.md" "localhost:8000/v1/ingest?namespace=legal"
 curl -H "Authorization: Bearer $GAP_KEY" localhost:8000/v1/jobs/<job_id>
 curl -X POST -H "Authorization: Bearer $GAP_KEY" -H 'Content-Type: application/json' \
      -d '{"query": "How long are records kept?", "namespace": "default"}' localhost:8000/v1/search

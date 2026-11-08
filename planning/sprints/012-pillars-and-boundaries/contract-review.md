@@ -23,3 +23,5 @@ The Architect reviewed the current recording, chain, gateway, auth, worker, iden
 | Historical migration test expects old claim privilege | Target its historical revision and separately test the new revocation at head |
 
 Implementation must still prove every acceptance item with captured command evidence, including full regression tiers and all five real-lifespan edition boots. The migration number and regression baseline are taken from the finally accepted Sprint 011 result. No commit, push or merge was run.
+
+The owner reaffirmed same-sprint UI delivery. Source review found an inline Agent option in Ask beyond the named navigation item; disposition item 11 and A7 now cover that option, stale selection, direct optional routes and continued foundation Search/Trust/receipt journeys with M2/M3 off. The pure-move checkpoint still precedes this behavior. Mechanical test discovery must continue to cover the moved files so their reason-catalogue and SDK import assertions are retained.
