@@ -82,8 +82,8 @@ The app is near flat. Hairline borders do the structure. Light-theme shadows sta
 | `motion-ease-out` | cubic-bezier(0.2, 0, 0, 1) | Default |
 
 - In the app, only motion that explains a change: a drawer sliding, a row expanding, a toast. Animate `transform` and `opacity` only. No scroll-triggered entry animation.
-- On the landing page: GSAP scroll story and heading reveals. At most one ambient WebGL background on the whole site, and none in the app.
-- `prefers-reduced-motion`: no GSAP, no WebGL, a static poster, and every story step visible.
+- On the landing page: CSS sticky scroll story and browser-native heading reveals. At most one ambient WebGL background on the whole site, and none in the app.
+- `prefers-reduced-motion`: no motion module, no WebGL, a static poster, and every story step visible.
 
 ## The surfaces
 | Surface | Routes | Character | Dials (variance, motion, density) |

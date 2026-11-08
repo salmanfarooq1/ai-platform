@@ -1,7 +1,6 @@
-// The pinned scroll story follows the GSAP ScrollTrigger pinning pattern. 21st.dev has similar scroll sections
-// (https://21st.dev). It is not reachable from the build container, so this is built from the pattern, with no code copied.
+// CSS sticky positioning and a lazy browser motion module drive the governed-request story.
 import { useEffect, useRef } from 'react'
-import { loadGsap } from './gsap-loader'
+import { loadMotion } from './gsap-loader'
 import { STORY_STEPS } from './story-data'
 import { StoryPanel } from './story-panels'
 import { useMediaQuery, useReducedMotion } from './use-reduced-motion'
@@ -21,35 +20,10 @@ export function ScrollStory() {
     let cancelled = false
     const rootEl = root.current
     const pinEl = pin.current
-    void loadGsap().then(({ gsap }) => {
+    void loadMotion().then(({ scrubStory }) => {
       if (cancelled) return
-      const ctx = gsap.context(() => {
-        const panels = gsap.utils.toArray<HTMLElement>('[data-panel]', pinEl)
-        // The active step is marked by a bar. Text stays at full contrast, so every step passes AA.
-        const items = gsap.utils.toArray<HTMLElement>('[data-bar]', pinEl)
-        gsap.set(panels, { autoAlpha: 0, y: 24 })
-        gsap.set(items, { opacity: 0 })
-        // The first step is showing when the story pins.
-        if (panels[0]) gsap.set(panels[0], { autoAlpha: 1, y: 0 })
-        if (items[0]) gsap.set(items[0], { opacity: 1 })
-        const tl = gsap.timeline({
-          defaults: { ease: 'none' },
-          scrollTrigger: { trigger: pinEl, start: 'top top', end: `+=${STORY_STEPS.length * 70}%`, pin: true, scrub: 0.4, anticipatePin: 1 },
-        })
-        panels.forEach((p, i) => {
-          const prev = panels[i - 1]
-          const prevItem = items[i - 1]
-          const item = items[i]
-          if (prev) tl.to(prev, { autoAlpha: 0, y: -24, duration: 0.35 }, i)
-          if (prevItem) tl.to(prevItem, { opacity: 0, duration: 0.35 }, i)
-          if (i === 0) return
-          tl.to(p, { autoAlpha: 1, y: 0, duration: 0.35 }, i + 0.2)
-          if (item) tl.to(item, { opacity: 1, duration: 0.35 }, i + 0.2)
-        })
-        tl.to({}, { duration: 0.5 })
-      }, rootEl)
+      revert = scrubStory(rootEl, pinEl)
       rootEl.dataset['motion'] = 'scrub'
-      revert = () => ctx.revert()
     })
     return () => { cancelled = true; revert?.(); delete rootEl.dataset['motion'] }
   }, [reduced])

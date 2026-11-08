@@ -14,7 +14,7 @@ const ASSETS = path.join(DIST, 'assets')
 const files = fs.readdirSync(ASSETS).filter((f) => f.endsWith('.js')).sort()
 
 // The marketing group is the only code allowed to name or contain GSAP and three.js.
-const MARKETING = /^(landing-page|how-it-works-page|marketing-shell|gsap|webgl|hero-scene)-/
+const MARKETING = /^(landing-page|how-it-works-page|marketing-shell|landing-motion|gsap|webgl|hero-scene)-/
 const ROUTES = [
   ['/', 'landing-page'], ['/how-it-works', 'how-it-works-page'], ['/signin', 'signin-page'],
   ['/app', 'overview-page'], ['/app/walkthrough', 'walkthrough-page'], ['/app/ask', 'ask-page'], ['/app/library', 'library-page'],
@@ -23,7 +23,7 @@ const ROUTES = [
   ['/app/trust', 'trust-page'], ['/app/system', 'system-page'],
 ]
 const BAD_CODE = /WebGLRenderer|@react-three|THREE\.|ScrollTrigger|SplitText|gsap\.registerPlugin|getContext\(["']webgl/
-const BAD_NAME = /(?:^|\/)(webgl|gsap|hero-scene)-[\w-]+\.js/
+const BAD_NAME = /(?:^|\/)(webgl|gsap|landing-motion|hero-scene)-[\w-]+\.js/
 
 let failures = 0
 const fail = (m) => { failures += 1; console.log(`FAIL ${m}`) }
@@ -53,7 +53,7 @@ for (const r of appChunks) {
 }
 console.log(`checked ${appChunks.length} chunks, grep for: ${BAD_CODE.source}`)
 const html = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8')
-if (/webgl|gsap|hero-scene|landing-page|how-it-works/.test(html)) fail('index.html preloads a marketing chunk')
+if (/webgl|gsap|landing-motion|hero-scene|landing-page|how-it-works/.test(html)) fail('index.html preloads a marketing chunk')
 else console.log('ok   index.html preloads no marketing chunk')
 
 console.log('\nWhere GSAP and WebGL live')

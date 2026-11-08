@@ -25,7 +25,7 @@ export default defineConfig({
           // inside the WebGL chunk and pull that chunk in with the landing page.
           if (id.includes('vite/preload-helper') || id.includes('vite/modulepreload-polyfill')) return 'react'
           if (id.includes('node_modules/three/') || id.includes('@react-three') || id.includes('node_modules/three-stdlib')) return 'webgl'
-          if (id.includes('node_modules/gsap')) return 'gsap'
+          if (id.includes('/landing/native-motion')) return 'landing-motion'
           if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/') || id.includes('node_modules/react-router') || id.includes('node_modules/scheduler')) return 'react'
           return undefined
         },

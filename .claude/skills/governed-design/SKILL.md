@@ -73,7 +73,7 @@ The full spec is `docs/design/PATTERNS.md`. In short:
 - **Verdict tokens:** `--allow`, `--deny` and `--escalate`, each with a `-tint`, for light and dark. They pass AA for text on `--bg-surface`. The contrast pairs are listed in `docs/design/ACCESSIBILITY.md`, and a test checks them.
 - **No color literals** in `ui/src`. ESLint fails on hex, rgb and hsl literals outside the generated file. A test guards the stylesheets.
 - **Typography:**
-  - Geist Sans for UI and Geist Mono for ids, hashes, reason codes and policy keys, self-hosted from the `geist` npm package (OFL).
+  - Geist Sans for UI and Geist Mono for ids, hashes, reason codes and policy keys, self-hosted from the audited Geist 1.7.2 assets (OFL).
   - Inter is retired. Tabular numbers in tables.
 - **Radius:** 8px for console cards and inputs, 12px for workspace cards, and up to 24px only on the landing page.
 - **Shadows:** near-flat in the app (light theme at or below 6% opacity). Hairline borders do the structure.
@@ -84,10 +84,10 @@ The full spec is `docs/design/PATTERNS.md`. In short:
   - 150-250ms, using the spring and easing values from apple-design.
   - No scroll-triggered entry animation in the console.
 - **On the landing page:**
-  - GSAP with ScrollTrigger and SplitText (free, all plugins) for the governed-request scroll story and text reveals.
+  - CSS sticky positioning, IntersectionObserver and Web Animations for the governed-request scroll story and text reveals.
   - One Three.js / WebGL ring, a quiet background behind the hero, lazy-loaded after first paint with `React.lazy` and an `IntersectionObserver`. Static poster fallback. It stays only while Lighthouse holds: desktop 90, mobile 75.
   - At most one ambient WebGL background on the whole site. No WebGL anywhere in the app.
-- **Reduced motion:** honor `prefers-reduced-motion` everywhere. GSAP timelines go to their end state, and WebGL shows the poster.
+- **Reduced motion:** honor `prefers-reduced-motion` everywhere. The motion module is not loaded and every story step is shown, and WebGL shows the poster.
 - **Performance:** animate `transform` and `opacity` only. `backdrop-blur` only on fixed layers. Landing page Lighthouse performance: desktop 90 or more, mobile 75 or more.
 
 ## Components and third-party code

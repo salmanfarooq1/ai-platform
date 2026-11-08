@@ -8,7 +8,7 @@ import { buttonVariants } from '@/components/ui/button-variants'
 import { cn } from '@/lib/utils'
 import { CAPABILITIES, HEADLINE, SUBLINE, USE_CASES, WHY_OUTSIDE } from './claims'
 import { EXAMPLE_DENY_SENTENCE, exampleReceipt } from './example-data'
-import { loadGsap } from './gsap-loader'
+import { loadMotion } from './gsap-loader'
 import { HeroVisual } from './hero-visual'
 import { MarketingShell } from './marketing-shell'
 import { ScrollStory } from './scroll-story'
@@ -25,15 +25,9 @@ export default function LandingPage() {
     let revert: (() => void) | undefined
     let cancelled = false
     const rootEl = root.current
-    void loadGsap().then(({ gsap, SplitText }) => {
+    void loadMotion().then(({ revealHeadings }) => {
       if (cancelled) return
-      const ctx = gsap.context(() => {
-        gsap.utils.toArray<HTMLElement>('[data-reveal]', rootEl).forEach((el) => {
-          const split = SplitText.create(el, { type: 'lines', mask: 'lines', autoSplit: true })
-          gsap.from(split.lines, { yPercent: 105, opacity: 0, duration: 0.7, ease: 'power3.out', stagger: 0.08, scrollTrigger: { trigger: el, start: 'top 88%', once: true } })
-        })
-      }, rootEl)
-      revert = () => ctx.revert()
+      revert = revealHeadings(rootEl)
     })
     return () => { cancelled = true; revert?.() }
   }, [reduced])

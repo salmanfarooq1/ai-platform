@@ -16,7 +16,7 @@ test.describe('A7 landing page: build output', () => {
     // three.js lives in webgl-*.js. hero-scene and landing-page may mention a context probe, but no app chunk may.
     expect(withWebgl.length).toBeGreaterThan(0)
     for (const f of withWebgl) expect(f).toMatch(/^(webgl|hero-scene|landing-page)-/)
-    const appChunks = assets.filter((f) => !/^(webgl|hero-scene|landing-page|gsap)-/.test(f))
+    const appChunks = assets.filter((f) => !/^(webgl|hero-scene|landing-page|landing-motion|gsap)-/.test(f))
     console.log('app chunks checked:', appChunks.join(', '))
     for (const f of appChunks) {
       const text = fs.readFileSync(path.join(DIST, 'assets', f), 'utf8')
@@ -25,7 +25,7 @@ test.describe('A7 landing page: build output', () => {
       expect(text, `${f} must not name the gsap chunk`).not.toMatch(/gsap-[\w-]+\.js/)
     }
     // The entry HTML preloads neither the WebGL chunk nor GSAP.
-    expect(html).not.toMatch(/webgl|gsap|hero-scene/)
+    expect(html).not.toMatch(/webgl|gsap|landing-motion|hero-scene/)
   })
 })
 
@@ -82,7 +82,7 @@ test.describe('A7 landing page: reduced motion', () => {
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(1500) // longer than the idle delay that would start the WebGL load
 
-    expect(urls.filter((u) => /\/assets\/(webgl|gsap|hero-scene)-/.test(u))).toEqual([])
+    expect(urls.filter((u) => /\/assets\/(webgl|gsap|landing-motion|hero-scene)-/.test(u))).toEqual([])
     await expect(page.getByTestId('hero-visual')).toHaveAttribute('data-webgl', 'off')
     await expect(page.getByTestId('hero-poster')).toBeVisible()
     await expect(page.locator('canvas')).toHaveCount(0)
@@ -127,7 +127,7 @@ test.describe('005b landing page: copy and sections', () => {
     await page.goto('/how-it-works')
     await expect(page.getByRole('heading', { level: 1, name: 'How a call is checked' })).toBeVisible()
     await page.waitForLoadState('networkidle')
-    expect(urls.filter((u) => /\/assets\/(webgl|gsap|hero-scene)-/.test(u))).toEqual([])
+    expect(urls.filter((u) => /\/assets\/(webgl|gsap|landing-motion|hero-scene)-/.test(u))).toEqual([])
     await expect(page.locator('canvas')).toHaveCount(0)
     await expect(page.getByRole('region', { name: 'Receipt' })).toBeVisible()
     await expect(page.getByText('With no tenant policy, the scopes on the key decide what is allowed, and a policy can only narrow that.')).toBeVisible()

@@ -54,7 +54,7 @@ Test paths are relative to `ui/src`. "Playwright" means a spec in `ui/e2e`.
 | `DayChart` | `features/usage` | Requests per day on the Usage page | A hidden table with the same numbers | Playwright (`governance.spec.ts`) |
 
 ## Landing components (`landing`)
-These are the only components that may load GSAP or three.js.
+These are the only components that may load the browser motion module or three.js.
 | Component | Purpose | States | Test |
 |---|---|---|---|
 | `LandingPage`, `HowItWorksPage` | The two public pages | Reduced motion: no animation | Playwright (`landing.spec.ts`, `a11y.spec.ts`) |

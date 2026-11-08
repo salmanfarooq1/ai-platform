@@ -8,7 +8,7 @@ Accessibility and honesty come first in the precedence order (see `README.md`). 
 - **axe in Playwright** (`ui/e2e/a11y.spec.ts`). It scans the landing page, How it works, Overview, Requests with the drawer open and the walkthrough, in the light and dark theme. The sprint passes with 0 serious or critical violations. Moderate and minor findings are logged in the test output and are fixed when they are cheap.
 - **Contrast test** (`ui/src/styles/contrast.test.ts`). It reads the pair table below and checks every pair against `ui/tokens/tokens.json` for both themes. A pair that falls under its minimum fails the build.
 - **Keyboard paths** (Playwright). Cmd or Ctrl plus K opens the palette, arrow keys and Enter pick a result, Escape closes the palette and the drawer, and the session menu opens from the keyboard.
-- **Reduced motion** (Playwright, `landing.spec.ts`). With `prefers-reduced-motion: reduce` there is no GSAP, no WebGL, the poster is shown and every story step is visible.
+- **Reduced motion** (Playwright, `landing.spec.ts`). With `prefers-reduced-motion: reduce` there is no motion module, no WebGL, the poster is shown and every story step is visible.
 - **Both themes.** Every axe scan runs twice.
 - **Component tests** (Vitest and Testing Library) check roles, names, `aria-current`, `aria-selected` and that a verdict never relies on colour alone.
 
