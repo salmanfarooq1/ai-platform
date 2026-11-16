@@ -9,12 +9,12 @@ Depends on: 013.
 ## Scope
 1. **`authorize()` service.**
    - A stateless service over `enforce()` with AuthZEN-shaped input (subject, action, resource, context). Our engine is the only decision maker and record writer in every mode.
-   - Three deployment modes: embedded (`enforce()` in process), sidecar (the service next to a client agent) and standalone proxy (MCP, OpenAI-style API). Each mode says how other routes are closed (rule 11).
+   - Two deployment modes: embedded (`enforce()` in process) and standalone proxy (MCP, OpenAI-style API). Each mode says how other routes are closed (rule 11). Sidecar comes later, when a client asks (re-plan 2026-11-08).
    - It answers allow or deny with a decision id. The third outcome, `approval_required`, arrives with 018 and the approval model with 019. Until then an over-limit action is a deny.
 2. **Request contract** that every agent call must carry.
    - Bearer token with `aud`, `iss`, `exp`, `sub` and optional `act`. Agent id, `traceparent`, run id and purpose. The action kind and canonical action hash are computed by the gateway.
    - A missing field is a deny `request_context_missing`, written as a decision. Purpose is recorded now. The purpose stage itself arrives in 018.
-   - Tokens still come from the configured issuer. Keycloak arrives in 020.
+   - Tokens still come from the configured issuer. The OIDC client for console sign-in arrives in 020.
 3. **Agent registry v1.**
    - Table with agent id, kind (ours, client, external), owner, optional card digest and a `stopped` flag (the kill switch). Routes under `/v1/agent/registry` (`admin`).
    - An unknown agent id is denied `agent_unregistered`. A stopped agent is denied `agent_stopped` on its next call. Tenant admin owns the stop switch.
@@ -45,6 +45,7 @@ Depends on: 013.
 - Output guardrails and stream modes beyond `buffer_all` on the LLM route (019); input guardrails come from 013 through `ModelCaller`. Run identity and delegation (020).
 - agentgateway, Kubernetes and Cilium egress templates, and the private signed-manifest registry (028).
 - Changed from old 033: the registry now covers all agent kinds, not only MCP servers, and the gateway is a service with modes, not only an in-process call.
+- Re-planned 2026-11-08: see "Re-plan 2026-11-08" in `planning/program/sprint-map.md` and ADR-0035.
 
 ## Nav placement
 Governance > MCP registry, and Governance > Agents (the registry with a Stop button). Gateway > Test, Gateway > Connect clients and Gateway > Models and providers. All five show in the Gateway edition.

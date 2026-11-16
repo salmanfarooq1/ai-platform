@@ -24,6 +24,7 @@ Source: old 025, old 026, plus new scope (integration-data-connectors research n
    - Test against a DuckLake attach and against a Direct source (021).
    - Record the result in `evidence/spike-metricflow.md` and ADR-0021.
    - If it fails, fall back to curated SQL metrics in YAML. The API and the guard stay the same.
+   - **Stored format:** metric and semantic-model definitions are stored in the open OSI (Open Semantic Interchange) format, so clients can bring or take their definitions. MetricFlow sits behind our own `MetricCompiler` interface and never owns the stored format. A contract test runs the same metric set through the compiler and the fallback (re-plan 2026-11-08).
    - The dbt Semantic Layer APIs (paid dbt platform) are not used. We use the library only.
 6. **Semantic models and metrics** for the reference finance and CRM data: gross margin, revenue and pipeline value, by region and quarter.
    - Each metric has `description`, `owner` and `glossary_term`.
@@ -39,6 +40,7 @@ Source: old 025, old 026, plus new scope (integration-data-connectors research n
 - User-written metrics or SQL. Agent tools on this path (027).
 - Cube Core and Wren AI as the metric path: they enforce their own rules and would bypass the gateway.
 - Changed from old 025 and 026: lineage covers reads in place and imported client lineage, and over-limit queries ask for approval.
+- Re-planned 2026-11-08: see "Re-plan 2026-11-08" in `planning/program/sprint-map.md` and ADR-0035.
 
 ## Nav placement
 - Data > Lineage.

@@ -8,6 +8,8 @@ Milestones, not dates. A sprint is done when its acceptance checks pass and QA s
 - The gateway sprints run in the order 016, 019, 020, 017, 018. Each is slimmed. SIEM export, audit search, showback, signed images and a pen test move into MG.
 - Gateway breadth (per-stage evidence, guardrails on model calls and output, an OpenAI-style API with streaming, virtual models, an MCP upstream proxy, a Gateway Test screen, a guardrail console, central sign-in) is written into the owning sprints as plain requirements.
 
+On 2026-11-08 the owner agreed a second re-plan: **fewer moving parts, the same quality**, and a stronger agent pillar. See "Re-plan 2026-11-08" below and ADR-0035.
+
 **Sprint numbers are ids, not order.** Folders, ADRs and links use the numbers. The **Run** column gives the order.
 
 ## The three pillars
@@ -40,21 +42,21 @@ The Kernel (platform) sits under all three. **Integration first** holds in every
 | 013 | 3 | `models-and-providers` | Gateway | Local models pinned by digest. Hosted providers (Azure OpenAI, Bedrock, Anthropic, OpenAI-compatible vLLM) as an equal option through LiteLLM. Data-use and residency register, region pin in policy (`local` resolves to the deploy's declared region). Model identity and a signed per-stage list (`stages`) in every record. Model calls get an input guardrail. Virtual models: fallback only inside the allowed regions, a breaker per route, a concurrency cap per tenant. A request-level admission check before any inference. A decision-path benchmark (decisions per second, added p50 and p95 latency). | 012 | ADR-0014 (revised) |
 | 014 | 4 | `reference-company` | Platform | The M0 showcase only: personas with keys, the `m0.sh` script (every M0 step, ending with the 015 restore drill) and the M0 Playwright project. Data generators move to 021. | 013, 015 | — |
 | 015 | 3 (parallel with 013) | `cloud-poc-lifecycle` | Platform | Local lifecycle only: release manifest with images pinned by digest, `poc up/backup/down/status` on the local host, maintenance mode, backup and restore that keep the signing key, a restore drill with a real run. OpenTofu, cloud modules and the upgrade job move to the cloud track. | 012 | ADR-0032 |
-| 016 | 5 | `gateway-service-and-proxy` | Gateway | The request contract every agent call carries, agent registry with a kill switch, `authorize()` over `enforce()`. OpenAI-compatible `/v1/chat/completions` (with SSE) and `/v1/embeddings` over the 013 model caller, streaming in `buffer_all` mode. MCP 2026-07-28 front, and an MCP upstream proxy with a tool allowlist, pinned tool hashes and per-server credential brokering. `cost_centre` on records and a showback view. Gateway Test screen that shows each stage from the signed record. A stated latency and throughput target, proven by a load test. | 013 | ADR-0023 (revised) |
+| 016 | 5 | `gateway-service-and-proxy` | Gateway | The request contract every agent call carries, agent registry with a kill switch, `authorize()` over `enforce()`. OpenAI-compatible `/v1/chat/completions` (with SSE) and `/v1/embeddings` over the 013 model caller, streaming in `buffer_all` mode. Stateless MCP 2026-07-28 front, and an MCP upstream proxy with a tool allowlist, pinned tool hashes and per-server credential brokering. `cost_centre` on records and a showback view. Gateway Test screen that shows each stage from the signed record. A stated latency and throughput target, proven by a load test. Two deployment modes: embedded and standalone proxy (sidecar later). | 013 | ADR-0023 (revised) |
 | 019 | 6 | `guardrails-and-approvals` | Gateway | A guardrail port with an ordered chain bound per action and direction in tenant policy. Presidio on input and output, a secrets recognizer, regional identifiers as data, a re-selected local guard model with its digest in records. Stream modes (`buffer_all` default, `windowed_scan` opt-in and documented as best effort). Guardrail console: library, bindings, activity. The one approval model bound to the canonical action hash, the inbox, stop and override. AI-generated content disclosure (EU AI Act Art. 50). | 016 | ADR-0024, ADR-0027 |
-| 020 | 7 | `identity-and-access` | Gateway | Keycloak OIDC sign-in for the console (code flow with PKCE into our session; keys stay for machines), MFA through realm config, custom roles, a read-only auditor role. Subject-scoped policy: rules by user, group, role and agent id, in both the policy document and the decision table. Platform-minted delegation tokens that only narrow, with token-issuer key rotation. | 019 | ADR-0025 |
+| 020 | 7 | `identity-and-access` | Gateway | A standard OIDC client for console sign-in against the client's own identity provider (Entra ID, Okta, Keycloak; code flow with PKCE into our session; keys stay for machines). Keycloak is the test issuer only. Entra group overage resolved through Graph. MFA stays with the provider, custom roles, a read-only auditor role. Subject-scoped policy: rules by user, group, role and agent id, in both the policy document and the decision table. Platform-minted delegation tokens that only narrow, with token-issuer key rotation. SCIM 2.0 inbound provisioning and deprovisioning (moved from 030). | 019 | ADR-0025 |
 | 017 | 8 | `receipts-v2-and-anchoring` | Gateway | COSE_Sign1 receipts (RFC 9942 proofs) with `kid`. Signing-key port with a file adapter, rotation and revocation list. One external anchor (public RFC 3161 TSA or Rekor) on by default. Standalone verifier package with test vectors. Audit search and export (CSV, JSON). SIEM export as OCSF to syslog or Splunk HEC, with no collector dependency. | 020 | ADR-0029, ADR-0030 |
 | 018 | 9 | `policy-engine-and-replay` | Gateway | The Python policy engine as a small, versioned, pure package that the verifier can import, pinned by hash in the record. Replay and what-if of "why was this allowed" offline. Purpose stage. AuthZEN 1.0 API with interop tests. MG close: cosign-signed images with an SBOM attestation, and a pen test of the 016 to 020 surface. | 017 | ADR-0022 |
-| 021 | 10 | `data-access-and-federation` | Data | Reference data generators first (finance, CRM, HR, PDFs, a client source in its own container, a change generator). `DataAccess` adapters: Direct (DuckDB ATTACH, read-only), Lakehouse (DuckLake), Federated spike (Trino). Connection registry with credentials from the secret store. `data.read`, snapshot ids in records, SQL parse base (sqlglot). | 018 | ADR-0015 (revised) |
-| 022 | 11 | `connectors-pipelines-transforms` | Data | dlt sources, lakehouse write path (single writer, protected snapshots, retention, erasure, backups), pipelines on the job queue, dbt on DuckLake, client event streams (optional profile). | 021 | ADR-0016, ADR-0017 |
+| 021 | 10 | `data-access-and-federation` | Data | Reference data generators first (finance, CRM, HR, PDFs, a client source in its own container, a change generator). A Postgres plus SQLite join through DuckDB proven first. `DataAccess` adapters: Direct and federated joins (DuckDB ATTACH, read-only, `QUERY_ENGINE=duckdb`), Lakehouse (DuckLake). Trino is an optional adapter, not built here. Connection registry with credentials from the secret store. `data.read`, snapshot ids in records, SQL parse base (sqlglot). | 018 | ADR-0015 (revised) |
+| 022 | 11 | `connectors-pipelines-transforms` | Data | dlt sources, lakehouse write path (single writer, protected snapshots, retention, erasure, backups), pipelines on the job queue, dbt on DuckLake. Change capture from client Postgres through dlt or logical replication, with a replication-slot WAL monitor. Client Kafka topics only when `EVENT_BUS=kafka`. No Debezium. | 021 | ADR-0016, ADR-0017 |
 | 023 | 12 | `products-contracts-quality` | Data | Data products (ODPS 1.1) and contracts (ODCS 3.2), versions and breaking-change diff, classification, glossary, catalog search and import. Contract rules compiled into policy data. Checks, certification, quality score, freshness SLOs. | 022 | ADR-0018 |
 | 024 | 13 | `grants-and-query-enforcement` | Data + Gateway | Access requests with purpose on the 019 approval model, grants, expiry, revocation. Grants enforced by rewriting SQL (row filters, column masks), minimum group size, cache keys with grant version, bypass corpus. | 023 | ADR-0019 |
-| 025 | 14 | `lineage-and-semantic-layer` | Data | Lineage store, OpenLineage from pipelines, dbt and streams, agent facets, decision ids through `EvidenceLookup`. MetricFlow compile, rewrite, guard. Parsed SQL guard with a function allowlist and an injection fuzz corpus. | 024 | ADR-0020, ADR-0021 |
+| 025 | 14 | `lineage-and-semantic-layer` | Data | Lineage store, OpenLineage from pipelines, dbt and streams, agent facets, decision ids through `EvidenceLookup`. Metric definitions stored in the open OSI format; MetricFlow compiles them behind our own `MetricCompiler` interface. Compile, rewrite, guard. Parsed SQL guard with a function allowlist and an injection fuzz corpus. | 024 | ADR-0020, ADR-0021 |
 | 026 | 15 | `documents-retrieval-grounding` | Data | Docling offline, true BM25 beside pgvector, per-chunk ACLs, grounding gate with span citations and abstention, labelled eval set, client pgvector adapter, malicious-PDF test. | 025 | ADR-0033 |
-| 027 | 16 | `data-and-integration-agents` | Agents | Agent tools on `DataAccess`, sandbox mandatory, session taint and the lethal-trifecta breaker, answer receipts, Ask-data UI, nightly red team. Integration agents that map a new connection for a human to approve. | 026 | — |
-| 028 | 17 | `agent-registry-monitoring-memory` | Agents | A2A v1.0 with signed Agent Cards and delegation tickets that only narrow. One registry for our, client and external agents. W3C trace context and one span per gateway stage, OTel GenAI spans with `decision_id`, the collector, loop and budget breakers, governed memory. | 027 | ADR-0026, ADR-0028 |
+| 027 | 16 | `data-and-integration-agents` | Agents | Agent tools on `DataAccess`, sandbox mandatory, session taint and the lethal-trifecta breaker, answer receipts, Ask-data UI, nightly red team. Integration agents that map a new connection for a human to approve. Saved run state (LangGraph checkpointer on our Postgres): runs resume after a crash, and an approval is a real interrupt and resume. Skills as governed, versioned data that a human approves. | 026 | — |
+| 028 | 17 | `agent-registry-monitoring-memory` | Agents | A2A v1.0 with signed Agent Cards and delegation tickets that only narrow. One registry for our, client and external agents. W3C trace context and one span per gateway stage, OTel GenAI spans with `decision_id`, the collector, loop and budget breakers, governed memory. A consolidation job in the worker proposes memory and skills from run logs, every write through `enforce()`. Outside harnesses (an open agent harness, an ADK agent) registered and governed through the gateway only. | 027 | ADR-0026, ADR-0028 |
 | 029 | 18 | `insights` | Data | Metric catalog, dashboards read under the viewer's grants with a receipt per tile, reports per recipient, metric alerts. | 028 | ADR-0031 |
-| 030 | 19 | `evidence-packs-and-siem` | Gateway | Signed evidence packs, retention floor, system and model cards, ML-BOM, EU AI Act, ISO 42001, NIST and OWASP mappings backed by tests. Enterprise identity deferred from 020: SCIM deprovisioning, IP allowlist, SPIFFE run ids. OPA adapter with a parity suite. Approval webhook (Jira, ServiceNow). | 029 | — |
+| 030 | 19 | `evidence-packs-and-siem` | Gateway | Signed evidence packs, retention floor, system and model cards, ML-BOM, EU AI Act, ISO 42001, NIST and OWASP mappings backed by tests. Enterprise identity deferred from 020: IP allowlist, SPIFFE run ids. Optional OPA adapter (`POLICY_ENGINE=opa`) with a parity suite. Approval webhook (Jira, ServiceNow). | 029 | — |
 | 031 | 20 | `resilience-and-cloud` | Platform | The cloud track lands here at the latest: OpenTofu interface, first cloud VM module, upgrade-from-previous-release job. RPO and RTO targets with a failover drill, HA reference, encryption at rest, KMS and PKCS#11 signing adapters, local TSA and transparency log, OpenBao secrets, one Helm chart. | 030 | ADR-0034 |
 | 032 | 21 | `release-and-trust` | Platform | Per-edition packages and installs, air-gap bundle, WCAG 2.2 AA checks and an ACR, CAIQ v4 answers, `security.txt` and disclosure policy, exit runbook, a scripted walkthrough of every milestone. | 031 | — |
 
@@ -75,6 +77,36 @@ The Kernel (platform) sits under all three. **Integration first** holds in every
 - **Guardrails before agents read data.** 019 comes before the data agents (027).
 - **Insights after the semantic layer.** Dashboards and reports use the same governed metric path as the agent (025).
 
+## Re-plan 2026-11-08: fewer moving parts, stronger agents
+**The rule** (ADR-0035). By default only Postgres, Valkey, the API and the worker run. Every other service is optional: it sits behind a port, is chosen by one setting in `adapters/registry.py`, and has a parity test that runs the same contract suite on the default and the option.
+
+| Setting | Default | Option | Sprint |
+|---|---|---|---|
+| `QUERY_ENGINE` | `duckdb` | `trino` (adapter built when a client needs it) | 021 |
+| `POLICY_ENGINE` | `python` | `opa` | 018, 030 |
+| `EVENT_BUS` | `outbox` | `kafka` | built |
+| `OBJECT_STORE` | `local` | `s3` (SeaweedFS or a cloud bucket) | built |
+| `IDP` | `oidc` (any standard provider) | — (Keycloak only as the test issuer) | 020 |
+| `AGENT_RUNTIME` | `openshell` (pinned version) | `docker`, `gvisor` | 027 |
+
+**Cuts.**
+1. Trino and OPA are optional. DuckDB does federation by default. Our Python engine and the AuthZEN API make the decisions.
+2. No Debezium. Kafka is optional. The Postgres outbox is the default bus. Change capture uses dlt or logical replication, with a monitor on replication-slot WAL growth.
+3. Keycloak is test-only. We ship an OIDC client and SCIM 2.0, and handle the Entra 200-group overage through Graph.
+4. Three editions are sold: **Gateway**, **Gateway + Data**, **Full**. The five module sets from 012 stay as technical profiles in the CI smoke matrix.
+5. Two gateway modes are planned: embedded and standalone proxy. Sidecar comes later, when a client asks.
+6. Lighter sprint packs: `requirements.md`, `acceptance.md` and the builder brief are required. Blueprint, threat model and test spec are sections of the brief unless the sprint adds a new trust boundary.
+
+**Agents.** We keep LangGraph and add four items:
+1. **Saved run state (027).** The LangGraph checkpointer on our Postgres, tenant-scoped with RLS. A run resumes after a crash. A human approval becomes a real interrupt and resume.
+2. **Skills as governed data (027).** A skill is a versioned procedure document, loaded on demand. An agent may propose one. A human approves it before any run can load it.
+3. **Consolidation job (028).** A job in the existing worker reviews run logs and proposes memory updates and skills. Every write is a `memory.write` through `enforce()` with a trust tier. Flagged writes are quarantined. No new service, no model training.
+4. **Outside harnesses (028).** An open agent harness and an ADK agent register with us and reach models and tools only through our OpenAI-style endpoint and MCP. The journey proves that no other route works.
+- The agent shape has three parts: session log, harness and sandbox. The session log lives in Postgres, outside the harness and the sandbox.
+- Memory stays in Postgres. No graph database.
+
+**Other changes.** MCP work in 016 builds on the stateless 2026-07-28 protocol. LiteLLM stays a library, never its proxy. Presidio and Docling run in process. OpenShell is pinned per sprint behind `AGENT_RUNTIME`.
+
 ## Moved by the 2026-11-02 re-plan
 | Item | From | To |
 |---|---|---|
@@ -89,6 +121,10 @@ The Kernel (platform) sits under all three. **Integration first** holds in every
 | SIEM export (OCSF), audit search and export | 030 | 017 |
 | `cost_centre` and showback | 030 | 016 |
 | Image signing with SBOM, pen test of the gateway surface | 032 | 018 |
+| Sidecar gateway mode | 016 | later, when a client asks (2026-11-08) |
+| Trino federated spike and adapter | 021, 024 | optional adapter, built on demand (2026-11-08) |
+| Debezium CDC | 022 | dropped; dlt or logical replication (2026-11-08) |
+| Keycloak in the default stack | 020 | test issuer only (2026-11-08) |
 
 ## Old to new (36-sprint draft)
 | Old | New | Old | New | Old | New |

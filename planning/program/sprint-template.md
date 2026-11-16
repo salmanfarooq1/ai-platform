@@ -2,6 +2,8 @@
 
 Every pack follows the style of Sprints 009 and 010: short files, plain words, simple sentences, specifics. No dates or durations. No "demo" wording. No brand names. No model or tool attribution.
 
+**Lighter packs (re-plan 2026-11-08).** Required files: `requirements.md`, `acceptance.md` and `builder-brief.md`. The blueprint, threat model and test spec are sections of the builder brief. They become their own files only when the sprint adds a new trust boundary or a new optional service (ADR-0035).
+
 ## `requirements.md`
 ```
 # Sprint NNN: <title>. Requirements
@@ -83,9 +85,10 @@ You are the Builder for Sprint NNN in /home/ubuntu/ai-platform, on branch sprint
 | Valkey | existing cache contract | CI service image |
 | Ollama | existing fake LLM | `scripts/verify/ollama.sh` |
 | dbt | none: runs against DuckDB | — |
-| Debezium | fake CDC event source | `scripts/verify/cdc.sh` |
-| OPA | the same decision-table suite runs on the Python engine and OPA | `scripts/verify/opa.sh` |
-| Keycloak | fake OIDC issuer with JWKS | `scripts/verify/keycloak.sh` |
+| Logical replication CDC | fake CDC event source | `scripts/verify/cdc.sh` |
+| OPA (optional) | the same decision-table suite runs on the Python engine and OPA | `scripts/verify/opa.sh` |
+| OIDC provider (Keycloak as test issuer) | fake OIDC issuer with JWKS | `scripts/verify/keycloak.sh` (nightly) |
 | Presidio and guard model | fake detector | `scripts/verify/guard.sh` |
 | Timestamp authority and log | fake TSA | `scripts/verify/tsa.sh` |
 | MCP and A2A peers | in-process peers | — |
+| Any optional service (ADR-0035) | the default adapter, with the same contract suite as the option | one verify script per option |

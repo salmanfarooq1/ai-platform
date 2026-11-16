@@ -19,12 +19,12 @@ Source: old 023, old 024, plus new scope (integration-data-connectors research n
    - A steward can revoke a grant. Revoking cancels running queries that use it.
    - Extracts go through `DataAccess.extract` and leave through signed, short-lived URLs. Masked columns are withheld.
 4. **Rewrite, not views, on every adapter.**
-   - sqlglot parses the query in the adapter's dialect (DuckDB for Direct and Lakehouse, Trino for Federated). Each table is replaced with the grant's filtered and masked subquery.
+   - sqlglot parses the query in the adapter's dialect (DuckDB for every default adapter; Trino only if that optional adapter exists). Each table is replaced with the grant's filtered and masked subquery.
    - Only rewritten references are allowed. Table functions and any unrewritten relation are denied.
    - Masks and filters come from the grant and the contract classification.
    - Checks: file pruning still works on DuckLake, and filters are still pushed down to a Direct Postgres source. The results go in evidence.
 5. **Second layer** (defence in depth, never the only control).
-   - The Federated adapter, built in full if the 021 spike passed. Trino's OPA plugin receives the same grant as row filters and masks from our policy bundle.
+   - Optional: when `QUERY_ENGINE=trino` is built for a client, Trino's OPA plugin receives the same grant as row filters and masks from our policy bundle. Not built in this sprint; the rewrite on DuckDB is the control (ADR-0035).
    - For a Native warehouse adapter, when one exists, the same grant can be pushed as a native row-access or masking policy. Not built here.
 6. **Purpose binding and limits.**
    - The 018 purpose stage now checks the declared purpose against the grant's purpose. A mismatch is a deny.
@@ -40,6 +40,7 @@ Source: old 023, old 024, plus new scope (integration-data-connectors research n
 - The full parsed SQL guard (function allowlist, cost limits) and the semantic layer (025). This sprint denies table functions and any unrewritten relation, nothing more.
 - Live queries across tenants. Cross-tenant grants stay extract-only.
 - Changed from old 023 and 024: the approval model and purpose stage come from 019 and 018, the rewrite covers every adapter, and Trino or native policies are a second layer.
+- Re-planned 2026-11-08: see "Re-plan 2026-11-08" in `planning/program/sprint-map.md` and ADR-0035.
 
 ## Nav placement
 - Workspace > Marketplace and Workspace > My access.
