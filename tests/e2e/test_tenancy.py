@@ -339,7 +339,7 @@ def config_description(slug):
 async def _wait_for_both_cache_writes(app, redis_raw):
     async def written():
         exact = [k async for k in redis_raw.scan_iter(match="cache:v*")]
-        semantic = [k async for k in redis_raw.scan_iter(match="semcache:*")]
+        semantic = [k async for k in redis_raw.scan_iter(match="cache:semantic:*")]
         return bool(exact) and bool(semantic)
 
     await eventually(written)

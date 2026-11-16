@@ -86,8 +86,9 @@ M0 journey steps today: modules off (done locally in 012) · deny by policy (don
 1. Sign off the re-planned sprint map and the 013 to 015 packs (diff to follow).
 2. Shape the product map (end-state console) once the Architect's draft is ready.
 
-## Now (2026-11-02)
-- **012 closing.** Live tier 880 tests, 0 failed (two runs). Unit 990. Ruff, mypy and import contracts (6 kept) pass. All five editions pass their smoke tests. Modules page done (Vitest 220 x3). Remaining: modules browser journey, docs (WP7), evidence (WP8), container proof, full browser run.
-- **Re-plan drafted:** sprint map, 013 to 015 packs, later sprint requirements and program docs revised and reviewed by the Architect. Waiting for owner sign-off.
-- **Product map:** Architect draft after the re-plan.
+## Now (2026-11-16)
+- **013 closed (models and providers).** All 22 acceptance rows pass. Unit 1054, e2e 384, ruff clean. Each fix had a review from a different model; no test was weakened (compose and network-guard checks made stricter). Evidence: `planning/sprints/013-models-and-providers/evidence/`.
+- **014 in build (reference company).** WP1 personas: second fix round. WP2 M0 journey: fixes in, re-review running; browser run next.
+- **Open, tracked separately:** `ui/node_modules` symlink in git; order-dependent `test_all_is_the_default_and_gateway_is_mandatory` (passes under `-m unit`).
+- **Next:** guardrail spike for 019 on Terra.
 - Environment: Docker data disk is on D: (needs at least 25 GB free; check before pulls). Docker Desktop does not start at sign-in; start it after a Windows restart. Local Playwright: `scratch/pw/run.sh`.

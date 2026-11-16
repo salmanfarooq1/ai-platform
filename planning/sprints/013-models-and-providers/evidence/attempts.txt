@@ -1,0 +1,31 @@
+Sprint 013 acceptance A2 evidence (attempts)
+Captured by the Architect 2026-11-16T09:31:51+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 1.1 tests/unit/test_model_types.py::test_identity_route_resolved_are_frozen: Assigning to any field of `ModelIdentity`, `ModelRoute` or `ResolvedModel` raises `FrozenInstanceError`; `ModelRoute.params` rejects mutation.
+- 1.3 tests/unit/test_model_types.py::test_extension_matches_registered_schema: `identity.as_extension(phase)` for local and hosted identities passes the closed model schema for `admission` and `attempt`. Adding any other key fails.
+- 1.4 tests/unit/test_model_types.py::test_fingerprint_changes_with_any_route_field: Changing endpoint, credential ref name, any param or the identity changes `ModelRoute.fingerprint`.
+- 4.5 tests/integration/test_model_records.py::test_model_invoke_record_carries_extension: One real search through the API with the fake provider: every `model.invoke` row has `record_version=2` and `extensions.model` equal to the resolved identity plus route fingerprint; the receipt's `canonical` contains it.
+- 5.1 tests/unit/test_model_caller.py::test_each_retry_has_its_own_decision: Provider fails twice with a rate-limit error, then answers. `complete` makes 3 requests and 3 `model.invoke` allows, in order, each before its request.
+- 5.4 tests/unit/test_model_caller.py::test_route_is_the_resolved_one: After resolution, changing settings, env and the catalog table does not change the model, endpoint or credential ref the adapter receives for that attempt.
+- 5.10 tests/e2e/test_attempts_e2e.py::test_agent_reasoning_and_verifier_each_recorded: An agent run with the fake chat model that reasons twice and verifies once writes admission rows for both aliases and 3 `model.invoke` attempt rows; the verifier row names its configured identity.
+- 5.11 tests/unit/test_model_caller.py::test_admission_precedes_all_model_io: A denied chat admission for search records the admission deny and makes zero chat and embedding requests.
+- 6.1 tests/unit/test_model_caller.py::test_embedding_fallback_records_each_target: Primary embedding fails, fallback answers. 2 decisions, 2 requests; `Embeddings.model` is the fallback identity; the dimension check still applies.
+- 6.2 tests/integration/test_ingest_attempts.py::test_each_batch_is_authorized_at_run_time: Ingest a document that makes 3 batches (batch size from settings). The job writes 3 `model.invoke` rows with the job's request id; a policy change that removes the embedding model between submit and run makes the job fail with a recorded deny and zero embedding requests.
+
+$ pytest -q -rs tests/unit/test_model_caller.py::test_admission_precedes_all_model_io tests/unit/test_model_caller.py::test_each_retry_has_its_own_decision tests/unit/test_model_caller.py::test_embedding_fallback_records_each_target tests/unit/test_model_caller.py::test_route_is_the_resolved_one tests/unit/test_model_types.py::test_extension_matches_registered_schema tests/unit/test_model_types.py::test_fingerprint_changes_with_any_route_field tests/unit/test_model_types.py::test_identity_route_resolved_are_frozen   # unit (live env unset)
+.......                                                                  [100%]
+7 passed in 4.08s
+exit=0
+
+$ pytest -q -rs tests/e2e/test_attempts_e2e.py::test_agent_reasoning_and_verifier_each_recorded tests/integration/test_ingest_attempts.py::test_each_batch_is_authorized_at_run_time tests/integration/test_model_records.py::test_model_invoke_record_carries_extension   # integration/e2e/contract (live env set)
+...                                                                      [100%]
+=============================== warnings summary ===============================
+tests/e2e/test_attempts_e2e.py::test_agent_reasoning_and_verifier_each_recorded
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-Iq6y1kNi-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+3 passed, 1 warning in 10.34s
+exit=0

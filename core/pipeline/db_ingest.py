@@ -39,6 +39,7 @@ async def ingestion_pipeline(
     embeddings: EmbeddingPort,
     tenant_id: UUID,         # owner of the rows; always the authenticated principal's tenant
     on_progress: Callable[[int, int], Awaitable[None]] | None = None,  # (chunks stored, chunks in total)
+    embed_batch: Callable[[list[ChunkRecord]], Awaitable[tuple[list[ChunkRecord], str, int]]] | None = None,
 ) -> dict:
     '''
     Chunk → embed → insert through the knowledge store port.
@@ -64,7 +65,10 @@ async def ingestion_pipeline(
         await on_progress(0, len(chunks))
 
     for batch in batch_generator(chunks, batch_size):
-        embedded_batch, model, dim = await embed_chunks(embeddings, batch)
+        if embed_batch is None:
+            embedded_batch, model, dim = await embed_chunks(embeddings, batch)
+        else:
+            embedded_batch, model, dim = await embed_batch(batch)
         if any(c.embedding is None for c in embedded_batch):
             raise RuntimeError("the embedding port returned no vector for a chunk")  # never store a row without one
         rows = [ChunkRow(content=c.content, embedding=c.embedding, metadata=c.metadata)

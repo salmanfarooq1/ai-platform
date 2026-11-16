@@ -1,0 +1,5 @@
+114:### Local CPU models
+116:The `models` profile runs Ollama on the host CPU. Set `DEPLOY_REGION` to the deployment's processing region before starting the API or worker; local model identities and region policy checks use this value. The one-shot `ollama-init` service loads the three entries in `models.lock`—`ollama/qwen3:4b-instruct-2507-q4_K_M`, `ollama/qwen3:1.7b`, and `ollama/nomic-embed-text:v1.5`—and verifies their digests. The serving `ollama` service mounts the initialized model store read-only and is attached to the internal models network.
+119:DEPLOY_REGION=us docker compose --profile models up -d --wait ollama
+122:CPU latency and peak memory have not been measured yet. No profile measurement is reported here until it is captured from a real local run.
+Check: documentation describes the CPU-only models profile, locked model set, read-only store, and DEPLOY_REGION; latency and peak memory are not measured.

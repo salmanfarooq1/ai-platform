@@ -44,6 +44,19 @@ MIN_VECTOR_SCORE = 0.0
 # GCP's text embedding 005 outputs 768 natively (no reduction needed).
 MODE = _settings.mode
 
+
+def completion_fallbacks_for_mode(mode: str) -> list[str]:
+    """Return the configured completion fallback aliases for a deployment mode."""
+    fallbacks = {
+        "local": ["ollama/qwen3:1.7b"],
+        "public-preview": ["ollama/llama3"],
+        "prod": ["ollama/llama3"],
+    }
+    try:
+        return list(fallbacks[mode])
+    except KeyError:
+        raise ValueError(f"unsupported model fallback mode: {mode}") from None
+
 # ==========================================
 # EXTERNAL SERVICE CONFIGURATIONS
 # ==========================================
@@ -74,7 +87,7 @@ LLM_CONFIG: dict[str, Any] = {
     "groq_key": _settings.groq_api_key,
 
     # Simple queries route to fallbacks[0]
-    "fallbacks": ["ollama/qwen2.5"] if MODE == "local" else ["ollama/llama3"],
+    "fallbacks": completion_fallbacks_for_mode(MODE),
 }
 
 DATABASE_CONFIG: dict[str, Any] = {
@@ -91,7 +104,6 @@ CACHE_CONFIG: dict[str, Any] = {
 # ==========================================
 
 FEATURES: dict[str, bool] = {
-    "reranker_enabled": MODE != "public-preview",  # disabled on Render free tier (512MB RAM OOM guard)
     "otel_enabled": True,
     "azure_monitor": MODE == "prod",
     "verifier_enabled": True,  # Enables the synthesis verifier loop in the agent
@@ -109,6 +121,9 @@ GUARDRAIL_CONFIG: dict[str, Any] = {
 # Update this dict when providers change rates, or replace with
 # a dynamic fetch script (see OBS-06 in notes_and_obs.md).
 MODEL_PRICING: dict[str, dict[str, float]] = {
+    "ollama/qwen3:4b-instruct-2507-q4_K_M":                {"input": 0.0,   "output": 0.0},
+    "ollama/qwen3:1.7b":                                   {"input": 0.0,   "output": 0.0},
+    "ollama/nomic-embed-text":                             {"input": 0.0,   "output": 0.0},
     # Gemini free tier is $0. Paid-tier rates are not recorded here (see planning/QUESTIONS.md B2).
     "gemini/gemini-3.5-flash-lite":                        {"input": 0.0,   "output": 0.0},
     "azure/gpt-4o":                                        {"input": 2.50,  "output": 10.00},

@@ -51,7 +51,7 @@ async def test_knn_returns_unindexed_fields_without_sortby():
     client.execute_command.return_value = [1, "semcache:1", ["response", "answer", "score", "0.01", "query", "question"]]
     hit = await adapter(client).semantic_lookup(
         "tenant", "kb", [1.0, 0.0, 0.0], embedding_model="model", retrieval_mode="hybrid",
-        rerank=False, top_k=5, min_similarity=0.8,
+        top_k=5, min_similarity=0.8,
     )
     assert hit is not None and hit.response == "answer" and hit.query == "question"
     command = client.execute_command.call_args.args

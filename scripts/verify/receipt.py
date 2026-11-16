@@ -56,13 +56,51 @@ def _versioned(record: dict[str, Any], version: Any, extensions: Any) -> dict[st
         raise ValueError("extensions must be a JSON object")
     if version == 1 and extensions:
         raise ValueError("version 1 cannot carry unsigned extensions")
-    # The reviewed registry is empty in Sprint 012, in both the server and this
-    # standalone verifier. A later registered schema must update both verifiers.
-    if extensions:
-        raise ValueError("extension key is not registered")
+    _validate_extensions(extensions)
     if version == 2:
-        record.update(record_version=2, extensions={})
+        record.update(record_version=2, extensions=dict(extensions))
     return record
+
+
+def _validate_extensions(extensions: Mapping[str, Any]) -> None:
+    """Keep the offline verifier's small, closed registry in sync with evidence/extensions.py."""
+    if set(extensions) - {"model", "stages", "guardrails"}:
+        raise ValueError("extension key is not registered")
+    guardrails = extensions.get("guardrails")
+    if guardrails is not None and (
+        not isinstance(guardrails, Mapping) or set(guardrails) != {"input_rule_ids"}
+        or not isinstance(guardrails["input_rule_ids"], list)
+        or any(not isinstance(rule, str) or not rule for rule in guardrails["input_rule_ids"])
+        or len(set(guardrails["input_rule_ids"])) != len(guardrails["input_rule_ids"])
+    ):
+        raise ValueError("guardrails extension is invalid")
+    model = extensions.get("model")
+    if model is not None:
+        if not isinstance(model, Mapping) or set(model) - {
+            "name", "provider", "source", "digest", "provider_model_id", "processing_scope", "region", "route", "phase",
+        }:
+            raise ValueError("model extension has unknown fields")
+        required = {"name", "provider", "source", "processing_scope", "region", "route", "phase"}
+        if not required <= set(model) or bool("digest" in model) == bool("provider_model_id" in model):
+            raise ValueError("model extension is incomplete")
+        if model["source"] not in {"local", "hosted"} or model["phase"] not in {"admission", "attempt"}:
+            raise ValueError("model extension has an invalid value")
+        if not isinstance(model["region"], str):
+            raise ValueError("model extension region must be text")
+    stages = extensions.get("stages")
+    if stages is not None:
+        expected = ["principal", "module", "boundary", "model", "policy", "guardrails", "rate", "budget", "cost"]
+        if not isinstance(stages, list) or [row.get("stage") for row in stages if isinstance(row, Mapping)] != expected:
+            raise ValueError("stages extension is not in gateway order")
+        for row in stages:
+            if not isinstance(row, Mapping) or set(row) != {"stage", "status", "reason", "duration_us"}:
+                raise ValueError("stage entry has invalid fields")
+            if row["status"] not in {"passed", "denied", "skipped", "not_reached"}:
+                raise ValueError("stage entry has an invalid status")
+            if row["reason"] is not None and not isinstance(row["reason"], str):
+                raise ValueError("stage reason must be text or null")
+            if type(row["duration_us"]) is not int or row["duration_us"] < 0:
+                raise ValueError("stage duration must be a non-negative integer")
 
 def format_time(value: Any) -> str:
     moment = value if isinstance(value, datetime) else datetime.fromisoformat(str(value).replace("Z", "+00:00"))
@@ -297,6 +335,11 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "receipt":
             receipt = json.loads(args.file.read_text(encoding="utf-8"))
+            stages = receipt.get("decision", {}).get("extensions", {}).get("stages", [])
+            if stages:
+                print("stages")
+                for row in stages:
+                    print(f"  {row['stage']}: {row['status']} ({row['reason'] or 'no reason'})")
             return report(f"receipt {args.file}", verify_receipt(receipt, load_keys(args)))
         if args.file:
             export = json.loads(args.file.read_text(encoding="utf-8"))

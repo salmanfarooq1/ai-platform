@@ -54,6 +54,9 @@ class ExecutionBoundary:
     max_tokens: int
     max_query_length: int
     blocked_terms: frozenset[str]
+    allowed_regions: frozenset[str] = frozenset({WILDCARD})
+    allowed_data_use: frozenset[str] = frozenset({WILDCARD})
+    verifier_must_be_local: bool = False
     policy_version: int | None = None
     # The tenant's own daily cost cap, or None for the platform default (`config.DEFAULT_DAILY_COST_CAP_USD`).
     daily_cost_cap_usd: float | None = None
@@ -68,6 +71,8 @@ class ExecutionBoundary:
             "tenant_id": str(self.tenant_id) if self.tenant_id else None,
             "actions": sorted(self.actions), "kbs": sorted(self.kbs), "tools": sorted(self.tools),
             "models": sorted(self.models), "max_tool_calls": self.max_tool_calls, "max_tokens": self.max_tokens,
+            "allowed_regions": sorted(self.allowed_regions), "allowed_data_use": sorted(self.allowed_data_use),
+            "verifier_must_be_local": self.verifier_must_be_local,
             "max_query_length": self.max_query_length, "blocked_terms": sorted(self.blocked_terms),
             "policy_version": self.policy_version, "unavailable_reason": self.unavailable_reason,
             "daily_cost_cap_usd": self.daily_cost_cap_usd, "tool_arguments": dict(self.tool_arguments),
@@ -80,6 +85,9 @@ class ExecutionBoundary:
             tenant_id=UUID(body["tenant_id"]) if body["tenant_id"] else None,
             actions=frozenset(body["actions"]), kbs=frozenset(body["kbs"]), tools=frozenset(body["tools"]),
             models=frozenset(body["models"]), max_tool_calls=int(body["max_tool_calls"]),
+            allowed_regions=frozenset(body.get("allowed_regions", [WILDCARD])),
+            allowed_data_use=frozenset(body.get("allowed_data_use", [WILDCARD])),
+            verifier_must_be_local=bool(body.get("verifier_must_be_local", False)),
             max_tokens=int(body["max_tokens"]), max_query_length=int(body["max_query_length"]),
             blocked_terms=frozenset(body["blocked_terms"]), policy_version=body["policy_version"],
             unavailable_reason=body["unavailable_reason"], daily_cost_cap_usd=body.get("daily_cost_cap_usd"),
@@ -146,6 +154,9 @@ def build_boundary(
         kbs=_resource_set(doc.allowed_kbs),
         tools=_resource_set(doc.allowed_tools),
         models=_resource_set(doc.allowed_models),
+        allowed_regions=_resource_set(doc.allowed_regions),
+        allowed_data_use=_resource_set(doc.allowed_data_use),
+        verifier_must_be_local=doc.verifier_must_be_local,
         max_tool_calls=doc.max_tool_calls,
         max_tokens=doc.max_tokens_per_request,
         max_query_length=min(doc.max_query_length, DEFAULT_POLICY.max_query_length),
@@ -159,5 +170,6 @@ def build_boundary(
 def deny_all_boundary(tenant_id: UUID | None, reason: str) -> ExecutionBoundary:
     return ExecutionBoundary(
         tenant_id=tenant_id, actions=frozenset(), kbs=frozenset(), tools=frozenset(), models=frozenset(),
+        allowed_regions=frozenset(), allowed_data_use=frozenset(),
         max_tool_calls=0, max_tokens=0, max_query_length=0, blocked_terms=frozenset(), unavailable_reason=reason,
     )

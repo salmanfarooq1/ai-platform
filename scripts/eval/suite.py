@@ -138,7 +138,7 @@ async def answer(store: KnowledgeStore, embeddings: EmbeddingPort, llm: LLMPort,
     query_embedding = await embed_query(embeddings, case.question)
     chunks = await retrieve(
         store=store, query=case.question, query_embedding=query_embedding, namespace=NAMESPACE,
-        cfg=RetrieverConfig(top_k=TOP_K, mode="hybrid", rerank=False), tenant_id=TENANT,
+        cfg=RetrieverConfig(top_k=TOP_K, mode="hybrid"), tenant_id=TENANT,
     )
     prepared = [{"document_id": c["document_id"], "source_filename": c.get("source_filename") or "unknown", "text": c["content"],
                  "score": c.get("rrf_score", c.get("vector_score", c.get("bm25_score", 0.0)))} for c in chunks]

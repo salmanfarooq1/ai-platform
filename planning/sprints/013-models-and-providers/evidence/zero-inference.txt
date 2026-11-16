@@ -1,0 +1,22 @@
+Sprint 013 acceptance A3 evidence (zero-inference)
+Captured by the Architect 2026-11-16T09:32:37+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 1.8 tests/contracts/test_model_catalog_contract.py: Runs on `FakeCatalog`, `LockCatalog` (with a temp lock and a stub Ollama `/api/tags`) and `RegisterCatalog` (with a temp register): resolve a known alias for an allowed use returns a `ResolvedModel` whose `use` equals the request; an unknown alias raises `UnknownModel`; a use not in the entry raises `UnknownModel`; `probe()` makes zero inference requests.
+- 3.3 tests/unit/test_register_catalog.py::test_unpriced_hosted_model_raises_in_every_mode: For `local`, `public-preview` and `prod`, a hosted alias with no `MODEL_PRICING` entry raises `UnpricedModel`.
+- 4.6 tests/integration/test_model_records.py::test_catalog_failure_is_recorded_before_io: For each typed failure from `FakeCatalog`, the API call is denied with the matching reason, one deny row exists, and `RecordingProvider` counted zero requests.
+- 5.2 tests/unit/test_model_caller.py::test_fallback_needs_its_own_allow: Primary fails with a non-retryable error; policy denies the fallback alias. Result is a deny; the fallback got zero requests; there are 2 decisions (allow primary, deny fallback).
+- 5.3 tests/unit/test_model_caller.py::test_unrecorded_attempt_is_not_sent: Decision sink raises on write. Zero requests; the error surfaces as `decision_unrecorded`.
+- 5.5 tests/unit/test_model_caller.py::test_endpoint_host_must_be_allowed: A resolved hosted route whose host is not in `MODEL_ALLOWED_HOSTS` is denied before I/O. `MODEL_ALLOWED_HOSTS` is an application-level allowlist; it is not network egress control.
+- 5.11 tests/unit/test_model_caller.py::test_admission_precedes_all_model_io: A denied chat admission for search records the admission deny and makes zero chat and embedding requests.
+
+$ pytest -q -rs tests/unit/test_model_caller.py::test_admission_precedes_all_model_io tests/unit/test_model_caller.py::test_endpoint_host_must_be_allowed tests/unit/test_model_caller.py::test_fallback_needs_its_own_allow tests/unit/test_model_caller.py::test_unrecorded_attempt_is_not_sent tests/unit/test_register_catalog.py::test_unpriced_hosted_model_raises_in_every_mode   # unit (live env unset)
+.......                                                                  [100%]
+7 passed in 2.86s
+exit=0
+
+$ pytest -q -rs tests/contracts/test_model_catalog_contract.py tests/integration/test_model_records.py::test_catalog_failure_is_recorded_before_io   # integration/e2e/contract (live env set)
+....                                                                     [100%]
+4 passed in 6.88s
+exit=0

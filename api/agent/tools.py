@@ -6,11 +6,13 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
 from api.auth import KB_NOT_FOUND_MESSAGE
-from api.services.embedding import embed_query
+from api.services.model_calls import ModelCallFailed, build_model_caller
 from api.services.retriever import RetrieverConfig, retrieve
-from config import FEATURES, LLM_CONFIG
+from config import LLM_CONFIG
+from core.settings import get_settings
 from gateway import Action, ActionKind, EnforcementContext, enforce, estimate_tokens
 from ports import Adapters
+from ports.models import ModelUse
 
 logger = logging.getLogger("api.agent.tools")
 
@@ -80,6 +82,11 @@ def make_retrieve_tool(adapters: Adapters):
     and is trivially testable: pass in fake adapters, no monkeypatching a global.
     """
 
+    model_caller = None
+    if isinstance(adapters, Adapters):
+        settings = get_settings()
+        model_caller = build_model_caller(adapters, settings, adapters.embeddings)
+
     @tool
     async def retrieve_chunks(
         query: str,
@@ -116,11 +123,6 @@ def make_retrieve_tool(adapters: Adapters):
         ), halt=True)
         if denied is None:
             denied = await _gate(ctx, Action(ActionKind.KB_READ, namespace, input_text=query), halt=False)
-        if denied is None:
-            denied = await _gate(ctx, Action(
-                ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens(query),
-                input_text=query,
-            ), halt=False)
         if denied is not None:
             return denied
         try:
@@ -129,12 +131,17 @@ def make_retrieve_tool(adapters: Adapters):
             if not await adapters.knowledge.kb_exists(tenant_id, namespace):
                 return json.dumps({"error": "kb_not_found", "reason": KB_NOT_FOUND_MESSAGE})
             k = max(1, min(top_k, 20))
-            query_embedding = await embed_query(adapters.embeddings, query)
+            if model_caller is None:
+                raise RuntimeError("model catalog is unavailable")
+            for alias in (LLM_CONFIG["embedding_model"], *settings.embed_fallbacks):
+                await model_caller.admit(ctx, alias, ModelUse.EMBEDDING, input_text=query)
+            query_embedding = await model_caller.embed(
+                ctx, LLM_CONFIG["embedding_model"], [query], estimated_tokens=estimate_tokens(query), input_text=query,
+            )
 
             cfg = RetrieverConfig(
                 top_k=k,
                 mode=mode,
-                rerank=FEATURES.get("reranker_enabled", False),
             )
 
             chunks = await retrieve(
@@ -171,7 +178,12 @@ def make_retrieve_tool(adapters: Adapters):
             return json.dumps({"count": len(results), "chunks": results}, indent=2)
 
         except Exception as e:
-            logger.error("[agent/retrieve] error: %s", e)
+            reason = getattr(getattr(e, "decision", None), "reason", None)
+            logger.error("[agent/retrieve] operation failed: %s", type(e).__name__)
+            if reason:
+                return json.dumps({"error": "policy_denied", "reason": reason})
+            if isinstance(e, ModelCallFailed):
+                return json.dumps({"error": "model_call_failed"})
             return json.dumps({"error": str(e)})
 
     return retrieve_chunks

@@ -1,0 +1,12 @@
+Sprint 013 acceptance A19 evidence (model-input-guardrail)
+Captured by the Architect 2026-11-16T09:38:26+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 5.14 tests/unit/test_model_caller.py::test_input_guardrail_runs_before_request: A blocked user question or chat message denies before provider I/O, including its query embedding; the decision stores its input hash and matched rule ids, not the text.
+- 5.15 tests/unit/test_model_caller.py::test_input_guardrail_skips_platform_text: A synthesis whose retrieved context exceeds `max_query_length` and contains a blocked pattern is allowed; an ingest embedding batch shows the guardrail stage as `skipped`.
+
+$ pytest -q -rs tests/unit/test_model_caller.py::test_input_guardrail_runs_before_request tests/unit/test_model_caller.py::test_input_guardrail_skips_platform_text   # unit (live env unset)
+..                                                                       [100%]
+2 passed in 4.12s
+exit=0

@@ -52,10 +52,18 @@ This table is generated from `core/settings.py` by `scripts/docs/generate.py`. D
 
 | Setting | Default | Secret | Purpose |
 |---|---|---|---|
-| `LLM_MODEL` | unset | no | LiteLLM model name for completions. Default by mode: `gemini/gemini-3.5-flash-lite` (local, public-preview), `azure/gpt-4o` (prod). |
+| `LLM_MODEL` | unset | no | LiteLLM model name for chat and completions. Default by mode: `ollama/qwen3:4b-instruct-2507-q4_K_M` (local), `gemini/gemini-3.5-flash-lite` (public-preview), `azure/gpt-4o` (prod). |
+| `VERIFIER_MODEL` | unset | no | Model alias used for agent answer verification. Defaults to the mode's chat model; a hosted verifier is subject to the same model policy checks. |
+| `DEPLOY_REGION` | unset | no | Deployment processing region used as the identity region for local models and required when a hosted model provider is configured. |
 | `EMBED_MODEL` | unset | no | LiteLLM model name for embeddings. Default by mode: `ollama/nomic-embed-text` (local), `gemini/gemini-embedding-001` (public-preview), `azure/text-embedding-3-small` (prod). Chunks record the model that made them, and search ignores chunks of another model. |
 | `EMBEDDING_DIM` | `768` | no | Width of every stored vector. It must match the `vector` column of the schema. |
 | `EMBED_FALLBACK_MODELS` | unset | no | Comma separated embedding models tried in order when the primary fails. A model whose vectors have another width than `EMBEDDING_DIM` is refused. Empty means no fallback. |
+| `MODEL_ALLOWED_HOSTS` | `` | no | Comma-separated hosted model endpoint hostnames allowed by the application. This application check is not network egress control; network egress control is Sprint 016. |
+| `MODEL_MAX_CONCURRENT_PER_TENANT` | `8` | no | Maximum simultaneous model calls allowed per tenant. |
+| `MODEL_CALL_TIMEOUT_SECONDS` | `60.0` | no | Maximum duration of one physical model call, in seconds. |
+| `MODEL_LEASE_TTL_MARGIN_SECONDS` | `10.0` | no | Extra life for a model concurrency lease beyond the call timeout, in seconds. |
+| `MODEL_BREAKER_FAILURE_THRESHOLD` | `5` | no | Consecutive provider failures before a model route breaker opens. |
+| `MODEL_BREAKER_OPEN_SECONDS` | `30.0` | no | Seconds a model route breaker stays open before one trial is allowed. |
 | `AZURE_OAI_BASE` | unset | no | Azure OpenAI endpoint. Used by `azure/...` models. |
 | `AZURE_OAI_KEY` | unset | yes | Azure OpenAI key. Used by `azure/...` models. |
 | `GROQ_API_KEY` | unset | yes | Groq API key. Used only when `LLM_MODEL` names a Groq model. |

@@ -1,0 +1,13 @@
+Sprint 013 acceptance A5 evidence (sdk-retries)
+Captured by the Architect 2026-11-16T09:34:00+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 5.6 tests/integration/test_sdk_retries.py::test_one_request_per_attempt: Against a local stub that fails once with 500, `LitellmLLM` makes exactly 1 HTTP request.
+- 5.7 tests/integration/test_sdk_retries.py::test_one_request_per_attempt: Against a local stub that fails once with 500, `LitellmChat` makes exactly 1 HTTP request.
+- 5.9 tests/integration/test_sdk_retries.py::test_one_request_per_attempt: Against a local stub that fails once with 500, `LitellmEmbeddings` makes exactly 1 HTTP request.
+
+$ pytest -q -rs tests/integration/test_sdk_retries.py::test_one_request_per_attempt   # integration/e2e/contract (live env set)
+...                                                                      [100%]
+3 passed in 2.25s
+exit=0

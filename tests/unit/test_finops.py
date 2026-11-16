@@ -59,7 +59,8 @@ def test_compute_cost_follows_a_patched_pricing_table(monkeypatch):
     assert compute_cost("test/model", 3_000_000, 1_000_000) == pytest.approx(5.0)
 
 
-def test_ollama_models_are_not_in_pricing():
-    """Models starting with 'ollama/' are handled as 0 by compute_cost and need no pricing entry."""
-    for model in MODEL_PRICING:
-        assert not model.startswith("ollama/"), f"Ollama model {model} should not have pricing"
+def test_local_models_have_zero_pricing():
+    """Locked local defaults have explicit zero-cost entries in the pricing table."""
+    for model, rates in MODEL_PRICING.items():
+        if model.startswith("ollama/"):
+            assert rates == {"input": 0.0, "output": 0.0}

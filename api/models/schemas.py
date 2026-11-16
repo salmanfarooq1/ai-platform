@@ -31,7 +31,8 @@ class SearchRequest(BaseModel):
     )
     rerank: bool = Field(
         default=True,
-        description="Whether to apply cross-encoder reranking after retrieval"
+        description="Deprecated and ignored",
+        deprecated=True,
     )
 
 class SearchResult(BaseModel):
@@ -46,7 +47,7 @@ class SearchResponse(BaseModel):
     answer: str                  # The LLM generated answer text
     confidence: float            # LLM self reported confidence (0.0 to 1.0)
     needs_clarification: bool    # LLM flagged the question as ambiguous
-    rerank_applied: bool = False # Whether cross-encoder reranking actually ran (False in public-preview mode even if requested)
+    rerank_applied: bool = Field(default=False, description="Deprecated compatibility field; always false", deprecated=True)
     results: list[SearchResult]  # The supporting chunk citations
     total_results: int
     flagged: bool = False

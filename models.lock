@@ -1,0 +1,28 @@
+version = 1
+
+[[model]]
+alias = "ollama/qwen3:4b-instruct-2507-q4_K_M"
+runtime = "ollama"
+digest = "sha256:0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0"
+licence = "Apache-2.0"
+source = "https://huggingface.co/Qwen/Qwen3-4B"
+size_bytes = 2497293803
+use = ["chat", "completion"]
+
+[[model]]
+alias = "ollama/qwen3:1.7b"
+runtime = "ollama"
+digest = "sha256:8f68893c685c3ddff2aa3fffce2aa60a30bb2da65ca488b61fff134a4d1730e7"
+licence = "Apache-2.0"
+source = "https://huggingface.co/Qwen/Qwen3-1.7B"
+size_bytes = 1359293444
+use = ["completion"]
+
+[[model]]
+alias = "ollama/nomic-embed-text:v1.5"
+runtime = "ollama"
+digest = "sha256:0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f"
+licence = "Apache-2.0"
+source = "https://huggingface.co/nomic-ai/nomic-embed-text-v1.5"
+size_bytes = 274302450
+use = ["embedding"]

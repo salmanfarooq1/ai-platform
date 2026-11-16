@@ -27,7 +27,7 @@ This brief wins over `AGENTS.md`, `CODEX.md`, `.agents/`, `.claude/` and any ski
 5. No secrets in files. Secret tests use `sk-SENTINEL-7f3a` only.
 6. Never run `playwright install` or edit `.env`.
 7. When writing a config read by a tool, run that tool to prove the config works when available.
-8. Run the full gate before reporting done: `poetry run pytest -m unit`, `poetry run ruff check api core gateway evidence ports adapters workers sandbox_agent tests scripts`, `poetry run mypy` and `poetry run lint-imports`. Launches B, C1, C2, D and E also run the live tier (`poetry run pytest -m "integration or e2e"` with the environment above) and `poetry run python scripts/ci/check_skips.py`. Give exact counts.
+8. Run the full gate before reporting done: `poetry run pytest -m unit`, `poetry run ruff check api core gateway evidence ports adapters workers sandbox_agent tests scripts/e2e scripts/docs scripts/supply_chain` (the CI scope; other `scripts/` folders have old lint debt, do not touch it), `poetry run mypy` and `poetry run lint-imports`. Launches B, C1, C2, D and E also run the live tier (`poetry run pytest -m "integration or e2e" -rs --junitxml=/tmp/live.xml` with the environment above) and `poetry run python scripts/check_skips.py /tmp/live.xml` (the CI form; a new skip must be justified in `tests/skip_allowlist.json` and named in `build-log.md`). Give exact counts.
 9. A flaky test is a bug. Find its cause; do not hide it with retries, fewer workers or longer sleeps.
 
 ### Output
@@ -93,16 +93,16 @@ scripts/models/check_lock.sh
 
 **Task.** Put `model` after `boundary` and before `policy`. Add model failures at `model`; add region and data-use checks at `policy` with their reason codes and policy fields. Collect the ordered `stages` extension for every action and outcome; mark later stages `not_reached` after a deny and inapplicable stages `skipped`. Scan caller-supplied model input through the existing guardrail stage (blueprint section 6: not platform-built text, not ingest batches, no query-length cap on whole prompts). Keep model text out of records.
 
-**Tests.** Write test-spec WP4.
+**Tests.** Write test-spec WP4 except 4.5, 4.6 and 4.12 (they need `ModelCaller`; they move to Launch C1). For 4.4 and 4.10, B owns the pure region rule: the model stage takes the deployment region as an input; a local attempt's scope is that region. The `DEPLOY_REGION` setting, the startup refusal and the Bedrock minimum scope are Launch E; mark those 4.10 parts as E in `build-log.md`, do not skip-test them. The model stage reads a resolved model or a typed catalog failure (`ports/errors.py`) carried on the gateway request; it never calls the catalog itself.
 
 **Commands.**
 ```bash
-~/.local/share/poetry233/bin/poetry run pytest tests/unit/test_reason_catalogue.py tests/unit/test_region_pin.py tests/unit/test_model_stage_order.py tests/unit/test_data_use.py tests/unit/test_stages_extension.py tests/integration/test_model_records.py tests/integration/test_receipt_verifier.py
+~/.local/share/poetry233/bin/poetry run pytest tests/unit/test_reason_catalogue.py tests/unit/test_region_pin.py tests/unit/test_model_stage_order.py tests/unit/test_data_use.py tests/unit/test_stages_extension.py tests/integration/test_receipt_verifier.py
 ```
 
-**Allowed files.** `gateway/types.py`, `gateway/enforce.py`, `gateway/stages.py`, `gateway/reasons.py`, `gateway/policy.py`, `gateway/__init__.py`, policy model files, `evidence/extensions.py`, named tests, `planning/program/conventions.md`, `build-log.md`.
+**Allowed files.** `gateway/types.py`, `gateway/enforce.py`, `gateway/stages.py`, `gateway/reasons.py`, `gateway/policy.py`, `gateway/__init__.py`, policy model files, `evidence/extensions.py`, `scripts/verify/receipt.py`, named tests, `planning/program/conventions.md`, `build-log.md`.
 
-**Done when.** WP4 tests pass, including boundary-before-residency; full gate passes.
+**Done when.** WP4 tests (except 4.5, 4.6, 4.12) pass, including boundary-before-residency; full gate passes.
 
 ---
 
@@ -114,11 +114,11 @@ scripts/models/check_lock.sh
 
 **Task.** Add `ModelCaller` for complete, chat and embed. Admit every request alias before any inference. Record each attempt with its own allow. Apply configured fallback lists; each target gets its own resolution and allow. Rate-limit handling makes at most 3 attempts per alias, with one allow per attempt. Route search, agent and MCP model calls through it. Keep ingest batch changes for Launch D. Disable automatic retries for LiteLLM, OpenAI, Azure and Bedrock. Breakers and concurrency leases are Launch C2. Check `MODEL_ALLOWED_HOSTS` as an application allowlist and describe network egress control as Sprint 016.
 
-**Tests.** Write test-spec WP5 except 5.12 and 5.13.
+**Tests.** Write test-spec WP5 except 5.12 and 5.13, plus WP4 tests 4.5, 4.6 and 4.12 (`tests/integration/test_model_records.py`), moved here from Launch B.
 
 **Commands.**
 ```bash
-~/.local/share/poetry233/bin/poetry run pytest tests/unit/test_model_caller.py tests/integration/test_sdk_retries.py tests/integration/test_model_caller_limits.py tests/e2e/test_attempts_e2e.py
+~/.local/share/poetry233/bin/poetry run pytest tests/unit/test_model_caller.py tests/integration/test_sdk_retries.py tests/integration/test_model_caller_limits.py tests/e2e/test_attempts_e2e.py tests/integration/test_model_records.py
 ```
 
 **Allowed files.** `api/services/model_calls.py`, `api/services/llm.py`, `api/agent/graph.py`, `api/agent/tools.py`, `api/mcp/tools.py`, `api/routers/search.py`, `adapters/litellm_*.py`, `core/settings.py`, `config.py`, named tests, `build-log.md`.
@@ -154,7 +154,7 @@ scripts/models/check_lock.sh
 
 **Journey step:** "A model call is denied by policy before any inference, and the receipt names the model and lists every stage."
 
-**Task.** Authorize each embedding batch at job execution. Store alias plus digest or provider model id in vector provenance. Include full identity in search and cache keys. Rows without identity are stale. In `api/routers/search.py`, retain `rerank` as deprecated in OpenAPI, ignore it, and remove it from cache identity. Remove reranker callers, functions and the `rerank` dependency group (Launch E removes `FEATURES["reranker_enabled"]` from `config.py`). Regenerate `docs/api/openapi.json` and `ui/src/api/schema.d.ts` with the repo's existing scripts.
+**Task.** Authorize each embedding batch at job execution. Store alias plus digest or provider model id in vector provenance. Include full identity in search and cache keys. Rows without identity are stale. In `api/routers/search.py`, retain `rerank` as deprecated in OpenAPI, ignore it, and remove it from cache identity. Remove reranker callers, functions, the `rerank` dependency group and `FEATURES["reranker_enabled"]` in `config.py` (Architect moved this from Launch E on 2026-11-10 so no reader outlives the key). Regenerate `docs/api/openapi.json` and `ui/src/api/schema.d.ts` with the repo's existing scripts.
 
 **Tests.** Write test-spec WP6 and the reranker-removal coverage named there.
 
@@ -163,7 +163,7 @@ scripts/models/check_lock.sh
 ~/.local/share/poetry233/bin/poetry run pytest tests/unit/test_search_rerank_compat.py tests/unit/test_model_caller.py tests/integration/test_ingest_attempts.py tests/integration/test_vector_identity.py
 ```
 
-**Allowed files.** `core/pipeline/db_ingest.py`, `workers/handlers/ingest.py`, `api/routers/ingest.py`, `api/routers/search.py`, `api/services/cache.py`, `api/services/retriever.py`, `adapters/pg_knowledge.py`, `adapters/redis_cache.py`, `pyproject.toml`, `poetry.lock` (only the lock change from removing the `rerank` group, with `poetry lock` and no upgrades), `docs/api/openapi.json`, `ui/src/api/schema.d.ts`, named tests, `build-log.md`.
+**Allowed files.** `config.py`, `core/pipeline/db_ingest.py`, `workers/handlers/ingest.py`, `api/routers/ingest.py`, `api/routers/search.py`, `api/services/cache.py`, `api/services/retriever.py`, `adapters/pg_knowledge.py`, `adapters/redis_cache.py`, `pyproject.toml`, `poetry.lock` (only the lock change from removing the `rerank` group, with `poetry lock` and no upgrades), `docs/api/openapi.json`, `ui/src/api/schema.d.ts`, named tests, `build-log.md`.
 
 **Done when.** WP6 tests pass; full gate passes.
 
@@ -175,7 +175,7 @@ scripts/models/check_lock.sh
 
 **Journey step:** "A model call is denied by policy before any inference, and the receipt names the model and lists every stage."
 
-**Task.** Keep health metadata-only. Configure `VERIFIER_MODEL` as local or hosted under the common admission and policy checks; refuse only a missing verifier when Agents is enabled. Add `DEPLOY_REGION` and Bedrock scope validation. Set local defaults. Remove `FEATURES["reranker_enabled"]` from `config.py`. Keep Ollama isolated with a read-only serving model store. Add the conditional live digest-resolution check. Keep a hosted smoke that prints `SKIP`, never `PASS`, when credentials are missing. Remove `.github/workflows/nightly-models.yml` if present. Do not add GPU or hosted profile documentation.
+**Task.** Keep health metadata-only. Configure `VERIFIER_MODEL` as local or hosted under the common admission and policy checks; refuse only a missing verifier when Agents is enabled. Add `DEPLOY_REGION` and Bedrock scope validation. Set local defaults. Keep Ollama isolated with a read-only serving model store. Add the conditional live digest-resolution check. Keep a hosted smoke that prints `SKIP`, never `PASS`, when credentials are missing. Remove `.github/workflows/nightly-models.yml` if present. Do not add GPU or hosted profile documentation.
 
 **Tests.** Write test-spec WP7 and WP8.
 
@@ -186,7 +186,7 @@ scripts/verify/ollama.sh
 scripts/verify/hosted.sh
 ```
 
-**Allowed files.** `api/routers/health.py`, `api/agent/graph.py`, `core/settings.py`, `config.py`, `docker-compose.yml`, `scripts/models/check_lock.sh`, `scripts/verify/ollama.sh`, `scripts/verify/hosted.sh`, `.github/workflows/nightly-models.yml` (remove if present), named tests, `build-log.md`.
+**Allowed files.** `api/routers/health.py`, `api/agent/graph.py`, `core/settings.py`, `docker-compose.yml`, `scripts/models/check_lock.sh`, `scripts/verify/ollama.sh`, `scripts/verify/hosted.sh`, `.github/workflows/nightly-models.yml` (remove if present), named tests, `build-log.md`.
 
 **Done when.** WP7 and WP8 tests pass; Ollama verification and full gate pass.
 

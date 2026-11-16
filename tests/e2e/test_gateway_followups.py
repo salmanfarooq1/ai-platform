@@ -2,12 +2,60 @@
 
 Each test asserts the fake LLM and embedding call counts and the `gateway_decisions` rows, not only the status.
 """
+import json
 from uuid import UUID
 
+import pytest
+
+from config import LLM_CONFIG
+from core.settings import get_settings
 from tests.e2e.test_gateway_e2e import AGENT, ALL, LoopingLLM, _mcp_call, error_of, publish, rows, summary
 from tests.e2e.test_search_flow import QUERY, ingest
+from tests.fakes import FAKE_VERIFIER_ALIAS
 
 GEN_MODEL = "gemini/gemini-3.5-flash-lite"
+EMBED_MODEL = "ollama/nomic-embed-text"
+COMPLETION_FALLBACK = "ollama/qwen2.5"
+VERIFIER_MODEL = FAKE_VERIFIER_ALIAS
+
+
+def _model_phase(row):
+    extensions = row["extensions"] if isinstance(row["extensions"], dict) else json.loads(row["extensions"])
+    return extensions.get("model", {}).get("phase")
+
+
+@pytest.fixture(autouse=True)
+def _pin_l4_model_configuration(request, monkeypatch):
+    if request.node.name != "test_l4_no_verifier_call_after_a_halt":
+        return
+
+    import api.agent.graph
+    import api.agent.router
+    import api.agent.tools
+    import api.services.model_calls
+    import config
+
+    base = get_settings()
+
+    class L4Settings:
+        mode = "local"
+        verifier_model = VERIFIER_MODEL
+        embed_fallbacks: list[str] = []
+
+        def __getattr__(self, name):
+            return getattr(base, name)
+
+    test_settings = L4Settings()
+    def fallback(mode):
+        return [COMPLETION_FALLBACK]
+
+    monkeypatch.setattr(config, "completion_fallbacks_for_mode", fallback)
+    monkeypatch.setattr(api.services.model_calls, "completion_fallbacks_for_mode", fallback)
+    monkeypatch.setattr(api.agent.router, "completion_fallbacks_for_mode", fallback)
+    for module in (api.agent.graph, api.agent.router, api.agent.tools):
+        monkeypatch.setattr(module, "get_settings", lambda: test_settings)
+    monkeypatch.setitem(LLM_CONFIG, "model", GEN_MODEL)
+    monkeypatch.setitem(LLM_CONFIG, "embedding_model", EMBED_MODEL)
 
 
 def break_policy(dsn, tenant):
@@ -226,8 +274,16 @@ async def test_l4_no_verifier_call_after_a_halt(client, pool, tenant_a, database
     assert "verifier" not in looping.kinds  # the run was cut short: no model call spent on verifying a partial answer
     assert looping.kinds.count("agent_tool_call") == 2 and "synthesis" in looping.kinds
     model_rows = await rows(pool, tenant_a, "AND action = 'model.invoke'")
-    generation = [r for r in model_rows if r["resource"] == GEN_MODEL]
-    assert len(generation) == len(looping.kinds) + 1  # one per LLM call, plus the route's entry check; none for a verifier
+    attempts = [r for r in model_rows if _model_phase(r) == "attempt"]
+    admissions = [r for r in model_rows if _model_phase(r) == "admission"]
+    generation = [r for r in attempts if r["resource"] == GEN_MODEL]
+    assert len(generation) == len(looping.kinds)
+    assert VERIFIER_MODEL != GEN_MODEL
+    assert not [r for r in attempts if r["resource"] == VERIFIER_MODEL]
+    # One admission per alias and use: GEN_MODEL chat and completion, the completion fallback, the verifier, the embedder.
+    assert sorted(r["resource"] for r in admissions) == sorted(
+        [GEN_MODEL, GEN_MODEL, COMPLETION_FALLBACK, VERIFIER_MODEL, EMBED_MODEL]
+    )
 
 
 # ------------------------------------------------------------------ L1: every recorded reason is in the catalogue

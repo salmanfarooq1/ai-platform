@@ -12,15 +12,17 @@ overrides `acompletion`, and installs it with `fake_llm.use(other)`.
 `FakeKnowledgeStore`, `FakeCache` and `FakeS3Client` are in-memory stand-ins that pass the same contract suites
 (tests/contracts/) as the real adapters.
 """
+import hashlib
 import json
 import math
 import re
 import time
 import zlib
 from collections.abc import Mapping, Sequence
+from dataclasses import replace
 from datetime import datetime, timezone
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import litellm
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
@@ -29,6 +31,8 @@ from langchain_core.tools import BaseTool
 import config
 from core.settings import get_settings
 from ports import (
+    BreakerState,
+    CacheUnavailable,
     ChunkRow,
     Completion,
     DocumentRecord,
@@ -36,6 +40,71 @@ from ports import (
     Embeddings,
     SemanticHit,
 )
+from ports.errors import UnknownModel
+from ports.models import CatalogHealth, ModelIdentity, ModelRoute, ModelUse, ResolvedModel
+
+FAKE_VERIFIER_ALIAS = "ollama/qwen2.5"
+
+
+def fake_resolved_model(alias: str, use: ModelUse = ModelUse.CHAT) -> ResolvedModel:
+    """A resolved route for legacy gateway tests that construct model.invoke actions directly."""
+    digest = "sha256:" + hashlib.sha256(alias.encode()).hexdigest()
+    identity = ModelIdentity(alias, "ollama", "local", digest, None, "local", "eu", None)
+    route = ModelRoute(identity, "http://127.0.0.1:11434", None, {"model": alias})
+    return ResolvedModel(identity, route, use, None, "no_training")
+
+
+class FakeCatalog:
+    """In-memory model catalog for tests; probing never contacts a provider."""
+
+    def __init__(self, entries: Mapping[str, ResolvedModel] | None = None,
+                 failures: Mapping[str, Exception] | None = None,
+                 supported_uses: Mapping[str, set[ModelUse]] | None = None) -> None:
+        self.entries = dict(entries or {})
+        self.failures = dict(failures or {})
+        self.supported_uses = {alias: set(uses) for alias, uses in (supported_uses or {}).items()}
+        for alias, model in self.entries.items():
+            self.supported_uses.setdefault(alias, {model.use})
+        self.probe_calls = 0
+        self.inference_calls = 0
+
+    async def resolve(self, alias: str, *, use: ModelUse) -> ResolvedModel:
+        if alias in self.failures:
+            raise self.failures[alias]
+        model = self.entries.get(alias)
+        if model is None or use not in self.supported_uses.get(alias, set()):
+            raise UnknownModel("model alias or use is not available")
+        return replace(model, use=use)
+
+    async def probe(self) -> CatalogHealth:
+        self.probe_calls += 1
+        return CatalogHealth(healthy=True)
+
+
+def make_fake_catalog(settings=None, *, extra_uses: Mapping[str, set[ModelUse]] | None = None) -> FakeCatalog:
+    """Fake resolution table for request tests; it never probes or contacts a provider."""
+    settings = settings or get_settings()
+    from config import completion_fallbacks_for_mode
+    from ports.models import ModelIdentity, ModelRoute
+
+    supported_uses: dict[str, set[ModelUse]] = {}
+    for alias in (str(settings.llm_model), str(config.LLM_CONFIG["model"])):
+        supported_uses.setdefault(alias, set()).update({ModelUse.CHAT, ModelUse.COMPLETION})
+    for alias in completion_fallbacks_for_mode(settings.mode):
+        supported_uses.setdefault(alias, set()).add(ModelUse.COMPLETION)
+    for alias in (str(settings.embed_model), str(config.LLM_CONFIG["embedding_model"]),
+                  *settings.embed_fallbacks, *config.LLM_CONFIG.get("embed_fallbacks", [])):
+        supported_uses.setdefault(alias, set()).add(ModelUse.EMBEDDING)
+    for alias, alias_uses in (extra_uses or {}).items():
+        supported_uses.setdefault(alias, set()).update(alias_uses)
+    entries = {}
+    for alias, alias_uses in supported_uses.items():
+        digest = "sha256:" + hashlib.sha256(alias.encode()).hexdigest()
+        identity = ModelIdentity(alias, "ollama", "local", digest, None, "local", "eu", None)
+        route = ModelRoute(identity, "http://127.0.0.1:11434", None, {"model": alias})
+        first_use = sorted(alias_uses, key=lambda item: item.value)[0]
+        entries[alias] = ResolvedModel(identity, route, first_use, None, "no_training")
+    return FakeCatalog(entries, supported_uses=supported_uses)
 
 
 class FakeDecisionSink:
@@ -45,10 +114,44 @@ class FakeDecisionSink:
         self.entries = []
 
     async def write(self, entry, events=None):
+        if getattr(self, "fail", False):
+            raise ConnectionError("decision sink unavailable")
         from uuid import uuid4
 
         self.entries.append(entry)
         return uuid4()
+
+
+class RecordingProvider:
+    """Single-request provider fake which records the resolved route before returning or failing."""
+
+    def __init__(self, results: Mapping[str, Any] | None = None) -> None:
+        self.results = dict(results or {})
+        self.requests: list[dict[str, Any]] = []
+        self.fail_next: dict[str, list[Exception]] = {}
+
+    def fail(self, alias: str, error: Exception, count: int = 1) -> None:
+        self.fail_next.setdefault(alias, []).extend([error] * count)
+
+    async def complete_resolved(self, resolved: ResolvedModel, messages, *, max_tokens: int,
+                                response_format=None):
+        self.requests.append({"alias": resolved.identity.alias, "route": resolved.route,
+                              "messages": messages, "kind": "completion"})
+        failures = self.fail_next.get(resolved.identity.alias, [])
+        if failures:
+            raise failures.pop(0)
+        if resolved.identity.alias in self.results:
+            return self.results[resolved.identity.alias]
+        return Completion(text="{}", model=resolved.identity.alias, tokens_in=1, tokens_out=1,
+                          cost_usd=0.0)
+
+    async def embed_resolved(self, resolved: ResolvedModel, texts: list[str]) -> Embeddings:
+        self.requests.append({"alias": resolved.identity.alias, "route": resolved.route,
+                              "texts": list(texts), "kind": "embedding"})
+        failures = self.fail_next.get(resolved.identity.alias, [])
+        if failures:
+            raise failures.pop(0)
+        return Embeddings(vectors=[[1.0] for _ in texts], model=resolved.identity.alias, dim=1)
 
 EMBEDDING_DIM = 768
 _WORD = re.compile(r"[a-z0-9]+")
@@ -92,8 +195,14 @@ class FakeEmbeddings:
         self.calls.append(list(texts))
         vectors = [(fake_embedding(t) * 5)[: self._width] if self._width != self._dim else fake_embedding(t) for t in texts]
         if any(len(v) != self._dim for v in vectors):
-            raise EmbeddingDimensionMismatch(f"the fake produced {self._width}-wide vectors, the active dimension is {self._dim}")
+            raise EmbeddingDimensionMismatch("fake embedding width mismatch", expected_dim=self._dim,
+                                             returned_dim=self._width)
         return Embeddings(vectors=vectors, model=self._model, dim=self._dim)
+
+    async def embed_resolved(self, resolved: ResolvedModel, texts: list[str]) -> Embeddings:
+        result = await self.embed(texts)
+        return Embeddings(vectors=result.vectors, model=resolved.identity.alias, dim=result.dim,
+                          route_fingerprint=resolved.route.fingerprint)
 
 
 _CHUNK_RE = re.compile(r"\[chunk_(\d+)\] \(from ([^,]+), score [0-9.]+\):\n(.*?)(?=\n\n\[chunk_|\n\nQuestion:)", re.S)
@@ -135,10 +244,34 @@ class FakeLLM:
             finish_reason=choice.finish_reason,
         )
 
+    async def complete_resolved(self, resolved: ResolvedModel, messages, *, max_tokens: int, response_format=None):
+        kwargs: dict[str, Any] = {"max_tokens": max_tokens}
+        if response_format is not None:
+            kwargs["response_format"] = response_format
+        response = await self._target.acompletion(
+            model=str(resolved.route.params.get("model", resolved.identity.alias)),
+            messages=[dict(message) for message in messages], **kwargs,
+        )
+        choice = response.choices[0]
+        tokens_in, tokens_out = response.usage.prompt_tokens, response.usage.completion_tokens
+        from core.pricing import rates_for
+
+        rates = rates_for(config.MODEL_PRICING, resolved.price_ref or resolved.identity.alias)
+        return Completion(
+            text=choice.message.content or "", model=resolved.identity.alias, tokens_in=tokens_in,
+            tokens_out=tokens_out,
+            cost_usd=(tokens_in / 1_000_000) * rates["input"] + (tokens_out / 1_000_000) * rates["output"],
+            finish_reason=choice.finish_reason,
+        )
+
+    def chat_model_resolved(self, resolved: ResolvedModel, *, max_tokens: int, temperature: float = 0.0):
+        model = str(resolved.route.params.get("model", resolved.identity.alias))
+        return FakeChatModel(self, max_tokens, (), model)
+
     # --- ChatModelPort ---
 
-    def chat_model(self, *, max_tokens: int, temperature: float = 0.0) -> "FakeChatModel":
-        return FakeChatModel(self, max_tokens, ())
+    def chat_model(self, *, max_tokens: int, temperature: float = 0.0, model: str | None = None) -> "FakeChatModel":
+        return FakeChatModel(self, max_tokens, (), model or str(get_settings().llm_model))
 
     def cost(self, model: str, tokens_in: int, tokens_out: int) -> float:
         return 0.0
@@ -224,11 +357,11 @@ class SandboxAnswerLLM(FakeLLM):
 class FakeChatModel:
     """What `FakeLLM.chat_model()` returns: LangChain messages in, an AIMessage out, via `FakeLLM.acompletion`."""
 
-    def __init__(self, llm: FakeLLM, max_tokens: int, tools: Sequence[BaseTool]) -> None:
-        self._llm, self._max_tokens, self._tools = llm, max_tokens, tuple(tools)
+    def __init__(self, llm: FakeLLM, max_tokens: int, tools: Sequence[BaseTool], model: str) -> None:
+        self._llm, self._max_tokens, self._tools, self._model = llm, max_tokens, tuple(tools), model
 
     def bind_tools(self, tools: Sequence[BaseTool]) -> "FakeChatModel":
-        return FakeChatModel(self._llm, self._max_tokens, tools)
+        return FakeChatModel(self._llm, self._max_tokens, tools, self._model)
 
     @staticmethod
     def _to_dict(message: BaseMessage) -> dict[str, Any]:
@@ -244,7 +377,7 @@ class FakeChatModel:
         kwargs: dict[str, Any] = {"max_tokens": self._max_tokens}
         if self._tools:
             kwargs["tools"] = [{"type": "function", "function": {"name": t.name}} for t in self._tools]
-        model = str(get_settings().llm_model)
+        model = self._model
         response = await self._llm._target.acompletion(
             model=model, messages=[self._to_dict(m) for m in messages], **kwargs)
         message = response.choices[0].message
@@ -463,6 +596,86 @@ class FakeKnowledgeStore:
 
 # ----------------------------------------------------------------------------------------------- cache
 
+class FakeModelLimitStore:
+    """In-memory atomic model breaker and lease store for unit tests."""
+
+    def __init__(
+        self,
+        *,
+        max_concurrent_per_tenant: int = 8,
+        failure_threshold: int = 5,
+        open_seconds: float = 30.0,
+        lease_ttl_seconds: float = 70.0,
+    ) -> None:
+        self.max_concurrent = max_concurrent_per_tenant
+        self.failure_threshold = failure_threshold
+        self.open_seconds = open_seconds
+        self.lease_ttl_seconds = lease_ttl_seconds
+        self._now = time.monotonic()
+        self._breakers: dict[str, dict[str, float | int]] = {}
+        self._leases: dict[UUID, dict[str, float]] = {}
+        self.fail_with: Exception | None = None
+
+    def _check(self) -> None:
+        if self.fail_with is not None:
+            if isinstance(self.fail_with, CacheUnavailable):
+                raise self.fail_with
+            raise CacheUnavailable("model limit store unavailable") from self.fail_with
+
+    def advance(self, seconds: float) -> None:
+        self._now += seconds
+
+    async def check_breaker(self, fingerprint: str) -> BreakerState:
+        self._check()
+        state = self._breakers.get(fingerprint)
+        if state is None or float(state["expires_at"]) <= self._now:
+            self._breakers.pop(fingerprint, None)
+            return BreakerState.CLOSED
+        if int(state["failures"]) < self.failure_threshold:
+            return BreakerState.CLOSED
+        if float(state.get("open_until", 0.0)) > self._now:
+            return BreakerState.OPEN
+        if float(state.get("trial_until", 0.0)) > self._now:
+            return BreakerState.OPEN
+        state["trial_until"] = self._now + self.lease_ttl_seconds
+        return BreakerState.TRIAL
+
+    async def record_success(self, fingerprint: str) -> None:
+        self._check()
+        self._breakers.pop(fingerprint, None)
+
+    async def record_failure(self, fingerprint: str) -> None:
+        self._check()
+        state = self._breakers.setdefault(fingerprint, {"failures": 0})
+        state["failures"] = int(state["failures"]) + 1
+        state["expires_at"] = self._now + self.open_seconds + self.lease_ttl_seconds
+        state.pop("trial_until", None)
+        if int(state["failures"]) >= self.failure_threshold:
+            state["open_until"] = self._now + self.open_seconds
+
+    async def release_trial(self, fingerprint: str) -> None:
+        self._check()
+        state = self._breakers.get(fingerprint)
+        if state is not None:
+            state.pop("trial_until", None)
+
+    async def acquire_lease(self, tenant_id: UUID) -> str | None:
+        self._check()
+        leases = self._leases.setdefault(tenant_id, {})
+        self._leases[tenant_id] = leases = {
+            lease_id: expiry for lease_id, expiry in leases.items() if expiry > self._now
+        }
+        if len(leases) >= self.max_concurrent:
+            return None
+        lease_id = uuid4().hex
+        leases[lease_id] = self._now + self.lease_ttl_seconds
+        return lease_id
+
+    async def release_lease(self, tenant_id: UUID, lease_id: str) -> None:
+        self._check()
+        self._leases.get(tenant_id, {}).pop(lease_id, None)
+
+
 class FakeCache:
     """An in-memory `CachePort`. `data` holds string values and `ttl` the TTL last set for each key.
 
@@ -476,6 +689,7 @@ class FakeCache:
         self.fail_with = fail_with
         self.semantic: list[dict[str, Any]] = []
         self.closed = False
+        self.model_limit_store = FakeModelLimitStore()
 
     def _check(self) -> None:
         if self.fail_with is not None:
@@ -514,16 +728,48 @@ class FakeCache:
     async def ensure_semantic_index(self) -> None:
         self._check()
 
+    async def check_breaker(self, fingerprint: str) -> BreakerState:
+        if self.fail_with is not None:
+            self._check()
+        return await self.model_limit_store.check_breaker(fingerprint)
+
+    async def record_success(self, fingerprint: str) -> None:
+        if self.fail_with is not None:
+            self._check()
+        await self.model_limit_store.record_success(fingerprint)
+
+    async def record_failure(self, fingerprint: str) -> None:
+        if self.fail_with is not None:
+            self._check()
+        await self.model_limit_store.record_failure(fingerprint)
+
+    async def release_trial(self, fingerprint: str) -> None:
+        if self.fail_with is not None:
+            self._check()
+        await self.model_limit_store.release_trial(fingerprint)
+
+    async def acquire_lease(self, tenant_id: UUID) -> str | None:
+        if self.fail_with is not None:
+            self._check()
+        return await self.model_limit_store.acquire_lease(tenant_id)
+
+    async def release_lease(self, tenant_id: UUID, lease_id: str) -> None:
+        if self.fail_with is not None:
+            self._check()
+        await self.model_limit_store.release_lease(tenant_id, lease_id)
+
+    def advance_model_limits(self, seconds: float) -> None:
+        self.model_limit_store.advance(seconds)
+
     async def semantic_lookup(
         self, tenant_id: UUID | str, namespace: str, embedding: list[float], *, embedding_model: str,
-        retrieval_mode: str, rerank: bool, top_k: int, min_similarity: float,
+        retrieval_mode: str, top_k: int, min_similarity: float,
     ) -> SemanticHit | None:
         self._check()
         best: tuple[float, dict[str, Any]] | None = None
         for entry in self.semantic:
             if (entry["tenant_id"], entry["namespace"], entry["embedding_model"], entry["retrieval_mode"],
-                    entry["rerank"], entry["top_k"]) != (str(tenant_id), namespace, embedding_model, retrieval_mode,
-                                                         rerank, top_k):
+                    entry["top_k"]) != (str(tenant_id), namespace, embedding_model, retrieval_mode, top_k):
                 continue
             similarity = cosine(embedding, entry["embedding"])
             if best is None or similarity > best[0]:
@@ -534,12 +780,12 @@ class FakeCache:
 
     async def semantic_store(
         self, tenant_id: UUID | str, namespace: str, embedding: list[float], response: str, *, query: str,
-        embedding_model: str, retrieval_mode: str, rerank: bool, top_k: int, ttl: int,
+        embedding_model: str, retrieval_mode: str, top_k: int, ttl: int,
     ) -> None:
         self._check()
         self.semantic.append({
             "tenant_id": str(tenant_id), "namespace": namespace, "embedding": list(embedding), "response": response,
-            "query": query, "embedding_model": embedding_model, "retrieval_mode": retrieval_mode, "rerank": rerank,
+            "query": query, "embedding_model": embedding_model, "retrieval_mode": retrieval_mode,
             "top_k": top_k, "expires": time.time() + ttl,
         })
 

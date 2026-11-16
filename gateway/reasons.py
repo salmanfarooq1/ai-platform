@@ -54,6 +54,16 @@ _ENTRIES = (
     ReasonInfo(
         "model_not_allowed", "Model not allowed", "The policy does not list this model.", "allowed_models", "policy",
     ),
+    ReasonInfo("model_digest_mismatch", "Model identity mismatch", "The local model digest does not match its reviewed identity.", None, "model"),
+    ReasonInfo("model_unknown", "Model unavailable", "The requested model or model use is not available.", None, "model"),
+    ReasonInfo("model_breaker_open", "Model route unavailable", "This model route is temporarily unavailable after provider failures.", None, "model"),
+    ReasonInfo("model_concurrency_limit", "Model concurrency limit", "The tenant has reached its concurrent model call limit.", None, "rate"),
+    ReasonInfo("model_host_not_allowed", "Model host not allowed", "The model endpoint is outside the application host allow-list.", None, "model"),
+    ReasonInfo("model_unpriced", "Model price unavailable", "The hosted model has no configured price.", None, "model"),
+    ReasonInfo("residency_unknown", "Processing region unknown", "The model processing region could not be established.", None, "model"),
+    ReasonInfo("region_not_allowed", "Region not allowed", "The model processing region is outside the policy pin.", "allowed_regions", "policy"),
+    ReasonInfo("data_use_not_allowed", "Data use not allowed", "The provider's data-use terms do not meet the policy pin.", "allowed_data_use", "policy"),
+    ReasonInfo("verifier_must_be_local", "Verifier must be local", "The policy requires a local answer verifier.", "verifier_must_be_local", "policy"),
     ReasonInfo(
         "token_limit", "Token limit exceeded", "The call would use more tokens than the policy allows for one request.",
         "max_tokens_per_request", "policy",

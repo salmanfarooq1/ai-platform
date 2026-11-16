@@ -30,16 +30,8 @@ COPY pyproject.toml poetry.lock ./
 
 # Install runtime dependencies only (no dev/test deps in production image).
 # --no-root: don't install the project itself yet (we haven't copied the code).
-# INCLUDE_RERANK=true pulls in sentence-transformers/torch for the cross-encoder
-# reranker (needed when MODE=prod). Leave it false for public-preview/free-tier builds,
-# where FEATURES["reranker_enabled"] is off anyway and the extra ~3GB is dead weight.
-ARG INCLUDE_RERANK=false
 RUN --mount=type=cache,id=gap-poetry,target=/root/.cache/pypoetry \
-    if [ "$INCLUDE_RERANK" = "true" ]; then \
-        poetry install --only main,rerank --no-root; \
-    else \
-        poetry install --only main --no-root; \
-    fi
+    poetry install --only main --no-root
 
 # Now copy the application code. This layer changes on every code change,
 # but the dependency layer above is cached.
@@ -56,8 +48,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Copy the virtualenv from the builder stage.
-# This contains all installed packages (fastapi, litellm, and sentence-transformers
-# if INCLUDE_RERANK=true was set on the builder stage above).
+# This contains all installed runtime packages.
 COPY --from=builder /app/.venv .venv
 
 # Copy application code
@@ -70,6 +61,8 @@ COPY --from=builder /app/adapters adapters/
 COPY --from=builder /app/workers workers/
 COPY --from=builder /app/sandbox_agent sandbox_agent/
 COPY --from=builder /app/config.py config.py
+COPY --from=builder /app/models.lock models.lock
+COPY --from=builder /app/providers.register.toml providers.register.toml
 COPY --from=builder /app/alembic.ini alembic.ini
 COPY --from=builder /app/migrations migrations/
 COPY --from=builder /app/data data/

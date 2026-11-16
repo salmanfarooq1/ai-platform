@@ -1,0 +1,16 @@
+# A15 Ollama isolation, live, 2026-11-11T22:17:28+05:00, Architect
+$ docker compose -p ai-platform --profile models up -d ollama-init ollama ollama-lock-check ollama-edge
+$ docker logs ai-platform-ollama-lock-check-1
+model lock ok: 3 Ollama models match
+$ scripts/verify/ollama.sh
+PASS: Ollama is attached only to the internal models network
+PASS: Ollama has no published ports
+PASS: Ollama cannot reach external IP or DNS endpoints
+PASS: host endpoint returns all models in models.lock
+PASS: ollama-lock-check exited successfully
+PASS: Ollama model store is read-only
+exit 0
+# positive control: the in-container probe can connect when a port is reachable
+control: connect to 127.0.0.1:11434 inside ollama ok
+# host inference through ollama-edge
+POST /api/generate qwen3:1.7b -> 200

@@ -1,0 +1,16 @@
+Sprint 013 acceptance A6 evidence (region-pin)
+Captured by the Architect 2026-11-16T09:34:19+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 3.4 tests/unit/test_register_catalog.py::test_unknown_scope_is_carried_to_model_stage: A hosted provider whose configured deployment scope is not in the register resolves with `processing_scope == "unknown"` and `region == "unknown"`; it never guesses a region. Architect decision 2026-11-16: carry `unknown` instead of raising, so the model stage records a `residency_unknown` deny in the receipt (row 4.3). Both fail closed; this one leaves evidence.
+- 4.2 tests/unit/test_region_pin.py::test_scope_outside_pin_is_denied: Policy `allowed_regions=["eu"]`; attempt with scope `azure:us`: deny `region_not_allowed`, stage `policy`. Scope `azure:eu-data-zone` mapped to region `eu` in the register: allow.
+- 4.3 tests/unit/test_region_pin.py::test_unknown_scope_never_matches: Scope `unknown` with pin `["eu"]`: deny. With pin `"*"`: deny `residency_unknown` from the model stage (unknown is never allowed for hosted).
+- 4.4 tests/unit/test_region_pin.py::test_local_scope: With `DEPLOY_REGION="eu"`, a local attempt passes pin `["eu"]`, denies pin `["us"]`, and passes pin `"*"`.
+- 4.8 tests/unit/test_model_stage_order.py::test_boundary_deny_precedes_residency: A caller without the required scope gets a boundary deny before the model stage can return `residency_unknown`.
+- 4.10 tests/unit/test_region_pin.py::test_local_region_and_bedrock_minimum: A local route uses `DEPLOY_REGION`; a listed pin with no deployment region refuses startup. A Bedrock model id prefix rejects a narrower configured scope.
+
+$ pytest -q -rs tests/unit/test_model_stage_order.py::test_boundary_deny_precedes_residency tests/unit/test_region_pin.py::test_local_region_and_bedrock_minimum tests/unit/test_region_pin.py::test_local_scope tests/unit/test_region_pin.py::test_scope_outside_pin_is_denied tests/unit/test_region_pin.py::test_unknown_scope_never_matches tests/unit/test_register_catalog.py::test_unknown_scope_is_carried_to_model_stage   # unit (live env unset)
+......                                                                   [100%]
+6 passed in 3.03s
+exit=0

@@ -1580,7 +1580,8 @@ export interface components {
             query: string;
             /**
              * Rerank
-             * @description Whether to apply cross-encoder reranking after retrieval
+             * @deprecated
+             * @description Deprecated and ignored
              * @default true
              */
             rerank: boolean;
@@ -1616,6 +1617,8 @@ export interface components {
             query: string;
             /**
              * Rerank Applied
+             * @deprecated
+             * @description Deprecated compatibility field; always false
              * @default false
              */
             rerank_applied: boolean;

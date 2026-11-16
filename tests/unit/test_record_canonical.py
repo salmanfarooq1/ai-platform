@@ -215,3 +215,11 @@ def test_verifier_runs_standalone_and_rejects_unsigned_claims(version, tmp_path)
     receipt_file.write_text(json.dumps(value))
     bad = subprocess.run(command, cwd=tmp_path, text=True, capture_output=True)
     assert bad.returncode == 1 and bad.stdout.strip().endswith("INVALID"), bad.stdout + bad.stderr
+
+
+def test_every_registered_schema_compiles_without_references():
+    from jsonschema import Draft202012Validator
+
+    for key, schema in extensions.EXTENSION_SCHEMAS.items():
+        Draft202012Validator.check_schema(schema)
+        assert extensions._validator(key) is extensions._validator(key), key  # compiled once, then reused

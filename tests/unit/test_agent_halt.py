@@ -10,6 +10,7 @@ from api.agent.models import AGENT_MAX_TOKENS, VERIFIER_MAX_TOKENS
 from api.services.llm import GENERATION_MAX_TOKENS
 from gateway import Action, ActionKind, enforce
 from gateway.estimate import estimate_tokens
+from tests.fakes import fake_resolved_model
 from tests.gateway_helpers import make_ctx
 
 
@@ -42,13 +43,22 @@ class CountingChat:
             return CountingModel("done", self.calls, "agent")
         return CountingModel(json.dumps({"supported": True, "notes": "ok"}), self.calls, "verifier")
 
+    def chat_model_resolved(self, resolved, *, max_tokens, temperature=0.0):
+        return self.chat_model(max_tokens=max_tokens, temperature=temperature)
+
     def cost(self, model, tokens_in, tokens_out):
         return 0.0
 
 
 def build(monkeypatch, calls):
     monkeypatch.setattr(graph_module, "make_retrieve_tool", lambda adapters: fake_retrieve)
-    return graph_module.build_agent_graph(SimpleNamespace(chat=CountingChat(calls), llm=None, knowledge=None, embeddings=None))
+    from tests.fakes import FakeModelLimitStore, make_fake_catalog
+    adapters = SimpleNamespace(
+        chat=CountingChat(calls), llm=None, knowledge=None, embeddings=None,
+        model_catalog=make_fake_catalog(),
+        model_limits=FakeModelLimitStore(),
+    )
+    return graph_module.build_agent_graph(adapters)
 
 
 def state(verifier=True):
@@ -93,8 +103,9 @@ def test_the_model_estimates_include_the_completion_tokens_they_ask_for():
 
 async def test_enforce_denies_a_model_call_whose_completion_tokens_push_it_over_the_cap():
     ctx = make_ctx(policy={"allowed_models": "*", "allowed_tools": "*", "allowed_kbs": "*", "max_tokens_per_request": GENERATION_MAX_TOKENS})
-    fits_without = Action(ActionKind.MODEL_INVOKE, "m", estimated_tokens=estimate_tokens("short question"))
-    over_with = Action(ActionKind.MODEL_INVOKE, "m", estimated_tokens=estimate_tokens("short question", GENERATION_MAX_TOKENS))
+    model = fake_resolved_model("m")
+    fits_without = Action(ActionKind.MODEL_INVOKE, "m", resolved_model=model, estimated_tokens=estimate_tokens("short question"))
+    over_with = Action(ActionKind.MODEL_INVOKE, "m", resolved_model=model, estimated_tokens=estimate_tokens("short question", GENERATION_MAX_TOKENS))
     assert (await enforce(ctx, fits_without)).allowed
     decision = await enforce(ctx, over_with)
     assert (decision.allowed, decision.stage, decision.reason) == (False, "policy", "token_limit")

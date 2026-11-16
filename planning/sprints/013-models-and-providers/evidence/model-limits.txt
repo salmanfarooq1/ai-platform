@@ -1,0 +1,18 @@
+Sprint 013 acceptance A16 evidence (model-limits)
+Captured by the Architect 2026-11-16T09:37:55+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 4.1 tests/unit/test_reason_catalogue.py: Passes with all new model, data-use, breaker, concurrency and verifier reasons, each with its stage and `policy_field`.
+- 5.12 tests/unit/test_model_caller.py::test_open_breaker_denies_without_request: An open route denies `model_breaker_open` at stage `model`; the provider count stays zero and fallback selection continues.
+- 5.13 tests/integration/test_model_caller_limits.py::test_tenant_concurrency_cap_denies_without_request: With the tenant at its configured in-flight cap, the next attempt denies `model_concurrency_limit` at stage `rate`; provider count stays zero.
+
+$ pytest -q -rs tests/unit/test_model_caller.py::test_open_breaker_denies_without_request tests/unit/test_reason_catalogue.py   # unit (live env unset)
+.........................                                                [100%]
+25 passed in 3.59s
+exit=0
+
+$ pytest -q -rs tests/integration/test_model_caller_limits.py::test_tenant_concurrency_cap_denies_without_request   # integration/e2e/contract (live env set)
+.                                                                        [100%]
+1 passed in 3.66s
+exit=0

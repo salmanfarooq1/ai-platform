@@ -46,15 +46,8 @@ dependencies = [
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+# Cross-encoder reranking and its dependency group were removed in Sprint 013.
 [dependency-groups]
-# Kept out of [project.dependencies] so that `poetry install --only main` - what
-# the Dockerfile runs - produces an image without torch. sentence-transformers
-# is only reached through the cross-encoder reranker, which FEATURES
-# ["reranker_enabled"] disables in public-preview mode to stay inside 512MB of RAM.
-rerank = [
-    "sentence-transformers (>=5.6.0,<6.0.0)",
-]
-
 # Only imported by scripts/ (labs, corpus building, eval plots), which the
 # production image does not copy.
 labs = [
@@ -95,6 +88,7 @@ markers = [
     "integration: tests against a real test database/Redis instance",
     "e2e: full-stack tests that exercise the API end-to-end",
     "edition_smoke: boots one edition and runs its smoke set",
+    "live: calls a real local runtime such as Ollama; run on purpose, never in CI",
 ]
 
 [tool.coverage.run]

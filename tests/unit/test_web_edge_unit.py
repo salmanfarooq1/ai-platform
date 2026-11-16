@@ -127,6 +127,7 @@ def test_preview_principal_id_must_be_a_uuid(clean_env):
 
 def test_preview_principal_id_is_accepted_in_local_and_public_preview_and_refused_in_prod(clean_env):
     pid = str(uuid4())
+    clean_env.setenv("DEPLOY_REGION", "us")
     clean_env.setenv("PREVIEW_PRINCIPAL_ID", pid)
     assert str(get_settings().preview_principal_id) == pid
     for mode in ("public-preview", "prod"):

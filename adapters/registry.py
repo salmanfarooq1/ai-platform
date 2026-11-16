@@ -5,7 +5,7 @@ provider is a change here (and in settings). Tests pass `overrides` to put fakes
 app they exercise is built by this same function.
 """
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, cast
 
 import config
 from adapters.inprocess_events import InProcessEventBus
@@ -16,18 +16,20 @@ from adapters.litellm_embeddings import LitellmEmbeddings
 from adapters.litellm_llm import LitellmLLM
 from adapters.local_object_store import LocalObjectStore
 from adapters.local_runtime import build_local_runtime as build_local_runtime
+from adapters.model_catalog import build_model_catalog
 from adapters.noop_modules import DisabledDataAccess, DroppingLineageEmitter
 from adapters.pg_evidence import PgDecisionSink, PgEvidenceLookup
 from adapters.pg_knowledge import PgKnowledgeStore
 from adapters.pg_outbox_events import OutboxEventBus
 from adapters.redis_cache import RedisCache
+from adapters.redis_model_limits import RedisModelLimitStore
 from adapters.s3_object_store import S3ObjectStore
 from core.database.tenant import DbPool
 from core.settings import Settings
 from gateway.context import context_to_payload
-from ports import Adapters, AgentRuntime, EventBus, ObjectStore, Runner
+from ports import Adapters, AgentRuntime, EventBus, ModelLimitStore, ObjectStore, Runner
 
-PORT_NAMES = ("llm", "chat", "embeddings", "knowledge", "cache", "objects", "events", "runtime", "decisions", "evidence", "data", "lineage")
+PORT_NAMES = ("llm", "chat", "embeddings", "knowledge", "cache", "objects", "events", "runtime", "decisions", "evidence", "data", "lineage", "model_catalog", "model_limits")
 
 
 def _object_store(settings: Settings) -> ObjectStore:
@@ -89,13 +91,30 @@ def build_adapters(
             raise ValueError("the evidence lookup needs a pool")
         return PgEvidenceLookup(pool)
 
+    cache_adapter = pick("cache", lambda: RedisCache(settings.redis_dsn, settings.embedding_dim))
+
+    def model_limits() -> ModelLimitStore:
+        if "model_limits" in overrides:
+            return cast(ModelLimitStore, overrides["model_limits"])
+        if isinstance(cache_adapter, ModelLimitStore):
+            return cache_adapter
+        if not isinstance(cache_adapter, RedisCache):
+            raise ValueError("a custom cache adapter must also provide model_limits or set the model_limits override")
+        return RedisModelLimitStore(
+            cache_adapter.redis_client,
+            max_concurrent_per_tenant=settings.model_max_concurrent_per_tenant,
+            failure_threshold=settings.model_breaker_failure_threshold,
+            open_seconds=settings.model_breaker_open_seconds,
+            lease_ttl_seconds=settings.model_call_timeout_seconds + settings.model_lease_ttl_margin_seconds,
+        )
+
     return Adapters(
         llm=pick("llm", lambda: LitellmLLM(config.MODEL_PRICING)),
         chat=pick("chat", lambda: LitellmChat(str(settings.llm_model))),
         embeddings=pick("embeddings", lambda: LitellmEmbeddings(
             str(settings.embed_model), settings.embedding_dim, settings.embed_fallbacks)),
         knowledge=pick("knowledge", knowledge),
-        cache=pick("cache", lambda: RedisCache(settings.redis_dsn, settings.embedding_dim)),
+        cache=cache_adapter,
         objects=pick("objects", lambda: _object_store(settings)),
         events=pick("events", events),
         runtime=pick("runtime", runtime),
@@ -103,4 +122,6 @@ def build_adapters(
         evidence=pick("evidence", evidence_lookup),
         data=pick("data", DisabledDataAccess),
         lineage=pick("lineage", DroppingLineageEmitter),
+        model_catalog=pick("model_catalog", lambda: build_model_catalog(settings, model_pricing=config.MODEL_PRICING)),
+        model_limits=pick("model_limits", model_limits),
     )

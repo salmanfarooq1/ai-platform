@@ -6,9 +6,11 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from adapters.pg_knowledge import PgKnowledgeStore
+from adapters.registry import build_adapters
 from api.agent.graph import _extract_chunks, _extract_llm_usage, should_continue, should_verify, verify_router
 from api.agent.router import _combine_usage
 from api.agent.tools import gateway_from_config, make_list_namespaces_tool, make_retrieve_tool
+from core.settings import get_settings
 from tests.fakes import FakeEmbeddings, FakePool
 from tests.gateway_helpers import FakeRedis, make_ctx, make_principal
 
@@ -33,16 +35,9 @@ class _FailingPool:
 
 
 @pytest.mark.asyncio
-async def test_retrieve_chunks_handles_db_error(monkeypatch):
+async def test_retrieve_chunks_handles_db_error():
     """A DB failure should come back as a JSON error string, not a raised
     exception (a raised exception inside a tool call terminates the agent loop)."""
-    import api.agent.tools as tools_module
-
-    async def fake_embed_query(embeddings, query: str):
-        return await embeddings.embed([query])
-
-    monkeypatch.setattr(tools_module, "embed_query", fake_embed_query)
-
     tool = make_retrieve_tool(ports(PgKnowledgeStore(_FailingPool())))
     result = await tool.ainvoke({"query": "test query", "namespace": "default"}, config=tenant_config())
     data = json.loads(result)
@@ -51,19 +46,16 @@ async def test_retrieve_chunks_handles_db_error(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_retrieve_chunks_refuses_to_run_without_a_tenant(monkeypatch):
+async def test_retrieve_chunks_refuses_to_run_without_a_tenant():
     """The tenant is not a tool argument. No tenant in the run config means the tool does nothing."""
-    import api.agent.tools as tools_module
-
-    async def must_not_embed(embeddings, query: str):
-        raise AssertionError("embedding must not run without a tenant")
-
-    monkeypatch.setattr(tools_module, "embed_query", must_not_embed)
-    tool = make_retrieve_tool(ports(PgKnowledgeStore(FakePool())))
+    embeddings = FakeEmbeddings()
+    adapters = build_adapters(get_settings(), pool=FakePool(), overrides={"embeddings": embeddings})
+    tool = make_retrieve_tool(adapters)
 
     for config in (None, {"configurable": {}}, {"configurable": {"tenant_id": "not-a-uuid"}}):
         data = json.loads(await tool.ainvoke({"query": "q", "namespace": "legal"}, config=config))
         assert data["error"] == "unauthenticated"
+        assert embeddings.calls == []
 
 
 def test_gateway_from_config_reads_only_an_enforcement_context():
@@ -221,6 +213,7 @@ async def test_agent_query_initializes_reducer_lists_and_runs_graph(monkeypatch)
     from api.agent.runner import make_agent_runner
     from core.identity.models import Principal
     from gateway import GatewayRuntime
+    from tests.fakes import FakeModelLimitStore, make_fake_catalog
 
     principal = Principal(id=uuid4(), tenant_id=UUID(TENANT), kind="service", scopes=frozenset({"agent"}))
     app = FastAPI()
@@ -251,6 +244,9 @@ async def test_agent_query_initializes_reducer_lists_and_runs_graph(monkeypatch)
     app.state.agent_graph = FakeGraph()
     app.state.db_pool = FakePool()  # the knowledge-base check reads through it
     app.state.adapters = SimpleNamespace(
+        llm=None,
+        model_catalog=make_fake_catalog(),
+        model_limits=FakeModelLimitStore(),
         knowledge=PgKnowledgeStore(app.state.db_pool),
         runtime=InProcessAgentRuntime(make_agent_runner(lambda: app.state.agent_graph)),
     )
@@ -300,10 +296,13 @@ async def test_agent_graph_end_to_end_with_verify_retry(monkeypatch):
                 return FakeAgentModel()
             return FakeVerifierModel()
 
+        def chat_model_resolved(self, resolved, *, max_tokens, temperature=0.0):
+            return self.chat_model(max_tokens=max_tokens, temperature=temperature)
+
         def cost(self, model, tokens_in, tokens_out):
             return 0.0
 
-    async def fake_generate(llm, question, db_chunks):
+    async def fake_generate(llm, question, db_chunks, **kwargs):
         from api.models.schemas import GeneratedAnswer
         ans = GeneratedAnswer(
             answer="synthetic answer",
@@ -323,8 +322,11 @@ async def test_agent_graph_end_to_end_with_verify_retry(monkeypatch):
         return json.dumps({"chunks": [{"document_id": "doc1", "chunk_index": 0, "content": "fake content"}]})
 
     monkeypatch.setattr(graph_module, "make_retrieve_tool", lambda adapters: fake_retrieve)
-
-    graph = graph_module.build_agent_graph(SimpleNamespace(chat=FakeChat(), llm=None, knowledge=None, embeddings=None))
+    from tests.fakes import FakeModelLimitStore, make_fake_catalog
+    graph = graph_module.build_agent_graph(SimpleNamespace(
+        chat=FakeChat(), llm=None, knowledge=None, embeddings=None, model_catalog=make_fake_catalog(),
+        model_limits=FakeModelLimitStore(),
+    ))
 
     result = await graph.ainvoke({
         "messages": [HumanMessage(content="Hello")],

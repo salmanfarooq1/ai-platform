@@ -95,9 +95,9 @@ Search, agent and MCP retrieval all go through `ModelCaller`, so they gain the s
 
 ## 8. Local runtime
 - `docker-compose.yml`, profile `models`: `ollama` keeps the pinned 0.40.7 image. Settings: `OLLAMA_MAX_LOADED_MODELS=2`, `OLLAMA_NUM_PARALLEL=1`, `OLLAMA_KEEP_ALIVE=10m`, `OLLAMA_CONTEXT_LENGTH=8192`.
-- `ollama-pull` becomes `ollama-init`: it pulls every model lock entry, then runs `scripts/models/check_lock.sh`, which compares the digests from `/api/tags` with the lock and exits non-zero on any difference.
+- `ollama-pull` becomes `ollama-init` and pulls every model lock entry. A pinned Python `ollama-lock-check` service compares `/api/tags` with the lock and exits non-zero on any difference; the host edge waits for this check to succeed.
 - The serving container mounts the model volume read-only after init. Ollama's mutation API (pull, push, create, copy, delete) then fails at the filesystem.
-- Ollama is reached only from the compose network and `127.0.0.1`. `scripts/verify/ollama.sh` proves it runs on an `internal: true` network with no egress.
+- The `ollama` container stays on the `internal: true` network with no egress. The host reaches Ollama through loopback-only `ollama-edge`; `scripts/verify/ollama.sh` checks isolation, reachability, locked models, the lock-check result and the read-only store.
 
 ## 9. Defaults and settings
 - `_LLM_MODEL_DEFAULTS["local"] = "ollama/qwen3:4b-instruct-2507-q4_K_M"`. `public-preview` and `prod` are unchanged (out of scope).
@@ -127,5 +127,5 @@ Unchanged from `requirements.md`.
 
 ## 14. Breaker, concurrency and benchmark
 - One circuit breaker per route fingerprint, stored in Valkey. Open after 5 consecutive provider failures; half-open after 30 seconds with one trial. An open breaker denies `model_breaker_open` before I/O and allows fallback selection to continue.
-- A Valkey lease caps attempts per tenant at `MODEL_MAX_CONCURRENT_PER_TENANT` (default 8). Over-limit attempts deny `model_concurrency_limit` at stage `rate`, before I/O. A lease expires if its process dies.
+- A Valkey lease caps attempts per tenant at `MODEL_MAX_CONCURRENT_PER_TENANT` (default 8). Calls time out after `MODEL_CALL_TIMEOUT_SECONDS` (default 60); abandoned leases live for that timeout plus `MODEL_LEASE_TTL_MARGIN_SECONDS` (default 10). Over-limit attempts deny `model_concurrency_limit` at stage `rate`, before I/O. A lease expires if its process dies.
 - `scripts/bench/decision_path.py` measures decisions per second (serial, 8 and 32 concurrent fake callers) and p50/p95 latency added by enforcement and record writes. A tiny test runs the script. Capture the real run in `evidence/decision-path-bench.txt`; no Sprint 013 target is set.

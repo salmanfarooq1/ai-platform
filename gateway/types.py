@@ -3,11 +3,13 @@ import hashlib
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 from uuid import UUID
 
 from core.identity.models import Principal
 from ports import CachePort, DecisionSink, EventBus
+from ports.errors import ModelDigestMismatch, ModelHostNotAllowed, ResidencyUnknown, UnknownModel, UnpricedModel
+from ports.models import ResolvedModel
 
 if TYPE_CHECKING:
     from gateway.boundary import ExecutionBoundary
@@ -23,6 +25,12 @@ class ActionKind(str, Enum):
     ANALYTICS_READ = "analytics.read"
     AUDIT_READ = "audit.read"
     SYSTEM_READ = "system.read"
+
+
+class ModelLimitOutcome(str, Enum):
+    BREAKER_OPEN = "breaker_open"
+    CONCURRENCY_LIMIT = "concurrency_limit"
+    DEPENDENCY_UNAVAILABLE = "dependency_unavailable"
 
 
 @dataclass(frozen=True)
@@ -45,6 +53,16 @@ class Action:
     # What a tool call passes to the tool. Checked against the policy's `tool_arguments` schema. Like `input_text`
     # it is never stored, logged or shown in `repr`: a deny records the reason code only.
     arguments: Mapping[str, Any] | None = field(default=None, repr=False, compare=False)
+    # Launch 013 carries catalog output into enforcement; the gateway never resolves aliases itself.
+    resolved_model: ResolvedModel | None = field(default=None, repr=False, compare=False)
+    model_failure: UnknownModel | ModelDigestMismatch | ModelHostNotAllowed | UnpricedModel | ResidencyUnknown | None = field(
+        default=None, repr=False, compare=False,
+    )
+    model_role: Literal["primary", "verifier"] = field(default="primary", repr=False, compare=False)
+    model_phase: Literal["admission", "attempt"] = field(default="admission", repr=False, compare=False)
+    model_limit_outcome: ModelLimitOutcome | None = field(default=None, repr=False, compare=False)
+    # caller input is scanned; platform-built prompts and ingest batches are explicitly exempt.
+    input_origin: Literal["caller", "platform"] = field(default="platform", repr=False, compare=False)
 
     @property
     def input_hash(self) -> str | None:
@@ -112,3 +130,4 @@ class EnforcementContext:
     # The run this request belongs to (ADR-0009). Written into every decision the run causes.
     execution_id: UUID | None = None
     required_module: str | None = None
+    guardrail_rule_ids: tuple[str, ...] = ()

@@ -27,8 +27,9 @@ from api.auth import require_any_scope, require_kb, require_scope
 from api.dependencies import adapters_of
 from api.gateway_deps import entry_action, gateway_context
 from api.services.cursor import InvalidCursor, decode_cursor, encode_cursor
+from api.services.model_calls import build_model_caller
 from api.services.run_status import run_status_word
-from config import LLM_CONFIG
+from config import FEATURES, LLM_CONFIG, completion_fallbacks_for_mode
 from core.database import jobs as job_store
 from core.database.jobs import JobRow
 from core.database.tenant import DbConnection, tenant_connection
@@ -36,6 +37,7 @@ from core.identity.models import Principal, Scope
 from core.settings import get_settings
 from gateway import Action, ActionKind, EnforcementContext, estimate_tokens, require
 from ports import RunSpec, RunState
+from ports.models import ModelUse
 
 logger = logging.getLogger("api.agent")
 TIMELINE_CAP = 500
@@ -66,10 +68,19 @@ async def agent_query(
     await require(ctx, entry_action(request.url.path, ActionKind.AGENT_RUN, input_text=payload.question))
     await require_kb(adapters.knowledge, principal, payload.namespace)
     # The model must be allowed before the run starts (each LLM call inside the run is checked again).
-    await require(ctx, Action(
-        ActionKind.MODEL_INVOKE, LLM_CONFIG["model"], estimated_tokens=estimate_tokens(payload.question, AGENT_MAX_TOKENS),
-        input_text=payload.question,
-    ))
+    settings = get_settings()
+    model_caller = build_model_caller(adapters, settings, adapters.llm)
+    await model_caller.admit(
+        ctx, LLM_CONFIG["model"], ModelUse.CHAT, input_text=payload.question,
+        estimated_tokens=estimate_tokens(payload.question, AGENT_MAX_TOKENS),
+    )
+    for alias in (LLM_CONFIG["model"], *completion_fallbacks_for_mode(settings.mode)):
+        await model_caller.admit(ctx, alias, ModelUse.COMPLETION, input_text=payload.question)
+    if payload.enable_verifier and FEATURES.get("verifier_enabled", True):
+        if not settings.verifier_model:  # Settings sets it; an explicit empty value is refused at startup
+            raise RuntimeError("VERIFIER_MODEL is not set")
+        verifier_alias = settings.verifier_model
+        await model_caller.admit(ctx, verifier_alias, ModelUse.CHAT, input_text=payload.question, role="verifier")
 
     # The run goes through the AgentRuntime port (ADR-0009): with the queued runtime it is a job a worker runs.
     try:

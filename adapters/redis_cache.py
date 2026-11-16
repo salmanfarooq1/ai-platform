@@ -49,6 +49,11 @@ class RedisCache:
         self._client: Any = redis.from_url(url, decode_responses=True, max_connections=max_connections)
         self._dim = embedding_dim
 
+    @property
+    def redis_client(self) -> Any:
+        """The shared command client for sibling Redis adapters built by the registry."""
+        return self._client
+
     async def get(self, key: str) -> str | None:
         value: Any = await _guard(lambda: self._client.get(key))
         return None if value is None else str(value)
@@ -85,7 +90,7 @@ class RedisCache:
         await self._client.execute_command(
             "FT.CREATE", SEMANTIC_INDEX,
             "ON", "HASH",
-            "PREFIX", "1", "semcache:",
+            "PREFIX", "1", "cache:semantic:",
             "SCHEMA",
             "embedding", "VECTOR", "HNSW", "6",
                 "TYPE", "FLOAT32",
@@ -95,7 +100,6 @@ class RedisCache:
             "embedding_model", "TAG",
             "namespace", "TAG",
             "retrieval_mode", "TAG",
-            "rerank", "TAG",
             "top_k", "NUMERIC",
             "created_at", "NUMERIC",
         )
@@ -116,7 +120,9 @@ class RedisCache:
         except ResponseError as e:
             if "already exists" in str(e).lower():
                 info = await _guard(lambda: self._client.execute_command("FT.INFO", SEMANTIC_INDEX))
-                if "tenant_id" in str(info) and "embedding_model" in str(info):
+                index_info = str(info)
+                prefix_is_legacy = "prefixes" in index_info and "semcache:" in index_info
+                if "tenant_id" in index_info and "embedding_model" in index_info and not prefix_is_legacy:
                     logger.debug("[cache] Semantic cache index already exists, skipping (idempotent)")
                 else:
                     logger.warning("[cache] Semantic cache index lacks a field the queries filter on; recreating it")
@@ -138,29 +144,25 @@ class RedisCache:
         *,
         embedding_model: str,
         retrieval_mode: str,
-        rerank: bool,
         top_k: int,
         min_similarity: float,
     ) -> SemanticHit | None:
         """KNN search in the Redis vector index for a semantically similar cached response."""
         vec_bytes = _to_bytes(embedding)
 
-        # The KNN pre-filter covers all retrieval config dimensions, so hybrid and bm25 results, or rerank
-        # on and off, never contaminate each other. All pre-filters sit inside ONE paren group so RediSearch
+        # The KNN pre-filter covers all retrieval config dimensions. All pre-filters sit inside ONE paren group so RediSearch
         # parses them as AND-ed conditions before the =>[KNN ...] combinator (separate groups are an implicit
         # OR in Dialect 2). Numeric range for top_k: @top_k:[n n] selects the exact value.
         tenant_tag = str(tenant_id).translate(_TAG_ESCAPE)
         model_tag = (embedding_model or NO_MODEL).translate(_TAG_ESCAPE)
         ns_tag = namespace.translate(_TAG_ESCAPE)
         mode_tag = retrieval_mode.translate(_TAG_ESCAPE)
-        rerank_str = str(int(rerank))
 
         filter_query = (
             f"(@tenant_id:{{{tenant_tag}}}"
             f" @embedding_model:{{{model_tag}}}"
             f" @namespace:{{{ns_tag}}}"
             f" @retrieval_mode:{{{mode_tag}}}"
-            f" @rerank:{{{rerank_str}}}"
             f" @top_k:[{top_k} {top_k}])"
             f"=>[KNN 1 @embedding $vec AS score]"
         )
@@ -200,7 +202,6 @@ class RedisCache:
         query: str,
         embedding_model: str,
         retrieval_mode: str,
-        rerank: bool,
         top_k: int,
         ttl: int,
     ) -> None:
@@ -209,7 +210,7 @@ class RedisCache:
         A pipeline (MULTI/EXEC) makes HSET + EXPIRE atomic. Without it, a crash between the two commands
         leaves a permanent entry with no TTL: a Redis memory leak.
         """
-        key = f"semcache:{uuid4().hex}"
+        key = f"cache:semantic:{uuid4().hex}"
 
         async def run() -> None:
             async with self._client.pipeline(transaction=True) as pipe:
@@ -221,7 +222,6 @@ class RedisCache:
                     "embedding_model": embedding_model or NO_MODEL,
                     "namespace": namespace,
                     "retrieval_mode": retrieval_mode,
-                    "rerank": str(int(rerank)),    # Redis TAG fields must be strings
                     "top_k": str(top_k),           # Redis NUMERIC as string
                     "created_at": int(time.time()),
                 })

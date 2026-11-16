@@ -1,0 +1,15 @@
+Sprint 013 acceptance A8 evidence (register-lock-gates)
+Captured by the Architect 2026-11-16T09:34:51+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 1.5 tests/unit/test_secrets.py::test_ref_syntax: `env:NAME` and `file:/abs/path` parse. `NAME`, `env:`, `file:rel/path`, `vault:x` and `http://x` raise `ValueError`.
+- 2.2 tests/unit/test_models_lock.py::test_lock_licences_are_osi: Every `licence` is on the OSI allowlist used by the 011 licence gate. A temp lock with `licence = "LLAMA-3"` fails the gate function.
+- 2.4 tests/unit/test_provider_register.py::test_register_is_valid: Every provider has `name`, `trains_on_data`, `retention`, `processing_scopes` (each with a description), `sources` (https URLs) and `reviewed` (ISO date).
+- 2.5 tests/unit/test_provider_register.py::test_configured_provider_needs_entry: For each MODE, every provider prefix of configured chat, embedding, fallback and verifier aliases has a register entry. A temp setting `LLM_MODEL=mistral/x` fails with a message naming `mistral`.
+- 3.5 tests/unit/test_register_catalog.py::test_credential_comes_from_ref: The route's `credential` is the configured `SecretRef`; no field holds the secret value.
+
+$ pytest -q -rs tests/unit/test_models_lock.py::test_lock_licences_are_osi tests/unit/test_provider_register.py::test_configured_provider_needs_entry tests/unit/test_provider_register.py::test_register_is_valid tests/unit/test_register_catalog.py::test_credential_comes_from_ref tests/unit/test_secrets.py::test_ref_syntax   # unit (live env unset)
+.....                                                                    [100%]
+5 passed in 2.86s
+exit=0

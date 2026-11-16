@@ -1,75 +1,36 @@
-import asyncio
 import time
-from typing import Any
 
 from fastapi import APIRouter, Request
 
 from api.dependencies import adapters_of
 from api.models.schemas import HealthResponse
 from api.services.cache import cache_health
+from api.services.model_calls import embedding_provenance
 from config import MODE
-from ports import EmbeddingPort
+from core.settings import get_settings
+from ports.models import ModelCatalog, ModelUse
 
 router = APIRouter()
 _start_time = time.time()
 
-# We cache the LLM health check so we don't bombard the LLM every 30 seconds.
-# If the LLM is healthy ("ok"), we trust that for 60 seconds.
-# If it's failing, we check it more frequently (every 10 seconds) so we recover faster.
-_embed_cache: dict[str, Any] = {"status": "unknown", "checked_at": 0.0}
-_EMBED_OK_TTL = 60
-_EMBED_FAIL_TTL = 10
-_embed_lock = asyncio.Lock()
-
-# Ollama unloads its models from memory when idle. If we ping it after an hour of silence,
-# it takes a few seconds to "wake up" and load the model again.
-# We set a retry delay so we don't accidentally report the API as "down" just because it was waking up.
-_EMBED_PROBE_TIMEOUT = 8.0
-_EMBED_COLD_START_RETRY_DELAY = 1.0
-
-
-async def _probe_once(embeddings: EmbeddingPort) -> str:
-    result = await asyncio.wait_for(
-        embeddings.embed(["health check"]),
-        timeout=_EMBED_PROBE_TIMEOUT,
-    )
-    return "ok" if result.vectors else "error: empty response"
-
-
-async def _check_embedding(embeddings: EmbeddingPort) -> str:
-    """Probe the embedding API, with a lock so concurrent /health requests
-    arriving during the stale window do not all fire duplicate probes."""
-    def _fresh(now: float) -> bool:
-        ttl = _EMBED_OK_TTL if _embed_cache["status"] == "ok" else _EMBED_FAIL_TTL
-        return now - _embed_cache["checked_at"] <= ttl
-
-    if _fresh(time.time()):
-        return _embed_cache["status"]
-
-    async with _embed_lock:
-        if _fresh(time.time()):  # another request may have refreshed it while we waited on the lock
-            return _embed_cache["status"]
-
-        try:
-            status = await _probe_once(embeddings)
-        except Exception:
-            await asyncio.sleep(_EMBED_COLD_START_RETRY_DELAY)
-            try:
-                status = await _probe_once(embeddings)
-            except Exception as e:
-                status = f"error: {str(e)}"
-
-        _embed_cache["status"] = status
-        _embed_cache["checked_at"] = time.time()
-
-    return _embed_cache["status"]
+async def _check_model_metadata(catalog: ModelCatalog) -> str:
+    """Read provider/model metadata only; health checks never make inference requests."""
+    try:
+        result = await catalog.probe()
+    except Exception as exc:
+        return f"error: {type(exc).__name__}"
+    return "ok" if result.healthy else f"error: {result.detail}"
 
 
 async def _stale_vectors(request: Request) -> int | None:
     """Chunks embedded with another model or dimension than the active one: search ignores them. None if unknown."""
     adapters = adapters_of(request)
     try:
-        return await adapters.knowledge.count_stale_vectors(adapters.embeddings.active_model, adapters.embeddings.active_dim)
+        settings = get_settings()
+        active = await adapters.model_catalog.resolve(str(settings.embed_model), use=ModelUse.EMBEDDING)
+        return await adapters.knowledge.count_stale_vectors(
+            embedding_provenance(active), settings.embedding_dim,
+        )
     except Exception:
         return None
 
@@ -85,7 +46,7 @@ async def health_check(request: Request) -> HealthResponse:
 
     adapters = adapters_of(request)
     redis_status = await cache_health(adapters.cache)
-    embed_status = await _check_embedding(adapters.embeddings)
+    embed_status = await _check_model_metadata(adapters.model_catalog)
     stale_vectors = await _stale_vectors(request)
     all_ok = all(s == "ok" for s in [db_status, redis_status, embed_status])
 

@@ -34,11 +34,10 @@ Set `DEPLOY_SHAPE` to `single_tenant` or `multi_tenant`. It defaults to `single_
 
 ```bash
 docker build -t gap-platform .                              # API and worker
-docker build --build-arg INCLUDE_RERANK=true -t gap-platform-rerank .
 docker build -f ui/Dockerfile.ui -t gap-ui ui
 ```
 
-- `INCLUDE_RERANK=false` (the default) leaves out the cross-encoder and torch. The image is about 120 MiB. With `true`, the reranker is available and the image is several GB.
+- Search is hybrid keyword + vector retrieval with reciprocal rank fusion and has no reranker.
 - The image's health check calls `/health`.
 
 ## Database roles
@@ -106,10 +105,29 @@ EMBEDDED_WORKERS=1 EMBEDDED_RELAY=true uvicorn api.main:app     # inside the API
 |---|---|
 | `docker compose up -d postgres valkey` | the stores |
 | `docker compose up -d worker` | a worker |
-| `docker compose --profile models up -d --wait ollama`, then `run --rm ollama-pull` | a local Ollama for local embeddings and models |
+| `docker compose --profile models up -d --wait ollama-edge` | a local Ollama endpoint on loopback for local embeddings and models |
 | `docker compose --profile observability up -d` | Prometheus and Grafana with the provisioned dashboard, on localhost |
 | `docker compose --profile streams up -d --wait kafka`, then `run --rm kafka-topics` | Apache Kafka in single-node KRaft mode and its topics |
 | `docker compose --profile lake up -d --wait seaweedfs`, then `run --rm seaweedfs-init` | the local S3 endpoint and the bucket named by `S3_BUCKET` |
+
+### Local CPU models
+
+The `models` profile runs Ollama on the host CPU. Set `DEPLOY_REGION` to the deployment's processing region before starting the API or worker; local model identities and region policy checks use this value. The one-shot `ollama-init` service pulls the three entries in `models.lock`—`ollama/qwen3:4b-instruct-2507-q4_K_M`, `ollama/qwen3:1.7b`, and `ollama/nomic-embed-text:v1.5`. A pinned Python one-shot service checks their digests before `ollama-edge` opens the host endpoint. The serving `ollama` service mounts the initialized model store read-only and stays on the `internal: true` models network, with no egress. The host reaches it through `ollama-edge`, published only on `127.0.0.1:11434`.
+
+```bash
+DEPLOY_REGION=us docker compose --profile models up -d --wait ollama-edge
+scripts/verify/ollama.sh
+```
+
+Measured on a 12-core host with no GPU (Sprint 013 evidence `cpu-profile.txt`; indicative, the host was shared):
+
+| Model | First call after load | Warm call (p50) | Decode speed |
+|---|---|---|---|
+| `qwen3:4b-instruct-2507-q4_K_M` (chat, 64 tokens) | 52 s | 15 s | 3 tokens/s |
+| `qwen3:1.7b` (completion, 64 tokens) | 23 s | 5 s | 8 tokens/s |
+| `nomic-embed-text:v1.5` (8 inputs) | 1.7 s | 0.9 s | n/a |
+
+Peak container memory was about 7 GiB with the 4B model loaded. The CPU profile suits demos and tests. Interactive users need a GPU or a hosted provider.
 
 Kafka, SeaweedFS and Ollama use upstream images pinned by tag and digest in `docker-compose.yml`. The image scan pulls and scans those exact artifacts; review any optional-profile critical findings through `scripts/supply_chain/image-exceptions.txt`. The supply-chain check builds the application and UI images and scans them alongside every digest-pinned Compose image. Existing Ollama stores follow [ollama-upgrade.md](ollama-upgrade.md); Compose keeps the original `ollama_data` and uses `ollama_data_v0407` for the reviewed runtime.
 

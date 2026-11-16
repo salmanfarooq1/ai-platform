@@ -189,13 +189,6 @@ async def run() -> int:
         from scripts.e2e import serve  # the seed the Playwright server uses: one tenant, one key, one document
 
         seeded = serve.seed(owner_dsn)
-        import api.agent.graph
-        import api.agent.tools
-        import api.mcp.tools
-        import api.routers.search
-
-        for module in (api.routers.search, api.agent.tools, api.agent.graph, api.mcp.tools):
-            module.FEATURES["reranker_enabled"] = False
         await serve.ingest_and_close_seed_key(owner_dsn, seeded)
         harness.clean_redis()
 

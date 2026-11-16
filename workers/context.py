@@ -32,13 +32,6 @@ def build_handlers(
     """Build platform handlers and those registered by the enabled modules."""
     active = settings if settings is not None else get_settings()
     active_keyring = keyring if keyring is not None else keyring_from_settings(active)
-    handlers: dict[str, Handler] = {
-        KIND_PURGE: make_purge_handler(
-            adapters.events, active.decision_retention_days, active.purge_batch_size,
-            active_keyring.sign,
-        ),
-        KIND_INGEST: _make_ingest_handler(adapters),
-    }
     deps = JobHandlerDeps(
         adapters=adapters,
         pool=pool,
@@ -50,6 +43,13 @@ def build_handlers(
             active, runner=runner, pool=pool, sandbox_driver=sandbox_driver,
         ),
     )
+    handlers: dict[str, Handler] = {
+        KIND_PURGE: make_purge_handler(
+            adapters.events, active.decision_retention_days, active.purge_batch_size,
+            active_keyring.sign,
+        ),
+        KIND_INGEST: _make_ingest_handler(deps),
+    }
     for module in MODULES:
         if module.name not in active.enabled_module_names:
             continue
@@ -66,10 +66,10 @@ def build_handlers(
     return handlers
 
 
-def _make_ingest_handler(adapters: Adapters) -> Handler:
+def _make_ingest_handler(deps: JobHandlerDeps) -> Handler:
     from workers.handlers.ingest import make_ingest_handler
 
-    return make_ingest_handler(adapters.knowledge, adapters.embeddings, adapters.objects)
+    return make_ingest_handler(deps.adapters, deps.gateway_runtime, deps.settings)
 
 
 def make_worker(

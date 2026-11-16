@@ -19,9 +19,12 @@ from api.agent.response import book_agent_usage
 from api.agent.tools import make_list_namespaces_tool, make_retrieve_tool
 from api.dependencies import adapters_of
 from api.run_authority import run_ctx, run_grant  # noqa: F401 - preserve the shared dependency import path
-from config import LLM_CONFIG
-from gateway import Action, ActionKind, EnforcementContext, GatewayDenied, require
+from api.services.model_calls import ModelCallFailed, build_model_caller
+from config import LLM_CONFIG, completion_fallbacks_for_mode
+from core.settings import get_settings
+from gateway import EnforcementContext, GatewayDenied
 from gateway.estimate import estimate_tokens
+from ports.models import ModelUse
 
 logger = logging.getLogger("api.sandbox")
 router = APIRouter(prefix="/sandbox", tags=["sandbox"])
@@ -109,16 +112,30 @@ async def call_model(
     adapters = adapters_of(request)
     text = "\n".join(m.content for m in body.messages)
     model = LLM_CONFIG["model"]
+    settings = get_settings()
+    caller = build_model_caller(adapters, settings, adapters.llm)
     try:
-        await require(ctx, Action(
-            ActionKind.MODEL_INVOKE, model, estimated_tokens=estimate_tokens(text, body.max_tokens), input_text=text,
-        ))
+        for alias in (model, *completion_fallbacks_for_mode(settings.mode)):
+            await caller.admit(ctx, alias, ModelUse.COMPLETION, input_text=text,
+                               estimated_tokens=estimate_tokens(text, body.max_tokens))
     except GatewayDenied as exc:
         if exc.decision.reason in _FAULTS:
             raise _unavailable() from None
         raise
     try:
-        completion = await adapters.llm.complete([m.model_dump() for m in body.messages], model=model, max_tokens=body.max_tokens)
+        completion = await caller.complete(
+            ctx, model, [m.model_dump() for m in body.messages], max_tokens=body.max_tokens,
+            estimated_tokens=estimate_tokens(text, body.max_tokens), input_text=text, input_origin="caller",
+        )
+    except GatewayDenied as exc:
+        if exc.decision.reason in _FAULTS:
+            raise _unavailable() from None
+        raise
+    except ModelCallFailed as exc:
+        raise HTTPException(
+            status_code=502,
+            detail={"error": "model_failed", "reason": f"Model {exc.alias} failed ({exc.category})"},
+        ) from None
     except Exception:
         logger.error("sandbox model call failed: execution_id=%s", execution_id, exc_info=True)
         raise HTTPException(status_code=502, detail={"error": "model_failed", "reason": "The model call failed"}) from None

@@ -1,0 +1,26 @@
+CPU profile measurement (Architect, 2026-11-10)
+
+Setup
+- Container: ollama, compose project ai-platform, image ollama/ollama:0.40.7@sha256:2e6cc92f...f31b, volume ai-platform_ollama_data_v0407.
+- Host: Docker Desktop on WSL2, 12 CPUs, 15.44 GiB visible to Docker, no GPU. No CPU or memory limit on the container.
+- The container was created on 2026-10-28 from the main checkout compose file. It runs the same image and model store as this sprint; only the mount mode differs (read-write there, read-only here), which does not affect speed.
+- Other containers were running on the same host, so numbers are indicative, not a clean benchmark.
+- Script: GET /api/tags, then per model: unload (keep_alive 0), 1 cold request, 5 warm requests.
+  Chat and completion: temperature 0, seed 1, num_predict 64. Embedding: a batch of 8 short inputs.
+- Peak memory: docker stats sampled about every 2 s during the whole run (98 samples).
+
+Locked digests (models.lock) match /api/tags
+- qwen3:4b-instruct-2507-q4_K_M  0edcdef34593...
+- qwen3:1.7b                     8f68893c685c...
+- nomic-embed-text:v1.5          0a109f422b47...
+
+Results
+- qwen3:4b-instruct-2507-q4_K_M [chat] cold 52.42s | warm p50 15.07s max 22.89s (n=5) | decode 3.0 tok/s (64 tokens)
+- qwen3:1.7b [gen] cold 23.23s | warm p50 5.17s max 8.73s (n=5) | decode 8.1 tok/s (64 tokens)
+- nomic-embed-text:v1.5 [emb] cold 1.67s | warm p50 0.88s max 5.44s (n=5) | batch of 8 inputs
+- Peak container memory: 6.974GiB (CPU up to about 800%, i.e. 8 of 12 cores).
+
+Reading
+- The CPU profile works for demos and tests, not for interactive users: the 4B chat model needs about 15 s for 64 tokens.
+- The first call after a model loads is slow (23 to 52 s). Keep a model warm or expect a long first answer.
+- Plan about 7 GiB of RAM for the models profile with the 4B model loaded.

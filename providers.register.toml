@@ -1,0 +1,64 @@
+version = 1
+
+[provider.ollama]
+name = "Ollama"
+trains_on_data = "unknown"
+retention = "unknown"
+processing_scopes = { local = { description = "Local inference; deployment region is configured separately." }, unknown = { region = "unknown", description = "Processing scope has not been configured or verified." } }
+storage_geography = "unknown"
+sources = ["https://ollama.com/", "https://github.com/ollama/ollama"]
+reviewed = "2026-11-10"
+
+[provider.gemini]
+name = "Google Gemini API"
+trains_on_data = "unknown"
+retention = "unknown"
+processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." } }
+storage_geography = "unknown"
+sources = ["https://ai.google.dev/gemini-api/docs"]
+reviewed = "2026-11-10"
+
+[provider.groq]
+name = "Groq API"
+trains_on_data = "unknown"
+retention = "unknown"
+processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." } }
+storage_geography = "unknown"
+sources = ["https://console.groq.com/docs/overview"]
+reviewed = "2026-11-10"
+
+[provider.azure-openai]
+name = "Azure OpenAI"
+trains_on_data = "unknown"
+retention = "unknown"
+processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." }, "azure:eu-data-zone" = { region = "eu", description = "Azure OpenAI EU data zone." }, "azure:us" = { region = "us", description = "Azure OpenAI US region." } }
+storage_geography = "unknown"
+sources = ["https://learn.microsoft.com/azure/ai-services/openai/overview"]
+reviewed = "2026-11-10"
+
+[provider.bedrock]
+name = "Amazon Bedrock"
+trains_on_data = "unknown"
+retention = "unknown"
+processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." } }
+storage_geography = "unknown"
+sources = ["https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html"]
+reviewed = "2026-11-10"
+
+[provider.anthropic]
+name = "Anthropic API"
+trains_on_data = "unknown"
+retention = "unknown"
+processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." } }
+storage_geography = "unknown"
+sources = ["https://docs.anthropic.com/en/docs/intro"]
+reviewed = "2026-11-10"
+
+[provider.openai-compatible]
+name = "OpenAI-compatible provider"
+trains_on_data = "unknown"
+retention = "unknown"
+processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." } }
+storage_geography = "unknown"
+sources = ["https://platform.openai.com/docs/overview"]
+reviewed = "2026-11-10"

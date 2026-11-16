@@ -116,6 +116,16 @@ Every allow and deny carries one of these codes. The table is generated from `ga
 | `tool_not_allowed` | policy | Tool not allowed | The policy does not list this tool. | `allowed_tools` | 403 `policy_denied` |
 | `tool_argument_not_allowed` | policy | Tool argument not allowed | The arguments of the tool call do not fit the schema the policy sets for this tool. | `tool_arguments` | 403 `policy_denied` |
 | `model_not_allowed` | policy | Model not allowed | The policy does not list this model. | `allowed_models` | 403 `policy_denied` |
+| `model_digest_mismatch` | model | Model identity mismatch | The local model digest does not match its reviewed identity. | none | 403 `policy_denied` |
+| `model_unknown` | model | Model unavailable | The requested model or model use is not available. | none | 403 `policy_denied` |
+| `model_breaker_open` | model | Model route unavailable | This model route is temporarily unavailable after provider failures. | none | 403 `policy_denied` |
+| `model_concurrency_limit` | rate | Model concurrency limit | The tenant has reached its concurrent model call limit. | none | 403 `policy_denied` |
+| `model_host_not_allowed` | model | Model host not allowed | The model endpoint is outside the application host allow-list. | none | 403 `policy_denied` |
+| `model_unpriced` | model | Model price unavailable | The hosted model has no configured price. | none | 403 `policy_denied` |
+| `residency_unknown` | model | Processing region unknown | The model processing region could not be established. | none | 403 `policy_denied` |
+| `region_not_allowed` | policy | Region not allowed | The model processing region is outside the policy pin. | `allowed_regions` | 403 `policy_denied` |
+| `data_use_not_allowed` | policy | Data use not allowed | The provider's data-use terms do not meet the policy pin. | `allowed_data_use` | 403 `policy_denied` |
+| `verifier_must_be_local` | policy | Verifier must be local | The policy requires a local answer verifier. | `verifier_must_be_local` | 403 `policy_denied` |
 | `token_limit` | policy | Token limit exceeded | The call would use more tokens than the policy allows for one request. | `max_tokens_per_request` | 403 `policy_denied` |
 | `query_blocked` | guardrails | Input blocked | The input matched a guardrail: it was too long, held a blocked term, or looked like an injection or data theft attempt. | `blocked_terms` | 400 `query_blocked` |
 | `rate_limit_exceeded` | rate | Rate limit exceeded | This identity sent too many requests in the current window. | none | 429 `rate_limit_exceeded` |

@@ -1,0 +1,25 @@
+Sprint 013 acceptance A12 evidence (verifier)
+Captured by the Architect 2026-11-16T09:36:49+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 4.1 tests/unit/test_reason_catalogue.py: Passes with all new model, data-use, breaker, concurrency and verifier reasons, each with its stage and `policy_field`.
+- 4.5 tests/integration/test_model_records.py::test_model_invoke_record_carries_extension: One real search through the API with the fake provider: every `model.invoke` row has `record_version=2` and `extensions.model` equal to the resolved identity plus route fingerprint; the receipt's `canonical` contains it.
+- 5.10 tests/e2e/test_attempts_e2e.py::test_agent_reasoning_and_verifier_each_recorded: An agent run with the fake chat model that reasons twice and verifies once writes admission rows for both aliases and 3 `model.invoke` attempt rows; the verifier row names its configured identity.
+- 7.2 tests/unit/test_verifier_policy.py::test_verifier_uses_same_policy_checks: Missing verifier refuses startup only when Agents is enabled. Local and hosted verifier attempts use admission, region and data-use checks; `verifier_must_be_local` denies a hosted verifier.
+
+$ pytest -q -rs tests/unit/test_reason_catalogue.py tests/unit/test_verifier_policy.py::test_verifier_uses_same_policy_checks   # unit (live env unset)
+.........................                                                [100%]
+25 passed in 3.34s
+exit=0
+
+$ pytest -q -rs tests/e2e/test_attempts_e2e.py::test_agent_reasoning_and_verifier_each_recorded tests/integration/test_model_records.py::test_model_invoke_record_carries_extension   # integration/e2e/contract (live env set)
+..                                                                       [100%]
+=============================== warnings summary ===============================
+tests/e2e/test_attempts_e2e.py::test_agent_reasoning_and_verifier_each_recorded
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-Iq6y1kNi-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2 passed, 1 warning in 9.36s
+exit=0

@@ -5,6 +5,7 @@ allow-lists and the token cap. A tenant with no active policy gets `DEFAULT_POLI
 scopes grant, over every KB, tool and model, with the platform limits (ADR-0006).
 """
 import asyncio
+import functools
 import json
 import logging
 from typing import TYPE_CHECKING, Any, Literal, Protocol
@@ -15,6 +16,7 @@ from jsonschema.exceptions import SchemaError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from core.database.tenant import tenant_connection
+from core.models_files import load_provider_register
 from gateway.types import Action, ActionKind
 
 if TYPE_CHECKING:
@@ -52,6 +54,17 @@ class PolicyError(ValueError):
     """A stored or submitted policy document is not valid."""
 
 
+@functools.cache
+def _known_region_labels() -> frozenset[str]:
+    """Region labels named in the reviewed provider register (read once per process)."""
+    return frozenset(
+        details["region"]
+        for provider in load_provider_register().values()
+        for details in provider.processing_scopes.values()
+        if details.get("region") not in (None, "unknown")
+    )
+
+
 class PolicyDocument(BaseModel):
     """What a tenant allows. A list that is left out allows nothing (deny by default)."""
 
@@ -60,6 +73,9 @@ class PolicyDocument(BaseModel):
     allowed_models: ResourceList = Field(default_factory=list)
     allowed_tools: ResourceList = Field(default_factory=list)
     allowed_kbs: ResourceList = Field(default_factory=list)
+    allowed_regions: ResourceList = "*"
+    allowed_data_use: ResourceList = "*"
+    verifier_must_be_local: bool = False
     max_tool_calls: int = Field(default=PLATFORM_MAX_TOOL_CALLS, ge=0, le=PLATFORM_MAX_TOOL_CALLS)
     max_tokens_per_request: int = Field(default=PLATFORM_MAX_TOKENS, ge=1, le=PLATFORM_MAX_TOKENS)
     max_query_length: int = Field(default=_PLATFORM_QUERY_LENGTH, ge=1, le=_PLATFORM_QUERY_LENGTH)
@@ -88,7 +104,7 @@ class PolicyDocument(BaseModel):
                 raise ValueError(f"the schema of {name!r} is not a valid JSON Schema: {exc.message}") from exc
         return value
 
-    @field_validator("allowed_models", "allowed_tools", "allowed_kbs")
+    @field_validator("allowed_models", "allowed_tools", "allowed_kbs", "allowed_regions", "allowed_data_use")
     @classmethod
     def _no_blank_or_mixed_wildcard(cls, value: ResourceList) -> ResourceList:
         if value == "*":
@@ -97,6 +113,27 @@ class PolicyDocument(BaseModel):
             raise ValueError("entries must not be blank")
         if "*" in value:
             raise ValueError("use the string \"*\" on its own, not inside a list")
+        return value
+
+    @field_validator("allowed_regions")
+    @classmethod
+    def _known_regions(cls, value: ResourceList) -> ResourceList:
+        if value == "*":
+            return value
+        if not value:
+            raise ValueError("allowed_regions must not be empty")
+        if any(region not in _known_region_labels() for region in value):
+            raise ValueError("allowed_regions must use known region labels")
+        return value
+
+    @field_validator("allowed_data_use")
+    @classmethod
+    def _known_data_use(cls, value: ResourceList) -> ResourceList:
+        if value != "*":
+            if not value:
+                raise ValueError("allowed_data_use must not be empty")
+            if any(use not in {"training", "no_training"} for use in value):
+                raise ValueError("allowed_data_use values must be training or no_training")
         return value
 
     @field_validator("blocked_terms")
@@ -188,6 +225,15 @@ class PythonPolicyEngine:
                 return PolicyVerdict(allowed=False, reason="model_not_allowed")
             if action.estimated_tokens is not None and action.estimated_tokens > boundary.max_tokens:
                 return PolicyVerdict(allowed=False, reason="token_limit")
+            model = action.resolved_model
+            if model is not None:
+                if boundary.verifier_must_be_local and action.model_role == "verifier" and model.identity.source != "local":
+                    return PolicyVerdict(allowed=False, reason="verifier_must_be_local")
+                region = model.identity.region
+                if "*" not in boundary.allowed_regions and region not in boundary.allowed_regions:
+                    return PolicyVerdict(allowed=False, reason="region_not_allowed")
+                if "*" not in boundary.allowed_data_use and model.data_use not in boundary.allowed_data_use:
+                    return PolicyVerdict(allowed=False, reason="data_use_not_allowed")
         return PolicyVerdict(allowed=True)
 
 

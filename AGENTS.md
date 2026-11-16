@@ -41,7 +41,7 @@ Operating files: `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `CONTRIBUTING.md`, `CHANG
 ## Commands
 Verified in a Linux container (see `planning/QUESTIONS.md` Q1 for WSL).
 ```bash
-poetry install --with dev                 # setup (add --with rerank for the cross-encoder)
+poetry install --with dev                 # setup
 docker compose up -d postgres valkey       # local stack (also creates the app login role gap_app; ollama is optional)
 scripts/setup_db.sh                       # create rag_platform if missing, migrate as the owner role, grant gap_app
 poetry run alembic upgrade head           # migrate only (runs as MIGRATION_DATABASE_URL, falls back to DATABASE_URL)

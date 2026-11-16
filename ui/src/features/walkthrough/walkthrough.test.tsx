@@ -11,7 +11,7 @@ import { firstRunPath, walkthroughSeen } from './walkthrough-store'
 import WalkthroughPage, { ALLOWED_QUESTION, BLOCKED_QUESTION } from './walkthrough-page'
 
 const config = (namespaces: Record<string, string>) => ({
-  namespaces, confidence_floor: 0.5, max_query_length: 1000, daily_token_budget: 1, rate_limit_rpm: 1, rate_limit_window_seconds: 60, reranker_enabled: false,
+  namespaces, confidence_floor: 0.5, max_query_length: 1000, daily_token_budget: 1, rate_limit_rpm: 1, rate_limit_window_seconds: 60,
   agent_defaults: { max_iterations: 1, enable_verifier: false, max_verify_retries: 0 },
 })
 

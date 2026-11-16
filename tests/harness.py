@@ -4,7 +4,7 @@ clear reason (never passed silently).
 
 Redis note: the platform's semantic cache uses a RediSearch index, and RediSearch can
 only create indexes in database 0. So tests use database 0 and delete only the keys the
-platform itself writes (rl:, budget:, cache:, semcache:). If database 0 holds any other
+platform itself writes (rl:, budget:, cache:). If database 0 holds any other
 key, the tests refuse to touch it and skip, so a developer's real data is never removed.
 """
 import os
@@ -22,7 +22,7 @@ ADMIN_URL = os.getenv("TEST_DATABASE_ADMIN_URL", "postgresql://postgres:postgres
 REDIS_URL = os.getenv("TEST_REDIS_URL", "redis://localhost:6379/0")
 APP_ROLE = "gap_app"
 APP_PASSWORD = os.getenv("APP_DB_PASSWORD", "gap_app")
-PLATFORM_REDIS_PREFIXES = ("rl:", "budget:", "cost:", "cache:", "semcache:", "websess:", "rtd:")
+PLATFORM_REDIS_PREFIXES = ("rl:", "budget:", "cost:", "cache:", "websess:", "rtd:")
 ROOT = Path(__file__).resolve().parent.parent
 
 

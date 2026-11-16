@@ -53,7 +53,6 @@ export interface PlatformConfig {
   daily_token_budget: number
   rate_limit_rpm: number
   rate_limit_window_seconds: number
-  reranker_enabled: boolean
   agent_defaults: { max_iterations: number; enable_verifier: boolean; max_verify_retries: number }
 }
 

@@ -15,22 +15,15 @@ def restore_config(monkeypatch):
 
 
 @pytest.mark.unit
-def test_public_preview_disables_reranker(monkeypatch):
+def test_public_preview_configuration(monkeypatch):
     monkeypatch.setenv("MODE", "public-preview")
     # Sprint 002: hosted modes require explicit DSNs (no placeholder defaults).
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
     monkeypatch.setenv("REDIS_URL", "redis://cache.example.test:6379")
     monkeypatch.setenv("RECEIPT_SIGNING_KEY", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")  # hosted modes need one (Sprint 008)
+    monkeypatch.setenv("DEPLOY_REGION", "us")
     reloaded = importlib.reload(config)
-    assert reloaded.FEATURES["reranker_enabled"] is False
     assert reloaded.DATABASE_CONFIG["pool_size"] == 5
-
-
-@pytest.mark.unit
-def test_local_enables_reranker(monkeypatch):
-    monkeypatch.setenv("MODE", "local")
-    reloaded = importlib.reload(config)
-    assert reloaded.FEATURES["reranker_enabled"] is True
 
 
 @pytest.mark.unit
@@ -52,8 +45,8 @@ def test_real_env_beats_env_local(tmp_path, monkeypatch):
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("mode,enabled", [("local", True), ("public-preview", False)])
-def test_modes_with_env_local_present(tmp_path, monkeypatch, mode, enabled):
+@pytest.mark.parametrize("mode", ["local", "public-preview"])
+def test_modes_with_env_local_present(tmp_path, monkeypatch, mode):
     monkeypatch.delenv("LOG_LEVEL", raising=False)
     monkeypatch.chdir(tmp_path)
     (tmp_path / ".env.local").write_text("LOG_LEVEL=DEBUG\n")
@@ -61,4 +54,5 @@ def test_modes_with_env_local_present(tmp_path, monkeypatch, mode, enabled):
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
     monkeypatch.setenv("REDIS_URL", "redis://cache.example.test:6379")
     monkeypatch.setenv("RECEIPT_SIGNING_KEY", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
-    assert importlib.reload(config).FEATURES["reranker_enabled"] is enabled
+    monkeypatch.setenv("DEPLOY_REGION", "us")
+    assert importlib.reload(config).MODE == mode

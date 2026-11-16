@@ -1,0 +1,14 @@
+Sprint 013 acceptance A10 evidence (health)
+Captured by the Architect 2026-11-16T09:36:02+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 1.8 tests/contracts/test_model_catalog_contract.py: Runs on `FakeCatalog`, `LockCatalog` (with a temp lock and a stub Ollama `/api/tags`) and `RegisterCatalog` (with a temp register): resolve a known alias for an allowed use returns a `ResolvedModel` whose `use` equals the request; an unknown alias raises `UnknownModel`; a use not in the entry raises `UnknownModel`; `probe()` makes zero inference requests.
+- 6.3 tests/integration/test_vector_identity.py::test_two_digests_never_mix: Ingest with digest A, switch the lock to digest B for the same alias, ingest again. Search under B returns only B rows; the exact and semantic caches miss for B; `/v1/health` reports the A rows as stale.
+- 6.4 tests/integration/test_vector_identity.py::test_rows_without_digest_are_stale: A row written with the old provenance format counts as stale and is not returned by search.
+- 7.1 tests/integration/test_health.py::test_health_makes_no_inference: `GET /health` and `GET /v1/health` with `RecordingProvider`: zero requests; response keys unchanged from the 012 snapshot; `stale_vectors` present.
+
+$ pytest -q -rs tests/contracts/test_model_catalog_contract.py tests/integration/test_health.py::test_health_makes_no_inference tests/integration/test_vector_identity.py::test_rows_without_digest_are_stale tests/integration/test_vector_identity.py::test_two_digests_never_mix   # integration/e2e/contract (live env set)
+......                                                                   [100%]
+6 passed in 16.42s
+exit=0

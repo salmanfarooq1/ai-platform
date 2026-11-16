@@ -1,0 +1,12 @@
+$ source /home/ubuntu/ai-platform/scratch/env012.sh && unset DATABASE_URL REDIS_URL TEST_DATABASE_ADMIN_URL MIGRATION_DATABASE_URL TEST_REDIS_URL && "$POETRY" run pytest -m unit -q tests/unit/test_compose.py tests/unit/test_check_lock_script.py
+..............                                                           [100%]
+14 passed in 3.47s
+$ "$POETRY" run ruff check tests/unit/test_compose.py
+All checks passed!
+$ bash -n scripts/verify/ollama.sh
+PASS: bash syntax
+$ test -x scripts/verify/ollama.sh
+PASS: executable bit
+$ git diff --check
+warning: Empty last update token.
+PASS: diff whitespace

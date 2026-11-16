@@ -12,7 +12,7 @@ _ENV_NAMES = [
     "MODE", "DATABASE_URL", "REDIS_URL", "LLM_MODEL", "EMBED_MODEL", "EMBEDDING_DIM",
     "RATE_LIMIT_REQUESTS", "CONFIDENCE_FLOOR", "OTEL_EXPORTER_OTLP_ENDPOINT", "RECEIPT_SIGNING_KEY",
     "RECEIPT_PREVIOUS_PUBLIC_KEYS", "METRICS_PUBLIC", "DECISION_RETENTION_DAYS",
-    "MIGRATION_DATABASE_URL", "ENABLED_MODULES", "DEPLOY_SHAPE",
+    "MIGRATION_DATABASE_URL", "ENABLED_MODULES", "DEPLOY_SHAPE", "DEPLOY_REGION", "VERIFIER_MODEL",
 ]
 # A well-formed Ed25519 key text (32 zero bytes, base64). Only the shape matters in these tests.
 KEY_TEXT = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
@@ -30,14 +30,18 @@ def clean_env(monkeypatch, tmp_path):
     importlib.reload(config)
 
 
-def test_local_defaults_use_compose_services():
+def test_local_defaults():
     s = get_settings()
+    from config import completion_fallbacks_for_mode
+
     assert s.mode == "local"
     assert s.database_dsn == LOCAL_DATABASE_URL
     assert s.redis_dsn == LOCAL_REDIS_URL
-    assert s.llm_model == "gemini/gemini-3.5-flash-lite"
+    assert s.llm_model == "ollama/qwen3:4b-instruct-2507-q4_K_M"
+    assert s.verifier_model == s.llm_model
     assert s.embed_model == "ollama/nomic-embed-text"
     assert s.embedding_dim == 768
+    assert completion_fallbacks_for_mode("local") == ["ollama/qwen3:1.7b"]
 
 
 @pytest.mark.parametrize("mode", ["public-preview", "prod"])
@@ -60,6 +64,7 @@ def test_hosted_mode_with_both_urls_loads(monkeypatch):
     monkeypatch.setenv("MODE", "prod")
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
     monkeypatch.setenv("REDIS_URL", "rediss://r.example.test:6380")
+    monkeypatch.setenv("DEPLOY_REGION", "us")
     monkeypatch.setenv("RECEIPT_SIGNING_KEY", KEY_TEXT)
     s = get_settings()
     assert s.database_dsn == "postgresql://u:p@db.example.test/app"
@@ -97,6 +102,7 @@ def test_trust_defaults(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@db.example.test/app")
     monkeypatch.setenv("REDIS_URL", "rediss://r.example.test:6380")
     monkeypatch.setenv("RECEIPT_SIGNING_KEY", KEY_TEXT)
+    monkeypatch.setenv("DEPLOY_REGION", "us")
     assert get_settings().metrics_public is False  # closed by default outside local
     get_settings.cache_clear()
     monkeypatch.setenv("METRICS_PUBLIC", "true")
@@ -137,6 +143,30 @@ def test_env_overrides_are_applied(monkeypatch):
     s = get_settings()
     assert s.llm_model == "ollama/llama3"
     assert s.rate_limit_requests == 3
+
+
+def test_deploy_region_is_required_for_hosted_models_and_validated(monkeypatch):
+    monkeypatch.setenv("LLM_MODEL", "azure/gpt-4o")
+    with pytest.raises(SettingsError, match="DEPLOY_REGION must be set"):
+        get_settings()
+    get_settings.cache_clear()
+    monkeypatch.setenv("DEPLOY_REGION", "eu")
+    assert get_settings().deploy_region == "eu"
+    get_settings.cache_clear()
+    monkeypatch.setenv("DEPLOY_REGION", "eu-west-1")
+    with pytest.raises(SettingsError, match="region name in providers.register.toml"):
+        get_settings()
+
+
+def test_verifier_defaults_and_is_required_only_for_agents(monkeypatch):
+    assert get_settings().verifier_model == get_settings().llm_model
+    get_settings.cache_clear()
+    monkeypatch.setenv("VERIFIER_MODEL", "")
+    with pytest.raises(SettingsError, match="VERIFIER_MODEL must be set when the Agents module is enabled"):
+        get_settings()
+    get_settings.cache_clear()
+    monkeypatch.setenv("ENABLED_MODULES", "gateway,data")
+    assert Settings(enabled_modules="gateway,data", verifier_model="", mode="local", _env_file=None).verifier_model == ""
 
 
 def test_otel_endpoint_is_optional(monkeypatch):

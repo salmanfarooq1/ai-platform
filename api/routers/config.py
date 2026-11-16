@@ -15,7 +15,6 @@ from api.dependencies import adapters_of
 from api.gateway_deps import entry_action, gateway_context
 from config import (
     DEFAULT_DAILY_TOKEN_BUDGET,
-    FEATURES,
     GUARDRAIL_CONFIG,
     RATE_LIMIT_REQUESTS,
     RATE_LIMIT_WINDOW_SECONDS,
@@ -48,7 +47,7 @@ async def get_config(
         "daily_token_budget": DEFAULT_DAILY_TOKEN_BUDGET,
         "rate_limit_rpm": RATE_LIMIT_REQUESTS,
         "rate_limit_window_seconds": RATE_LIMIT_WINDOW_SECONDS,
-        "reranker_enabled": FEATURES["reranker_enabled"],
+        "reranker_enabled": False,  # Deprecated compatibility field; always false.
         "agent_defaults": {
             "max_iterations": 6,
             "enable_verifier": True,

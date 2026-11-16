@@ -40,7 +40,7 @@ function CheckRow({ name, ok, detail }: { name: string; ok: boolean; detail: str
 }
 
 interface SignedText {
-  decision?: Record<string, string | number | null>
+  decision?: Record<string, unknown>
   chain?: { position?: number; prev_hash?: string; row_hash?: string }
 }
 
@@ -58,7 +58,23 @@ const SIGNED_ROWS: Array<[string, string]> = [
   ['id', 'Decision id'], ['request_id', 'Request id'], ['action', 'Action'], ['resource', 'Resource'], ['outcome', 'Outcome'],
   ['stage', 'Stage'], ['reason', 'Reason'], ['policy_version', 'Policy version'], ['input_sha256', 'Input SHA-256'],
   ['created_at', 'Recorded'],
+  ['extensions.model', 'Model'], ['extensions.stages', 'Stages'],
 ]
+
+function signedValue(decision: Record<string, unknown> | undefined, field: string): unknown {
+  if (!decision) return undefined
+  if (field === 'extensions.model' || field === 'extensions.stages') {
+    const extensions = decision.extensions
+    return typeof extensions === 'object' && extensions !== null && !Array.isArray(extensions)
+      ? (extensions as Record<string, unknown>)[field.slice('extensions.'.length)]
+      : undefined
+  }
+  return decision[field]
+}
+
+function displaySignedValue(value: unknown): string {
+  return typeof value === 'string' ? value : JSON.stringify(value)
+}
 
 /** The outcome of one verification. Only a valid receipt has a "Verified" list, and it shows the signed text's own
  * values. Names, the tenant label and the trace are context: the signature does not cover them. */
@@ -89,8 +105,8 @@ export function VerificationResult({ outcome }: { outcome: Outcome }) {
         <section aria-label="Verified" data-testid="verified-fields">
           <h4 className="mb-2 text-callout font-semibold">Verified</h4>
           <dl className="grid grid-cols-[120px_minmax(0,1fr)] gap-x-3 gap-y-2 text-footnote">
-            {SIGNED_ROWS.filter(([k]) => signed.decision && signed.decision[k] !== undefined && signed.decision[k] !== null).map(([k, label]) => (
-              <div key={k} className="contents"><dt className="text-fg-secondary">{label}</dt><dd><CopyValue value={String(signed.decision?.[k])} label={label.toLowerCase()} /></dd></div>
+            {SIGNED_ROWS.filter(([k]) => signedValue(signed.decision, k) !== undefined && signedValue(signed.decision, k) !== null).map(([k, label]) => (
+              <div key={k} className="contents"><dt className="text-fg-secondary">{label}</dt><dd><CopyValue value={displaySignedValue(signedValue(signed.decision, k))} label={label.toLowerCase()} /></dd></div>
             ))}
             <dt className="text-fg-secondary">Chain position</dt>
             <dd data-testid="chain-position" className="mono tabular">{signed.chain?.position}</dd>

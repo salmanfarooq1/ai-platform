@@ -9,6 +9,8 @@ from ports.evidence import DecisionSink, EvidenceLookup
 from ports.knowledge import KnowledgeStore
 from ports.lineage import LineageEmitter
 from ports.llm import ChatModelPort, LLMPort
+from ports.model_limits import ModelLimitStore
+from ports.models import ModelCatalog
 from ports.objects import ObjectStore
 from ports.runtime import AgentRuntime
 
@@ -27,3 +29,5 @@ class Adapters:
     evidence: EvidenceLookup
     data: DataAccess
     lineage: LineageEmitter
+    model_catalog: ModelCatalog
+    model_limits: ModelLimitStore

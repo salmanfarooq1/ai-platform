@@ -5,12 +5,16 @@ deny with reason `internal_error` (fail closed). Every call writes one decision 
 """
 import logging
 from collections.abc import Awaitable, Callable, Sequence
+from time import perf_counter_ns
+from typing import TypeAlias
 
 from gateway.module_stage import module_check
 from gateway.stages import (
+    INPUT_GUARDED_KINDS,
     boundary_check,
     cost_cap,
     guardrails_input,
+    model_check,
     policy,
     principal_present,
     rate_limit,
@@ -18,34 +22,63 @@ from gateway.stages import (
 )
 from gateway.types import Action, ActionKind, Decision, EnforcementContext, GatewayDenied
 from ports import DecisionEntry
+from ports.evidence import JsonValue
 
 logger = logging.getLogger("gateway.enforce")
 
 Stage = Callable[[EnforcementContext, Action], Awaitable[Decision | None]]
+StageTrace: TypeAlias = dict[str, dict[str, str | int | None]]
 
 STAGES: Sequence[tuple[str, Stage]] = (
     ("principal", principal_present),
     ("module", module_check),
     ("boundary", boundary_check),
+    ("model", model_check),
     ("policy", policy),
     ("guardrails", guardrails_input),
     ("rate", rate_limit),
     ("budget", token_budget),
     ("cost", cost_cap),
 )
+_STAGE_ORDER = tuple(name for name, _ in STAGES)
 
 
-async def _decide(ctx: EnforcementContext, action: Action, stages: Sequence[tuple[str, Stage]]) -> Decision:
+def _stage_applies(name: str, action: Action) -> bool:
+    if name == "model":
+        return action.kind is ActionKind.MODEL_INVOKE
+    if name == "guardrails":
+        return (action.kind in INPUT_GUARDED_KINDS and action.input_text is not None) or (
+            action.kind is ActionKind.MODEL_INVOKE and action.input_text is not None and action.input_origin == "caller"
+        )
+    if name == "rate":
+        return action.rate or (
+            action.kind is ActionKind.MODEL_INVOKE and action.model_limit_outcome is not None
+        )
+    if name in {"budget", "cost"}:
+        return action.budget
+    return True
+
+
+async def _decide(
+    ctx: EnforcementContext, action: Action, stages: Sequence[tuple[str, Stage]], trace: StageTrace | None = None,
+) -> Decision:
     for name, stage in stages:
+        started = perf_counter_ns()
         try:
             decision = await stage(ctx, action)
         except Exception:
             logger.error("stage %s failed, denying (action=%s)", name, action.kind.value, exc_info=True)
-            return Decision(
+            decision = Decision(
                 allowed=False, stage=name, reason="internal_error", policy_version=_version(ctx),
                 message="The request could not be authorised.",
             )
+        elapsed = max(0, (perf_counter_ns() - started) // 1000)
+        if trace is not None:
+            trace[name] = {"status": "denied" if decision is not None else "passed", "reason": decision.reason if decision else None, "duration_us": elapsed}
         if decision is not None:
+            if trace is not None:
+                for later in _STAGE_ORDER[_STAGE_ORDER.index(name) + 1:]:
+                    trace[later] = {"status": "not_reached", "reason": None, "duration_us": 0}
             return decision
     return Decision(allowed=True, stage="allow", reason="allowed", policy_version=_version(ctx))
 
@@ -57,21 +90,39 @@ def _version(ctx: EnforcementContext) -> int | None:
         return None
 
 
-async def enforce(ctx: EnforcementContext, action: Action, stages: Sequence[tuple[str, Stage]] = STAGES) -> Decision:
+async def enforce(ctx: EnforcementContext, action: Action, stages: Sequence[tuple[str, Stage]] | None = None) -> Decision:
     """Decide, record, return. Never raises: a failure anywhere is a deny.
 
     The record is part of the decision: if the row cannot be written, an allow becomes a deny
     `decision_unrecorded` (no action without a record). A deny stays a deny.
     """
     try:
-        decision = await _decide(ctx, action, stages)
+        ctx.guardrail_rule_ids = ()
+        chosen = STAGES if stages is None else stages
+        trace: StageTrace = {}
+        applicable = [(name, stage) for name, stage in chosen if _stage_applies(name, action)]
+        for name, _ in STAGES:
+            if not _stage_applies(name, action):
+                trace[name] = {"status": "skipped", "reason": None, "duration_us": 0}
+        decision = await _decide(ctx, action, applicable, trace)
+        for name in _STAGE_ORDER:
+            trace.setdefault(name, {"status": "skipped", "reason": None, "duration_us": 0})
+        stage_extension: list[dict[str, JsonValue]] = [
+            {"stage": name, **trace[name]} for name in _STAGE_ORDER
+        ]
     except Exception:
         logger.error("enforce failed, denying (action=%s)", action.kind.value, exc_info=True)
         decision = Decision(allowed=False, stage="enforce", reason="internal_error", message="The request could not be authorised.")
+        stage_extension = [{"stage": name, "status": "not_reached", "reason": None, "duration_us": 0} for name in _STAGE_ORDER]
     try:
         tenant_id = ctx.principal.tenant_id if ctx.principal else ctx.boundary.tenant_id
         if tenant_id is None:
             raise RuntimeError("no tenant to record the decision under")
+        extensions: dict[str, JsonValue] = {"stages": tuple(stage_extension)}
+        if action.kind is ActionKind.MODEL_INVOKE and action.resolved_model is not None:
+            extensions["model"] = action.resolved_model.as_extension(action.model_phase)
+        if ctx.guardrail_rule_ids:
+            extensions["guardrails"] = {"input_rule_ids": ctx.guardrail_rule_ids}
         entry = DecisionEntry(
             tenant_id=tenant_id,
             principal_id=ctx.principal.id if ctx.principal else None,
@@ -85,7 +136,7 @@ async def enforce(ctx: EnforcementContext, action: Action, stages: Sequence[tupl
             policy_version=decision.policy_version,
             input_sha256=action.input_hash,
             execution_id=ctx.execution_id,
-            extensions={},
+            extensions=extensions,
         )
         await ctx.runtime.decisions.write(entry, ctx.runtime.events)
     except Exception:

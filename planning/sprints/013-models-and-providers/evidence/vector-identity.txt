@@ -1,0 +1,12 @@
+Sprint 013 acceptance A11 evidence (vector-identity)
+Captured by the Architect 2026-11-16T09:36:31+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 6.3 tests/integration/test_vector_identity.py::test_two_digests_never_mix: Ingest with digest A, switch the lock to digest B for the same alias, ingest again. Search under B returns only B rows; the exact and semantic caches miss for B; `/v1/health` reports the A rows as stale.
+- 6.4 tests/integration/test_vector_identity.py::test_rows_without_digest_are_stale: A row written with the old provenance format counts as stale and is not returned by search.
+
+$ pytest -q -rs tests/integration/test_vector_identity.py::test_rows_without_digest_are_stale tests/integration/test_vector_identity.py::test_two_digests_never_mix   # integration/e2e/contract (live env set)
+..                                                                       [100%]
+2 passed in 2.26s
+exit=0

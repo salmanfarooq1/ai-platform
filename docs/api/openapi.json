@@ -2096,7 +2096,8 @@
           },
           "rerank": {
             "default": true,
-            "description": "Whether to apply cross-encoder reranking after retrieval",
+            "deprecated": true,
+            "description": "Deprecated and ignored",
             "title": "Rerank",
             "type": "boolean"
           },
@@ -2158,6 +2159,8 @@
           },
           "rerank_applied": {
             "default": false,
+            "deprecated": true,
+            "description": "Deprecated compatibility field; always false",
             "title": "Rerank Applied",
             "type": "boolean"
           },

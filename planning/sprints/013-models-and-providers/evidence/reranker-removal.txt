@@ -1,0 +1,125 @@
+
+$ env -u DATABASE_URL -u REDIS_URL -u TEST_DATABASE_ADMIN_URL -u MIGRATION_DATABASE_URL -u TEST_REDIS_URL $POETRY run pytest -m unit -q
+    warnings.warn(
+
+tests/unit/test_search_route.py::test_search_request_defaults
+  /home/ubuntu/ai-platform-sprints/013-models-and-providers/tests/unit/test_search_route.py:14: DeprecationWarning: deprecated
+    assert req.rerank is True
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1043 passed, 908 deselected, 2 warnings in 108.68s (0:01:48)
+EXIT CODE: 0
+
+$  $POETRY run ruff check .
+43 |             print(f"Failed to fetch. Response text:\n{response.text[:500]}")
+   -             
+44 +
+45 |     except Exception as e:
+   |
+
+Found 468 errors.
+[*] 408 fixable with the `--fix` option (41 hidden fixes can be enabled with the `--unsafe-fixes` option).
+EXIT CODE: 1
+
+$ $POETRY run mypy
+Success: no issues found in 172 source files
+EXIT CODE: 0
+
+$ $POETRY run lint-imports
+ports imports no platform package KEPT
+core imports no module package KEPT
+evidence does not import gateway, api or workers KEPT
+gateway does not import evidence, api or workers KEPT
+agent and MCP code do not import evidence KEPT
+agent and MCP code use only the gateway package API KEPT
+
+Contracts: 6 kept, 0 broken.
+EXIT CODE: 0
+
+$ $POETRY run python scripts/docs/generate.py --check
+EXIT CODE: 0
+
+$ $POETRY run pytest tests/integration/test_cache_tenancy.py tests/integration/test_vector_identity.py tests/e2e/test_search_flow.py -q
+................                                                         [100%]
+=============================== warnings summary ===============================
+tests/e2e/test_search_flow.py::test_ingest_search_documents_feedback_analytics
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-Iq6y1kNi-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+16 passed, 1 warning in 24.65s
+EXIT CODE: 0
+
+$ grep -rni rerank api adapters ports ui/src Dockerfile docs AGENTS.md
+api/routers/config.py:50:        "reranker_enabled": False,  # Deprecated compatibility field; always false.
+api/routers/search.py:190:        rerank_applied=False,
+api/models/schemas.py:32:    rerank: bool = Field(
+api/models/schemas.py:50:    rerank_applied: bool = Field(default=False, description="Deprecated compatibility field; always false", deprecated=True)
+ui/src/api/schema.d.ts:1582:             * Rerank
+ui/src/api/schema.d.ts:1587:            rerank: boolean;
+ui/src/api/schema.d.ts:1619:             * Rerank Applied
+ui/src/api/schema.d.ts:1624:            rerank_applied: boolean;
+ui/src/features/ask/ask-page.test.tsx:49:      data: { answer: 'Found it.', confidence: 0.9, flagged: false, needs_clarification: false, query: 'How long?', rerank_applied: false, results: [], total_results: 0 },
+ui/src/features/ask/ask-page.test.tsx:65:      data: { answer: 'Found it.', confidence: 0.9, flagged: false, needs_clarification: false, query: 'How long?', rerank_applied: false, results: [], total_results: 0 },
+ui/src/features/ask/ask-page.test.tsx:141:      data: { answer: 'Found it.', confidence: 0.9, flagged: false, needs_clarification: false, query: 'How long?', rerank_applied: false, results: [], total_results: 0 },
+ui/src/features/ask/ask.test.tsx:28:    rerank_applied: false, total_results: 1,
+docs/deployment.md:40:- Search is hybrid keyword + vector retrieval with reciprocal rank fusion and has no reranker.
+docs/architecture.md:113:- **Search** is hybrid keyword + vector retrieval, merged with reciprocal rank fusion, and has no reranker. The names `bm25_only` and `bm25_score` remain compatibility values; this ranking is not true BM25. Answers carry citations and a confidence level, and a low score refuses to answer.
+docs/api/openapi.json:2097:          "rerank": {
+docs/api/openapi.json:2101:            "title": "Rerank",
+docs/api/openapi.json:2160:          "rerank_applied": {
+docs/api/openapi.json:2164:            "title": "Rerank Applied",
+EXIT CODE: 0
+
+$ node --version
+v22.23.4
+
+$ npm run typecheck
+
+> ai-platform-ui@2.0.0 typecheck
+> tsc --noEmit
+
+EXIT CODE: 0
+
+$ npm run lint
+
+> ai-platform-ui@2.0.0 lint
+> eslint . --max-warnings 0
+
+EXIT CODE: 0
+
+$ npm test -- --run
+   ✓ eslint colour guard > a real colour fails: const s = { color: '#fff' } 3230ms
+ ✓ src/app/nav.test.ts (2 tests) 5ms
+
+ Test Files  32 passed (32)
+      Tests  224 passed (224)
+   Start at  11:48:51
+   Duration  65.57s (transform 9.13s, setup 28.70s, collect 303.79s, tests 118.71s, environment 169.03s, prepare 23.33s)
+
+EXIT CODE: 0
+
+$ grep -rni rerank api adapters ports ui/src Dockerfile docs AGENTS.md
+api/routers/config.py:50:        "reranker_enabled": False,  # Deprecated compatibility field; always false.
+api/routers/search.py:190:        rerank_applied=False,
+api/models/schemas.py:32:    rerank: bool = Field(
+api/models/schemas.py:50:    rerank_applied: bool = Field(default=False, description="Deprecated compatibility field; always false", deprecated=True)
+ui/src/api/schema.d.ts:1582:             * Rerank
+ui/src/api/schema.d.ts:1587:            rerank: boolean;
+ui/src/api/schema.d.ts:1619:             * Rerank Applied
+ui/src/api/schema.d.ts:1624:            rerank_applied: boolean;
+ui/src/features/ask/ask-page.test.tsx:49:      data: { answer: 'Found it.', confidence: 0.9, flagged: false, needs_clarification: false, query: 'How long?', rerank_applied: false, results: [], total_results: 0 },
+ui/src/features/ask/ask-page.test.tsx:65:      data: { answer: 'Found it.', confidence: 0.9, flagged: false, needs_clarification: false, query: 'How long?', rerank_applied: false, results: [], total_results: 0 },
+ui/src/features/ask/ask-page.test.tsx:141:      data: { answer: 'Found it.', confidence: 0.9, flagged: false, needs_clarification: false, query: 'How long?', rerank_applied: false, results: [], total_results: 0 },
+ui/src/features/ask/ask.test.tsx:28:    rerank_applied: false, total_results: 1,
+docs/deployment.md:40:- Search is hybrid keyword + vector retrieval with reciprocal rank fusion and has no reranker.
+docs/architecture.md:113:- **Search** is hybrid keyword + vector retrieval, merged with reciprocal rank fusion, and has no reranker. The names `bm25_only` and `bm25_score` remain compatibility values; this ranking is not true BM25. Answers carry citations and a confidence level, and a low score refuses to answer.
+docs/api/openapi.json:2097:          "rerank": {
+docs/api/openapi.json:2101:            "title": "Rerank",
+docs/api/openapi.json:2160:          "rerank_applied": {
+docs/api/openapi.json:2164:            "title": "Rerank Applied",
+EXIT CODE: 0
+
+$ git diff --check
+warning: Empty last update token.
+EXIT CODE: 0

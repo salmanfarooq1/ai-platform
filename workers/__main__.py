@@ -10,11 +10,13 @@ import logging
 import signal
 import sys
 
+import config
 from adapters.registry import build_adapters
 from api.observability import setup_logging
 from config import MODEL_PRICING
 from core.database.pool import create_pool
 from core.identity.deploy_shape import assert_deploy_shape
+from core.models_files import validate_model_files
 from core.pricing import check_priced
 from core.settings import get_settings
 from gateway import GatewayRuntime
@@ -28,6 +30,7 @@ logger = logging.getLogger("workers")
 async def main(concurrency: int | None, relay_enabled: bool) -> int:
     settings = get_settings()
     slots = concurrency or settings.worker_concurrency
+    validate_model_files(settings, completion_fallbacks=tuple(config.completion_fallbacks_for_mode(settings.mode)))
     check_priced(MODEL_PRICING, settings.mode, [settings.llm_model, settings.embed_model, *settings.embed_fallbacks])
     pool = await create_pool()
     await assert_deploy_shape(pool, settings.deploy_shape)

@@ -32,7 +32,6 @@ def cache_key(
     namespace: str,
     top_k: int,
     retrieval_mode: str = "hybrid",
-    rerank: bool = True,
     embedding_model: str = "",
 ) -> str:
     """
@@ -56,7 +55,7 @@ def cache_key(
     - Old entries expire naturally via TTL (1 hour). Zero-downtime schema migration.
     """
     normalized = query.lower().strip()
-    raw = f"{tenant_id}:{normalized}:{namespace}:{top_k}:{retrieval_mode}:{rerank}"
+    raw = f"{tenant_id}:{normalized}:{namespace}:{top_k}:{retrieval_mode}"
     if embedding_model:
         raw += f":{embedding_model}"
     hash_hex = hashlib.sha256(raw.encode()).hexdigest()
@@ -72,7 +71,6 @@ async def get_cached_response(
     namespace: str,
     top_k: int,
     retrieval_mode: str = "hybrid",
-    rerank: bool = True,
     embedding_model: str = "",
 ) -> dict | None:
     """
@@ -81,7 +79,7 @@ async def get_cached_response(
     Returns parsed dict on HIT, None on MISS or any cache failure.
     """
     try:
-        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, rerank, embedding_model)
+        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, embedding_model)
         value = await cache.get(key)
 
         if value is None:
@@ -103,7 +101,6 @@ async def set_cached_response(
     top_k: int,
     response: dict,
     retrieval_mode: str = "hybrid",
-    rerank: bool = True,
     embedding_model: str = "",
 ) -> None:
     """
@@ -112,7 +109,7 @@ async def set_cached_response(
     One atomic SET with a TTL (see `RedisCache.set`).
     """
     try:
-        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, rerank, embedding_model)
+        key = cache_key(tenant_id, query, namespace, top_k, retrieval_mode, embedding_model)
         await cache.set(key, json.dumps(response), ttl=CACHE_TTL_SECONDS)
 
     except CacheUnavailable as e:
@@ -131,7 +128,6 @@ async def semantic_cache_lookup(
     namespace: str,
     query_embedding: list[float],
     retrieval_mode: str = "hybrid",
-    rerank: bool = True,
     top_k: int = 5,
     embedding_model: str = "",
 ) -> dict | None:
@@ -139,7 +135,7 @@ async def semantic_cache_lookup(
     try:
         hit = await cache.semantic_lookup(
             tenant_id, namespace, query_embedding,
-            embedding_model=embedding_model, retrieval_mode=retrieval_mode, rerank=rerank, top_k=top_k,
+            embedding_model=embedding_model, retrieval_mode=retrieval_mode, top_k=top_k,
             min_similarity=SEMANTIC_CACHE_THRESHOLD,
         )
         if hit is None:
@@ -161,7 +157,6 @@ async def semantic_cache_store(
     query_embedding: list[float],
     response: dict,
     retrieval_mode: str = "hybrid",
-    rerank: bool = True,
     top_k: int = 5,
     embedding_model: str = "",
 ) -> None:
@@ -169,7 +164,7 @@ async def semantic_cache_store(
     try:
         await cache.semantic_store(
             tenant_id, namespace, query_embedding, json.dumps(response),
-            query=query, embedding_model=embedding_model, retrieval_mode=retrieval_mode, rerank=rerank,
+            query=query, embedding_model=embedding_model, retrieval_mode=retrieval_mode,
             top_k=top_k, ttl=SEMANTIC_CACHE_TTL,
         )
 

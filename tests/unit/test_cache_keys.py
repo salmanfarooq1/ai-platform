@@ -19,12 +19,11 @@ def test_tenant_given_as_string_or_uuid_is_the_same_key():
 
 
 def test_every_other_part_still_changes_the_key():
-    base = cache_key(A, "q", "legal", 5, "hybrid", True)
-    assert base != cache_key(A, "q2", "legal", 5, "hybrid", True)
-    assert base != cache_key(A, "q", "kyc_aml", 5, "hybrid", True)
-    assert base != cache_key(A, "q", "legal", 6, "hybrid", True)
-    assert base != cache_key(A, "q", "legal", 5, "bm25_only", True)
-    assert base != cache_key(A, "q", "legal", 5, "hybrid", False)
+    base = cache_key(A, "q", "legal", 5, "hybrid")
+    assert base != cache_key(A, "q2", "legal", 5, "hybrid")
+    assert base != cache_key(A, "q", "kyc_aml", 5, "hybrid")
+    assert base != cache_key(A, "q", "legal", 6, "hybrid")
+    assert base != cache_key(A, "q", "legal", 5, "bm25_only")
 
 
 def test_key_is_versioned_and_does_not_leak_the_tenant_or_the_query():

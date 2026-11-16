@@ -6,7 +6,7 @@ from ports.bundle import Adapters
 from ports.cache import CachePort, CacheUnavailable, SemanticHit
 from ports.data_access import DataAccess, DataResult
 from ports.embeddings import EmbeddingDimensionMismatch, EmbeddingError, EmbeddingPort, Embeddings
-from ports.errors import ModuleDisabled
+from ports.errors import ModelDigestMismatch, ModuleDisabled, ResidencyUnknown, UnknownModel, UnpricedModel
 from ports.events import (
     DECISION_RECORDED,
     DECISIONS_PURGED,
@@ -21,6 +21,8 @@ from ports.evidence import DecisionEntry, DecisionSink, EvidenceLookup, Evidence
 from ports.knowledge import ChunkRow, DocumentRecord, Hit, KnowledgeStore
 from ports.lineage import LineageEmitter
 from ports.llm import ChatModel, ChatModelPort, Completion, LLMPort
+from ports.model_limits import BreakerState, ModelLimitStore
+from ports.models import CatalogHealth, ModelCatalog, ModelIdentity, ModelRoute, ModelUse, ResolvedModel, SecretRef
 from ports.objects import ObjectNotFound, ObjectStore
 from ports.runtime import (
     AgentRuntime,
@@ -47,10 +49,12 @@ from ports.sandbox import (
 )
 
 __all__ = [
-    "Adapters", "AgentRuntime", "DataAccess", "DataResult", "DecisionEntry", "DecisionSink", "EvidenceLookup", "EvidenceRef", "JsonValue", "LineageEmitter", "ModuleDisabled", "CachePort", "CacheUnavailable", "ChatModel", "ChatModelPort", "ChunkRow", "CloudEvent",
+    "Adapters", "AgentRuntime", "DataAccess", "DataResult", "DecisionEntry", "DecisionSink", "EvidenceLookup", "EvidenceRef", "JsonValue", "LineageEmitter", "ModuleDisabled", "ModelDigestMismatch", "ResidencyUnknown", "UnknownModel", "UnpricedModel", "CachePort", "CacheUnavailable", "ChatModel", "ChatModelPort", "ChunkRow", "CloudEvent",
     "Completion", "DECISION_RECORDED", "DECISIONS_PURGED", "DocumentRecord", "EVENT_CATALOGUE", "EventInfo", "INGEST_COMPLETED", "EmbeddingDimensionMismatch", "EmbeddingError",
     "EmbeddingPort", "Embeddings", "EventBus", "Handler", "Hit", "KnowledgeStore", "LLMPort", "ObjectNotFound",
     "ObjectStore", "RunHandle", "RunNotFound", "RunResult", "RunSpec", "RunState", "RunStatus", "Runner", "SemanticHit",
     "EgressRule", "SandboxDriver", "SandboxEvent", "SandboxEventKind", "SandboxExit", "SandboxLaunch", "SandboxLimits",
     "SandboxMessage", "SandboxOutput", "SandboxPolicy", "SandboxUnavailable",
+    "CatalogHealth", "ModelCatalog", "ModelIdentity", "ModelRoute", "ModelUse", "ResolvedModel", "SecretRef",
+    "BreakerState", "ModelLimitStore",
 ]

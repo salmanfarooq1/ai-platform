@@ -110,7 +110,7 @@ The data model is defined by the migrations in `migrations/versions/` ([ADR-0003
 
 ## 8. Retrieval and the agent
 
-- **Search** is hybrid: keyword search (Postgres full-text `ts_rank`) and pgvector similarity, merged with reciprocal rank fusion. An optional cross-encoder reranker runs where the image includes it. The names `bm25_only` and `bm25_score` remain compatibility values; this ranking is not true BM25. Answers carry citations and a confidence level, and a low score refuses to answer.
+- **Search** is hybrid keyword + vector retrieval, merged with reciprocal rank fusion, and has no reranker. The names `bm25_only` and `bm25_score` remain compatibility values; this ranking is not true BM25. Answers carry citations and a confidence level, and a low score refuses to answer.
 - **Caches:** an exact-match cache and a semantic cache in Valkey, keyed by tenant and embedding model.
 - **The agent** is a LangGraph graph with a retrieve tool and a verify loop. Every model and tool call goes through the gateway, with the run's boundary.
 - **MCP:** the same tools and resources are served over MCP (`/v1/mcp/sse`, `/v1/mcp/messages`), with the same credential and the same gateway.

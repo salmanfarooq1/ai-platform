@@ -18,9 +18,12 @@ from langgraph.prebuilt import ToolNode
 
 from api.agent.models import AGENT_MAX_TOKENS, VERIFIER_MAX_TOKENS
 from api.agent.tools import gateway_from_config, make_list_namespaces_tool, make_retrieve_tool
+from api.services.model_calls import ModelCaller, build_model_caller
 from config import FEATURES, LLM_CONFIG
-from gateway import Action, ActionKind, EnforcementContext, enforce, estimate_tokens
+from core.settings import get_settings
+from gateway import GatewayDenied, estimate_tokens
 from ports import Adapters
+from ports.models import ResolvedModel
 
 logger = logging.getLogger("api.agent.graph")
 
@@ -129,27 +132,17 @@ def _estimate_tokens(messages: list[BaseMessage], max_completion_tokens: int) ->
     return estimate_tokens("".join(str(m.content) for m in messages), max_completion_tokens)
 
 
-async def _model_allowed(config: RunnableConfig | None, texts: str, estimated_tokens: int) -> bool:
-    """`enforce(model.invoke)` for one LLM call of this run. A deny ends the loop (`ctx.halted`)."""
-    ctx: EnforcementContext | None = gateway_from_config(config)
-    if ctx is None:
-        return False  # no gateway context: fail closed
-    decision = await enforce(ctx, Action(
-        ActionKind.MODEL_INVOKE, LLM_CONFIG["model"], estimated_tokens=estimated_tokens, input_text=texts,
-    ))
-    if not decision.allowed:
-        ctx.halted = decision.reason
-    return decision.allowed
-
-
-def make_synthesize_node(adapters: Adapters):
+def make_synthesize_node(adapters: Adapters, model_caller: ModelCaller | None = None):
     async def node(state: AgentState, config: RunnableConfig | None = None) -> dict:
-        return await synthesize_node(state, config, adapters)
+        return await synthesize_node(state, config, adapters, model_caller)
 
     return node
 
 
-async def synthesize_node(state: AgentState, config: RunnableConfig | None, adapters: Adapters) -> dict:
+async def synthesize_node(
+    state: AgentState, config: RunnableConfig | None, adapters: Adapters,
+    model_caller: ModelCaller | None = None,
+) -> dict:
     """
     Deterministic finalizer. Always runs once the agent stops requesting
     tools. Not an LLM tool call, so there is no path where a query returns
@@ -182,7 +175,7 @@ async def synthesize_node(state: AgentState, config: RunnableConfig | None, adap
         for c in chunks
     ]
 
-    if not await _model_allowed(config, question, estimate_tokens(question, SYNTHESIS_MAX_TOKENS)):
+    if model_caller is None:
         return {
             "final_answer": "I could not generate an answer: the model call is not permitted within your limits.",
             "confidence": 0.0,
@@ -191,7 +184,16 @@ async def synthesize_node(state: AgentState, config: RunnableConfig | None, adap
             "synthesis_usage": [{"prompt_tokens": 0, "completion_tokens": 0, "cost": 0.0}],
         }
 
-    answer_obj, usage_dict = await generate_with_routing(adapters.llm, question, db_chunks)
+    ctx = gateway_from_config(config)
+    if ctx is None:
+        return {
+            "final_answer": "I could not generate an answer: the model call is not permitted within your limits.",
+            "confidence": 0.0, "citations": [], "model_used": "",
+            "synthesis_usage": [{"prompt_tokens": 0, "completion_tokens": 0, "cost": 0.0}],
+        }
+    answer_obj, usage_dict = await generate_with_routing(
+        adapters.llm, question, db_chunks, caller=model_caller, ctx=ctx,
+    )
 
     return {
         "final_answer": answer_obj.answer,
@@ -242,10 +244,18 @@ def verify_router(state: AgentState) -> str:
 
 
 def build_agent_graph(adapters: Adapters):
+    settings = get_settings()
+    model_caller = build_model_caller(adapters, settings, adapters.llm)
     tools = [make_retrieve_tool(adapters), make_list_namespaces_tool(adapters)]
-    reasoning_model = adapters.chat.chat_model(max_tokens=AGENT_MAX_TOKENS).bind_tools(tools)
-    verifier_model = adapters.chat.chat_model(max_tokens=VERIFIER_MAX_TOKENS)
     cost_of = adapters.chat.cost
+
+    async def invoke_chat(resolved: ResolvedModel, messages: list[BaseMessage], *, max_tokens: int,
+                          bind_tools: bool = False) -> BaseMessage:
+        chat_adapter = adapters.chat
+        chat_model = chat_adapter.chat_model_resolved(resolved, max_tokens=max_tokens)
+        if bind_tools:
+            chat_model = chat_model.bind_tools(tools)
+        return await chat_model.ainvoke(messages)
 
     async def agent_node(state: AgentState, config: RunnableConfig) -> dict:
         messages = [SystemMessage(content=AGENT_SYSTEM_PROMPT), *state["messages"]]
@@ -254,22 +264,19 @@ def build_agent_graph(adapters: Adapters):
             # A denial already ended this run: no more model calls, go straight to synthesis.
             return {"messages": [AIMessage(content="")], "reasoning_usage": []}
         question = next((str(m.content) for m in state["messages"] if isinstance(m, HumanMessage)), "")
-        if not await _model_allowed(config, question, _estimate_tokens(messages, AGENT_MAX_TOKENS)):
+        if ctx is None:
             return {"messages": [AIMessage(content="")], "reasoning_usage": []}
-        response = None
-        for attempt in range(3):
-            try:
-                response = await reasoning_model.ainvoke(messages)
-                break
-            except Exception as e:
-                if "rate_limit" in str(e).lower() and attempt < 2:
-                    import asyncio
-                    logger.warning("[agent] reasoning_model rate limited, waiting 35s (attempt %d)...", attempt + 1)
-                    await asyncio.sleep(35)
-                else:
-                    raise
-        if response is None:  # unreachable: the loop either breaks with a response or raises
-            raise RuntimeError("Reasoning model returned no response")
+        try:
+            if model_caller is None:
+                return {"messages": [AIMessage(content="")], "reasoning_usage": []}
+            response = await model_caller.chat(
+                ctx, LLM_CONFIG["model"], messages,
+                lambda resolved, msgs: invoke_chat(resolved, msgs, max_tokens=AGENT_MAX_TOKENS, bind_tools=True),
+                estimated_tokens=_estimate_tokens(messages, AGENT_MAX_TOKENS), input_text=question,
+            )
+        except GatewayDenied as exc:
+            ctx.halted = getattr(getattr(exc, "decision", None), "reason", "model_call_failed")
+            return {"messages": [AIMessage(content="")], "reasoning_usage": []}
         return {
             "messages": [response],
             "reasoning_usage": [_extract_llm_usage(response, cost_of)],
@@ -286,15 +293,30 @@ def build_agent_graph(adapters: Adapters):
             return {"verification_notes": f"Verification skipped: the run was cut short by policy ({ctx.halted}).",
                     "verifier_usage": []}
         draft = str(state.get("final_answer", ""))
-        if not await _model_allowed(config, draft, estimate_tokens(draft + excerpts, VERIFIER_MAX_TOKENS)):
-            return {"verification_notes": "Verification skipped: the model call is not permitted within your limits.",
-                    "verifier_usage": []}
-        response = await verifier_model.ainvoke([
+        if ctx is None:
+            return {"verification_notes": "Verification skipped: model access is unavailable.", "verifier_usage": []}
+        messages = [
             SystemMessage(content=VERIFIER_SYSTEM_PROMPT),
             HumanMessage(
                 content=f"Draft answer:\n{state['final_answer']}\n\nSource chunks:\n{excerpts}"
             ),
-        ])
+        ]
+        if not settings.verifier_model:  # Settings sets it; an explicit empty value is refused at startup
+            raise RuntimeError("VERIFIER_MODEL is not set")
+        verifier_alias = settings.verifier_model
+        try:
+            if model_caller is None:
+                return {"verification_notes": "Verification skipped: model access is unavailable.", "verifier_usage": []}
+            response = await model_caller.chat(
+                ctx, verifier_alias, messages,
+                lambda resolved, msgs: invoke_chat(resolved, msgs, max_tokens=VERIFIER_MAX_TOKENS),
+                estimated_tokens=estimate_tokens(draft + excerpts, VERIFIER_MAX_TOKENS),
+                input_origin="platform",
+                role="verifier",
+            )
+        except GatewayDenied as exc:
+            ctx.halted = getattr(getattr(exc, "decision", None), "reason", "model_call_failed")
+            return {"verification_notes": "Verification skipped: model access is not permitted.", "verifier_usage": []}
 
         try:
             parsed = json.loads(str(response.content))
@@ -322,7 +344,7 @@ def build_agent_graph(adapters: Adapters):
     graph = StateGraph(AgentState)
     graph.add_node("agent", agent_node)
     graph.add_node("tools", ToolNode(tools))
-    graph.add_node("synthesize", make_synthesize_node(adapters))
+    graph.add_node("synthesize", make_synthesize_node(adapters, model_caller))
     graph.add_node("verify", verify_node_inner)
 
     graph.set_entry_point("agent")

@@ -1,0 +1,4 @@
+# A22 hosted smoke, 2026-11-16T14:18:50+05:00, Architect, no *_CREDENTIAL_REF set
+$ scripts/verify/hosted.sh
+SKIP: no hosted credential references are configured.
+exit 0

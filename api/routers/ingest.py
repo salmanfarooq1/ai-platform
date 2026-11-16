@@ -7,14 +7,12 @@ from api.auth import require_kb, require_scope
 from api.dependencies import adapters_of
 from api.gateway_deps import entry_action, gateway_context
 from api.models.jobs import JobAccepted
-from config import LLM_CONFIG
 from core.database import jobs
 from core.database.tenant import tenant_connection
 from core.identity.models import Principal, Scope
 from core.ingestion.lifecycle import compute_content_hash
 from core.settings import get_settings
-from gateway import Action, ActionKind, EnforcementContext, require
-from gateway.estimate import estimate_tokens
+from gateway import ActionKind, EnforcementContext, require
 
 logger = logging.getLogger("api.ingest")
 router = APIRouter()
@@ -46,8 +44,6 @@ async def ingest(
     tenant_id = principal.tenant_id
     adapters = adapters_of(request)
     await require(ctx, entry_action(request.url.path, ActionKind.KB_WRITE, namespace))
-    # Ingest embeds the file's chunks: the embedding model must be allowed too.
-    await require(ctx, Action(ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens("")))
     await require_kb(adapters.knowledge, principal, namespace)
     if idempotency_key is not None and not _KEY.match(idempotency_key):
         raise HTTPException(status_code=400, detail={"error": "invalid_idempotency_key", "reason": "The Idempotency-Key must be 1 to 200 printable characters"})

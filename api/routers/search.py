@@ -13,13 +13,15 @@ from api.services.cache import (
     semantic_cache_store,
     set_cached_response,
 )
-from api.services.embedding import embed_query
 from api.services.llm import GENERATION_MAX_TOKENS, generate_with_routing
+from api.services.model_calls import ModelCallFailed, build_model_caller
 from api.services.retriever import RetrieverConfig, retrieve
-from config import FEATURES, LLM_CONFIG
+from config import LLM_CONFIG, completion_fallbacks_for_mode
 from core.identity.models import Principal, Scope
-from gateway import Action, ActionKind, EnforcementContext, check_output, require
+from core.settings import get_settings
+from gateway import ActionKind, EnforcementContext, GatewayDenied, check_output, require
 from gateway.estimate import estimate_tokens
+from ports.models import ModelUse
 
 router = APIRouter()
 
@@ -33,7 +35,6 @@ async def search(
 ):
     tenant_id = principal.tenant_id
     adapters = adapters_of(request)
-    embed_model = adapters.embeddings.active_model
 
     # Step -1: the gateway decides first: scope and policy for this KB, input guardrails, rate limit and
     # daily token budget. A denial is a 403 (policy), 400 (guardrail), 429 (limits) or 503 (Redis down).
@@ -43,28 +44,43 @@ async def search(
     await require_kb(adapters.knowledge, principal, payload.namespace)
 
     # Step 0: the model that will answer must be allowed, checked before any cache, embedding or LLM I/O.
-    await require(ctx, Action(
-        ActionKind.MODEL_INVOKE, LLM_CONFIG["model"], estimated_tokens=estimate_tokens(payload.query, GENERATION_MAX_TOKENS),
-        input_text=payload.query,
-    ))
-    # The embedding model too (it embeds the query for the cache lookup and the vector search).
-    await require(ctx, Action(
-        ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens(payload.query),
-        input_text=payload.query,
-    ))
+    settings = get_settings()
+    completion_caller = build_model_caller(adapters, settings, adapters.llm)
+    embedding_caller = build_model_caller(adapters, settings, adapters.embeddings)
+    # Admit both model families before query embedding, which is the first possible inference.
+    completion_aliases = (LLM_CONFIG["model"], *completion_fallbacks_for_mode(settings.mode))
+    for alias in completion_aliases:
+        await completion_caller.admit(
+            ctx, alias, ModelUse.COMPLETION, input_text=payload.query,
+            estimated_tokens=estimate_tokens(payload.query, GENERATION_MAX_TOKENS),
+        )
+    embedding_aliases = (str(settings.embed_model), *settings.embed_fallbacks)
+    await embedding_caller.admit(
+        ctx, embedding_aliases[0], ModelUse.EMBEDDING, input_text=payload.query,
+    )
+    for alias in embedding_aliases[1:]:
+        await embedding_caller.admit(ctx, alias, ModelUse.EMBEDDING, input_text=payload.query)
 
-    # Step 0.5: Compute effective rerank flag
-    # If the environment disables reranking (e.g., the 512MB free tier), force it to False.
-    # We must compute this BEFORE cache lookups so we don't cache non-reranked results
-    # under a rerank=True key.
-    effective_rerank = payload.rerank and FEATURES["reranker_enabled"]
+    # Embed before cache lookup so cache identity comes from the resolved model that answered.
+    # Embedding is needed for both semantic cache lookup AND vector search.
+    # Compute once, use twice but don't embed twice.
+    try:
+        query_embedding = await embedding_caller.embed(
+            ctx, str(settings.embed_model), [payload.query], input_text=payload.query,
+        )
+    except GatewayDenied:
+        raise
+    except Exception as exc:
+        if isinstance(exc, ModelCallFailed) and exc.category == "dimension_mismatch":
+            raise HTTPException(status_code=502, detail=(
+                f"Embedding provider {exc.alias} refused: expected width {exc.expected_dim}, "
+                f"returned width {exc.returned_dim}"
+            )) from None
+        raise HTTPException(status_code=502, detail="Embedding provider failed") from None
 
-    # Step 1: Exact cache check
-    # Cheapest possible check with pure Redis GET, no embedding, no DB, no LLM.
-    # If this hits, we're done in ~1ms.
     exact_hit = await get_cached_response(
         adapters.cache, tenant_id, payload.query, payload.namespace, payload.top_k,
-        payload.retrieval_mode, effective_rerank, embed_model,
+        payload.retrieval_mode, query_embedding.model,
     )
     if exact_hit:
         request.state.usage = {"cache": "exact_hit", "total_cost": 0.0, "namespace": payload.namespace}
@@ -74,20 +90,13 @@ async def search(
         response.headers["X-Cost-USD"] = "0.000000"
         return response
 
-    # Step 2: Embed query
-    # Embedding is needed for both semantic cache lookup AND vector search.
-    # Compute once, use twice but don't embed twice.
-    try:
-        query_embedding = await embed_query(adapters.embeddings, payload.query)
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Embedding provider failed: {str(e)}")
-
     # Step 3: Semantic cache check
     # Slightly more expensive than exact (vector search in Redis) but still
     # orders of magnitude cheaper than a DB + LLM round trip.
     semantic_hit = await semantic_cache_lookup(
         adapters.cache, tenant_id, payload.query, payload.namespace, query_embedding.vectors[0],
-        payload.retrieval_mode, effective_rerank, payload.top_k, query_embedding.model,
+        payload.retrieval_mode, payload.top_k,
+        query_embedding.model,
     )
     if semantic_hit:
         request.state.usage = {"cache": "semantic_hit", "total_cost": 0.0, "namespace": payload.namespace}
@@ -101,7 +110,6 @@ async def search(
     retriever_config = RetrieverConfig(
         top_k=payload.top_k,
         mode=payload.retrieval_mode,
-        rerank=effective_rerank,
     )
 
     raw_chunks = await retrieve(
@@ -131,10 +139,6 @@ async def search(
             # even when 0.0 is a legitimate value. rrf_score is always a small
             # positive float (1/(k+rank)), so it can never be zero in practice,
             # but this pattern is correct for any future score field.
-            # NOTE: rerank_score is intentionally excluded here. It is a raw
-            # cross-encoder logit (unbounded, not in [0,1]) — not comparable
-            # to vector_score or rrf_score. Displaying it as a confidence
-            # percentage would be misleading. Reranking only changes ordering.
             "score": (
                 c["rrf_score"]    if "rrf_score"    in c else
                 c["vector_score"] if "vector_score" in c else
@@ -147,9 +151,13 @@ async def search(
 
     try:
         # generate_with_routing classifies complexity, picks model, generates
-        answer_obj, usage_dict = await generate_with_routing(adapters.llm, payload.query, db_chunks)
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"LLM provider failed: {str(e)}")
+        answer_obj, usage_dict = await generate_with_routing(
+            adapters.llm, payload.query, db_chunks, caller=completion_caller, ctx=ctx,
+        )
+    except GatewayDenied:
+        raise
+    except Exception:
+        raise HTTPException(status_code=502, detail="LLM provider failed") from None
 
     # Attach usage to request state — FinOps middleware reads this
     request.state.usage = usage_dict
@@ -175,7 +183,7 @@ async def search(
         answer=answer_obj.answer,
         confidence=answer_obj.confidence,
         needs_clarification=getattr(answer_obj, "needs_clarification", False),
-        rerank_applied=effective_rerank,
+        rerank_applied=False,
         results=results,
         total_results=len(results),
         flagged=output_guard.flagged,
@@ -188,11 +196,12 @@ async def search(
     # a warning internally and swallow the error.
     asyncio.create_task(set_cached_response(
         adapters.cache, tenant_id, payload.query, payload.namespace, payload.top_k, response_data,
-        payload.retrieval_mode, effective_rerank, embed_model,
+        payload.retrieval_mode, query_embedding.model,
     ))
     asyncio.create_task(semantic_cache_store(
         adapters.cache, tenant_id, payload.query, payload.namespace, query_embedding.vectors[0], response_data,
-        payload.retrieval_mode, effective_rerank, payload.top_k, query_embedding.model,
+        payload.retrieval_mode, payload.top_k,
+        query_embedding.model,
     ))
 
     response = JSONResponse(content=response_data)

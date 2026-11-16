@@ -24,7 +24,7 @@ LOCAL_MIGRATION_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/ra
 LOCAL_REDIS_URL = "redis://localhost:6379"
 
 _LLM_MODEL_DEFAULTS: dict[str, str] = {
-    "local": "gemini/gemini-3.5-flash-lite",
+    "local": "ollama/qwen3:4b-instruct-2507-q4_K_M",
     "public-preview": "gemini/gemini-3.5-flash-lite",
     "prod": "azure/gpt-4o",
 }
@@ -87,7 +87,15 @@ class Settings(BaseSettings):
 
     llm_model: str | None = Field(
         default=None,
-        description="LiteLLM model name for completions. Default by mode: `gemini/gemini-3.5-flash-lite` (local, public-preview), `azure/gpt-4o` (prod).",
+        description="LiteLLM model name for chat and completions. Default by mode: `ollama/qwen3:4b-instruct-2507-q4_K_M` (local), `gemini/gemini-3.5-flash-lite` (public-preview), `azure/gpt-4o` (prod).",
+    )
+    verifier_model: str | None = Field(
+        default=None,
+        description="Model alias used for agent answer verification. Defaults to the mode's chat model; a hosted verifier is subject to the same model policy checks.",
+    )
+    deploy_region: str | None = Field(
+        default=None,
+        description="Deployment processing region used as the identity region for local models and required when a hosted model provider is configured.",
     )
     embed_model: str | None = Field(
         default=None,
@@ -100,6 +108,25 @@ class Settings(BaseSettings):
     embed_fallback_models: str | None = Field(
         default=None,
         description="Comma separated embedding models tried in order when the primary fails. A model whose vectors have another width than `EMBEDDING_DIM` is refused. Empty means no fallback.",
+    )
+    model_allowed_hosts: str = Field(
+        default="",
+        description="Comma-separated hosted model endpoint hostnames allowed by the application. This application check is not network egress control; network egress control is Sprint 016.",
+    )
+    model_max_concurrent_per_tenant: int = Field(
+        default=8, ge=1, description="Maximum simultaneous model calls allowed per tenant.",
+    )
+    model_call_timeout_seconds: float = Field(
+        default=60.0, gt=0, description="Maximum duration of one physical model call, in seconds.",
+    )
+    model_lease_ttl_margin_seconds: float = Field(
+        default=10.0, gt=0, description="Extra life for a model concurrency lease beyond the call timeout, in seconds.",
+    )
+    model_breaker_failure_threshold: int = Field(
+        default=5, ge=1, description="Consecutive provider failures before a model route breaker opens.",
+    )
+    model_breaker_open_seconds: float = Field(
+        default=30.0, gt=0, description="Seconds a model route breaker stays open before one trial is allowed.",
     )
 
     object_store: Literal["local", "s3"] = Field(
@@ -373,6 +400,35 @@ class Settings(BaseSettings):
             self.metrics_public = self.mode == "local"
         self.llm_model = self.llm_model or _LLM_MODEL_DEFAULTS[self.mode]
         self.embed_model = self.embed_model or _EMBED_MODEL_DEFAULTS[self.mode]
+        if self.verifier_model is None:
+            self.verifier_model = self.llm_model
+        from core.models_files import PROVIDER_PREFIX_TO_KEY, load_provider_register
+
+        provider_regions = {
+            details["region"]
+            for provider in load_provider_register().values()
+            for details in provider.processing_scopes.values()
+            if details.get("region") not in (None, "unknown")
+        }
+        if self.deploy_region and self.deploy_region not in provider_regions:
+            raise ValueError("DEPLOY_REGION must match a region name in providers.register.toml")
+        aliases = [self.llm_model, self.embed_model, self.verifier_model, *self.embed_fallbacks]
+        configured_hosted = []
+        for alias in aliases:
+            prefix = alias.split("/", 1)[0] if alias else ""
+            if prefix in PROVIDER_PREFIX_TO_KEY and prefix != "ollama":
+                configured_hosted.append(alias)
+        if configured_hosted and not self.deploy_region:
+            raise ValueError("DEPLOY_REGION must be set when a hosted model provider is configured")
+        if "agents" in self.enabled_module_names and not self.verifier_model:
+            raise ValueError("VERIFIER_MODEL must be set when the Agents module is enabled")
+        if self.deploy_region:
+            for alias in configured_hosted:
+                prefix, _, model_id = alias.partition("/")
+                if prefix == "bedrock":
+                    minimum = next((region for region in ("us", "eu", "apac", "global") if model_id.startswith(region + ".")), None)
+                    if minimum and self.deploy_region not in {minimum, "global"}:
+                        raise ValueError(f"DEPLOY_REGION is narrower than the Bedrock model scope required by {minimum}.")
         return self
 
     @property
@@ -423,6 +479,10 @@ class Settings(BaseSettings):
     def embed_fallbacks(self) -> list[str]:
         """The ordered fallback embedding models (blank entries dropped)."""
         return [m.strip() for m in (self.embed_fallback_models or "").split(",") if m.strip()]
+
+    @property
+    def model_allowed_host_list(self) -> list[str]:
+        return [host.strip().lower() for host in self.model_allowed_hosts.split(",") if host.strip()]
 
     @property
     def signing_key_text(self) -> str:

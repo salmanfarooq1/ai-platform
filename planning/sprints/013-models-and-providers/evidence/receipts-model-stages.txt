@@ -1,0 +1,18 @@
+Sprint 013 acceptance A13 evidence (receipts-model-stages)
+Captured by the Architect 2026-11-16T09:37:24+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 1.3 tests/unit/test_model_types.py::test_extension_matches_registered_schema: `identity.as_extension(phase)` for local and hosted identities passes the closed model schema for `admission` and `attempt`. Adding any other key fails.
+- 4.7 tests/unit/test_stages_extension.py::test_every_stage_is_recorded_in_order: Every decision has the registered closed `stages` extension; applied stages pass in order, inapplicable stages are `skipped`, and stages after a deny are `not_reached`.
+- 4.11 tests/integration/test_receipt_verifier.py::test_model_and_stages_extensions_verify: `scripts/verify/receipt.py` verifies a receipt with `extensions.model` and `extensions.stages`, prints the stage list, and verifies a v1 receipt unchanged.
+
+$ pytest -q -rs tests/unit/test_model_types.py::test_extension_matches_registered_schema tests/unit/test_stages_extension.py::test_every_stage_is_recorded_in_order   # unit (live env unset)
+..                                                                       [100%]
+2 passed in 3.25s
+exit=0
+
+$ pytest -q -rs tests/integration/test_receipt_verifier.py::test_model_and_stages_extensions_verify   # integration/e2e/contract (live env set)
+.                                                                        [100%]
+1 passed in 1.08s
+exit=0

@@ -118,6 +118,13 @@ async def test_api_shows_version_and_extensions(blank_db, monkeypatch):
             new_detail = await client.get(f"/v1/decisions/{newest}")
             old_detail = await client.get(f"/v1/decisions/{old_ids[0]}")
     assert new_detail.status_code == 200 and new_detail.json()["record_version"] == 2
-    assert new_detail.json()["extensions"] == {}
+    stages = new_detail.json()["extensions"]["stages"]
+    assert [stage["stage"] for stage in stages] == [
+        "principal", "module", "boundary", "model", "policy", "guardrails", "rate", "budget", "cost",
+    ]
+    assert all(set(stage) == {"stage", "status", "reason", "duration_us"} for stage in stages)
+    assert all(stage["status"] in {"passed", "denied", "skipped", "not_reached"} for stage in stages)
+    assert all(stage["reason"] is None or isinstance(stage["reason"], str) for stage in stages)
+    assert all(isinstance(stage["duration_us"], int) and stage["duration_us"] >= 0 for stage in stages)
     assert old_detail.status_code == 200 and old_detail.json()["record_version"] == 1
     assert old_detail.json()["extensions"] == {}

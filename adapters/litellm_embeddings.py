@@ -12,6 +12,8 @@ import litellm
 import numpy as np
 
 from ports.embeddings import EmbeddingDimensionMismatch, EmbeddingError, Embeddings
+from ports.llm import ProviderCallError, ProviderRateLimitError
+from ports.models import ResolvedModel
 
 logger = logging.getLogger("adapters.embeddings")
 
@@ -68,11 +70,46 @@ class LitellmEmbeddings:
         kwargs = {"dimensions": self._dim} if _truncates(model) else {}
         # `litellm.aembedding` is looked up per call so the network guard (and tests) can replace it.
         call = self._call or litellm.aembedding
+        if self._call is None:
+            kwargs["num_retries"] = 0
         response = await call(model=model, input=texts, **kwargs)
         vectors = [d["embedding"] for d in response.data]
         if _truncates(model):
             vectors = [_renormalize(v) for v in vectors]
         return vectors
+
+    async def embed_resolved(self, resolved: ResolvedModel, texts: list[str]) -> Embeddings:
+        from core.secrets import resolve_secret
+
+        model = str(resolved.route.params.get("model", resolved.identity.alias))
+        kwargs: dict[str, Any] = dict(resolved.route.params)
+        kwargs.pop("model", None)
+        kwargs["num_retries"] = 0
+        if resolved.route.endpoint:
+            kwargs["api_base"] = resolved.route.endpoint
+        if resolved.route.credential is not None:
+            kwargs["api_key"] = resolve_secret(resolved.route.credential).reveal()
+        if _truncates(model):
+            kwargs["dimensions"] = self._dim
+        call = self._call or litellm.aembedding
+        try:
+            response = await call(model=model, input=texts, **kwargs)
+        except litellm.RateLimitError as exc:
+            raise ProviderRateLimitError(_retry_after(exc)) from None
+        except Exception as exc:
+            raise ProviderCallError(type(exc).__name__, "litellm.aembedding") from None
+        vectors = [item["embedding"] for item in response.data]
+        if _truncates(model):
+            vectors = [_renormalize(vector) for vector in vectors]
+        widths = {len(vector) for vector in vectors}
+        if widths != {self._dim}:
+            returned = next(iter(widths), 0)
+            raise EmbeddingDimensionMismatch(
+                "resolved provider returned vectors outside the configured format",
+                expected_dim=self._dim, returned_dim=returned,
+            )
+        return Embeddings(vectors=vectors, model=resolved.identity.alias, dim=self._dim,
+                          route_fingerprint=resolved.route.fingerprint)
 
     async def embed(self, texts: list[str]) -> Embeddings:
         if not texts:
@@ -100,8 +137,16 @@ class LitellmEmbeddings:
             return Embeddings(vectors=vectors, model=model, dim=self._dim)
         if refused:
             raise EmbeddingDimensionMismatch(
-                f"no embedding provider returned {self._dim}-wide vectors (refused: {', '.join(refused)})"
+                f"no embedding provider returned {self._dim}-wide vectors (refused: {', '.join(refused)})",
+                expected_dim=self._dim,
+                returned_dim=self._dim,
             )
         if len(failed) == 1:
             raise last  # one provider, no fallback: surface its own error, as before the port existed
         raise EmbeddingError(f"every embedding provider failed ({', '.join(failed)})") from last
+
+
+def _retry_after(error: Exception) -> str | None:
+    response = getattr(error, "response", None)
+    headers = getattr(response, "headers", None)
+    return str(headers.get("Retry-After")) if headers and headers.get("Retry-After") is not None else None

@@ -69,14 +69,14 @@ async def test_return_fetches_unindexed_fields(cache):
     assert hit.response == '{"answer": "unindexed response"}' and hit.query == QUERY
 
 
-async def _store(cache, tenant=A, namespace="legal", text=QUERY, response='{"answer": "A"}', model=MODEL, mode="hybrid", rerank=False, top_k=5):
+async def _store(cache, tenant=A, namespace="legal", text=QUERY, response='{"answer": "A"}', model=MODEL, mode="hybrid", top_k=5):
     await cache.semantic_store(tenant, namespace, fake_embedding(text), response, query=text, embedding_model=model,
-                               retrieval_mode=mode, rerank=rerank, top_k=top_k, ttl=60)
+                               retrieval_mode=mode, top_k=top_k, ttl=60)
 
 
-async def _lookup(cache, tenant=A, namespace="legal", text=QUERY, model=MODEL, mode="hybrid", rerank=False, top_k=5, floor=0.65):
+async def _lookup(cache, tenant=A, namespace="legal", text=QUERY, model=MODEL, mode="hybrid", top_k=5, floor=0.65):
     return await cache.semantic_lookup(tenant, namespace, fake_embedding(text), embedding_model=model, retrieval_mode=mode,
-                                       rerank=rerank, top_k=top_k, min_similarity=floor)
+                                       top_k=top_k, min_similarity=floor)
 
 
 async def test_semantic_lookup_finds_a_near_duplicate_and_not_an_unrelated_query(cache):
@@ -89,12 +89,17 @@ async def test_semantic_lookup_finds_a_near_duplicate_and_not_an_unrelated_query
 
 
 @pytest.mark.parametrize("change", [
-    {"tenant": B}, {"namespace": "kyc_aml"}, {"model": "test/other"}, {"mode": "bm25_only"}, {"rerank": True}, {"top_k": 6},
+    {"tenant": B}, {"namespace": "kyc_aml"}, {"model": "test/other"}, {"mode": "bm25_only"}, {"top_k": 6},
 ])
 async def test_semantic_lookup_is_isolated_by_every_filter(cache, change):
     await _store(cache)
     assert await _lookup(cache, text=QUERY) is not None  # sanity: the owner hits
     assert await _lookup(cache, text=QUERY, **change) is None
+
+
+async def test_semantic_lookup_uses_retrieval_dimensions(cache):
+    await _store(cache)
+    assert await _lookup(cache, text=QUERY) is not None
 
 
 async def test_the_semantic_cache_is_per_tenant_for_the_same_query(cache):

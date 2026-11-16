@@ -1,0 +1,84 @@
+# A1 full check set, assembled 2026-11-16T14:46:41+05:00 by the Architect from three runs
+
+## static
+# A1 static part, 2026-11-11T22:18:25+05:00, Architect, outside the builder sandbox
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1044 passed, 908 deselected, 2 warnings in 63.32s (0:01:03)
+exit 0
+
+$ /home/ubuntu/.local/share/poetry233/bin/poetry run ruff check api core gateway evidence ports adapters workers sandbox_agent tests scripts/e2e scripts/docs
+All checks passed!
+exit 0
+$ /home/ubuntu/.local/share/poetry233/bin/poetry run mypy
+Success: no issues found in 172 source files
+exit 0
+gateway does not import evidence, api or workers KEPT
+agent and MCP code do not import evidence KEPT
+agent and MCP code use only the gateway package API KEPT
+
+Contracts: 6 kept, 0 broken.
+exit 0
+
+$ npm run --silent typecheck
+exit 0
+
+$ npm run --silent lint
+exit 0
+
+PASS
+exit 0
+✔︎ /tmp/tokens-KMNCEb/tokens.css
+No drift: src/styles/tokens.css is exactly what tokens/tokens.json generates.
+exit 0
+ Test Files  32 passed (32)
+      Tests  224 passed (224)
+exit 0
+
+## live
+# A1 live part, 2026-11-16T13:04:50+05:00, Architect
+........................................................................ [ 31%]
+........................................................................ [ 39%]
+........................................................................ [ 47%]
+........................................................................ [ 55%]
+........................................................................ [ 63%]
+........................................................................ [ 71%]
+........................................................................ [ 79%]
+........................................................................ [ 87%]
+........................................................................ [ 95%]
+...........................................                              [100%]
+=============================== warnings summary ===============================
+tests/contracts/test_llm_contract.py::test_complete_returns_a_typed_completion[fake]
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-Iq6y1kNi-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/contracts/test_object_store_contract.py:52: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:60: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:69: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:75: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [5] tests/contracts/test_object_store_contract.py:80: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+SKIPPED [1] tests/contracts/test_object_store_contract.py:87: live SeaweedFS not configured; set S3_LIVE_ENDPOINT, S3_LIVE_ACCESS_KEY, S3_LIVE_SECRET_KEY, S3_LIVE_BUCKET (scripts/verify/seaweedfs.sh)
+897 passed, 10 skipped, 1045 deselected, 1 warning in 517.37s (0:08:37)
+exit 0
+
+$ /home/ubuntu/.local/share/poetry233/bin/poetry run python scripts/check_skips.py /tmp/claude-1000/a1-live.xml
+skip check ok: 10 allowed skips
+exit 0
+
+## ui-build
+dist/assets/index-B8mTHPbG.js                  249.43 kB │ gzip:  76.76 kB
+dist/assets/webgl-gc836SuQ.js                  878.61 kB │ gzip: 235.14 kB
+✓ built in 19.12s
+exit 0
+
+## recheck after the test-weakening fix, 2026-11-16T15:22:18+05:00, Architect
+# Restored test properties (independent Terra review): guardrail input cases, zero embedding calls without a tenant,
+# health checks per service, healthy-or-one-shot dependencies, sanitized failure categories. Grafana is the one
+# named no-probe service (distroless image, optional profile, nothing depends on it).
+unit tier (-m unit): 1054 passed, 909 deselected, exit 0
+e2e tier (tests/e2e): 384 passed, exit 0
+tests/integration/test_model_caller_limits.py: 6 passed
+tests/unit/test_compose.py tests/unit/test_agent_tools.py tests/unit/test_guardrails.py: 49 passed
+ruff (changed files): All checks passed

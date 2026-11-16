@@ -10,6 +10,62 @@ import { VerdictBadge } from '@/components/governance/verdict-badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useReasonCodes } from '@/lib/reasons'
 
+function extensionObject(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null
+}
+
+function ExtensionValue({ value }: { value: unknown }) {
+  return <code className="mono break-all">{typeof value === 'string' ? value : JSON.stringify(value)}</code>
+}
+
+function ModelEvidence({ extensions }: { extensions: DecisionDetail['extensions'] }) {
+  const model = extensionObject(extensions.model)
+  const stages = Array.isArray(extensions.stages) ? extensions.stages : null
+  if (!model && !stages) return null
+
+  const identity = model ? [
+    ['Alias', model.name],
+    ['Source', model.source],
+    ['Digest', model.digest],
+    ['Provider model id', model.provider_model_id],
+    ['Region', model.region],
+    ['Phase', model.phase],
+  ] as const : []
+
+  return (
+    <section aria-label="Model evidence" className="flex flex-col gap-3">
+      {model ? (
+        <div>
+          <h3 className="mb-2">Model</h3>
+          <dl className="grid grid-cols-[120px_minmax(0,1fr)] gap-x-3 gap-y-2 text-footnote">
+            {identity.filter(([, value]) => value !== undefined && value !== null).map(([label, value]) => (
+              <div key={label} className="contents"><dt className="text-fg-secondary">{label}</dt><dd className="min-w-0"><ExtensionValue value={value} /></dd></div>
+            ))}
+          </dl>
+        </div>
+      ) : null}
+      {stages ? (
+        <div>
+          <h3 className="mb-2">Stages</h3>
+          <ol aria-label="Stages" className="m-0 list-decimal space-y-2 pl-5 text-footnote">
+            {stages.map((value, index) => {
+              const stage = extensionObject(value)
+              if (!stage) return null
+              return (
+                <li key={`${String(stage.stage)}-${index}`}>
+                  <span className="font-medium">{String(stage.stage ?? 'Unknown stage')}</span>
+                  {' · '}{String(stage.status ?? 'Unknown status')}
+                  {stage.reason === null || stage.reason === undefined || stage.reason === '' ? null : <> · <ExtensionValue value={stage.reason} /></>}
+                </li>
+              )
+            })}
+          </ol>
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
 export function DecisionDetailView({ decision }: { decision: DecisionDetail }) {
   const denied = decision.outcome === 'deny'
   const { byCode } = useReasonCodes()
@@ -33,6 +89,7 @@ export function DecisionDetailView({ decision }: { decision: DecisionDetail }) {
         <h3 className="mb-2">Trace</h3>
         <TraceTimeline steps={decision.trace} currentId={decision.id} reasons={byCode} />
       </section>
+      <ModelEvidence extensions={decision.extensions} />
       <Receipt decision={decision} />
     </div>
   )

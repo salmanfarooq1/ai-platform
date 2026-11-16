@@ -7,10 +7,25 @@ import { openApp, readState, setTheme } from './fixtures'
 // were made while seeding, so this test reads stored data, and it proves the page and the runs API, not OpenShell.
 const state = () => readState()
 
+// The run list is newest first and paged. Other specs create runs after seeding, so a seeded run can sit
+// on a later page: page through it with "Load more", as a user would, until the row shows.
+async function findRunRow(page: Page, executionId: string) {
+  const table = page.getByRole('table', { name: 'Agent runs, newest first' })
+  await expect(table).toBeVisible()
+  const row = page.locator('tbody tr').filter({ has: page.getByTestId('run-row-execution-id').filter({ hasText: executionId.slice(0, 8) }) })
+  const more = page.getByRole('button', { name: 'Load more' })
+  for (let i = 0; i < 20 && (await row.count()) === 0 && (await more.isVisible()); i++) {
+    const before = await page.locator('tbody tr').count()
+    await more.click()
+    await expect.poll(() => page.locator('tbody tr').count()).toBeGreaterThan(before)
+  }
+  await expect(row).toHaveCount(1)
+  return row
+}
+
 async function openRun(page: Page, executionId: string): Promise<void> {
   await openApp(page, '/app/runs')
-  const row = page.locator('tbody tr').filter({ has: page.getByTestId('run-row-execution-id').filter({ hasText: executionId.slice(0, 8) }) })
-  await expect(row).toHaveCount(1)
+  const row = await findRunRow(page, executionId)
   await row.getByRole('button', { name: /Open run from/ }).click()
   await expect(page.getByRole('complementary', { name: 'Run timeline' }).getByRole('list', { name: 'Run steps' })).toBeVisible()
 }
@@ -58,7 +73,7 @@ test.describe('A6 sandbox events on the Agent runs timeline', () => {
   test('the run list shows both runs as finished, and a run with no sandbox keeps the request trace', async ({ page }) => {
     await openApp(page, '/app/runs')
     for (const id of Object.values(state().sandbox_runs)) {
-      const row = page.locator('tbody tr').filter({ has: page.getByTestId('run-row-execution-id').filter({ hasText: id.slice(0, 8) }) })
+      const row = await findRunRow(page, id)
       await expect(row.getByTestId('run-row-status')).toHaveText('Finished')
     }
   })

@@ -44,7 +44,6 @@ class CachePort(Protocol):
         *,
         embedding_model: str,
         retrieval_mode: str,
-        rerank: bool,
         top_k: int,
         min_similarity: float,
     ) -> SemanticHit | None: ...
@@ -59,7 +58,6 @@ class CachePort(Protocol):
         query: str,
         embedding_model: str,
         retrieval_mode: str,
-        rerank: bool,
         top_k: int,
         ttl: int,
     ) -> None: ...

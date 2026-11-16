@@ -15,7 +15,9 @@ Every sprint includes the applicable UI in the same sprint as its backend and co
 | Pre-flight | `scripts/preflight.sh` (engine, memory, clock, ports) | 011, extended in 017 |
 | Import boundaries | `poetry run lint-imports` (import-linter contracts in `pyproject.toml`) | 012 |
 | Edition smoke | `scripts/ci/edition_smoke.sh` runs `ENABLED_MODULES=<edition> poetry run pytest -m edition_smoke` for each edition; CI workflow `.github/workflows/editions.yml` calls it | 012 |
+| Model metadata | `models.lock` and `providers.register.toml` | 013 |
 | Model lock check | `scripts/models/check_lock.sh` against `models.lock` | 013 |
+| Model alias and provenance | Aliases use `<provider>/<model-id>`; policy uses that alias. Stored identity is `<alias>@<digest>` locally or `<alias>@<provider_model_id>` for hosted models | 013 |
 | Live verify scripts | `scripts/verify/<component>.sh` | per sprint |
 | Showcase journeys | `scripts/showcase/<milestone>.sh` and `ui/e2e/showcase-<milestone>.spec.ts` | 014 onward |
 
@@ -60,7 +62,7 @@ The `module` stage (012) needs each action kind's module. Each sprint registers 
 ### Decision record v2 extensions
 | Extension | Fields | Added in |
 |---|---|---|
-| `model` | name, provider, source, digest or provider model id, processing scope, route fingerprint, phase | 013 |
+| `model` | name, provider, source, digest or provider model id, processing scope, region, route fingerprint, phase | 013 |
 | `stages` | ordered stage, status, reason and duration entries for every decision | 013 |
 | `data` | `snapshot_id` | 021 |
 | `data` (more) | `quality_evaluation_id` | 023 |
@@ -82,6 +84,7 @@ Sprint 013 reason codes: `model_breaker_open` (model), `model_concurrency_limit`
 
 ## Settings
 - Module prefix first, unit spelled out: `INSIGHTS_REPORT_RETENTION_DAYS`, `INSIGHTS_VIEW_TIMEOUT_SECONDS`. Existing names stay as they are.
+- Every platform cache key starts with `cache:`; semantic keys use `cache:semantic:`. Keep new cache namespaces under this prefix.
 
 ## ADR numbers
 ADR numbers are reserved by the plan in `vision-and-architecture.md`. A sprint may write a higher number before a lower one exists (ADR-0031 in 029).

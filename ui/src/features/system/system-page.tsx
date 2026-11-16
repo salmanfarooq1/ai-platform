@@ -44,7 +44,6 @@ export default function SystemPage() {
             <dt className="text-fg-secondary">Uptime</dt><dd className="mono">{uptime(h.uptime_seconds)}</dd>
             {config.data ? (
               <>
-                <dt className="text-fg-secondary">Reranker</dt><dd className="mono">{config.data.reranker_enabled ? 'enabled' : 'disabled in this mode'}</dd>
                 <dt className="text-fg-secondary">Rate limit</dt><dd className="mono">{config.data.rate_limit_rpm} per {config.data.rate_limit_window_seconds}s</dd>
                 <dt className="text-fg-secondary">Daily token budget</dt><dd className="mono tabular">{config.data.daily_token_budget.toLocaleString('en-US')}</dd>
               </>

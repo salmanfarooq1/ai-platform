@@ -1,0 +1,36 @@
+Sprint 013 acceptance A20 evidence (threat-tests)
+Captured by the Architect 2026-11-16T09:38:46+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 1.1 tests/unit/test_model_types.py::test_identity_route_resolved_are_frozen: Assigning to any field of `ModelIdentity`, `ModelRoute` or `ResolvedModel` raises `FrozenInstanceError`; `ModelRoute.params` rejects mutation.
+- 1.4 tests/unit/test_model_types.py::test_fingerprint_changes_with_any_route_field: Changing endpoint, credential ref name, any param or the identity changes `ModelRoute.fingerprint`.
+- 1.6 tests/unit/test_secrets.py::test_file_ref_rules: A 0600 regular file owned by the user resolves. A symlink, a 0640 file, a 0604 file and a directory are refused with `SecretRefError`.
+- 1.7 tests/unit/test_secrets.py::test_sentinel_never_leaks: With sentinel value `sk-SENTINEL-7f3a`, `repr`, `str`, `f"{secret}"`, `logging` of the object, and the message of a resolver error never contain the sentinel.
+- 2.5 tests/unit/test_provider_register.py::test_configured_provider_needs_entry: For each MODE, every provider prefix of configured chat, embedding, fallback and verifier aliases has a register entry. A temp setting `LLM_MODEL=mistral/x` fails with a message naming `mistral`.
+- 3.1 tests/unit/test_lock_catalog.py::test_route_uses_digest_reference: Resolving the chat alias gives route model `ollama_chat/sha256:<digest>`; completion gives `ollama/sha256:<digest>`; embedding gives `ollama/sha256:<digest>`. The alias stays in `identity.alias`.
+- 3.4 tests/unit/test_register_catalog.py::test_unknown_scope_is_carried_to_model_stage: A hosted provider whose configured deployment scope is not in the register resolves with `processing_scope == "unknown"` and `region == "unknown"`; it never guesses a region. Architect decision 2026-11-16: carry `unknown` instead of raising, so the model stage records a `residency_unknown` deny in the receipt (row 4.3). Both fail closed; this one leaves evidence.
+- 4.1 tests/unit/test_reason_catalogue.py: Passes with all new model, data-use, breaker, concurrency and verifier reasons, each with its stage and `policy_field`.
+- 4.3 tests/unit/test_region_pin.py::test_unknown_scope_never_matches: Scope `unknown` with pin `["eu"]`: deny. With pin `"*"`: deny `residency_unknown` from the model stage (unknown is never allowed for hosted).
+- 4.7 tests/unit/test_stages_extension.py::test_every_stage_is_recorded_in_order: Every decision has the registered closed `stages` extension; applied stages pass in order, inapplicable stages are `skipped`, and stages after a deny are `not_reached`.
+- 4.8 tests/unit/test_model_stage_order.py::test_boundary_deny_precedes_residency: A caller without the required scope gets a boundary deny before the model stage can return `residency_unknown`.
+- 5.1 tests/unit/test_model_caller.py::test_each_retry_has_its_own_decision: Provider fails twice with a rate-limit error, then answers. `complete` makes 3 requests and 3 `model.invoke` allows, in order, each before its request.
+- 5.2 tests/unit/test_model_caller.py::test_fallback_needs_its_own_allow: Primary fails with a non-retryable error; policy denies the fallback alias. Result is a deny; the fallback got zero requests; there are 2 decisions (allow primary, deny fallback).
+- 5.3 tests/unit/test_model_caller.py::test_unrecorded_attempt_is_not_sent: Decision sink raises on write. Zero requests; the error surfaces as `decision_unrecorded`.
+- 5.4 tests/unit/test_model_caller.py::test_route_is_the_resolved_one: After resolution, changing settings, env and the catalog table does not change the model, endpoint or credential ref the adapter receives for that attempt.
+- 5.5 tests/unit/test_model_caller.py::test_endpoint_host_must_be_allowed: A resolved hosted route whose host is not in `MODEL_ALLOWED_HOSTS` is denied before I/O. `MODEL_ALLOWED_HOSTS` is an application-level allowlist; it is not network egress control.
+- 5.6 tests/integration/test_sdk_retries.py::test_one_request_per_attempt: Against a local stub that fails once with 500, `LitellmLLM` makes exactly 1 HTTP request.
+- 5.7 tests/integration/test_sdk_retries.py::test_one_request_per_attempt: Against a local stub that fails once with 500, `LitellmChat` makes exactly 1 HTTP request.
+- 5.9 tests/integration/test_sdk_retries.py::test_one_request_per_attempt: Against a local stub that fails once with 500, `LitellmEmbeddings` makes exactly 1 HTTP request.
+- 6.3 tests/integration/test_vector_identity.py::test_two_digests_never_mix: Ingest with digest A, switch the lock to digest B for the same alias, ingest again. Search under B returns only B rows; the exact and semantic caches miss for B; `/v1/health` reports the A rows as stale.
+- 7.1 tests/integration/test_health.py::test_health_makes_no_inference: `GET /health` and `GET /v1/health` with `RecordingProvider`: zero requests; response keys unchanged from the 012 snapshot; `stale_vectors` present.
+
+$ pytest -q -rs tests/unit/test_lock_catalog.py::test_route_uses_digest_reference tests/unit/test_model_caller.py::test_each_retry_has_its_own_decision tests/unit/test_model_caller.py::test_endpoint_host_must_be_allowed tests/unit/test_model_caller.py::test_fallback_needs_its_own_allow tests/unit/test_model_caller.py::test_route_is_the_resolved_one tests/unit/test_model_caller.py::test_unrecorded_attempt_is_not_sent tests/unit/test_model_stage_order.py::test_boundary_deny_precedes_residency tests/unit/test_model_types.py::test_fingerprint_changes_with_any_route_field tests/unit/test_model_types.py::test_identity_route_resolved_are_frozen tests/unit/test_provider_register.py::test_configured_provider_needs_entry tests/unit/test_reason_catalogue.py tests/unit/test_region_pin.py::test_unknown_scope_never_matches tests/unit/test_register_catalog.py::test_unknown_scope_is_carried_to_model_stage tests/unit/test_secrets.py::test_file_ref_rules tests/unit/test_secrets.py::test_sentinel_never_leaks tests/unit/test_stages_extension.py::test_every_stage_is_recorded_in_order   # unit (live env unset)
+.......................................                                  [100%]
+39 passed in 4.33s
+exit=0
+
+$ pytest -q -rs tests/integration/test_health.py::test_health_makes_no_inference tests/integration/test_sdk_retries.py::test_one_request_per_attempt tests/integration/test_vector_identity.py::test_two_digests_never_mix   # integration/e2e/contract (live env set)
+.....                                                                    [100%]
+5 passed in 14.23s
+exit=0

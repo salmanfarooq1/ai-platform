@@ -1,6 +1,7 @@
 """Sprint 006 end to end, through the real app built by the registry: embedding provenance and stale vectors, the
 embedding fallback, one CloudEvent per recorded decision, and agent runs through the AgentRuntime."""
 import asyncio
+import hashlib
 import json
 from types import SimpleNamespace
 from uuid import UUID
@@ -21,15 +22,24 @@ from tests.fakes import FakeEmbeddings, FakeLLM, fake_embedding
 from tests.jobs_helpers import post_ingest
 
 AGENT = {"question": "breach notification supervisory authority 72 hours", "namespace": "legal"}
-OTHER_MODEL = "test/other-embedding-model"
+OTHER_MODEL = "ollama/other-embedding-model"
 
 
-async def second_app(request, tenant, **extra):
+async def second_app(request, tenant, *, embed_model=None, embed_fallbacks=None, **extra):
     """A second app on the same database and Redis, as after a restart with another EMBED_MODEL."""
     # The first app "goes away" (its worker stops), so only this app's worker, with these adapters, runs the jobs.
     first = request.getfixturevalue("app")
     if first.state.embedded is not None:
         await first.state.embedded.stop()
+    from config import LLM_CONFIG
+    monkeypatch = request.getfixturevalue("monkeypatch")
+    settings = get_settings()
+    configured_model = str(embed_model or settings.embed_model)
+    monkeypatch.setitem(LLM_CONFIG, "embedding_model", configured_model)
+    monkeypatch.setattr(settings, "embed_model", configured_model)
+    if embed_fallbacks is not None:
+        monkeypatch.setattr(settings, "embed_fallback_models", ",".join(embed_fallbacks))
+
     overrides = {**adapter_overrides(request), **extra}
     application = create_app(adapter_overrides=overrides, embedded_workers=1)
     manager = LifespanManager(application)
@@ -44,7 +54,9 @@ async def second_app(request, tenant, **extra):
 async def test_ingested_chunks_record_the_model_and_dimension_that_produced_them(client, pool, fake_llm, fake_embeddings):
     await ingest(client)
     rows = await pool.fetch("SELECT DISTINCT embedding_model, embedding_dim FROM documents")
-    assert [(r["embedding_model"], r["embedding_dim"]) for r in rows] == [(get_settings().embed_model, 768)]
+    alias = str(get_settings().embed_model)
+    provenance = f"{alias}@sha256:{hashlib.sha256(alias.encode()).hexdigest()}"
+    assert [(r["embedding_model"], r["embedding_dim"]) for r in rows] == [(provenance, 768)]
     assert await pool.fetchval("SELECT count(*) FROM documents WHERE embedding_model IS NULL OR embedding_dim IS NULL") == 0
 
 
@@ -63,7 +75,9 @@ async def test_changing_the_embedding_model_makes_old_chunks_stale_not_wrong(
 
     # "Restart" with another embedding model: same database, same Redis (so the exact cache is still full).
     other = FakeEmbeddings(model=OTHER_MODEL)
-    application, client2, manager = await second_app(request, tenant_a, embeddings=other)
+    application, client2, manager = await second_app(
+        request, tenant_a, embed_model=OTHER_MODEL, embeddings=other,
+    )
     try:
         health = (await client2.get("/v1/health")).json()
         assert health["stale_vectors"] == chunks > 0
@@ -97,7 +111,9 @@ async def test_the_semantic_cache_is_not_shared_across_embedding_models(
     near = {**QUERY, "query": QUERY["query"] + " please"}
     assert (await client.post("/v1/search", json=near)).headers["X-Cache-Type"] == "semantic"  # same model: a hit
 
-    application, client2, manager = await second_app(request, tenant_a, embeddings=FakeEmbeddings(model=OTHER_MODEL))
+    application, client2, manager = await second_app(
+        request, tenant_a, embed_model=OTHER_MODEL, embeddings=FakeEmbeddings(model=OTHER_MODEL),
+    )
     try:
         resp = await client2.post("/v1/search", json=near)
         assert resp.status_code == 404 and resp.headers.get("X-Cache") != "HIT"
@@ -125,15 +141,19 @@ class Providers:
 async def test_the_fallback_embeds_when_the_primary_fails_and_the_rows_say_which_model_did(
     request, tenant_a, pool, fake_llm,
 ):
-    providers = Providers({"primary/embed": 768, "fallback/embed": 768}, down={"primary/embed"})
-    embeddings = LitellmEmbeddings("primary/embed", 768, ["fallback/embed"], call=providers)
-    application, client, manager = await second_app(request, tenant_a, embeddings=embeddings)
+    providers = Providers({"ollama/primary-embed": 768, "ollama/fallback-embed": 768}, down={"ollama/primary-embed"})
+    embeddings = LitellmEmbeddings("ollama/primary-embed", 768, ["ollama/fallback-embed"], call=providers)
+    application, client, manager = await second_app(
+        request, tenant_a, embed_model="ollama/primary-embed", embed_fallbacks=["ollama/fallback-embed"], embeddings=embeddings,
+    )
     try:
         resp = await ingest(client)
         assert resp.status_code == 200
         rows = await pool.fetch("SELECT DISTINCT embedding_model, embedding_dim FROM documents")
-        assert [(r["embedding_model"], r["embedding_dim"]) for r in rows] == [("fallback/embed", 768)]
-        assert providers.calls[:2] == ["primary/embed", "fallback/embed"]  # the primary was tried first
+        alias = "ollama/fallback-embed"
+        provenance = f"{alias}@sha256:{hashlib.sha256(alias.encode()).hexdigest()}"
+        assert [(r["embedding_model"], r["embedding_dim"]) for r in rows] == [(provenance, 768)]
+        assert providers.calls[:2] == ["ollama/primary-embed", "ollama/fallback-embed"]  # the primary was tried first
         # the query is embedded by the fallback too, so it compares like with like and finds the chunk
         found = await client.post("/v1/search", json=QUERY)
         assert found.status_code == 200 and "72 hours" in found.json()["answer"]
@@ -145,18 +165,20 @@ async def test_the_fallback_embeds_when_the_primary_fails_and_the_rows_say_which
 
 
 async def test_a_fallback_with_another_dimension_is_refused_and_logged(request, tenant_a, pool, fake_llm, json_logs):
-    providers = Providers({"primary/embed": 768, "fallback/narrow": 512}, down={"primary/embed"})
-    embeddings = LitellmEmbeddings("primary/embed", 768, ["fallback/narrow"], call=providers)
-    application, client, manager = await second_app(request, tenant_a, embeddings=embeddings)
+    providers = Providers({"ollama/primary-embed": 768, "ollama/fallback-narrow": 512}, down={"ollama/primary-embed"})
+    embeddings = LitellmEmbeddings("ollama/primary-embed", 768, ["ollama/fallback-narrow"], call=providers)
+    application, client, manager = await second_app(
+        request, tenant_a, embed_model="ollama/primary-embed", embed_fallbacks=["ollama/fallback-narrow"], embeddings=embeddings,
+    )
     try:
         failed = await ingest(client)
         assert failed.status_code == 500 and failed.json()["error"]["message"] == "Ingestion failed"
         assert await pool.fetchval("SELECT count(*) FROM documents") == 0  # nothing stored with the wrong width
         searched = await client.post("/v1/search", json=QUERY)
-        assert searched.status_code == 502 and "Embedding provider failed" in searched.json()["error"]["message"]
+        assert searched.status_code == 502 and "Embedding provider ollama/fallback-narrow refused" in searched.json()["error"]["message"], searched.text
         assert "512" in searched.json()["error"]["message"] or "768" in searched.json()["error"]["message"]
         refused = [line for line in json_logs() if "embedding provider refused" in line.get("message", "")]
-        assert refused and "fallback/narrow" in refused[0]["message"] and refused[0]["level"] == "ERROR"
+        assert refused and "ollama/fallback-narrow" in refused[0]["message"] and refused[0]["level"] == "ERROR"
     finally:
         await client.aclose()
         await manager.__aexit__(None, None, None)

@@ -9,6 +9,7 @@ Run subsets with:
     poetry run pytest -m unit
     poetry run pytest -m integration
     poetry run pytest -m e2e
+    poetry run pytest -m live         # needs local runtimes (Ollama)
     poetry run pytest                 # everything
 """
 import ipaddress
@@ -49,6 +50,9 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.integration)
         elif "e2e" in parts:
             item.add_marker(pytest.mark.e2e)
+        elif "live" in parts:
+            # Calls a real local runtime (Ollama). Run on purpose with -m live; CI and the unit tier never collect it.
+            item.add_marker(pytest.mark.live)
 
 
 def _is_local(host: Any) -> bool:

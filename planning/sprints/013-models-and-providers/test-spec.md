@@ -45,7 +45,7 @@ Journey step: "A model call is denied by policy before any inference, and the re
 | 3.1 | `tests/unit/test_lock_catalog.py::test_route_uses_digest_reference` | U | Resolving the chat alias gives route model `ollama_chat/sha256:<digest>`; completion gives `ollama/sha256:<digest>`; embedding gives `ollama/sha256:<digest>`. The alias stays in `identity.alias`. | A4, T3 |
 | 3.2 | `tests/unit/test_lock_catalog.py::test_pulled_digest_mismatch_raises` | U | Stub `/api/tags` reports a different digest for the alias; `resolve` raises `ModelDigestMismatch`. Missing from tags raises `UnknownModel`. | A4 |
 | 3.3 | `tests/unit/test_register_catalog.py::test_unpriced_hosted_model_raises_in_every_mode` | U | For `local`, `public-preview` and `prod`, a hosted alias with no `MODEL_PRICING` entry raises `UnpricedModel`. | A3 |
-| 3.4 | `tests/unit/test_register_catalog.py::test_unknown_scope_raises` | U | A hosted provider whose configured deployment scope is not in the register raises `ResidencyUnknown`. | A6, T5 |
+| 3.4 | `tests/unit/test_register_catalog.py::test_unknown_scope_is_carried_to_model_stage` | U | A hosted provider whose configured deployment scope is not in the register resolves with `processing_scope == "unknown"` and `region == "unknown"`; it never guesses a region. Architect decision 2026-11-16: carry `unknown` instead of raising, so the model stage records a `residency_unknown` deny in the receipt (row 4.3). Both fail closed; this one leaves evidence. | A6, T5 |
 | 3.5 | `tests/unit/test_register_catalog.py::test_credential_comes_from_ref` | U | The route's `credential` is the configured `SecretRef`; no field holds the secret value. | A8 |
 
 ## WP4: Gateway, policy and records
@@ -79,6 +79,7 @@ Journey step: "A model call is denied by policy before any inference, and the re
 | 5.8 | `tests/integration/test_sdk_retries.py::test_provider_routes_make_one_request[openai|azure|anthropic|bedrock|ollama]` | I | Each route uses a local stub that fails once with 500; OpenAI, Azure, Anthropic, Bedrock stub and Ollama each make exactly 1 HTTP request. | A5, T2 |
 | 5.9 | `tests/integration/test_sdk_retries.py::test_one_request_per_attempt[embedding]` | I | Against a local stub that fails once with 500, `LitellmEmbeddings` makes exactly 1 HTTP request. | A5, T2 |
 | 5.10 | `tests/e2e/test_attempts_e2e.py::test_agent_reasoning_and_verifier_each_recorded` | I | An agent run with the fake chat model that reasons twice and verifies once writes admission rows for both aliases and 3 `model.invoke` attempt rows; the verifier row names its configured identity. | A2, A12 |
+Architect note (C1-F10): This journey records 2 reasoning + 1 verifier + 1 query embedding + 1 synthesis attempts; the test also asserts the 3 named in the row.
 | 5.11 | `tests/unit/test_model_caller.py::test_admission_precedes_all_model_io` | U | A denied chat admission for search records the admission deny and makes zero chat and embedding requests. | A2, A3 |
 | 5.12 | `tests/unit/test_model_caller.py::test_open_breaker_denies_without_request` | U | An open route denies `model_breaker_open` at stage `model`; the provider count stays zero and fallback selection continues. | A16 |
 | 5.13 | `tests/integration/test_model_caller_limits.py::test_tenant_concurrency_cap_denies_without_request` | I | With the tenant at its configured in-flight cap, the next attempt denies `model_concurrency_limit` at stage `rate`; provider count stays zero. | A16 |
@@ -109,7 +110,7 @@ Journey step: "A model call is denied by policy before any inference, and the re
 | ID | Test | Tier | Given / when / then | Proves |
 |---|---|---|---|---|
 | 8.1 | `tests/unit/test_compose.py::test_ollama_serves_read_only_store` | U | The `ollama` service mounts the model volume with `:ro`; `ollama-init` mounts it read-write and runs `check_lock.sh`; both images pinned by digest; runtime settings match the blueprint. | A4, A15 |
-| 8.2 | `tests/unit/test_models_live.py::test_live_digest_check_is_conditional` | L | The live digest-binding test runs only when Ollama is available, invokes a locked model by `ollama/sha256:<digest>`, and fails if digest resolution fails. There is no nightly workflow. | A4 |
+| 8.2 | `tests/live/test_model_live_digest.py::test_live_digest_check_is_conditional` | L | The live digest-binding test runs only when Ollama is available, invokes a locked model by `ollama/sha256:<digest>`, and fails if digest resolution fails. There is no nightly workflow. | A4 |
 | 8.3 | live `scripts/verify/ollama.sh` | L | Architect-run: internal network, digest calls for chat, completion and embedding, mutation API refused, no egress. | A4, A15 |
 | 8.4 | `tests/unit/test_models_live.py::test_hosted_smoke_skips_without_credentials` | U | `scripts/verify/hosted.sh` with no credential refs prints `SKIP`, exits 0 and never prints `PASS`. | A22 |
 | 8.5 | captured `scripts/verify/hosted.sh` output | I | The Architect captures the command output for the missing-credential case. | A22 |

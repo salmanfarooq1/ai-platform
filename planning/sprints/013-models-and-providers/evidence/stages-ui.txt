@@ -1,0 +1,62 @@
+# A17 Playwright, 2026-11-16T14:10:52+05:00, Architect, run alone
+
+[1A[2K[40/85] [chromium] › e2e/landing.spec.ts:69:3 › A7 landing page: motion on › scrolling moves the story from the first panel to the last
+[1A[2K[41/85] [chromium] › e2e/landing.spec.ts:93:3 › A7 landing page: reduced motion › no GSAP, no WebGL, the poster is shown and every story step is visible
+[1A[2K[42/85] [chromium] › e2e/landing.spec.ts:124:3 › 005b landing page: copy and sections › the headline and subline are exact, and the hero is built from real components labelled as examples
+[1A[2K[43/85] [chromium] › e2e/landing.spec.ts:141:3 › 005b landing page: copy and sections › has the use cases, the one reason the gateway sits outside the agent, and no problem section
+[1A[2K[44/85] [chromium] › e2e/landing.spec.ts:160:3 › 005b landing page: copy and sections › How it works is a public page without GSAP or WebGL
+[1A[2K[45/85] [chromium] › e2e/model-evidence.spec.ts:3:1 › model decision to verified receipt
+[1A[2K[46/85] [chromium] › e2e/modules.spec.ts:14:3 › Gateway edition module boundaries › gateway edition hides agents and keeps search and trust
+[1A[2K[47/85] [chromium] › e2e/modules.spec.ts:52:3 › Gateway edition module boundaries › direct agent runs url shows module unavailable
+[1A[2K[48/85] [chromium] › e2e/polish.spec.ts:26:3 › A4 (a) the walkthrough › shows an allowed and a blocked request side by side, the blocked one at the guardrails stage
+[1A[2K[49/85] [chromium] › e2e/polish.spec.ts:71:3 › A4 (a) the first run › a new browser opens the walkthrough first, and the Overview after that
+[1A[2K[50/85] [chromium] › e2e/polish.spec.ts:96:3 › A4 (b) the governance line in Ask › shows "Checked by policy v1 ..." and the line opens the request drawer
+[1A[2K[51/85] [chromium] › e2e/polish.spec.ts:121:3 › A4 (b) the governance line in Ask › a denied ask shows the governance line too
+[1A[2K[52/85] [chromium] › e2e/polish.spec.ts:133:3 › A4 (c) Overview › the blocked number opens the request list filtered to deny
+[1A[2K[53/85] [chromium] › e2e/polish.spec.ts:165:3 › A4 (c) Overview › shows the numbers and the top deny reasons with plain titles
+[1A[2K[54/85] [chromium] › e2e/polish.spec.ts:181:3 › A4 (d) the command palette › Cmd or Ctrl plus K jumps to a request id
+[1A[2K[55/85] [chromium] › e2e/polish.spec.ts:202:3 › A4 (d) the command palette › goes to a screen by name, and Escape closes it
+[1A[2K[56/85] [chromium] › e2e/polish.spec.ts:223:3 › A4 (e) a deny shows its plain sentence and the policy field › in Ask, in the request drawer and in the decision detail
+[1A[2K[57/85] [chromium] › e2e/polish.spec.ts:254:3 › Requests page and the session menu › console reads are left out unless "Include console views" is on
+[1A[2K[58/85] [chromium] › e2e/polish.spec.ts:270:3 › Requests page and the session menu › the session menu shows who you are, the tenant and the scopes, and switches the theme
+[1A[2K[59/85] [chromium] › e2e/polish.spec.ts:293:3 › Requests page and the session menu › an unknown request id says so in the drawer
+[1A[2K[60/85] [chromium] › e2e/polish.spec.ts:311:3 › signed out › /how-it-works is public and /app/requests asks for sign-in
+[1A[2K[61/85] [chromium] › e2e/preview.spec.ts:11:1 › read-only preview: continue without a key, see the mode chip, cannot add documents
+[1A[2K[62/85] [chromium] › e2e/responsive.spec.ts:21:1 › landing page fits a phone
+[1A[2K[63/85] [chromium] › e2e/responsive.spec.ts:31:1 › how it works fits a phone
+[1A[2K[64/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app fits a phone
+[1A[2K[65/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/walkthrough fits a phone
+[1A[2K[66/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/requests fits a phone
+[1A[2K[67/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/ask fits a phone
+[1A[2K[68/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/decisions fits a phone
+[1A[2K[69/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/library fits a phone
+[1A[2K[70/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/policies fits a phone
+[1A[2K[71/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/keys fits a phone
+[1A[2K[72/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/usage fits a phone
+[1A[2K[73/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/runs fits a phone
+[1A[2K[74/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/system fits a phone
+[1A[2K[75/85] [chromium] › e2e/responsive.spec.ts:41:3 › /app/history fits a phone
+[1A[2K[76/85] [chromium] › e2e/sandbox.spec.ts:46:3 › A6 sandbox events on the Agent runs timeline › a run where the sandbox blocked a network call and a file read shows both, as denials, in time order next to the decisions
+[1A[2K[77/85] [chromium] › e2e/sandbox.spec.ts:93:3 › A6 sandbox events on the Agent runs timeline › a clean run shows a start and an exit, no denials, and says nothing was blocked
+[1A[2K[78/85] [chromium] › e2e/sandbox.spec.ts:106:3 › A6 sandbox events on the Agent runs timeline › the run list shows both runs as finished, and a run with no sandbox keeps the request trace
+[1A[2K[79/85] [chromium] › e2e/sandbox.spec.ts:116:5 › A6 sandbox events on the Agent runs timeline › the sandbox timeline has no serious accessibility violations, light theme
+[1A[2K[chromium] › e2e/sandbox.spec.ts:116:5 › A6 sandbox events on the Agent runs timeline › the sandbox timeline has no serious accessibility violations, light theme
+axe sandbox timeline (light): violations=0 serious_or_critical=0 passes=23
+
+[1A[2K[80/85] [chromium] › e2e/sandbox.spec.ts:116:5 › A6 sandbox events on the Agent runs timeline › the sandbox timeline has no serious accessibility violations, dark theme
+[1A[2K[chromium] › e2e/sandbox.spec.ts:116:5 › A6 sandbox events on the Agent runs timeline › the sandbox timeline has no serious accessibility violations, dark theme
+axe sandbox timeline (dark): violations=0 serious_or_critical=0 passes=23
+
+[1A[2K[81/85] [chromium] › e2e/trust.spec.ts:24:3 › A7 the Trust page › a receipt verifies as valid, and a tampered one as invalid
+[1A[2K[82/85] [chromium] › e2e/trust.spec.ts:64:3 › A7 the Trust page › the decision drawer links to the check, which runs on arrival
+[1A[2K[83/85] [chromium] › e2e/trust.spec.ts:76:3 › A7 the Trust page › retention and the recorded eval gate run show
+[1A[2K[84/85] [chromium] › e2e/trust.spec.ts:88:5 › A7 the Trust page › axe is clean, light theme, after a verification
+[1A[2K[chromium] › e2e/trust.spec.ts:88:5 › A7 the Trust page › axe is clean, light theme, after a verification
+axe trust (light): violations=0 serious_or_critical=0 passes=27
+
+[1A[2K[85/85] [chromium] › e2e/trust.spec.ts:88:5 › A7 the Trust page › axe is clean, dark theme, after a verification
+[1A[2K[chromium] › e2e/trust.spec.ts:88:5 › A7 the Trust page › axe is clean, dark theme, after a verification
+axe trust (dark): violations=0 serious_or_critical=0 passes=27
+
+[1A[2K  85 passed (22.2m)
+exit 0

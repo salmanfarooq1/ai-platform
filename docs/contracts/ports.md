@@ -11,6 +11,32 @@ async write(entry: DecisionEntry, events: EventBus | None = None) -> UUID
 
 `DecisionEntry` carries `tenant_id: UUID`, `principal_id: UUID | None`, `request_id: str`, `trace_id: str`, `action: str`, `resource: str | None`, `outcome: Literal["allow", "deny"]`, `stage: str`, `reason: str`, `policy_version: int | None`, `input_sha256: str | None`, `execution_id: UUID | None`, and `extensions: Mapping[str, JsonValue]`. The sink creates the decision id, timestamp and chain position. It preserves the tenant chain lock and transactional outbox order.
 
+## ModelCatalog
+
+Resolves a policy-facing alias and use into a frozen model identity and route. The catalog probe is metadata-only and does not run inference. Local entries resolve through `models.lock` digests; hosted entries resolve through `providers.register.toml` and configured provider settings. Catalog failures are typed and become recorded gateway denials before provider I/O.
+
+```python
+async resolve(alias: str, *, use: ModelUse) -> ResolvedModel
+async probe() -> CatalogHealth
+```
+
+`ModelIdentity` carries the alias, provider, source, local digest or hosted provider model id, processing scope, region, and storage geography. `ModelRoute` binds that identity to a fixed endpoint, credential reference and parameters; its fingerprint changes when any route field changes. `ResolvedModel` pairs identity and route with the requested `ModelUse` and optional price reference.
+
+## ModelLimitStore
+
+Stores one breaker per route fingerprint and per-tenant concurrency leases. An open breaker denies before inference; a lease limits concurrent physical attempts and is released when the attempt ends. Lease expiry bounds abandoned work after process failure.
+
+```python
+async check_breaker(fingerprint: str) -> BreakerState
+async record_success(fingerprint: str) -> None
+async record_failure(fingerprint: str) -> None
+async release_trial(fingerprint: str) -> None
+async acquire_lease(tenant_id: UUID) -> str | None
+async release_lease(tenant_id: UUID, lease_id: str) -> None
+```
+
+`BreakerState` is `closed`, `open` or `trial`. The protocol provides breaker checks and success/failure updates, trial release, and tenant lease acquisition and release. The production adapter uses Valkey; tests use a fake implementation.
+
 ## EvidenceLookup
 Looks up a decision receipt link within a tenant. Unknown and foreign ids return the same unlinked value. The real lookup remains enabled when the Evidence module is off.
 

@@ -1,0 +1,27 @@
+Decision-path benchmark (test-spec 10.2). Architect run, 2026-11-10, WSL2 laptop, local Postgres in Docker.
+Command: python scripts/bench/decision_path.py --iterations 40
+Real enforce() + PgDecisionSink, one tenant, fake model (no provider I/O). No Sprint 013 target.
+
+## Before the fix (extension schemas re-checked on every write)
+serial: decisions=40 decisions_per_second=30.59 p50_added_ms=30.488 p95_added_ms=52.727
+8-way: decisions=320 decisions_per_second=28.78 p50_added_ms=153.228 p95_added_ms=308.095
+32-way: decisions=1280 decisions_per_second=29.15 p50_added_ms=585.297 p95_added_ms=1124.250
+
+real	1m10.912s
+user	0m48.005s
+sys	0m1.399s
+
+## After the fix (evidence/extensions.py compiles each registered schema once)
+serial: decisions=40 decisions_per_second=37.39 p50_added_ms=23.904 p95_added_ms=40.346
+8-way: decisions=320 decisions_per_second=46.37 p50_added_ms=95.073 p95_added_ms=195.438
+32-way: decisions=1280 decisions_per_second=47.21 p50_added_ms=350.239 p95_added_ms=755.899
+
+real	0m50.748s
+user	0m25.338s
+sys	0m2.113s
+
+## Reading
+- cProfile (before): validate_extensions -> jsonschema check_schema took ~90% of decision-write CPU.
+- After: throughput 29 -> 47 decisions/s at 8 and 32 callers; serial p50 30.5 -> 23.9 ms.
+- Throughput stays flat as callers grow: one tenant's decisions are written in hash-chain order, so they
+  serialize on the chain head. Remaining time is mostly database wait. A later sprint can measure several tenants.

@@ -18,6 +18,9 @@ services:
     envVars:
       - key: MODE
         value: public-preview
+      # Matches the Render service region (Render's default is Oregon, US).
+      - key: DEPLOY_REGION
+        value: us
       # Single worker: FEATURES["reranker_enabled"] is already off in public-preview
       # mode, but the DB pool itself is sized (config.py DATABASE_CONFIG
       # pool_size=5) assuming one worker process on a 512MB instance.

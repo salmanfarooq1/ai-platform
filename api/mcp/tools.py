@@ -13,12 +13,14 @@ from api.auth import KB_NOT_FOUND_MESSAGE
 from api.mcp.context import blocked_query_json, gate, scope_denied, session_adapters, session_pool, session_tenant
 from api.mcp.server import mcp
 from api.models.schemas import IngestionStatusResponse, LatestDocumentInfo
-from api.services.embedding import embed_query
+from api.services.model_calls import build_model_caller
 from api.services.retriever import RetrieverConfig, retrieve
-from config import FEATURES, LLM_CONFIG
+from config import LLM_CONFIG
 from core.database.tenant import tenant_connection
 from core.identity.models import Scope
+from core.settings import get_settings
 from gateway import Action, ActionKind, GatewayDenied, estimate_tokens
+from ports.models import ModelUse
 
 MAX_CHUNK_PREVIEW_LENGTH = 800
 logger = logging.getLogger(__name__)
@@ -84,13 +86,12 @@ async def search_documents(
 
     # Policy, input guardrails and the token cap on the model that will be used, before any data is read.
     try:
-        await gate(
+        ctx = await gate(
             Action(
                 ActionKind.TOOL_CALL, "search_documents", input_text=query,
                 arguments={"query": query, "namespace": namespace, "top_k": top_k, "mode": mode},
             ),
             Action(ActionKind.KB_READ, namespace, input_text=query),
-            Action(ActionKind.MODEL_INVOKE, LLM_CONFIG["embedding_model"], estimated_tokens=estimate_tokens(query), input_text=query),
         )
     except GatewayDenied as exc:
         if (blocked := blocked_query_json(exc)) is not None:
@@ -101,11 +102,16 @@ async def search_documents(
         if not await adapters.knowledge.kb_exists(tenant_id, namespace):
             return _kb_not_found()
         k = max(1, min(top_k, 20))
-        query_embedding = await embed_query(adapters.embeddings, query)
+        settings = get_settings()
+        caller = build_model_caller(adapters, settings, adapters.embeddings)
+        for alias in (LLM_CONFIG["embedding_model"], *settings.embed_fallbacks):
+            await caller.admit(ctx, alias, ModelUse.EMBEDDING, input_text=query)
+        query_embedding = await caller.embed(
+            ctx, LLM_CONFIG["embedding_model"], [query], estimated_tokens=estimate_tokens(query), input_text=query,
+        )
         cfg = RetrieverConfig(
             top_k=k,
             mode=mode,
-            rerank=FEATURES.get("reranker_enabled", False),
         )
         chunks = await retrieve(
             store=adapters.knowledge,
@@ -121,9 +127,7 @@ async def search_documents(
 
         results = []
         for i, c in enumerate(chunks):
-            if "rerank_score" in c and c["rerank_score"] is not None:
-                score = c["rerank_score"]
-            elif "rrf_score" in c and c["rrf_score"] is not None:
+            if "rrf_score" in c and c["rrf_score"] is not None:
                 score = c["rrf_score"]
             elif "vector_score" in c and c["vector_score"] is not None:
                 score = c["vector_score"]
@@ -142,6 +146,10 @@ async def search_documents(
 
     except Exception as exc:
         logger.warning("MCP tool %s failed with %s", "search_documents", type(exc).__name__)
+        if isinstance(exc, GatewayDenied):
+            raise
+        if type(exc).__name__ == "ModelCallFailed":
+            return json.dumps({"error": "model_call_failed"})
         raise RuntimeError("MCP operation failed") from None
 
 

@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import config
 from adapters.registry import build_adapters
 from api.errors import register_exception_handlers
 from api.middleware.auth import AuthMiddleware
@@ -33,6 +34,7 @@ from config import MODEL_PRICING
 from core.database.pool import create_pool
 from core.identity.deploy_shape import assert_deploy_shape
 from core.identity.jwt import JwtVerifier
+from core.models_files import validate_model_files
 from core.pricing import check_priced
 from core.settings import get_settings
 from evidence.receipts import keyring_from_settings
@@ -51,6 +53,7 @@ def _lifespan(
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # STARTUP
+        validate_model_files(settings, completion_fallbacks=tuple(config.completion_fallbacks_for_mode(settings.mode)))
         # A hosted mode refuses to start when a model it may call has no price (an unpriced model would dodge the cost cap).
         check_priced(MODEL_PRICING, settings.mode, [settings.llm_model, settings.embed_model, *settings.embed_fallbacks])
         app.state.db_pool = await create_pool()

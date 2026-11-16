@@ -87,11 +87,20 @@ def record_eval_gate(owner_dsn: str) -> None:
 
 
 def fake_adapters() -> dict:
-    """The fake LLM, chat model and embeddings, put behind their ports through the registry's overrides."""
+    """The fake LLM, chat model, embeddings and model catalog, put behind their ports through the registry's
+    overrides. The fake catalog resolves the configured aliases without probing a provider (Sprint 013)."""
     from tests.fakes import FakeEmbeddings, FakeLLM
 
     fake_llm = FakeLLM()
-    return {"llm": fake_llm, "chat": fake_llm, "embeddings": FakeEmbeddings()}
+    return {"llm": fake_llm, "chat": fake_llm, "embeddings": FakeEmbeddings(), "model_catalog": fake_catalog()}
+
+
+def fake_catalog():
+    """A catalog that resolves the configured aliases offline, as the end-to-end tests do."""
+    from ports.models import ModelUse
+    from tests.fakes import FAKE_VERIFIER_ALIAS, make_fake_catalog
+
+    return make_fake_catalog(extra_uses={FAKE_VERIFIER_ALIAS: {ModelUse.CHAT}})
 
 
 async def ingest_and_close_seed_key(app_dsn_owner: str, seeded: dict[str, str]) -> None:
@@ -156,7 +165,7 @@ async def seed_sandbox_runs(owner_dsn: str, seeded: dict[str, str]) -> dict[str,
     driver = FakeSandboxDriver(clean)
     llm = SandboxAnswerLLM(agent_namespace=ALLOWED_KB)
     try:
-        app = create_app(adapter_overrides={"llm": llm, "chat": llm, "embeddings": FakeEmbeddings()}, embedded_workers=1, sandbox_driver=driver)
+        app = create_app(adapter_overrides={"llm": llm, "chat": llm, "embeddings": FakeEmbeddings(), "model_catalog": fake_catalog()}, embedded_workers=1, sandbox_driver=driver)
         async with LifespanManager(app):
             world["loop"] = asyncio.get_running_loop()
             async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=SANDBOX_GATEWAY) as client:
@@ -252,6 +261,8 @@ def main() -> int:
     os.environ["OBJECT_STORE_DIR"] = str(args.state_dir / "objects")
     if args.preview:
         os.environ["RECEIPT_SIGNING_KEY"] = throwaway_signing_key()
+        # Preview defaults to hosted aliases, which need a deployment region (Sprint 013); the fake catalog is EU.
+        os.environ["DEPLOY_REGION"] = "eu"
     os.environ.pop("JWT_SECRET", None)
     os.environ.pop("JWT_JWKS_URL", None)
     seeded = seed(owner_dsn)
@@ -263,15 +274,6 @@ def main() -> int:
         os.environ["PREVIEW_PRINCIPAL_ID"] = seeded["principal_id"]
         get_settings.cache_clear()
     harness.clean_redis()
-
-    # The fakes go behind their ports through the registry (see fake_adapters). The app code is unchanged.
-    import api.agent.graph
-    import api.agent.tools
-    import api.mcp.tools
-    import api.routers.search
-
-    for module in (api.routers.search, api.agent.tools, api.agent.graph, api.mcp.tools):
-        module.FEATURES["reranker_enabled"] = False
 
     asyncio.run(ingest_and_close_seed_key(owner_dsn, seeded))
     from core.settings import get_settings

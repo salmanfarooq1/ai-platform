@@ -1,0 +1,12 @@
+Sprint 013 acceptance A7 evidence (data-use)
+Captured by the Architect 2026-11-16T09:34:35+00:00
+Worktree: /home/ubuntu/ai-platform-sprints/013-models-and-providers
+
+Spec rows:
+- 4.1 tests/unit/test_reason_catalogue.py: Passes with all new model, data-use, breaker, concurrency and verifier reasons, each with its stage and `policy_field`.
+- 4.9 tests/unit/test_data_use.py::test_training_provider_denied: With `allowed_data_use=["no_training"]`, a provider marked `yes` or `unknown` denies `data_use_not_allowed` at policy.
+
+$ pytest -q -rs tests/unit/test_data_use.py::test_training_provider_denied tests/unit/test_reason_catalogue.py   # unit (live env unset)
+..........................                                               [100%]
+26 passed in 4.28s
+exit=0

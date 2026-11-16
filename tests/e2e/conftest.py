@@ -22,23 +22,19 @@ from tests import harness
 
 @pytest.fixture
 def platform_config(monkeypatch, app_database_url, clean_state):
-    """Point the app at the throwaway database and test Redis, and turn the cross-encoder off.
+    """Point the app at the throwaway database and test Redis.
 
     The app connects as `gap_app` (NOSUPERUSER NOBYPASSRLS), never as the owner, so row-level
     security applies to everything it does.
 
-    Each consumer module holds its own reference to the config dicts, so each is patched in place.
     """
-    import api.agent.graph
-    import api.agent.tools
-    import api.mcp.tools
-    import api.routers.search
+    import config
     import core.database.pool
 
     monkeypatch.setitem(core.database.pool.DATABASE_CONFIG, "url", app_database_url)
     monkeypatch.setitem(core.database.pool.DATABASE_CONFIG, "pool_size", 4)
-    for module in (api.routers.search, api.agent.tools, api.agent.graph, api.mcp.tools):
-        monkeypatch.setitem(module.FEATURES, "reranker_enabled", False)
+    # Legacy gateway journeys pin their historical chat alias; default selection is covered in WP7 unit tests.
+    monkeypatch.setitem(config.LLM_CONFIG, "model", "gemini/gemini-3.5-flash-lite")
     return app_database_url
 
 
@@ -55,11 +51,14 @@ def adapter_overrides(request) -> dict[str, Any]:
     from adapters.local_object_store import LocalObjectStore
     from adapters.redis_cache import RedisCache
     from config import EMBEDDING_DIM
+    from ports.models import ModelUse
+    from tests.fakes import FAKE_VERIFIER_ALIAS, make_fake_catalog
 
     # Raw uploads go to a throwaway directory (Sprint 007), never into the repository's data/objects.
     overrides: dict[str, Any] = {
         "cache": RedisCache(harness.REDIS_URL, EMBEDDING_DIM),
         "objects": LocalObjectStore(request.getfixturevalue("tmp_path")),
+        "model_catalog": make_fake_catalog(extra_uses={FAKE_VERIFIER_ALIAS: {ModelUse.CHAT}}),
     }
     if "fake_llm" in request.fixturenames:
         llm = request.getfixturevalue("fake_llm")
@@ -70,7 +69,7 @@ def adapter_overrides(request) -> dict[str, Any]:
 
 
 @pytest_asyncio.fixture
-async def app(platform_config, request):
+async def app(platform_config, request, monkeypatch):
     """A fresh app instance with its real lifespan started."""
     from api.main import create_app
     from tests import jobs_helpers

@@ -12,7 +12,7 @@ import config
 from gateway.admin import set_policy
 from tests.e2e.test_search_flow import QUERY, ingest
 
-MODEL = config.LLM_CONFIG["model"]
+MODEL = "gemini/gemini-3.5-flash-lite"
 
 
 def cost_key(tenant) -> str:

@@ -58,7 +58,7 @@ def world():
 
 
 @pytest_asyncio.fixture
-async def app(platform_config, request, openshell_settings, world):
+async def app(platform_config, request, openshell_settings, world, monkeypatch):
     """The app with its worker running every agent run in the fake sandbox (this module's own `app`)."""
     from api.main import create_app
     from tests import jobs_helpers
@@ -126,7 +126,10 @@ async def test_a2_an_authorised_task_completes_in_the_sandbox_and_the_answer_is_
 async def test_a2_every_decision_the_run_caused_carries_its_execution_id_including_the_ones_made_over_http_from_the_sandbox(
     app, client, pool, tenant_a, sandbox_llm, fake_embeddings,
 ):
+    from datetime import datetime, timezone
+
     await ingest(client)
+    run_started = datetime.now(timezone.utc)
     assert (await run_agent(client)).status_code == 200
     execution_id = await execution_of(pool)
     rows = await decisions_of(pool, execution_id)
@@ -134,9 +137,24 @@ async def test_a2_every_decision_the_run_caused_carries_its_execution_id_includi
     assert seen[0][0] == "agent.run"  # the entry check, in the request
     for expected in (("tool.call", "retrieve_chunks", "allow"), ("kb.read", "legal", "allow")):
         assert expected in seen
-    assert sum(1 for a, _, _ in seen if a == "model.invoke") == 3  # entry check, the query embedding, the answer
+    import json
+
+    from config import completion_fallbacks_for_mode
+    from core.settings import get_settings
+
+    model_rows = [r for r in rows if r["action"] == "model.invoke"]
+    phases = [
+        (r["extensions"] if isinstance(r["extensions"], dict) else json.loads(r["extensions"]))
+        .get("model", {}).get("phase") for r in model_rows
+    ]
+    assert phases.count("attempt") == 2  # query embedding and the sandbox model request
+    expected_admissions = 5 + 2 * len(completion_fallbacks_for_mode(get_settings().mode)) + len(get_settings().embed_fallbacks)
+    assert phases.count("admission") == expected_admissions
     assert {r["outcome"] for r in rows} == {"allow"}
-    assert await pool.fetchval("SELECT count(*) FROM gateway_decisions WHERE execution_id IS NULL AND action <> 'audit.read' AND created_at > (SELECT min(created_at) FROM jobs)") == 0
+    assert await pool.fetchval(
+        "SELECT count(*) FROM gateway_decisions WHERE execution_id IS NULL AND action <> 'audit.read' AND created_at >= $1",
+        run_started,
+    ) == 0
     # the calls from inside the sandbox are other requests than the entry one, under the same run
     assert len({r["request_id"] for r in rows}) >= 3
 
