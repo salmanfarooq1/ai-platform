@@ -228,13 +228,15 @@ def main() -> int:
     parser.add_argument("--state-dir", type=Path, default=ROOT / "ui" / "e2e" / ".state")
     parser.add_argument("--preview", action="store_true", help="run as MODE=public-preview with a preview principal")
     parser.add_argument("--enabled-modules", help="comma-separated enabled module names; defaults to the configured edition")
+    parser.add_argument("--reference-company", action="store_true", help="seed the isolated M0 admission-deny journey")
     args = parser.parse_args()
 
     harness.ensure_app_role()
     name = f"gap_e2e_{secrets.token_hex(4)}"
     lease = acquire_database_lease(name)
     atexit.register(lease.close)
-    sweep_leftover_databases()
+    if not args.reference_company:
+        sweep_leftover_databases()
     import psycopg2
 
     conn = psycopg2.connect(harness.ADMIN_URL)
@@ -273,13 +275,21 @@ def main() -> int:
 
         os.environ["PREVIEW_PRINCIPAL_ID"] = seeded["principal_id"]
         get_settings.cache_clear()
-    harness.clean_redis()
+    if not args.reference_company:
+        harness.clean_redis()
 
     asyncio.run(ingest_and_close_seed_key(owner_dsn, seeded))
+    if args.reference_company:
+        from core.identity.admin import admin_connection
+        from gateway.admin import set_policy
+
+        with admin_connection(owner_dsn) as conn:
+            set_policy(conn, TENANT_SLUG, {**POLICY, "allowed_models": []}, "showcase-m0")
     from core.settings import get_settings
 
     sandbox_runs = asyncio.run(seed_sandbox_runs(owner_dsn, seeded)) if "agents" in get_settings().enabled_module_names else {}
-    harness.clean_redis()
+    if not args.reference_company:
+        harness.clean_redis()
 
     args.state_dir.mkdir(parents=True, exist_ok=True)
     state = {

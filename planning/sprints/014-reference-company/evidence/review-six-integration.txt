@@ -1,0 +1,26 @@
+.....FF...                                                               [100%]
+=================================== FAILURES ===================================
+____________ test_list_keys_sets_tenant_on_fresh_app_connection[0] _____________
+tests/integration/refco/test_identity_key_listing.py:32: in test_list_keys_sets_tenant_on_fresh_app_connection
+    rows = admin.list_keys(conn, tenant_slug=slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core/identity/admin.py:175: in list_keys
+    _as_tenant(cur, _tenant_id(cur, tenant_slug))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core/identity/admin.py:51: in _tenant_id
+    raise AdminError(f"unknown tenant '{slug}'")
+E   core.identity.admin.AdminError: unknown tenant 'key-review-cf90f3c92d7b'
+____________ test_list_keys_sets_tenant_on_fresh_app_connection[1] _____________
+tests/integration/refco/test_identity_key_listing.py:32: in test_list_keys_sets_tenant_on_fresh_app_connection
+    rows = admin.list_keys(conn, tenant_slug=slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core/identity/admin.py:175: in list_keys
+    _as_tenant(cur, _tenant_id(cur, tenant_slug))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core/identity/admin.py:51: in _tenant_id
+    raise AdminError(f"unknown tenant '{slug}'")
+E   core.identity.admin.AdminError: unknown tenant 'key-review-6bb78994d8a1'
+=========================== short test summary info ============================
+FAILED tests/integration/refco/test_identity_key_listing.py::test_list_keys_sets_tenant_on_fresh_app_connection[0]
+FAILED tests/integration/refco/test_identity_key_listing.py::test_list_keys_sets_tenant_on_fresh_app_connection[1]
+2 failed, 8 passed in 5.09s

@@ -1,0 +1,34 @@
+..............FFFFF.                                                     [100%]
+=================================== FAILURES ===================================
+_ test_redact_server_credentials_fallbacks[RuntimeError: {"password": "JSONVALUE", "token": "JSONTOKEN"}-hidden0] _
+tests/unit/refco/test_m0_server_errors.py:143: in test_redact_server_credentials_fallbacks
+    assert all(value not in output for value in hidden)
+E   assert False
+E    +  where False = all(<generator object test_redact_server_credentials_fallbacks.<locals>.<genexpr> at 0x7694149891c0>)
+_ test_redact_server_credentials_fallbacks[RuntimeError: {'password': 'DICTVALUE', 'token': 'DICTTOKEN'}-hidden1] _
+tests/unit/refco/test_m0_server_errors.py:143: in test_redact_server_credentials_fallbacks
+    assert all(value not in output for value in hidden)
+E   assert False
+E    +  where False = all(<generator object test_redact_server_credentials_fallbacks.<locals>.<genexpr> at 0x769414434120>)
+_ test_redact_server_credentials_fallbacks[RuntimeError: password => ARROWVALUE-hidden2] _
+tests/unit/refco/test_m0_server_errors.py:143: in test_redact_server_credentials_fallbacks
+    assert all(value not in output for value in hidden)
+E   assert False
+E    +  where False = all(<generator object test_redact_server_credentials_fallbacks.<locals>.<genexpr> at 0x769414434820>)
+_ test_redact_server_credentials_fallbacks[RuntimeError: context "ordinary \\"quoted\\" VALUE" and 'other \\'quoted\\' VALUE' -hidden3] _
+tests/unit/refco/test_m0_server_errors.py:143: in test_redact_server_credentials_fallbacks
+    assert all(value not in output for value in hidden)
+E   assert False
+E    +  where False = all(<generator object test_redact_server_credentials_fallbacks.<locals>.<genexpr> at 0x769414434d60>)
+_ test_redact_server_credentials_fallbacks[RuntimeError: value aB3dE5gH7jK9mN2pQ4sT6vW8yZ1cD3fG-hidden4] _
+tests/unit/refco/test_m0_server_errors.py:143: in test_redact_server_credentials_fallbacks
+    assert all(value not in output for value in hidden)
+E   assert False
+E    +  where False = all(<generator object test_redact_server_credentials_fallbacks.<locals>.<genexpr> at 0x7694144351c0>)
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_m0_server_errors.py::test_redact_server_credentials_fallbacks[RuntimeError: {"password": "JSONVALUE", "token": "JSONTOKEN"}-hidden0]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_redact_server_credentials_fallbacks[RuntimeError: {'password': 'DICTVALUE', 'token': 'DICTTOKEN'}-hidden1]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_redact_server_credentials_fallbacks[RuntimeError: password => ARROWVALUE-hidden2]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_redact_server_credentials_fallbacks[RuntimeError: context "ordinary \\"quoted\\" VALUE" and 'other \\'quoted\\' VALUE' -hidden3]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_redact_server_credentials_fallbacks[RuntimeError: value aB3dE5gH7jK9mN2pQ4sT6vW8yZ1cD3fG-hidden4]
+5 failed, 15 passed in 5.70s

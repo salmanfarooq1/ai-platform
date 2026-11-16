@@ -1,0 +1,8 @@
+{
+  "id": "producer",
+  "kind": "user",
+  "name": "reference-producer",
+  "scopes": ["kb:write"],
+  "journey_policies": ["m0-baseline"],
+  "notes": "Writes knowledge-base content. Journey policies are tenant-wide; per-persona policy and column masking are not built."
+}

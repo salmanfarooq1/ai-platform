@@ -13,6 +13,10 @@ from core.identity.admin import AdminError
 from gateway.policy import KNOWN_TOOLS, PolicyError, parse_policy
 
 
+class PolicyConflict(AdminError):
+    """The active policy no longer matches the publisher's expected version."""
+
+
 def _tenant(cur: Any, slug: str) -> UUID:
     cur.execute("SELECT id FROM tenants WHERE slug = %s", (slug,))
     row = cur.fetchone()
@@ -25,8 +29,15 @@ def _as_tenant(cur: Any, tenant_id: UUID) -> None:
     cur.execute("SELECT set_config('app.tenant_id', %s, true)", (str(tenant_id),))
 
 
-def set_policy(conn: PgConnection, tenant_slug: str, document: Any, created_by: str) -> int:
-    """Validate and publish `document` as the tenant's next policy version. Returns the version."""
+def set_policy(
+    conn: PgConnection, tenant_slug: str, document: Any, created_by: str,
+    expected_version: int | None = None,
+) -> int:
+    """Append a policy version in the caller's transaction.
+
+    With `expected_version`, raise PolicyConflict unless it matches the active head
+    (0 when no policy exists). None publishes unconditionally. The caller commits.
+    """
     try:
         parsed = parse_policy(document)
     except PolicyError as exc:
@@ -37,6 +48,13 @@ def set_policy(conn: PgConnection, tenant_slug: str, document: Any, created_by: 
     with conn.cursor() as cur:
         tenant_id = _tenant(cur, tenant_slug)
         _as_tenant(cur, tenant_id)
+        # A stable tenant lock also serializes writers when no policy exists yet.
+        cur.execute("SELECT id FROM tenants WHERE id = %s FOR UPDATE", (str(tenant_id),))
+        cur.execute("SELECT version FROM policies WHERE tenant_id = %s AND active FOR UPDATE", (str(tenant_id),))
+        active = cur.fetchone()
+        active_version = int(active[0]) if active is not None else 0
+        if expected_version is not None and active_version != expected_version:
+            raise PolicyConflict(f"policy version changed: expected {expected_version}, active {active_version}")
         cur.execute("SELECT COALESCE(MAX(version), 0) + 1 FROM policies WHERE tenant_id = %s", (str(tenant_id),))
         row = cur.fetchone()
         assert row is not None  # an aggregate always returns a row

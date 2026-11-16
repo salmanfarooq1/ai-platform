@@ -50,7 +50,7 @@ The platform is a modular monolith ([ADR-0001](adr/0001-modular-monolith.md)). T
 | `migrations/` | Forward-only Alembic migrations |
 | `ui/` | The React and TypeScript console, workspace and public pages |
 
-The port interfaces are listed in [contracts/ports.md](contracts/ports.md). Import-lint tests enforce the package boundaries: only `adapters/` imports `litellm`, `boto3`, `redis`, `aiokafka` or `openshell`, and agent code never imports the model client directly ([ADR-0005](adr/0005-ports-and-adapters.md)).
+Product packages never import `scripts`; operator and showcase scripts consume public product APIs. The port interfaces are listed in [contracts/ports.md](contracts/ports.md). Import-lint tests enforce the package boundaries: only `adapters/` imports `litellm`, `boto3`, `redis`, `aiokafka` or `openshell`, and agent code never imports the model client directly ([ADR-0005](adr/0005-ports-and-adapters.md)).
 
 ### Modules and editions
 
@@ -87,7 +87,7 @@ Any exception inside a stage is a deny. An action has a kind (`kb.read`, `kb.wri
 
 **The execution boundary** is created once per request from the principal and the policy. It is passed to the agent and to MCP in the run configuration, never as an argument the model could set. A delegated boundary is always a subset of its parent.
 
-**Policies** are versioned documents per tenant. Publishing one creates a new version, and the newest is active from the next request. A tenant without a policy gets the platform default: what the key's scopes grant. A list left out of a policy allows nothing. A `tool_arguments` entry holds a JSON Schema per tool. Schemas may not use regular expressions, and a check that takes longer than 0.25 seconds is a deny.
+**Policies** are versioned documents per tenant. Publishing one creates a new version, and the newest is active from the next request. Operator code publishes through `gateway.admin.set_policy`; its optional `expected_version` rejects a changed active head with `PolicyConflict` (an `AdminError`), using 0 for no policy. Publication locks the tenant and active policy in the caller's transaction so concurrent writers allocate distinct versions and preserve history. A tenant without a policy gets the platform default: what the key's scopes grant. A list left out of a policy allows nothing. A `tool_arguments` entry holds a JSON Schema per tool. Schemas may not use regular expressions, and a check that takes longer than 0.25 seconds is a deny.
 
 ## 6. Decision records, the hash chain and receipts
 

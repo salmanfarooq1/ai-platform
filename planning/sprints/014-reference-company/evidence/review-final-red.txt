@@ -1,0 +1,943 @@
+FFFF.......FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF [ 69%]
+FFFFFFFFFFFF..........F.F.......                                         [100%]
+=================================== FAILURES ===================================
+_________________ test_publication_chains_expected_versions[0] _________________
+tests/unit/refco/test_m0_policy.py:18: in test_publication_chains_expected_versions
+    document, journey, kb = m0.publish_journey_policy(conn, "fixture", ["legal"], "ollama/chat")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'scripts.showcase.m0' has no attribute 'publish_journey_policy'
+_________________ test_publication_chains_expected_versions[7] _________________
+tests/unit/refco/test_m0_policy.py:18: in test_publication_chains_expected_versions
+    document, journey, kb = m0.publish_journey_policy(conn, "fixture", ["legal"], "ollama/chat")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'scripts.showcase.m0' has no attribute 'publish_journey_policy'
+_______________ test_concurrent_publication_stops_on_conflict[0] _______________
+tests/unit/refco/test_m0_policy.py:35: in test_concurrent_publication_stops_on_conflict
+    m0.publish_journey_policy(object(), "fixture", ["legal"], "ollama/chat")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'scripts.showcase.m0' has no attribute 'publish_journey_policy'
+_______________ test_concurrent_publication_stops_on_conflict[1] _______________
+tests/unit/refco/test_m0_policy.py:35: in test_concurrent_publication_stops_on_conflict
+    m0.publish_journey_policy(object(), "fixture", ["legal"], "ollama/chat")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'scripts.showcase.m0' has no attribute 'publish_journey_policy'
+________ test_server_readiness_failure_is_private[gap_sentinelkey-True] ________
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: [REDACTED]'
+_______ test_server_readiness_failure_is_private[gap_sentinelkey-False] ________
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: [REDACTED]'
+_ test_server_readiness_failure_is_private[postgresql://alice:DSNSENTINEL@pass@localhost/db-True] _
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: postgresql://alice:[REDACTED]@pass@localhost/db'
+_ test_server_readiness_failure_is_private[postgresql://alice:DSNSENTINEL@pass@localhost/db-False] _
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: postgresql://alice:[REDACTED]@pass@localhost/db'
+_ test_server_readiness_failure_is_private[ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL-True] _
+tests/unit/refco/test_m0_server_errors.py:61: in test_server_readiness_failure_is_private
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ALPHABETICS...ETICSENTINEL' not in 'PASS fixtur...Sprint 015\n'
+E     
+E     'ALPHABETICSENTINEL...LALPHABETICSENTINEL' is contained here:
+E       imeError: ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete
+E       SKIP receipt: prerequisite did not complete...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show)
+_ test_server_readiness_failure_is_private[ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL-False] _
+tests/unit/refco/test_m0_server_errors.py:61: in test_server_readiness_failure_is_private
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ALPHABETICS...ETICSENTINEL' not in 'PASS fixtur...Sprint 015\n'
+E     
+E     'ALPHABETICSENTINEL...LALPHABETICSENTINEL' is contained here:
+E       imeError: ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete
+E       SKIP receipt: prerequisite did not complete...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show)
+_ test_server_readiness_failure_is_private[{"password": "JSONSENTINEL"}-True] __
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: {[REDACTED]: [REDACTED]}'
+_ test_server_readiness_failure_is_private[{"password": "JSONSENTINEL"}-False] _
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: {[REDACTED]: [REDACTED]}'
+_ test_server_readiness_failure_is_private[Authorization: Bearer BEARERSENTINEL-True] _
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: Authorization: Bearer [REDACTED]'
+_ test_server_readiness_failure_is_private[Authorization: Bearer BEARERSENTINEL-False] _
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: Authorization: Bearer [REDACTED]'
+________ test_server_readiness_failure_is_private[key=KEYSENTINEL-True] ________
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: key=[REDACTED]'
+_______ test_server_readiness_failure_is_private[key=KEYSENTINEL-False] ________
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: key=[REDACTED]'
+_____ test_server_readiness_failure_is_private[ToKeN: TOKENSENTINEL-True] ______
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: ToKeN: [REDACTED]'
+_____ test_server_readiness_failure_is_private[ToKeN: TOKENSENTINEL-False] _____
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: ToKeN: [REDACTED]'
+____ test_server_readiness_failure_is_private[SECRET='SECRETSENTINEL'-True] ____
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: SECRET=[REDACTED]'
+___ test_server_readiness_failure_is_private[SECRET='SECRETSENTINEL'-False] ____
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: SECRET=[REDACTED]'
+_ test_server_readiness_failure_is_private[api_key="FIRSTSENTINEL\\"SECONDSENTINEL"-True] _
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: api_key=[REDACTED]'
+_ test_server_readiness_failure_is_private[api_key="FIRSTSENTINEL\\"SECONDSENTINEL"-False] _
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: api_key=[REDACTED]'
+____ test_server_readiness_failure_is_private[Password: PASSSENTINEL-True] _____
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: Password: [REDACTED]'
+____ test_server_readiness_failure_is_private[Password: PASSSENTINEL-False] ____
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: Password: [REDACTED]'
+_______ test_server_readiness_failure_is_private[sk-STYLESENTINEL-True] ________
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: [REDACTED]'
+_______ test_server_readiness_failure_is_private[sk-STYLESENTINEL-False] _______
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: [REDACTED]'
+___ test_server_readiness_failure_is_private[password => ARROWSENTINEL-True] ___
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: password => [REDACTED]'
+__ test_server_readiness_failure_is_private[password => ARROWSENTINEL-False] ___
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: password => [REDACTED]'
+_ test_server_readiness_failure_is_private[ordinary unquoted JOURNEYSENTINEL-True] _
+tests/unit/refco/test_m0_server_errors.py:61: in test_server_readiness_failure_is_private
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ordinary un...RNEYSENTINEL' not in 'PASS fixtur...Sprint 015\n'
+E     
+E     'ordinary unquoted JOURNEYSENTINEL' is contained here:
+E       imeError: ordinary unquoted JOURNEYSENTINEL
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete
+E       SKIP receipt: prerequisite did not complete...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show)
+_ test_server_readiness_failure_is_private[ordinary unquoted JOURNEYSENTINEL-False] _
+tests/unit/refco/test_m0_server_errors.py:61: in test_server_readiness_failure_is_private
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ordinary un...RNEYSENTINEL' not in 'PASS fixtur...Sprint 015\n'
+E     
+E     'ordinary unquoted JOURNEYSENTINEL' is contained here:
+E       imeError: ordinary unquoted JOURNEYSENTINEL
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete
+E       SKIP receipt: prerequisite did not complete...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show)
+_ test_server_readiness_failure_is_private[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT-True] _
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API exited before readiness: RuntimeError: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+_ test_server_readiness_failure_is_private[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT-False] _
+tests/unit/refco/test_m0_server_errors.py:63: in test_server_readiness_failure_is_private
+    assert "(RuntimeError)" in failures[0]
+E   AssertionError: assert '(RuntimeError)' in 'FAIL journey: Gateway-only API did not become ready: RuntimeError: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+_ test_journey_exception_messages_never_reach_stdout[ValueError-gap_sentinelkey] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('gap_sentinelkey' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'gap_sentinelkey' is contained here:
+E       FAIL journey: ValueError: gap_sentinelkey
+E     ?                           +++++++++++++++
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-postgresql://alice:DSNSENTINEL@pass@localhost/db] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('postgresql:...localhost/db' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'postgresql://alice...L@pass@localhost/db' is contained here:
+E       FAIL journey: ValueError: postgresql://alice:DSNSENTINEL@pass@localhost/db
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ALPHABETICS...ETICSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'ALPHABETICSENTINEL...LALPHABETICSENTINEL' is contained here:
+E       FAIL journey: ValueError: ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-{"password": "JSONSENTINEL"}] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   assert ('{"password"...ONSENTINEL"}' not in 'FAIL journe...Sprint 015\n'
+E     
+E     '{"password": "JSONSENTINEL"}' is contained here:
+E       FAIL journey: ValueError: {"password": "JSONSENTINEL"}
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-Authorization: Bearer BEARERSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('Authorizati...ARERSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'Authorization: Bearer BEARERSENTINEL' is contained here:
+E       FAIL journey: ValueError: Authorization: Bearer BEARERSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-key=KEYSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('key=KEYSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'key=KEYSENTINEL' is contained here:
+E       FAIL journey: ValueError: key=KEYSENTINEL
+E     ?                           +++++++++++++++
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-ToKeN: TOKENSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ToKeN: TOKENSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'ToKeN: TOKENSENTINEL' is contained here:
+E       FAIL journey: ValueError: ToKeN: TOKENSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-SECRET='SECRETSENTINEL'] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   assert ("SECRET='SECRETSENTINEL'" not in 'FAIL journe...Sprint 015\n'
+E     
+E     "SECRET='SECRETSENTINEL'" is contained here:
+E       FAIL journey: ValueError: SECRET='SECRETSENTINEL'
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-api_key="FIRSTSENTINEL\\"SECONDSENTINEL"] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   assert ('api_key="FI...ONDSENTINEL"' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'api_key="FIRSTSENTINEL\\"SECONDSENTINEL"' is contained here:
+E       FAIL journey: ValueError: api_key="FIRSTSENTINEL\"SECONDSENTINEL"
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-Password: PASSSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('Password: PASSSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'Password: PASSSENTINEL' is contained here:
+E       FAIL journey: ValueError: Password: PASSSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-sk-STYLESENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('sk-STYLESENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'sk-STYLESENTINEL' is contained here:
+E       FAIL journey: ValueError: sk-STYLESENTINEL
+E     ?                           ++++++++++++++++
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-password => ARROWSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('password => ARROWSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'password => ARROWSENTINEL' is contained here:
+E       FAIL journey: ValueError: password => ARROWSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-ordinary unquoted JOURNEYSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ordinary un...RNEYSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'ordinary unquoted JOURNEYSENTINEL' is contained here:
+E       FAIL journey: ValueError: ordinary unquoted JOURNEYSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ValueError-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('xxxxxxxxxxx...INELFRAGMENT' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'xxxxxxxxxxxxxxxxxx...OSSSENTINELFRAGMENT' is contained here:
+E       FAIL journey: ValueError: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-gap_sentinelkey] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('gap_sentinelkey' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'gap_sentinelkey' is contained here:
+E       FAIL journey: RuntimeError: gap_sentinelkey
+E     ?                             +++++++++++++++
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-postgresql://alice:DSNSENTINEL@pass@localhost/db] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('postgresql:...localhost/db' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'postgresql://alice...L@pass@localhost/db' is contained here:
+E       FAIL journey: RuntimeError: postgresql://alice:DSNSENTINEL@pass@localhost/db
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ALPHABETICS...ETICSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'ALPHABETICSENTINEL...LALPHABETICSENTINEL' is contained here:
+E       FAIL journey: RuntimeError: ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-{"password": "JSONSENTINEL"}] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   assert ('{"password"...ONSENTINEL"}' not in 'FAIL journe...Sprint 015\n'
+E     
+E     '{"password": "JSONSENTINEL"}' is contained here:
+E       FAIL journey: RuntimeError: {"password": "JSONSENTINEL"}
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-Authorization: Bearer BEARERSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('Authorizati...ARERSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'Authorization: Bearer BEARERSENTINEL' is contained here:
+E       FAIL journey: RuntimeError: Authorization: Bearer BEARERSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-key=KEYSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('key=KEYSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'key=KEYSENTINEL' is contained here:
+E       FAIL journey: RuntimeError: key=KEYSENTINEL
+E     ?                             +++++++++++++++
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-ToKeN: TOKENSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ToKeN: TOKENSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'ToKeN: TOKENSENTINEL' is contained here:
+E       FAIL journey: RuntimeError: ToKeN: TOKENSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-SECRET='SECRETSENTINEL'] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   assert ("SECRET='SECRETSENTINEL'" not in 'FAIL journe...Sprint 015\n'
+E     
+E     "SECRET='SECRETSENTINEL'" is contained here:
+E       FAIL journey: RuntimeError: SECRET='SECRETSENTINEL'
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-api_key="FIRSTSENTINEL\\"SECONDSENTINEL"] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   assert ('api_key="FI...ONDSENTINEL"' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'api_key="FIRSTSENTINEL\\"SECONDSENTINEL"' is contained here:
+E       FAIL journey: RuntimeError: api_key="FIRSTSENTINEL\"SECONDSENTINEL"
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-Password: PASSSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('Password: PASSSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'Password: PASSSENTINEL' is contained here:
+E       FAIL journey: RuntimeError: Password: PASSSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-sk-STYLESENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('sk-STYLESENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'sk-STYLESENTINEL' is contained here:
+E       FAIL journey: RuntimeError: sk-STYLESENTINEL
+E     ?                             ++++++++++++++++
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-password => ARROWSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('password => ARROWSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'password => ARROWSENTINEL' is contained here:
+E       FAIL journey: RuntimeError: password => ARROWSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-ordinary unquoted JOURNEYSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ordinary un...RNEYSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'ordinary unquoted JOURNEYSENTINEL' is contained here:
+E       FAIL journey: RuntimeError: ordinary unquoted JOURNEYSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[RuntimeError-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('xxxxxxxxxxx...INELFRAGMENT' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'xxxxxxxxxxxxxxxxxx...OSSSENTINELFRAGMENT' is contained here:
+E       FAIL journey: RuntimeError: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-gap_sentinelkey] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('gap_sentinelkey' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'gap_sentinelkey' is contained here:
+E       FAIL journey: ConnectError: gap_sentinelkey
+E     ?                             +++++++++++++++
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-postgresql://alice:DSNSENTINEL@pass@localhost/db] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('postgresql:...localhost/db' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'postgresql://alice...L@pass@localhost/db' is contained here:
+E       FAIL journey: ConnectError: postgresql://alice:DSNSENTINEL@pass@localhost/db
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ALPHABETICS...ETICSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'ALPHABETICSENTINEL...LALPHABETICSENTINEL' is contained here:
+E       FAIL journey: ConnectError: ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-{"password": "JSONSENTINEL"}] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   assert ('{"password"...ONSENTINEL"}' not in 'FAIL journe...Sprint 015\n'
+E     
+E     '{"password": "JSONSENTINEL"}' is contained here:
+E       FAIL journey: ConnectError: {"password": "JSONSENTINEL"}
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-Authorization: Bearer BEARERSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('Authorizati...ARERSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'Authorization: Bearer BEARERSENTINEL' is contained here:
+E       FAIL journey: ConnectError: Authorization: Bearer BEARERSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-key=KEYSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('key=KEYSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'key=KEYSENTINEL' is contained here:
+E       FAIL journey: ConnectError: key=KEYSENTINEL
+E     ?                             +++++++++++++++
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-ToKeN: TOKENSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ToKeN: TOKENSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'ToKeN: TOKENSENTINEL' is contained here:
+E       FAIL journey: ConnectError: ToKeN: TOKENSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-SECRET='SECRETSENTINEL'] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   assert ("SECRET='SECRETSENTINEL'" not in 'FAIL journe...Sprint 015\n'
+E     
+E     "SECRET='SECRETSENTINEL'" is contained here:
+E       FAIL journey: ConnectError: SECRET='SECRETSENTINEL'
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-api_key="FIRSTSENTINEL\\"SECONDSENTINEL"] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   assert ('api_key="FI...ONDSENTINEL"' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'api_key="FIRSTSENTINEL\\"SECONDSENTINEL"' is contained here:
+E       FAIL journey: ConnectError: api_key="FIRSTSENTINEL\"SECONDSENTINEL"
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-Password: PASSSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('Password: PASSSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'Password: PASSSENTINEL' is contained here:
+E       FAIL journey: ConnectError: Password: PASSSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-sk-STYLESENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('sk-STYLESENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'sk-STYLESENTINEL' is contained here:
+E       FAIL journey: ConnectError: sk-STYLESENTINEL
+E     ?                             ++++++++++++++++
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-password => ARROWSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('password => ARROWSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'password => ARROWSENTINEL' is contained here:
+E       FAIL journey: ConnectError: password => ARROWSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-ordinary unquoted JOURNEYSENTINEL] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('ordinary un...RNEYSENTINEL' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'ordinary unquoted JOURNEYSENTINEL' is contained here:
+E       FAIL journey: ConnectError: ordinary unquoted JOURNEYSENTINEL
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+_ test_journey_exception_messages_never_reach_stdout[ConnectError-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT] _
+tests/unit/refco/test_m0_server_errors.py:83: in test_journey_exception_messages_never_reach_stdout
+    assert message not in output and "SENTINEL" not in output
+E   AssertionError: assert ('xxxxxxxxxxx...INELFRAGMENT' not in 'FAIL journe...Sprint 015\n'
+E     
+E     'xxxxxxxxxxxxxxxxxx...OSSSENTINELFRAGMENT' is contained here:
+E       FAIL journey: ConnectError: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT
+E       SKIP fixture: prerequisite did not complete
+E       SKIP gateway: prerequisite did not complete
+E       SKIP policy: prerequisite did not complete
+E       SKIP search: prerequisite did not complete...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show)
+__________________ test_server_failure_replaces_invalid_utf8 ___________________
+tests/unit/refco/test_m0_server_errors.py:106: in test_server_failure_replaces_invalid_utf8
+    assert "(RuntimeError)" in output
+E   AssertionError: assert '(RuntimeError)' in 'PASS fixture: tenant credential and database verified\nFAIL journey: Gateway-only API exited before readiness: Runtim... modules: prerequisite did not complete\nSKIP restore: prerequisite did not complete\nSKIP restore drill: Sprint 015\n'
+__________________ test_stderr_retained_when_terminate_raises __________________
+tests/unit/refco/test_m0_server_errors.py:128: in test_stderr_retained_when_terminate_raises
+    assert (runner / "m0-server.log").read_text() == "RuntimeError: startup failed\n"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-ubuntu/pytest-92/test_stderr_retained_when_term0/.showcase/m0-server.log'
+_____________ test_log_creation_refuses_existing_file_and_symlink ______________
+tests/unit/refco/test_m0_server_errors.py:136: in test_log_creation_refuses_existing_file_and_symlink
+    m0.open_server_log()
+    ^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'scripts.showcase.m0' has no attribute 'open_server_log'
+_________________ test_showcase_contains_no_product_sql[m0.py] _________________
+tests/unit/refco/test_public_seams.py:58: in test_showcase_contains_no_product_sql
+    assert not product_sql(path.read_text()), f"{path.name} issues SQL against product tables"
+E   AssertionError: m0.py issues SQL against product tables
+E   assert not [79, 87, 252, 283]
+E    +  where [79, 87, 252, 283] = product_sql('"""Run the reference-company M0 journey against an explicitly verified fixture tenant."""\n\nimport base64\nimport js...:\n        print("PASS restore drill")\n    return int(failed)\n\n\nif __name__ == "__main__":\n    sys.exit(main())\n')
+E    +    where '"""Run the reference-company M0 journey against an explicitly verified fixture tenant."""\n\nimport base64\nimport js...:\n        print("PASS restore drill")\n    return int(failed)\n\n\nif __name__ == "__main__":\n    sys.exit(main())\n' = read_text()
+E    +      where read_text = PosixPath('/home/ubuntu/ai-platform-sprints/014-reference-company/scripts/showcase/m0.py').read_text
+______________ test_showcase_contains_no_product_sql[personas.py] ______________
+tests/unit/refco/test_public_seams.py:58: in test_showcase_contains_no_product_sql
+    assert not product_sql(path.read_text()), f"{path.name} issues SQL against product tables"
+E   AssertionError: personas.py issues SQL against product tables
+E   assert not [170, 189, 199, 200, 203, 206, ...]
+E    +  where [170, 189, 199, 200, 203, 206, ...] = product_sql('"""Private persona setup using the identity CLI; never creates a tenant.\n\nRun through setup_personas.sh in the exis... inspection", file=sys.stderr)\n        return 2\n    return 0\n\n\nif __name__ == "__main__":\n    sys.exit(main())\n')
+E    +    where '"""Private persona setup using the identity CLI; never creates a tenant.\n\nRun through setup_personas.sh in the exis... inspection", file=sys.stderr)\n        return 2\n    return 0\n\n\nif __name__ == "__main__":\n    sys.exit(main())\n' = read_text()
+E    +      where read_text = PosixPath('/home/ubuntu/ai-platform-sprints/014-reference-company/scripts/showcase/personas.py').read_text
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_m0_policy.py::test_publication_chains_expected_versions[0]
+FAILED tests/unit/refco/test_m0_policy.py::test_publication_chains_expected_versions[7]
+FAILED tests/unit/refco/test_m0_policy.py::test_concurrent_publication_stops_on_conflict[0]
+FAILED tests/unit/refco/test_m0_policy.py::test_concurrent_publication_stops_on_conflict[1]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[gap_sentinelkey-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[gap_sentinelkey-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[postgresql://alice:DSNSENTINEL@pass@localhost/db-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[postgresql://alice:DSNSENTINEL@pass@localhost/db-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[{"password": "JSONSENTINEL"}-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[{"password": "JSONSENTINEL"}-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[Authorization: Bearer BEARERSENTINEL-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[Authorization: Bearer BEARERSENTINEL-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[key=KEYSENTINEL-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[key=KEYSENTINEL-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[ToKeN: TOKENSENTINEL-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[ToKeN: TOKENSENTINEL-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[SECRET='SECRETSENTINEL'-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[SECRET='SECRETSENTINEL'-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[api_key="FIRSTSENTINEL\\"SECONDSENTINEL"-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[api_key="FIRSTSENTINEL\\"SECONDSENTINEL"-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[Password: PASSSENTINEL-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[Password: PASSSENTINEL-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[sk-STYLESENTINEL-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[sk-STYLESENTINEL-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[password => ARROWSENTINEL-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[password => ARROWSENTINEL-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[ordinary unquoted JOURNEYSENTINEL-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[ordinary unquoted JOURNEYSENTINEL-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT-True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_private[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT-False]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-gap_sentinelkey]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-postgresql://alice:DSNSENTINEL@pass@localhost/db]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-{"password": "JSONSENTINEL"}]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-Authorization: Bearer BEARERSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-key=KEYSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-ToKeN: TOKENSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-SECRET='SECRETSENTINEL']
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-api_key="FIRSTSENTINEL\\"SECONDSENTINEL"]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-Password: PASSSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-sk-STYLESENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-password => ARROWSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-ordinary unquoted JOURNEYSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ValueError-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-gap_sentinelkey]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-postgresql://alice:DSNSENTINEL@pass@localhost/db]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-{"password": "JSONSENTINEL"}]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-Authorization: Bearer BEARERSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-key=KEYSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-ToKeN: TOKENSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-SECRET='SECRETSENTINEL']
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-api_key="FIRSTSENTINEL\\"SECONDSENTINEL"]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-Password: PASSSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-sk-STYLESENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-password => ARROWSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-ordinary unquoted JOURNEYSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[RuntimeError-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-gap_sentinelkey]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-postgresql://alice:DSNSENTINEL@pass@localhost/db]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-ALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINELALPHABETICSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-{"password": "JSONSENTINEL"}]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-Authorization: Bearer BEARERSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-key=KEYSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-ToKeN: TOKENSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-SECRET='SECRETSENTINEL']
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-api_key="FIRSTSENTINEL\\"SECONDSENTINEL"]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-Password: PASSSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-sk-STYLESENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-password => ARROWSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-ordinary unquoted JOURNEYSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_journey_exception_messages_never_reach_stdout[ConnectError-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx CROSSSENTINELFRAGMENT]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_replaces_invalid_utf8
+FAILED tests/unit/refco/test_m0_server_errors.py::test_stderr_retained_when_terminate_raises
+FAILED tests/unit/refco/test_m0_server_errors.py::test_log_creation_refuses_existing_file_and_symlink
+FAILED tests/unit/refco/test_public_seams.py::test_showcase_contains_no_product_sql[m0.py]
+FAILED tests/unit/refco/test_public_seams.py::test_showcase_contains_no_product_sql[personas.py]
+79 failed, 25 passed in 19.62s
+F...F                                                                    [100%]
+=================================== FAILURES ===================================
+_______________ test_fixture_uses_operator_credential_inspection _______________
+tests/unit/refco/test_m0_public_reads.py:17: in test_fixture_uses_operator_credential_inspection
+    assert m0.verified_fixture("owner", {"tenant_id": "tenant", "database": "fixture-db"}) == ("fixture", ["legal"])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/showcase/m0.py:73: in verified_fixture
+    raise ValueError("SHOWCASE_FIXTURE_KEY must be the verified fixture-owned tenant credential")
+E   ValueError: SHOWCASE_FIXTURE_KEY must be the verified fixture-owned tenant credential
+_____________ test_decision_lookup_uses_auditor_and_request_filter _____________
+tests/unit/refco/test_m0_public_reads.py:41: in test_decision_lookup_uses_auditor_and_request_filter
+    assert m0.recorded_decision(client, {"Authorization": "Bearer auditor"}, "request", "model_not_allowed") == "deny"
+           ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'scripts.showcase.m0' has no attribute 'recorded_decision'
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_m0_public_reads.py::test_fixture_uses_operator_credential_inspection
+FAILED tests/unit/refco/test_m0_public_reads.py::test_decision_lookup_uses_auditor_and_request_filter
+2 failed, 3 passed in 3.96s
+sssss                                                                    [100%]
+5 skipped in 3.81s
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+_________ test_operator_credential_inspection_fails_closed[malformed] __________
+tests/integration/refco/test_operator_reads.py:21: in test_operator_credential_inspection_fails_closed
+    admin.inspect_credential(conn, token)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'core.identity.admin' has no attribute 'inspect_credential'
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Trust baseline: the decision hash chain, retention, eval runs and the metrics reads (Sprint 008).
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Sandboxed agent runs: the sandbox event log and the run tokens (Sprint 009).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, Decision record versions, deployment shape probe and module-filtered job claims (Sprint 012).
+________ test_operator_credential_inspection_fails_closed[wrong-secret] ________
+tests/integration/refco/test_operator_reads.py:21: in test_operator_credential_inspection_fails_closed
+    admin.inspect_credential(conn, token)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'core.identity.admin' has no attribute 'inspect_credential'
+__________ test_operator_credential_inspection_fails_closed[revoked] ___________
+tests/integration/refco/test_operator_reads.py:21: in test_operator_credential_inspection_fails_closed
+    admin.inspect_credential(conn, token)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'core.identity.admin' has no attribute 'inspect_credential'
+__________ test_operator_credential_inspection_fails_closed[disabled] __________
+tests/integration/refco/test_operator_reads.py:21: in test_operator_credential_inspection_fails_closed
+    admin.inspect_credential(conn, token)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'core.identity.admin' has no attribute 'inspect_credential'
+____________ test_operator_reads_are_tenant_scoped_and_secret_free _____________
+tests/integration/refco/test_operator_reads.py:27: in test_operator_reads_are_tenant_scoped_and_secret_free
+    record = admin.inspect_credential(conn, first.tokens["full"])
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'core.identity.admin' has no attribute 'inspect_credential'
+=========================== short test summary info ============================
+FAILED tests/integration/refco/test_operator_reads.py::test_operator_credential_inspection_fails_closed[malformed]
+FAILED tests/integration/refco/test_operator_reads.py::test_operator_credential_inspection_fails_closed[wrong-secret]
+FAILED tests/integration/refco/test_operator_reads.py::test_operator_credential_inspection_fails_closed[revoked]
+FAILED tests/integration/refco/test_operator_reads.py::test_operator_credential_inspection_fails_closed[disabled]
+FAILED tests/integration/refco/test_operator_reads.py::test_operator_reads_are_tenant_scoped_and_secret_free
+5 failed in 4.76s
+.FF........................................                              [100%]
+=================================== FAILURES ===================================
+_________________ test_ollama_reachable_only_through_recorder __________________
+tests/integration/refco/test_m0.py:215: in test_ollama_reachable_only_through_recorder
+    assert result.returncode == 0, result.stdout
+E   AssertionError: PASS fixture: tenant credential and database verified
+E     INFO gateway: private server log at /tmp/pytest-of-ubuntu/pytest-95/test_ollama_reachable_only_thr0/.showcase/m0-server.log
+E     PASS gateway: owned Gateway-only API started
+E     PASS policy: baseline and deny versions recorded
+E     PASS search: model admission denied; Ollama request count unchanged
+E     FAIL journey: journey failed (HTTPStatusError)
+E     PASS restore: baseline appended as a new policy version
+E     SKIP receipt: prerequisite did not complete
+E     SKIP modules: prerequisite did not complete
+E     SKIP restore drill: Sprint 015
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-dDxeGklu-py3.11/bin/python', '-c', '\nimp...erequisite did not complete\nSKIP modules: prerequisite did not complete\nSKIP restore drill: Sprint 015\n', stderr='').returncode
+______________ test_gateway_only_auditor_reads_request_decisions _______________
+tests/integration/refco/test_m0.py:251: in test_gateway_only_auditor_reads_request_decisions
+    assert decisions.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404 Not Found]>.status_code
+----------------------------- Captured stdout call -----------------------------
+{"timestamp": "2026-11-16T11:43:07.347661+00:00", "level": "INFO", "logger": "api.db", "message": "[db] Pool ready: 20 connections/worker \u00d7 1 worker(s) = 20 total DB connections", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-11-16T11:43:07.359170+00:00", "level": "INFO", "logger": "evidence.receipts", "message": "receipt signing key generated for local use (not stored): key_id=32b54c773d5e29a9", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-11-16T11:43:07.370618+00:00", "level": "INFO", "logger": "adapters.redis_cache", "message": "[cache] Semantic cache index created", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-11-16T11:43:07.370986+00:00", "level": "INFO", "logger": "api.main", "message": "startup complete: enabled modules gateway", "request_id": "-", "trace_id": "-"}
+{"timestamp": "2026-11-16T11:43:07.515061+00:00", "level": "INFO", "logger": "api.access", "message": "request completed", "request_id": "3ca1820829104aa78984431e0c1f8455", "trace_id": "ec886d6d1c73822151c1ba1740864a7c", "tenant_id": "970f7700-9441-4889-9aea-afb70ab50d19", "principal_id": "ccec2131-faab-4353-bb9e-0a939498da06", "method": "POST", "path": "/v1/agent/query", "status": 404, "duration_ms": 79.77}
+{"timestamp": "2026-11-16T11:43:07.533983+00:00", "level": "INFO", "logger": "api.access", "message": "request completed", "request_id": "a5c82b49254a4db7ad155e2a5b58b89f", "trace_id": "102ef0a9b694b5ad5c8069d855da12bd", "tenant_id": "970f7700-9441-4889-9aea-afb70ab50d19", "principal_id": "ccec2131-faab-4353-bb9e-0a939498da06", "method": "GET", "path": "/v1/console/decisions", "status": 404, "duration_ms": 15.5}
+------------------------------ Captured log call -------------------------------
+INFO     api.db:pool.py:58 [db] Pool ready: 20 connections/worker × 1 worker(s) = 20 total DB connections
+INFO     evidence.receipts:receipts.py:113 receipt signing key generated for local use (not stored): key_id=32b54c773d5e29a9
+INFO     adapters.redis_cache:redis_cache.py:119 [cache] Semantic cache index created
+INFO     api.main:main.py:94 startup complete: enabled modules gateway
+INFO     api.access:logging.py:60 request completed
+INFO     api.access:logging.py:60 request completed
+=========================== short test summary info ============================
+FAILED tests/integration/refco/test_m0.py::test_ollama_reachable_only_through_recorder
+FAILED tests/integration/refco/test_m0.py::test_gateway_only_auditor_reads_request_decisions
+2 failed, 41 passed in 163.60s (0:02:43)

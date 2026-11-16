@@ -1,0 +1,10 @@
+sprint 014 acceptance 2026-11-16T23:17:18+05:00 6682228 (+ working tree)
+ruff           PASS  rc=0  1s  All checks passed!
+mypy           PASS  rc=0  -1s  Success: no issues found in 172 source files
+contracts      PASS  rc=0  1s  Contracts: 7 kept, 0 broken.
+unit           PASS  rc=0  84s  1214 passed, 948 deselected, 2 warnings in 78.44s (0:01:18)
+refco          PASS  rc=0  75s  39 passed in 65.27s (0:01:05)
+ui-types       PASS  rc=0  9s  
+playwright     PASS  rc=0  270s    1 passed (4.9m)
+live-m0        PASS  rc=0  19s  live m0 exit 0
+failures: 0

@@ -94,6 +94,7 @@ The 15 strict rules are in `docs/architecture.md` section 2. Never break one. If
 8. **No brand name on the platform.** Use functional names. Names belong only to use cases built on top.
 9. **Never reference any employer or employer product.** The working method is adapted from the public 120x Operators Kit.
 10. **Branch per sprint:** `sprint/NNN-slug`. Nothing goes straight to `main`.
+11. **Showcases use only public seams.** Showcase and reference-company code calls the product only through what a real client or operator could use (API, CLI, public admin functions). Never private imports, raw SQL into product tables, env reads inside adapters or global SDK overrides. If the showcase needs something the product lacks, add it to the product with tests, or write it in `planning/QUESTIONS.md`.
 
 ## Builder autonomy policy
 The Builder works continuously until the sprint is complete. It never pauses to ask for review.

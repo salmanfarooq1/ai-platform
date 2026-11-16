@@ -1,0 +1,179 @@
+...............FFFFFFFFFFFFFFFFFFFFFFFFF.F                               [100%]
+=================================== FAILURES ===================================
+______ test_sql_guard_recognizes_any_table[SELECT id FROM arbitrary_rows] ______
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'SELECT id FROM arbitrary_rows'")
+__ test_sql_guard_recognizes_any_table[INSERT INTO arbitrary_rows VALUES (1)] __
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'INSERT INTO arbitrary_rows VALUES (1)'")
+___ test_sql_guard_recognizes_any_table[UPDATE arbitrary_rows SET value = 2] ___
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'UPDATE arbitrary_rows SET value = 2'")
+_______ test_sql_guard_recognizes_any_table[DELETE FROM arbitrary_rows] ________
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'DELETE FROM arbitrary_rows'")
+________ test_sql_guard_recognizes_any_table[LOCK TABLE arbitrary_rows] ________
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'LOCK TABLE arbitrary_rows'")
+_________ test_sql_guard_recognizes_any_table[TRUNCATE arbitrary_rows] _________
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'TRUNCATE arbitrary_rows'")
+__ test_sql_guard_recognizes_any_table[ALTER TABLE arbitrary_rows ADD x int] ___
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'ALTER TABLE arbitrary_rows ADD x int'")
+_ test_sql_guard_recognizes_any_table[CREATE VIEW arbitrary_view AS SELECT 1] __
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'CREATE VIEW arbitrary_view AS SELECT 1'")
+________ test_sql_guard_recognizes_any_table[DROP VIEW arbitrary_view] _________
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'DROP VIEW arbitrary_view'")
+______ test_sql_guard_recognizes_any_table[sElEcT x\nFrOm arbitrary_rows] ______
+tests/unit/refco/test_public_seams.py:78: in test_sql_guard_recognizes_any_table
+    assert product_sql(f"query = {statement!r}")
+E   assert []
+E    +  where [] = product_sql("query = 'sElEcT x\\nFrOm arbitrary_rows'")
+__________ test_sql_guard_rejects_calls_without_literal_sql[execute] ___________
+tests/unit/refco/test_public_seams.py:83: in test_sql_guard_rejects_calls_without_literal_sql
+    assert product_sql(f"connection.{method}(query)")
+E   AssertionError: assert []
+E    +  where [] = product_sql('connection.execute(query)')
+________ test_sql_guard_rejects_calls_without_literal_sql[executemany] _________
+tests/unit/refco/test_public_seams.py:83: in test_sql_guard_rejects_calls_without_literal_sql
+    assert product_sql(f"connection.{method}(query)")
+E   AssertionError: assert []
+E    +  where [] = product_sql('connection.executemany(query)')
+____________ test_sql_guard_rejects_calls_without_literal_sql[copy] ____________
+tests/unit/refco/test_public_seams.py:83: in test_sql_guard_rejects_calls_without_literal_sql
+    assert product_sql(f"connection.{method}(query)")
+E   AssertionError: assert []
+E    +  where [] = product_sql('connection.copy(query)')
+___________ test_sql_guard_rejects_database_imports[import-psycopg] ____________
+tests/unit/refco/test_public_seams.py:90: in test_sql_guard_rejects_database_imports
+    assert product_sql(source)
+E   AssertionError: assert []
+E    +  where [] = product_sql('import psycopg.extras as db')
+___________ test_sql_guard_rejects_database_imports[import-psycopg2] ___________
+tests/unit/refco/test_public_seams.py:90: in test_sql_guard_rejects_database_imports
+    assert product_sql(source)
+E   AssertionError: assert []
+E    +  where [] = product_sql('import psycopg2.extras as db')
+__________ test_sql_guard_rejects_database_imports[import-sqlalchemy] __________
+tests/unit/refco/test_public_seams.py:90: in test_sql_guard_rejects_database_imports
+    assert product_sql(source)
+E   AssertionError: assert []
+E    +  where [] = product_sql('import sqlalchemy.extras as db')
+___________ test_sql_guard_rejects_database_imports[import-asyncpg] ____________
+tests/unit/refco/test_public_seams.py:90: in test_sql_guard_rejects_database_imports
+    assert product_sql(source)
+E   AssertionError: assert []
+E    +  where [] = product_sql('import asyncpg.extras as db')
+____________ test_sql_guard_rejects_database_imports[from-psycopg] _____________
+tests/unit/refco/test_public_seams.py:90: in test_sql_guard_rejects_database_imports
+    assert product_sql(source)
+E   AssertionError: assert []
+E    +  where [] = product_sql('from psycopg import connect')
+____________ test_sql_guard_rejects_database_imports[from-psycopg2] ____________
+tests/unit/refco/test_public_seams.py:90: in test_sql_guard_rejects_database_imports
+    assert product_sql(source)
+E   AssertionError: assert []
+E    +  where [] = product_sql('from psycopg2 import connect')
+___________ test_sql_guard_rejects_database_imports[from-sqlalchemy] ___________
+tests/unit/refco/test_public_seams.py:90: in test_sql_guard_rejects_database_imports
+    assert product_sql(source)
+E   AssertionError: assert []
+E    +  where [] = product_sql('from sqlalchemy import connect')
+____________ test_sql_guard_rejects_database_imports[from-asyncpg] _____________
+tests/unit/refco/test_public_seams.py:90: in test_sql_guard_rejects_database_imports
+    assert product_sql(source)
+E   AssertionError: assert []
+E    +  where [] = product_sql('from asyncpg import connect')
+______________ test_server_entrypoint_has_no_adapter_construction ______________
+tests/unit/refco/test_public_seams.py:95: in test_server_entrypoint_has_no_adapter_construction
+    assert not [node for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+E   assert not [<ast.ImportFrom object at 0x7fb59287fb50>]
+_____________ test_wait_for_lock_observes_backend_before_returning _____________
+tests/unit/refco/test_review_regressions.py:14: in test_wait_for_lock_observes_backend_before_returning
+    cursor = conn.cursor.return_value.__enter__.return_value
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:640: in __getattr__
+    raise AttributeError(name)
+E   AttributeError: __enter__
+_______________________ test_wait_for_lock_timeout_fails _______________________
+tests/unit/refco/test_review_regressions.py:24: in test_wait_for_lock_timeout_fails
+    conn.cursor.return_value.__enter__.return_value.fetchone.return_value = ("Client",)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:640: in __getattr__
+    raise AttributeError(name)
+E   AttributeError: __enter__
+____________________ test_m0_shell_resolves_runner[poetry] _____________________
+tests/unit/refco/test_review_regressions.py:46: in test_m0_shell_resolves_runner
+    assert result.returncode == 0
+E   AssertionError: assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['/bin/bash', '/home/ubuntu/ai-platform-sprints/014-reference-company/scripts/showcase/m0.sh', '...AIL prerequisites: missing state; run scripts/showcase/setup_personas.sh, see scripts/showcase/README.md\n', stderr='').returncode
+____________________ test_m0_shell_resolves_runner[missing] ____________________
+tests/unit/refco/test_review_regressions.py:44: in test_m0_shell_resolves_runner
+    assert "poetry on PATH" in result.stderr and "SHOWCASE_PYTHON" in result.stderr
+E   AssertionError: assert ('poetry on PATH' in '')
+E    +  where '' = CompletedProcess(args=['/bin/bash', '/home/ubuntu/ai-platform-sprints/014-reference-company/scripts/showcase/m0.sh', '...AIL prerequisites: missing state; run scripts/showcase/setup_personas.sh, see scripts/showcase/README.md\n', stderr='').stderr
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[SELECT id FROM arbitrary_rows]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[INSERT INTO arbitrary_rows VALUES (1)]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[UPDATE arbitrary_rows SET value = 2]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[DELETE FROM arbitrary_rows]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[LOCK TABLE arbitrary_rows]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[TRUNCATE arbitrary_rows]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[ALTER TABLE arbitrary_rows ADD x int]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[CREATE VIEW arbitrary_view AS SELECT 1]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[DROP VIEW arbitrary_view]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_recognizes_any_table[sElEcT x\nFrOm arbitrary_rows]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_calls_without_literal_sql[execute]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_calls_without_literal_sql[executemany]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_calls_without_literal_sql[copy]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_database_imports[import-psycopg]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_database_imports[import-psycopg2]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_database_imports[import-sqlalchemy]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_database_imports[import-asyncpg]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_database_imports[from-psycopg]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_database_imports[from-psycopg2]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_database_imports[from-sqlalchemy]
+FAILED tests/unit/refco/test_public_seams.py::test_sql_guard_rejects_database_imports[from-asyncpg]
+FAILED tests/unit/refco/test_public_seams.py::test_server_entrypoint_has_no_adapter_construction
+FAILED tests/unit/refco/test_review_regressions.py::test_wait_for_lock_observes_backend_before_returning
+FAILED tests/unit/refco/test_review_regressions.py::test_wait_for_lock_timeout_fails
+FAILED tests/unit/refco/test_review_regressions.py::test_m0_shell_resolves_runner[poetry]
+FAILED tests/unit/refco/test_review_regressions.py::test_m0_shell_resolves_runner[missing]
+26 failed, 16 passed in 10.47s
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____________ test_wait_for_lock_observes_backend_before_returning _____________
+tests/unit/refco/test_review_regressions.py:16: in test_wait_for_lock_observes_backend_before_returning
+    test_policy_cas.wait_for_lock(conn, 123, timeout=1)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'tests.integration.refco.test_policy_cas' has no attribute 'wait_for_lock'
+_______________________ test_wait_for_lock_timeout_fails _______________________
+tests/unit/refco/test_review_regressions.py:26: in test_wait_for_lock_timeout_fails
+    test_policy_cas.wait_for_lock(conn, 123, timeout=0)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'tests.integration.refco.test_policy_cas' has no attribute 'wait_for_lock'
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_review_regressions.py::test_wait_for_lock_observes_backend_before_returning
+FAILED tests/unit/refco/test_review_regressions.py::test_wait_for_lock_timeout_fails
+2 failed, 3 deselected in 3.27s

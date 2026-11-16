@@ -1,0 +1,59 @@
+
+╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐
+╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │
+ ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗
+ ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝
+╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║
+╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝
+  └──▶║║                    ▲ 
+      ╚╝────────────────────┘
+
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/lab_7.5_deep_eval_v5.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_7.5_rerank_event_loop.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_3.2_psycopg2_insert.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_6.5_cache_benchmarks.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_6.4_cache_integration.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_2.5_integration_test.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_1.1_benchmarking.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_7.3_hybrid_retrieval.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_2.3_controlled_concurrency.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_1.4_generator_pipeline.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_4.4_hybrid_chunking_strategy.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_1.5_integration_test.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_6.3_model_routing.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_6.2_semantic_cache.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_4.3_hybrid_mt_mp.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/comparison_lab_3.2_vs_3.3.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_7.2_migrate_fts.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_2.2_concurrency_trap.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_1.3_file_chunk_iterator.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_7.1_vector_failures.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_3.3_async_bulk.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_4.1_gil_proof.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/comparison_lab_2.2_vs_2.3.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_4.2_serialization_overhead.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_1.2_memory_leak.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_2.1_event_loop_explorer.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_2.4_async_client_test.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_6.1_cache_aside.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_1.1_memory_experiments.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_3.1_db_setup.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_3.4_integration_test.py
+Warning: skipping module with too many dots in the name: /home/ubuntu/ai-platform-sprints/014-reference-company/scripts/labs/lab_3.4_connection_pool.py
+
+---------
+Contracts
+---------
+
+Analyzed 219 files, 584 dependencies.
+-------------------------------------
+
+product packages do not import scripts KEPT
+ports imports no platform package KEPT
+core imports no module package KEPT
+evidence does not import gateway, api or workers KEPT
+gateway does not import evidence, api or workers KEPT
+agent and MCP code do not import evidence KEPT
+agent and MCP code use only the gateway package API KEPT
+
+Contracts: 7 kept, 0 broken.

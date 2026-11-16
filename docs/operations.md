@@ -36,6 +36,20 @@ All of this runs through `scripts/admin/identity.py`, with the owner URL in `MIG
 | `show-policy <tenant>` | Prints the active policy |
 | `set-retention <tenant> <days\|default>` | A tenant's decision retention, 30 days or more |
 
+Operator Python callers can use `gateway.admin.set_policy(..., expected_version=head_version)` inside `admin_connection`. A changed head raises public `PolicyConflict`, a subclass of `AdminError`, without publishing a policy. Use version 0 to require no existing policy; omit the argument for unconditional publication. The caller commits or rolls back the transaction.
+
+The public owner-role functions in `core.identity.admin` also support operator Python clients:
+`inspect_credential(conn, token)` verifies an active key and returns only tenant ID and slug,
+principal ID and kind, prefix and scopes. It never returns a secret or hash.
+`list_principals(conn, tenant_slug)` and `list_kbs(conn, tenant_slug)` list a tenant's
+principal metadata and knowledge bases. `list_keys(conn, tenant_slug, principal_id=...)`
+sets transaction-local tenant context and filters metadata by tenant and optionally principal.
+Omitting the tenant explicitly requests an operator-wide listing, subject to the connection role's visibility.
+These functions do not grant runtime permissions.
+
+`GET /v1/decisions?request_id=...` is available in the Gateway edition with `audit:read`.
+It returns only the verified caller's tenant decisions, including recorded module denials.
+
 After a leaked key: revoke it, then check `/v1/decisions` filtered by the principal for what it did.
 
 ## Retention

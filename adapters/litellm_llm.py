@@ -14,9 +14,12 @@ litellm.suppress_debug_info = True
 
 
 class LitellmLLM:
-    def __init__(self, pricing: Mapping[str, Mapping[str, float]]) -> None:
+    def __init__(
+        self, pricing: Mapping[str, Mapping[str, float]], *, ollama_base_url: str = "http://127.0.0.1:11434",
+    ) -> None:
         """`pricing`: USD per million tokens, `{model: {"input": x, "output": y}}`. An unpriced model costs the highest known rate."""
         self._pricing = pricing
+        self._ollama_base_url = ollama_base_url
 
     async def complete(
         self,
@@ -28,6 +31,8 @@ class LitellmLLM:
         response_format: Any = None,
     ) -> Completion:
         kwargs: dict[str, Any] = {}
+        if model.startswith(("ollama/", "ollama_chat/")):
+            kwargs["api_base"] = self._ollama_base_url
         if temperature is not None:
             kwargs["temperature"] = temperature
         if response_format is not None:

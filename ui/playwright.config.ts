@@ -13,6 +13,9 @@ const PREVIEW_UI_PORT = 4174
 // Gateway-only edition for module boundary journeys.
 const GATEWAY_API_PORT = 8002
 const GATEWAY_UI_PORT = 4175
+const SHOWCASE_API_PORT = 8003
+const SHOWCASE_UI_PORT = 4176
+const showcaseOnly = process.argv.some((arg) => arg === '--project=showcase-m0' || arg === 'showcase-m0')
 
 export default defineConfig({
   testDir: './e2e',
@@ -33,7 +36,7 @@ export default defineConfig({
     {
       name: 'chromium',
       dependencies: ['setup'],
-      testIgnore: /auth\.setup\.ts/,
+      testIgnore: /auth\.setup\.ts|showcase-m0\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'e2e/.state/auth.json',
@@ -41,8 +44,28 @@ export default defineConfig({
         launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] },
       },
     },
+    {
+      name: 'showcase-m0',
+      testMatch: /showcase-m0\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: `http://127.0.0.1:${SHOWCASE_UI_PORT}`, storageState: { cookies: [], origins: [] }, trace: 'off' },
+    },
   ],
-  webServer: [
+  webServer: showcaseOnly ? [
+    {
+      command: `/home/ubuntu/.local/share/poetry233/bin/poetry run python scripts/e2e/serve.py --reference-company --enabled-modules gateway --port ${SHOWCASE_API_PORT} --state-dir ui/e2e/.state/showcase-m0`,
+      cwd: '..',
+      url: `http://127.0.0.1:${SHOWCASE_API_PORT}/v1/health`,
+      timeout: 180_000,
+      reuseExistingServer: false,
+    },
+    {
+      command: `npx vite preview --host 127.0.0.1 --port ${SHOWCASE_UI_PORT} --strictPort`,
+      env: { API_URL: `http://127.0.0.1:${SHOWCASE_API_PORT}` },
+      url: `http://127.0.0.1:${SHOWCASE_UI_PORT}/`,
+      timeout: 60_000,
+      reuseExistingServer: false,
+    },
+  ] : [
     {
       command: `poetry run python scripts/e2e/serve.py --port ${API_PORT}`,
       cwd: '..',
@@ -84,6 +107,20 @@ export default defineConfig({
       url: `http://127.0.0.1:${GATEWAY_UI_PORT}/`,
       timeout: 60_000,
       reuseExistingServer: !!process.env.E2E_REUSE,
+    },
+    {
+      command: `/home/ubuntu/.local/share/poetry233/bin/poetry run python scripts/e2e/serve.py --reference-company --enabled-modules gateway --port ${SHOWCASE_API_PORT} --state-dir ui/e2e/.state/showcase-m0`,
+      cwd: '..',
+      url: `http://127.0.0.1:${SHOWCASE_API_PORT}/v1/health`,
+      timeout: 180_000,
+      reuseExistingServer: false,
+    },
+    {
+      command: `npx vite preview --host 127.0.0.1 --port ${SHOWCASE_UI_PORT} --strictPort`,
+      env: { API_URL: `http://127.0.0.1:${SHOWCASE_API_PORT}` },
+      url: `http://127.0.0.1:${SHOWCASE_UI_PORT}/`,
+      timeout: 180_000,
+      reuseExistingServer: false,
     },
   ],
 })

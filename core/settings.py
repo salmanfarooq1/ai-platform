@@ -8,6 +8,7 @@ env var name only and never appear in error messages.
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import urlsplit
 from uuid import UUID
 
 from dotenv import load_dotenv
@@ -89,6 +90,19 @@ class Settings(BaseSettings):
         default=None,
         description="LiteLLM model name for chat and completions. Default by mode: `ollama/qwen3:4b-instruct-2507-q4_K_M` (local), `gemini/gemini-3.5-flash-lite` (public-preview), `azure/gpt-4o` (prod).",
     )
+    ollama_base_url: str = Field(
+        default="http://127.0.0.1:11434",
+        description="Ollama HTTP endpoint shared by the local model catalog and legacy completions. Set OLLAMA_BASE_URL to override it; SDK environment variables do not select this endpoint.",
+    )
+
+    @field_validator("ollama_base_url")
+    @classmethod
+    def validate_ollama_base_url(cls, value: str) -> str:
+        parsed = urlsplit(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            raise ValueError("ollama_base_url must be an HTTP or HTTPS endpoint")
+        return value.rstrip("/")
+
     verifier_model: str | None = Field(
         default=None,
         description="Model alias used for agent answer verification. Defaults to the mode's chat model; a hosted verifier is subject to the same model policy checks.",

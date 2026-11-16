@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-ROOT_PACKAGES = ("api", "core", "gateway", "evidence", "ports", "adapters", "workers", "sandbox_agent")
+ROOT_PACKAGES = ("api", "core", "gateway", "evidence", "ports", "adapters", "workers", "sandbox_agent", "scripts")
 LINTER = Path(sys.executable).with_name("lint-imports")
 
 
@@ -26,7 +26,7 @@ def test_tree_passes() -> None:
     result = _lint(ROOT)
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "6 kept, 0 broken" in result.stdout
+    assert "7 kept, 0 broken" in result.stdout
 
 
 @pytest.mark.parametrize(
@@ -43,6 +43,12 @@ def test_tree_passes() -> None:
             "api/agent/graph.py",
             "from gateway import policy",
             "agent and MCP code use only the gateway package API",
+        ),
+        (
+            "product_imports_scripts",
+            "api/main.py",
+            "import scripts.showcase.personas",
+            "product packages do not import scripts",
         ),
         (
             "evidence_imports_gateway",

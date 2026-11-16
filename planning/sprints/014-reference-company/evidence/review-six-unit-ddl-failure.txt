@@ -1,0 +1,39 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 29%]
+........................................................................ [ 35%]
+........................................................................ [ 41%]
+........................................................................ [ 47%]
+........................................................................ [ 53%]
+........................................................................ [ 59%]
+........................................................................ [ 65%]
+......................................F................................. [ 71%]
+........................................................................ [ 77%]
+........................................................................ [ 83%]
+........................................................................ [ 88%]
+........................................................................ [ 94%]
+..............................................................           [100%]
+=================================== FAILURES ===================================
+__________ test_ddl_check_passes_on_the_repo_and_fails_on_a_violation __________
+tests/unit/test_openapi_snapshot.py:61: in test_ddl_check_passes_on_the_repo_and_fails_on_a_violation
+    assert ok.returncode == 0, ok.stdout
+E   AssertionError: DDL found outside migrations/ (strict rule 7):
+E     tests/unit/refco/test_public_seams.py:79:    "LOCK TABLE arbitrary_rows", "TRUNCATE arbitrary_rows", "ALTER TABLE arbitrary_rows ADD x int",
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['/home/ubuntu/ai-platform-sprints/014-reference-company/scripts/check_no_ddl.sh', '/home/ubuntu...y:79:    "LOCK TABLE arbitrary_rows", "TRUNCATE arbitrary_rows", "ALTER TABLE arbitrary_rows ADD x int",\n', stderr='').returncode
+=============================== warnings summary ===============================
+tests/unit/test_eval_gate.py::test_the_suite_scores_what_the_baseline_says
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-dDxeGklu-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+tests/unit/test_search_route.py::test_search_request_defaults
+  /home/ubuntu/ai-platform-sprints/014-reference-company/tests/unit/test_search_route.py:14: DeprecationWarning: deprecated
+    assert req.rerank is True
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_openapi_snapshot.py::test_ddl_check_passes_on_the_repo_and_fails_on_a_violation
+1 failed, 1213 passed, 948 deselected, 2 warnings in 86.71s (0:01:26)

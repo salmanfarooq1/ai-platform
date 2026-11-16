@@ -1,0 +1,14 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_______________ test_server_readiness_failure_is_sanitized[True] _______________
+tests/unit/refco/test_m0_server_errors.py:43: in test_server_readiness_failure_is_sanitized
+    assert "known startup failure" in failures[0]
+E   AssertionError: assert 'known startup failure' in 'FAIL journey: AttributeError'
+______________ test_server_readiness_failure_is_sanitized[False] _______________
+tests/unit/refco/test_m0_server_errors.py:43: in test_server_readiness_failure_is_sanitized
+    assert "known startup failure" in failures[0]
+E   AssertionError: assert 'known startup failure' in 'FAIL journey: AttributeError'
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_sanitized[True]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_readiness_failure_is_sanitized[False]
+2 failed in 6.85s

@@ -1,0 +1,19 @@
+# Row 2.5 live M0 run (Architect, 2026-11-16)
+Stack: compose project ai-platform (Postgres 15432, Valkey), local Ollama 127.0.0.1:11434.
+Throwaway database from tests/harness.create_database, fresh fixture tenant refco-m0, claimed then six personas, then scripts.showcase.m0; database dropped after. DEPLOY_SHAPE=multi_tenant.
+Keys stayed in process env and the git-ignored .showcase/ (removed after); output masked.
+
+PASS personas: fixture marker claimed
+PASS personas: six credentials verified
+PASS fixture: tenant credential and database verified
+PASS gateway: owned Gateway-only API started
+PASS policy: baseline and deny versions recorded
+PASS search: model admission denied; Ollama request count unchanged
+PASS receipt: offline signature and local model identity verified
+PASS modules: agents off and disabled response recorded
+PASS restore: baseline appended as a new policy version
+SKIP restore drill: Sprint 015
+m0 exit 0
+throwaway database dropped
+
+First attempt without DEPLOY_SHAPE: 'FAIL journey: RuntimeError: Gateway-only API exited before readiness'. Server stderr (hidden by m0.py) showed: single_tenant deployment requires at most one tenant; set DEPLOY_SHAPE=multi_tenant. Follow-up: surface the reason and document the setting.

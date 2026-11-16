@@ -5,6 +5,8 @@ All notable changes, newest first, in the [Keep a Changelog](https://keepachange
 ## [Unreleased]
 
 ### Added
+- Narrow operator credential inspection, tenant-scoped principal/KB lists and optional principal filtering for key metadata; showcase setup reuses or rotates keys without fixture claims, journals or global writer locks. Auditor clients use the existing decision API. M0 keeps server stderr private, emits fixed diagnostics, and chains policy version checks.
+- Policy publication supports compare-and-swap with public `PolicyConflict` and serializes concurrent version allocation. Local catalog and legacy completions share the configured `OLLAMA_BASE_URL`; showcase routing uses this product setting.
 - **Console and workspace.** A React and TypeScript UI with these screens:
   - Console: Overview, Requests (with a detail drawer), Decisions, Policies, Keys, Usage, Agent runs, Trust and System.
   - Workspace: Ask, Library and History.
@@ -29,6 +31,7 @@ All notable changes, newest first, in the [Keep a Changelog](https://keepachange
 - **Documentation** in one standard set: getting started, architecture, configuration, deployment, operations, API, contracts and security. Reference tables are generated from the code.
 
 ### Changed
+- Showcase rotation revokes only its recorded issued prefix and warns about untouched active keys; lost state causes fresh issuance without revocation. Tenant key listing sets RLS context after operator tenant resolution; fresh app-role slug resolution still requires a migration scope decision. Generic SQL guards, observed policy lock contention and portable M0 Poetry lookup close review findings.
 - **Sprint 012: Pillars and boundaries.** Module editions, pillar metadata, version 2 decision records, and explicit single- or multi-tenant deployment shape.
   - **Upgrade notes:**
     - `DEPLOY_SHAPE` defaults to `single_tenant`. If the database has more than one tenant, set `DEPLOY_SHAPE=multi_tenant`; otherwise the API and workers refuse to start.

@@ -1,0 +1,8 @@
+{
+  "id": "operator",
+  "kind": "user",
+  "name": "reference-operator",
+  "scopes": ["admin"],
+  "journey_policies": ["m0-baseline", "m0-chat-model-denied"],
+  "notes": "Operates the platform; policy publication uses the owner-role admin seam. Journey policies are tenant-wide; per-persona policy and column masking are not built."
+}

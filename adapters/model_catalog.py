@@ -158,7 +158,7 @@ def build_model_catalog(settings: Any, *, model_pricing: Mapping[str, Any]) -> C
     """Build the app's metadata catalog from validated settings and reviewed files."""
     register = load_provider_register()
     scopes = {key: "unknown" for key in register}
-    ollama_endpoint = getattr(settings, "ollama_base_url", "http://127.0.0.1:11434")
+    ollama_endpoint = settings.ollama_base_url
     endpoints = {
         "ollama": ollama_endpoint,
         "azure-openai": settings.azure_oai_base or "",

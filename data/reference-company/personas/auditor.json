@@ -1,0 +1,8 @@
+{
+  "id": "auditor",
+  "kind": "user",
+  "name": "reference-auditor",
+  "scopes": ["audit:read"],
+  "journey_policies": ["m0-chat-model-denied"],
+  "notes": "Reads decisions and signed receipts. Journey policies are tenant-wide; per-persona policy and column masking are not built."
+}

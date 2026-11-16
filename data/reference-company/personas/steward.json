@@ -1,0 +1,8 @@
+{
+  "id": "steward",
+  "kind": "user",
+  "name": "reference-steward",
+  "scopes": ["kb:read"],
+  "journey_policies": ["m0-baseline"],
+  "notes": "Reads knowledge-base metadata and content. Journey policies are tenant-wide; per-persona policy and column masking are not built."
+}

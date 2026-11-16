@@ -35,3 +35,4 @@ sbom/
 
 # raw uploads of the local object store (Sprint 007)
 data/objects/
+.showcase/

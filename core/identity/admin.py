@@ -100,6 +100,15 @@ def create_kb(conn: PgConnection, tenant_slug: str, slug: str, description: str 
         return _returned_id(cur)
 
 
+def list_kbs(conn: PgConnection, tenant_slug: str) -> list[dict[str, Any]]:
+    """List a tenant's knowledge bases for operator inventory."""
+    with conn.cursor() as cur:
+        tenant_id = _tenant_id(cur, tenant_slug)
+        _as_tenant(cur, tenant_id)
+        cur.execute("SELECT id, slug, description FROM knowledge_bases WHERE tenant_id = %s ORDER BY slug", (str(tenant_id),))
+        return [dict(zip(("id", "slug", "description"), row)) for row in cur.fetchall()]
+
+
 def create_principal(conn: PgConnection, tenant_slug: str, kind: str, name: str) -> UUID:
     if kind not in PRINCIPAL_KINDS:
         raise AdminError(f"kind must be one of {', '.join(PRINCIPAL_KINDS)}")
@@ -111,6 +120,15 @@ def create_principal(conn: PgConnection, tenant_slug: str, kind: str, name: str)
             (str(tenant_id), kind, name),
         )
         return _returned_id(cur)
+
+
+def list_principals(conn: PgConnection, tenant_slug: str) -> list[dict[str, Any]]:
+    """List a tenant's principal metadata, including disabled principals."""
+    with conn.cursor() as cur:
+        tenant_id = _tenant_id(cur, tenant_slug)
+        _as_tenant(cur, tenant_id)
+        cur.execute("SELECT id, name, kind, disabled_at FROM principals WHERE tenant_id = %s ORDER BY id", (str(tenant_id),))
+        return [dict(zip(("id", "name", "kind", "disabled_at"), row)) for row in cur.fetchall()]
 
 
 def create_key(conn: PgConnection, principal_id: UUID | str, scopes: Iterable[str]) -> GeneratedKey:
@@ -146,17 +164,57 @@ def revoke_key(conn: PgConnection, prefix: str) -> bool:
         return bool(cur.rowcount)
 
 
-def list_keys(conn: PgConnection, tenant_slug: str | None = None) -> list[dict[str, Any]]:
-    """Key metadata only. Neither the secret nor its hash is returned."""
+def list_keys(conn: PgConnection, tenant_slug: str | None = None, *, principal_id: UUID | str | None = None) -> list[dict[str, Any]]:
+    """Return key metadata without secrets or hashes.
+
+    A tenant slug establishes transaction-local RLS context before reading.
+    None explicitly requests an operator-wide listing, subject to role visibility.
+    """
     with conn.cursor() as cur:
+        if tenant_slug is not None:
+            _as_tenant(cur, _tenant_id(cur, tenant_slug))
         cur.execute(
             """
             SELECT k.prefix, t.slug, p.name, p.kind, k.scopes, k.created_at, k.last_used_at, k.revoked_at
             FROM api_keys k JOIN principals p ON p.id = k.principal_id JOIN tenants t ON t.id = k.tenant_id
             WHERE (%s::text IS NULL OR t.slug = %s)
+              AND (%s::uuid IS NULL OR p.id = %s::uuid)
             ORDER BY k.created_at
             """,
-            (tenant_slug, tenant_slug),
+            (tenant_slug, tenant_slug, str(principal_id) if principal_id is not None else None,
+             str(principal_id) if principal_id is not None else None),
         )
         columns = ["prefix", "tenant", "principal", "kind", "scopes", "created_at", "last_used_at", "revoked_at"]
         return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+
+def inspect_credential(conn: PgConnection, token: str) -> dict[str, Any]:
+    """Verify an active API key for an operator; return identity, never its secret/hash.
+
+    This owner-role seam supports credential inventory and deployment validation.
+    It does not grant runtime authority or accept a caller-supplied tenant.
+    """
+    from psycopg2.extras import RealDictCursor
+
+    from core.identity.keys import parse_key, verify_secret
+
+    parsed = parse_key(token)
+    if parsed is None:
+        raise AdminError("credential is invalid or inactive")
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute("SELECT * FROM auth_lookup_key(%s)", (parsed[0],))
+        row = cur.fetchone()
+        if (row is None or row["revoked_at"] is not None or row["principal_disabled_at"] is not None
+                or not verify_secret(parsed[1], row["secret_hash"])):
+            raise AdminError("credential is invalid or inactive")
+        tenant_id = UUID(str(row["tenant_id"]))
+        _as_tenant(cur, tenant_id)
+        cur.execute("SELECT slug FROM tenants WHERE id = %s", (str(tenant_id),))
+        tenant = cur.fetchone()
+        if tenant is None:
+            raise AdminError("credential is invalid or inactive")
+        return {
+            "tenant_id": str(tenant_id), "tenant_slug": tenant["slug"],
+            "principal_id": str(row["principal_id"]), "principal_kind": row["principal_kind"],
+            "prefix": parsed[0], "scopes": list(row["scopes"]),
+        }

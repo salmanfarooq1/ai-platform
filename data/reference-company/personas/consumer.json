@@ -1,0 +1,8 @@
+{
+  "id": "consumer",
+  "kind": "user",
+  "name": "reference-consumer",
+  "scopes": ["query"],
+  "journey_policies": ["m0-baseline", "m0-chat-model-denied"],
+  "notes": "Searches with governed retrieval. Journey policies are tenant-wide; per-persona policy and column masking are not built."
+}

@@ -58,6 +58,8 @@ The tenant always comes from the credential. A missing or invalid credential get
 | `GET /v1/mcp/sse`, `POST /v1/mcp/messages` | per tool | The MCP server. Each tool needs the same scope as its REST equivalent |
 | `GET /metrics` | none or `admin` | Prometheus metrics |
 
+`GET /v1/decisions?request_id=...` returns the filtered decision list in the Gateway edition with `audit:read` scope and tenant isolation.
+
 Console reads are left out of console lists unless they were denied. Add `include_console_reads=true` to include them.
 
 ## Errors

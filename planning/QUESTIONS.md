@@ -131,3 +131,13 @@ These supersede the historical open states above; final sprint acceptance remain
 
 - **S011-clock environment:** read-only sampling in the isolated PostgreSQL store proves repeated backward wall-clock steps on this shared WSL host (`evidence/architect-database-clock*.jsonl` in Sprint 011). Synthetic Hyper-V and ACPI clock-source experiments and a brief guest-timesync pause did not establish a fix. Original `tsc` and active time synchronization were restored; no WSL/Docker restart or persistent setting change was used. The full backend tier subsequently passes unchanged. Chain position remains the causal ordinal; chronological displays and helpers that sort wall time can reorder around a correction. Do not claim that acquiring the chain lock makes the wall clock monotonic. Investigate this existing assumption during evidence-core review after the pure-move checkpoint; preserve signed historical timestamps.
 - **S011-round2-PSF.** Closed 2026-10-24 (Architect, under owner decision D2). `typing-extensions==4.15.0` is also PSF-2.0. PSF-2.0 now passes only through an exact name and version line in `licence-exceptions.txt`; the two lines are `aiohappyeyeballs==2.6.1` and `typing-extensions==4.15.0`. Any other PSF-2.0 package still fails.
+
+## Sprint 014 WP2 bounded run
+- Answered 2026-11-16: Private git-ignored `.showcase/keys.env` is designed and allowed; keys remain banned from logs, output, evidence and tracked files.
+- Answered 2026-11-16: `clean_redis` is acceptable when nothing else runs on shared Valkey; the Architect runs the integration suite alone.
+
+## Sprint 014 review: fresh app-role tenant resolution
+
+The requested list_keys regression on a fresh gap_app connection fails because tenants itself has RLS (0002): _tenant_id cannot resolve the slug before a tenant UUID is set. Setting _as_tenant before reading keys fixes owner-role reads but cannot bootstrap a tenant slug under gap_app. A general operator tenant-ID lookup through a narrow SECURITY DEFINER function needs a forward-only migration, which Sprint 014 requirements list out of scope. Scope decision requested; do not weaken RLS or initialize the test with prior tenant context. Evidence: sprints/014-reference-company/evidence/review-six-integration.txt (8 passed, 2 failed). Other five findings and checks proceed.
+
+**Resolved (Architect, 2026-11-16):** no migration. `core/identity/admin.py` runs as the owner role by contract, so the app-role premise was wrong. The test now proves `list_keys` sets its own tenant context on a fresh owner connection. RLS unchanged.

@@ -53,6 +53,7 @@ This table is generated from `core/settings.py` by `scripts/docs/generate.py`. D
 | Setting | Default | Secret | Purpose |
 |---|---|---|---|
 | `LLM_MODEL` | unset | no | LiteLLM model name for chat and completions. Default by mode: `ollama/qwen3:4b-instruct-2507-q4_K_M` (local), `gemini/gemini-3.5-flash-lite` (public-preview), `azure/gpt-4o` (prod). |
+| `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | no | Ollama HTTP endpoint shared by the local model catalog and legacy completions. Set OLLAMA_BASE_URL to override it; SDK environment variables do not select this endpoint. |
 | `VERIFIER_MODEL` | unset | no | Model alias used for agent answer verification. Defaults to the mode's chat model; a hosted verifier is subject to the same model policy checks. |
 | `DEPLOY_REGION` | unset | no | Deployment processing region used as the identity region for local models and required when a hosted model provider is configured. |
 | `EMBED_MODEL` | unset | no | LiteLLM model name for embeddings. Default by mode: `ollama/nomic-embed-text` (local), `gemini/gemini-embedding-001` (public-preview), `azure/text-embedding-3-small` (prod). Chunks record the model that made them, and search ignores chunks of another model. |

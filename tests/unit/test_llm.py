@@ -9,6 +9,7 @@ removed on purpose (routing now picks one model). The old test was the stale sid
 so it is rewritten against generate_with_citations / generate_with_routing.
 """
 import json
+from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
@@ -22,6 +23,7 @@ from api.services.llm import (
     generate_with_routing,
 )
 from config import LLM_CONFIG, MODEL_PRICING
+from tests.fakes import fake_resolved_model
 
 pytestmark = pytest.mark.unit
 
@@ -51,6 +53,36 @@ def _answer(indexes):
             Citation(document_id="x", chunk_index=i, relevance_score=0.0, excerpt="") for i in indexes
         ],
     )
+
+
+async def test_legacy_ollama_completion_uses_configured_api_base(monkeypatch):
+    monkeypatch.setenv("OLLAMA_API_BASE", "http://127.0.0.1:19001")
+    llm = LitellmLLM(MODEL_PRICING, ollama_base_url="http://127.0.0.1:19002")
+    fake = AsyncMock(return_value=_response(_answer([])))
+    with patch("adapters.litellm_llm.litellm.acompletion", fake):
+        await llm.complete([{"role": "user", "content": "test"}], model="ollama/example", max_tokens=10)
+    assert fake.call_args.kwargs["api_base"] == "http://127.0.0.1:19002"
+
+
+async def test_legacy_ollama_env_alone_does_not_change_endpoint(monkeypatch):
+    llm = LitellmLLM(MODEL_PRICING)
+    monkeypatch.setenv("OLLAMA_API_BASE", "http://127.0.0.1:19001")
+    fake = AsyncMock(return_value=_response(_answer([])))
+    with patch("adapters.litellm_llm.litellm.acompletion", fake):
+        await llm.complete([{"role": "user", "content": "test"}], model="ollama_chat/example", max_tokens=10)
+    assert fake.call_args.kwargs["api_base"] == "http://127.0.0.1:11434"
+
+
+async def test_resolved_ollama_route_takes_precedence_and_other_providers_are_unchanged(monkeypatch):
+    monkeypatch.setenv("OLLAMA_API_BASE", "http://127.0.0.1:19001")
+    resolved = fake_resolved_model("ollama/example")
+    resolved = replace(resolved, route=replace(resolved.route, endpoint="http://127.0.0.1:19002"))
+    fake = AsyncMock(return_value=_response(_answer([])))
+    with patch("adapters.litellm_llm.litellm.acompletion", fake):
+        await LLM.complete_resolved(resolved, [{"role": "user", "content": "test"}], max_tokens=10)
+        assert fake.call_args.kwargs["api_base"] == "http://127.0.0.1:19002"
+        await LLM.complete([{"role": "user", "content": "test"}], model="azure/gpt-4o", max_tokens=10)
+        assert "api_base" not in fake.call_args.kwargs
 
 
 async def test_citations_are_hydrated_from_real_chunks():
@@ -183,3 +215,23 @@ async def test_generate_with_routing_delegates_with_model():
         answer, usage = await generate_with_routing(LLM, "q", CHUNKS, model="azure/gpt-4o")
     assert usage["routed_model"] == "azure/gpt-4o"
     assert json.loads(answer.model_dump_json())["citations"][0]["document_id"] == "doc-a"
+
+async def test_registry_injects_same_endpoint_into_legacy_llm_and_catalog(monkeypatch, tmp_path):
+    from adapters.registry import build_adapters
+    from core.settings import Settings
+
+    monkeypatch.setenv("OLLAMA_API_BASE", "http://127.0.0.1:19001")
+    settings = Settings(mode="local", ollama_base_url="http://127.0.0.1:19002", object_store_dir=str(tmp_path))
+    bundle = build_adapters(settings, pool=object())
+    fake = AsyncMock(return_value=_response(_answer([])))
+    with patch("adapters.litellm_llm.litellm.acompletion", fake):
+        await bundle.llm.complete([{"role": "user", "content": "test"}], model="ollama/example", max_tokens=10)
+    assert fake.call_args.kwargs["api_base"] == "http://127.0.0.1:19002"
+    assert bundle.model_catalog.local.endpoint == "http://127.0.0.1:19002"
+
+@pytest.mark.parametrize("endpoint", ["", "file:///tmp/socket", "http://"])
+def test_ollama_endpoint_is_validated_at_startup(endpoint):
+    from core.settings import Settings
+
+    with pytest.raises(ValueError, match="ollama_base_url"):
+        Settings(mode="local", ollama_base_url=endpoint)

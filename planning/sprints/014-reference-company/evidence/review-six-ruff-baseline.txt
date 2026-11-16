@@ -1,0 +1,4 @@
+Whole-repo Ruff errors: 468
+Diagnostic files: 44
+All diagnostic files tracked: True
+All diagnostic files unchanged from HEAD: True

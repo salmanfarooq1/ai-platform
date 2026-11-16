@@ -109,7 +109,7 @@ def build_adapters(
         )
 
     return Adapters(
-        llm=pick("llm", lambda: LitellmLLM(config.MODEL_PRICING)),
+        llm=pick("llm", lambda: LitellmLLM(config.MODEL_PRICING, ollama_base_url=settings.ollama_base_url)),
         chat=pick("chat", lambda: LitellmChat(str(settings.llm_model))),
         embeddings=pick("embeddings", lambda: LitellmEmbeddings(
             str(settings.embed_model), settings.embedding_dim, settings.embed_fallbacks)),

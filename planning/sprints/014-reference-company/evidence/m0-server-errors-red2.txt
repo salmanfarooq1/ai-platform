@@ -1,0 +1,121 @@
+..FFFFFFFF.FFF                                                           [100%]
+=================================== FAILURES ===================================
+____________ test_server_failure_masks_credentials[key=KEYSENTINEL] ____________
+tests/unit/refco/test_m0_server_errors.py:69: in test_server_failure_masks_credentials
+    assert "SENTINEL" not in output
+E   AssertionError: assert 'SENTINEL' not in 'FAIL journe...=KEYSENTINEL'
+E     
+E     'SENTINEL' is contained here:
+E       or: key=KEYSENTINEL
+_________ test_server_failure_masks_credentials[ToKeN: TOKENSENTINEL] __________
+tests/unit/refco/test_m0_server_errors.py:69: in test_server_failure_masks_credentials
+    assert "SENTINEL" not in output
+E   AssertionError: assert 'SENTINEL' not in 'FAIL journe...OKENSENTINEL'
+E     
+E     'SENTINEL' is contained here:
+E       oKeN: TOKENSENTINEL
+________ test_server_failure_masks_credentials[SECRET='SECRETSENTINEL'] ________
+tests/unit/refco/test_m0_server_errors.py:69: in test_server_failure_masks_credentials
+    assert "SENTINEL" not in output
+E   assert 'SENTINEL' not in "FAIL journe...RETSENTINEL'"
+E     
+E     'SENTINEL' is contained here:
+E       ET='SECRETSENTINEL'
+_ test_server_failure_masks_credentials[api_key="FIRSTSENTINEL\\"SECONDSENTINEL"] _
+tests/unit/refco/test_m0_server_errors.py:69: in test_server_failure_masks_credentials
+    assert "SENTINEL" not in output
+E   assert 'SENTINEL' not in 'FAIL journe...ONDSENTINEL"'
+E     
+E     'SENTINEL' is contained here:
+E       key="FIRSTSENTINEL\"SECONDSENTINEL"
+E     ?           ++++++++
+________ test_server_failure_masks_credentials[Password: PASSSENTINEL] _________
+tests/unit/refco/test_m0_server_errors.py:69: in test_server_failure_masks_credentials
+    assert "SENTINEL" not in output
+E   AssertionError: assert 'SENTINEL' not in 'FAIL journe...PASSSENTINEL'
+E     
+E     'SENTINEL' is contained here:
+E       sword: PASSSENTINEL
+__ test_server_failure_masks_credentials[Authorization: Bearer AUTHSENTINEL] ___
+tests/unit/refco/test_m0_server_errors.py:69: in test_server_failure_masks_credentials
+    assert "SENTINEL" not in output
+E   AssertionError: assert 'SENTINEL' not in 'FAIL journe...AUTHSENTINEL'
+E     
+E     'SENTINEL' is contained here:
+E       Bearer AUTHSENTINEL
+_________ test_server_failure_masks_credentials[Bearer BEARERSENTINEL] _________
+tests/unit/refco/test_m0_server_errors.py:69: in test_server_failure_masks_credentials
+    assert "SENTINEL" not in output
+E   AssertionError: assert 'SENTINEL' not in 'FAIL journe...ARERSENTINEL'
+E     
+E     'SENTINEL' is contained here:
+E       arer BEARERSENTINEL
+___________ test_server_failure_masks_credentials[sk-STYLE_SENTINEL] ___________
+tests/unit/refco/test_m0_server_errors.py:69: in test_server_failure_masks_credentials
+    assert "SENTINEL" not in output
+E   AssertionError: assert 'SENTINEL' not in 'FAIL journe...YLE_SENTINEL'
+E     
+E     'SENTINEL' is contained here:
+E       : sk-STYLE_SENTINEL
+___________________ test_server_failure_masks_before_cutoff ____________________
+tests/unit/refco/test_m0_server_errors.py:78: in test_server_failure_masks_before_cutoff
+    assert "CROSS" not in output and "SENTINEL" not in output
+E   AssertionError: assert ('CROSS' not in 'FAIL journe...key=CROSSSEN'
+E     
+E     'CROSS' is contained here:
+E       xxxxx key=CROSSSEN
+E     ?           +++++)
+__________________ test_server_failure_replaces_invalid_utf8 ___________________
+scripts/showcase/m0.py:204: in main
+    raise ServerReadinessError("Gateway-only API exited before readiness")
+E   scripts.showcase.m0.ServerReadinessError: Gateway-only API exited before readiness
+
+During handling of the above exception, another exception occurred:
+tests/unit/refco/test_m0_server_errors.py:101: in test_server_failure_replaces_invalid_utf8
+    assert m0.main() == 1
+           ^^^^^^^^^
+scripts/showcase/m0.py:277: in main
+    print(server_failure(server_stderr, str(exc))[:300], flush=True)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/showcase/m0.py:108: in server_failure
+    lines = stderr.read().splitlines()
+            ^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/tempfile.py:483: in func_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+<frozen codecs>:322: in decode
+    ???
+E   UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 27: invalid start byte
+----------------------------- Captured stdout call -----------------------------
+PASS fixture: tenant credential and database verified
+SKIP gateway: prerequisite did not complete
+SKIP policy: prerequisite did not complete
+SKIP search: prerequisite did not complete
+SKIP receipt: prerequisite did not complete
+SKIP modules: prerequisite did not complete
+SKIP restore: prerequisite did not complete
+__________________ test_stderr_removed_when_terminate_raises ___________________
+tests/unit/refco/test_m0_server_errors.py:127: in test_stderr_removed_when_terminate_raises
+    assert m0.main() == 1
+           ^^^^^^^^^
+scripts/showcase/m0.py:306: in main
+    server.terminate()
+tests/unit/refco/test_m0_server_errors.py:124: in terminate
+    raise OSError("terminate failed")
+E   OSError: terminate failed
+----------------------------- Captured stdout call -----------------------------
+PASS fixture: tenant credential and database verified
+FAIL journey: Gateway-only API exited before readiness: RuntimeError: startup failed
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_masks_credentials[key=KEYSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_masks_credentials[ToKeN: TOKENSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_masks_credentials[SECRET='SECRETSENTINEL']
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_masks_credentials[api_key="FIRSTSENTINEL\\"SECONDSENTINEL"]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_masks_credentials[Password: PASSSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_masks_credentials[Authorization: Bearer AUTHSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_masks_credentials[Bearer BEARERSENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_masks_credentials[sk-STYLE_SENTINEL]
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_masks_before_cutoff
+FAILED tests/unit/refco/test_m0_server_errors.py::test_server_failure_replaces_invalid_utf8
+FAILED tests/unit/refco/test_m0_server_errors.py::test_stderr_removed_when_terminate_raises
+11 failed, 3 passed in 5.96s

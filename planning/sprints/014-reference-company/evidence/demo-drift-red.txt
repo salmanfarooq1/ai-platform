@@ -1,0 +1,258 @@
+...FFFFFFFFFF...............FFFFFF                                       [100%]
+=================================== FAILURES ===================================
+______ test_showcase_imports_no_product_private_names[policy_restore.py] _______
+tests/unit/refco/test_public_seams.py:23: in test_showcase_imports_no_product_private_names
+    assert not violations, f"{path.name} imports private product names: {violations}"
+E   AssertionError: policy_restore.py imports private product names: ['_as_tenant', '_tenant']
+E   assert not ['_as_tenant', '_tenant']
+_______________ test_restore_delegates_cas_to_public_product_api _______________
+tests/unit/refco/test_public_seams.py:34: in test_restore_delegates_cas_to_public_product_api
+    assert policy_restore.restore_policy(conn, "tenant", 7, {}) == 8
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/showcase/policy_restore.py:9: in restore_policy
+    with conn.cursor() as cur:
+         ^^^^^^^^^^^
+E   AttributeError: 'object' object has no attribute 'cursor'
+_________________ test_policy_conflict_is_a_public_admin_error _________________
+tests/unit/test_gateway_admin.py:19: in test_policy_conflict_is_a_public_admin_error
+    assert issubclass(admin.PolicyConflict, AdminError)
+                      ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'gateway.admin' has no attribute 'PolicyConflict'
+_________________ test_stale_policy_does_not_write[active0-3] __________________
+tests/unit/test_gateway_admin.py:25: in test_stale_policy_does_not_write
+    with pytest.raises(admin.PolicyConflict):
+                       ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'gateway.admin' has no attribute 'PolicyConflict'
+___________________ test_stale_policy_does_not_write[None-4] ___________________
+tests/unit/test_gateway_admin.py:25: in test_stale_policy_does_not_write
+    with pytest.raises(admin.PolicyConflict):
+                       ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'gateway.admin' has no attribute 'PolicyConflict'
+_ test_publish_locks_tenant_and_active_head_before_allocating_version[active0-4] _
+tests/unit/test_gateway_admin.py:35: in test_publish_locks_tenant_and_active_head_before_allocating_version
+    assert admin.set_policy(conn, "tenant", {}, "operator", expected_version=expected) == 5
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: set_policy() got an unexpected keyword argument 'expected_version'
+_ test_publish_locks_tenant_and_active_head_before_allocating_version[None-0] __
+tests/unit/test_gateway_admin.py:35: in test_publish_locks_tenant_and_active_head_before_allocating_version
+    assert admin.set_policy(conn, "tenant", {}, "operator", expected_version=expected) == 5
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: set_policy() got an unexpected keyword argument 'expected_version'
+_ test_publish_locks_tenant_and_active_head_before_allocating_version[active2-None] _
+tests/unit/test_gateway_admin.py:35: in test_publish_locks_tenant_and_active_head_before_allocating_version
+    assert admin.set_policy(conn, "tenant", {}, "operator", expected_version=expected) == 5
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: set_policy() got an unexpected keyword argument 'expected_version'
+____________ test_legacy_ollama_completion_uses_configured_api_base ____________
+tests/unit/test_llm.py:60: in test_legacy_ollama_completion_uses_configured_api_base
+    llm = LitellmLLM(MODEL_PRICING, ollama_base_url="http://127.0.0.1:19002")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: LitellmLLM.__init__() got an unexpected keyword argument 'ollama_base_url'
+____________ test_legacy_ollama_env_alone_does_not_change_endpoint _____________
+tests/unit/test_llm.py:73: in test_legacy_ollama_env_alone_does_not_change_endpoint
+    assert fake.call_args.kwargs["api_base"] == "http://127.0.0.1:11434"
+E   AssertionError: assert 'http://127.0.0.1:19001' == 'http://127.0.0.1:11434'
+E     
+E     - http://127.0.0.1:11434
+E     ?                    ---
+E     + http://127.0.0.1:19001
+E     ?                   +++
+------------------------------ Captured log call -------------------------------
+WARNING  core.pricing:pricing.py:22 [pricing] model 'ollama_chat/example' has no price: costed at the highest known rate. Add it to MODEL_PRICING.
+_______ test_registry_injects_same_endpoint_into_legacy_llm_and_catalog ________
+tests/unit/test_llm.py:229: in test_registry_injects_same_endpoint_into_legacy_llm_and_catalog
+    assert fake.call_args.kwargs["api_base"] == "http://127.0.0.1:19002"
+E   AssertionError: assert 'http://127.0.0.1:19001' == 'http://127.0.0.1:19002'
+E     
+E     - http://127.0.0.1:19002
+E     ?                      ^
+E     + http://127.0.0.1:19001
+E     ?                      ^
+__________ test_policy_cas_preserves_history_and_rejects_missing_head __________
+tests/integration/refco/test_policy_cas.py:29: in test_policy_cas_preserves_history_and_rejects_missing_head
+    with pytest.raises(admin.PolicyConflict):
+                       ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'gateway.admin' has no attribute 'PolicyConflict'
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Trust baseline: the decision hash chain, retention, eval runs and the metrics reads (Sprint 008).
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Sandboxed agent runs: the sandbox event log and the run tokens (Sprint 009).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, Decision record versions, deployment shape probe and module-filtered job claims (Sprint 012).
+_____ test_two_concurrent_policy_writers[unconditional-first-publication] ______
+tests/integration/refco/test_policy_cas.py:58: in publish
+    return admin.set_policy(conn, slug, {"allowed_models": "*"}, writer,
+E   TypeError: set_policy() got an unexpected keyword argument 'expected_version'
+
+During handling of the above exception, another exception occurred:
+tests/integration/refco/test_policy_cas.py:64: in test_two_concurrent_policy_writers
+    results = list(pool.map(publish, ["writer-a", "writer-b"]))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:619: in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:317: in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/refco/test_policy_cas.py:60: in publish
+    except admin.PolicyConflict:
+           ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'gateway.admin' has no attribute 'PolicyConflict'
+_______ test_two_concurrent_policy_writers[unconditional-existing-head] ________
+tests/integration/refco/test_policy_cas.py:58: in publish
+    return admin.set_policy(conn, slug, {"allowed_models": "*"}, writer,
+E   TypeError: set_policy() got an unexpected keyword argument 'expected_version'
+
+During handling of the above exception, another exception occurred:
+tests/integration/refco/test_policy_cas.py:64: in test_two_concurrent_policy_writers
+    results = list(pool.map(publish, ["writer-a", "writer-b"]))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:619: in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:317: in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/refco/test_policy_cas.py:60: in publish
+    except admin.PolicyConflict:
+           ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'gateway.admin' has no attribute 'PolicyConflict'
+____ test_two_concurrent_policy_writers[compare-and-swap-first-publication] ____
+tests/integration/refco/test_policy_cas.py:58: in publish
+    return admin.set_policy(conn, slug, {"allowed_models": "*"}, writer,
+E   TypeError: set_policy() got an unexpected keyword argument 'expected_version'
+
+During handling of the above exception, another exception occurred:
+tests/integration/refco/test_policy_cas.py:64: in test_two_concurrent_policy_writers
+    results = list(pool.map(publish, ["writer-a", "writer-b"]))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:619: in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:317: in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/refco/test_policy_cas.py:60: in publish
+    except admin.PolicyConflict:
+           ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'gateway.admin' has no attribute 'PolicyConflict'
+______ test_two_concurrent_policy_writers[compare-and-swap-existing-head] ______
+tests/integration/refco/test_policy_cas.py:58: in publish
+    return admin.set_policy(conn, slug, {"allowed_models": "*"}, writer,
+E   TypeError: set_policy() got an unexpected keyword argument 'expected_version'
+
+During handling of the above exception, another exception occurred:
+tests/integration/refco/test_policy_cas.py:64: in test_two_concurrent_policy_writers
+    results = list(pool.map(publish, ["writer-a", "writer-b"]))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:619: in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:317: in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../../.pyenv/versions/3.11.0/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/refco/test_policy_cas.py:60: in publish
+    except admin.PolicyConflict:
+           ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'gateway.admin' has no attribute 'PolicyConflict'
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_public_seams.py::test_showcase_imports_no_product_private_names[policy_restore.py]
+FAILED tests/unit/refco/test_public_seams.py::test_restore_delegates_cas_to_public_product_api
+FAILED tests/unit/test_gateway_admin.py::test_policy_conflict_is_a_public_admin_error
+FAILED tests/unit/test_gateway_admin.py::test_stale_policy_does_not_write[active0-3]
+FAILED tests/unit/test_gateway_admin.py::test_stale_policy_does_not_write[None-4]
+FAILED tests/unit/test_gateway_admin.py::test_publish_locks_tenant_and_active_head_before_allocating_version[active0-4]
+FAILED tests/unit/test_gateway_admin.py::test_publish_locks_tenant_and_active_head_before_allocating_version[None-0]
+FAILED tests/unit/test_gateway_admin.py::test_publish_locks_tenant_and_active_head_before_allocating_version[active2-None]
+FAILED tests/unit/test_llm.py::test_legacy_ollama_completion_uses_configured_api_base
+FAILED tests/unit/test_llm.py::test_legacy_ollama_env_alone_does_not_change_endpoint
+FAILED tests/unit/test_llm.py::test_registry_injects_same_endpoint_into_legacy_llm_and_catalog
+FAILED tests/integration/refco/test_policy_cas.py::test_policy_cas_preserves_history_and_rejects_missing_head
+FAILED tests/integration/refco/test_policy_cas.py::test_two_concurrent_policy_writers[unconditional-first-publication]
+FAILED tests/integration/refco/test_policy_cas.py::test_two_concurrent_policy_writers[unconditional-existing-head]
+FAILED tests/integration/refco/test_policy_cas.py::test_two_concurrent_policy_writers[compare-and-swap-first-publication]
+FAILED tests/integration/refco/test_policy_cas.py::test_two_concurrent_policy_writers[compare-and-swap-existing-head]
+16 failed, 18 passed in 5.67s
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_ollama_reachable_only_through_recorder __________________
+tests/integration/refco/test_m0.py:138: in test_ollama_reachable_only_through_recorder
+    assert env["OLLAMA_BASE_URL"] == recorder_url
+           ^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'OLLAMA_BASE_URL'
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Trust baseline: the decision hash chain, retention, eval runs and the metrics reads (Sprint 008).
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Sandboxed agent runs: the sandbox event log and the run tokens (Sprint 009).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, Decision record versions, deployment shape probe and module-filtered job claims (Sprint 012).
+=========================== short test summary info ============================
+FAILED tests/integration/refco/test_m0.py::test_ollama_reachable_only_through_recorder
+1 failed in 7.92s
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_ollama_endpoint_is_validated_at_startup[] ________________
+tests/unit/test_llm.py:236: in test_ollama_endpoint_is_validated_at_startup
+    with pytest.raises(ValueError, match="ollama_base_url"):
+E   Failed: DID NOT RAISE ValueError
+_______ test_ollama_endpoint_is_validated_at_startup[file:///tmp/socket] _______
+tests/unit/test_llm.py:236: in test_ollama_endpoint_is_validated_at_startup
+    with pytest.raises(ValueError, match="ollama_base_url"):
+E   Failed: DID NOT RAISE ValueError
+____________ test_ollama_endpoint_is_validated_at_startup[http://] _____________
+tests/unit/test_llm.py:236: in test_ollama_endpoint_is_validated_at_startup
+    with pytest.raises(ValueError, match="ollama_base_url"):
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_llm.py::test_ollama_endpoint_is_validated_at_startup[]
+FAILED tests/unit/test_llm.py::test_ollama_endpoint_is_validated_at_startup[file:///tmp/socket]
+FAILED tests/unit/test_llm.py::test_ollama_endpoint_is_validated_at_startup[http://]
+3 failed, 18 deselected in 4.60s

@@ -131,7 +131,14 @@ warn_return_any = true
 no_implicit_reexport = true
 
 [tool.importlinter]
-root_packages = ["api", "core", "gateway", "evidence", "ports", "adapters", "workers", "sandbox_agent"]
+root_packages = ["api", "core", "gateway", "evidence", "ports", "adapters", "workers", "sandbox_agent", "scripts"]
+
+[[tool.importlinter.contracts]]
+id = "product-no-scripts"
+name = "product packages do not import scripts"
+type = "forbidden"
+source_modules = ["api", "gateway", "core", "adapters", "ports", "workers", "evidence", "sandbox_agent"]
+forbidden_modules = ["scripts"]
 
 [[tool.importlinter.contracts]]
 id = "ports-pure"

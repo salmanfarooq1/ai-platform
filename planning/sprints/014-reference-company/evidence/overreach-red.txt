@@ -1,0 +1,240 @@
+FFFFF.FFF.....                                                           [100%]
+=================================== FAILURES ===================================
+_________ test_no_showcase_only_identity_helpers[identity_admin_lock] __________
+tests/unit/refco/test_product_overreach.py:10: in test_no_showcase_only_identity_helpers
+    assert not hasattr(admin, name)
+E   AssertionError: assert not True
+E    +  where True = hasattr(admin, 'identity_admin_lock')
+___________ test_no_showcase_only_identity_helpers[tenant_inventory] ___________
+tests/unit/refco/test_product_overreach.py:10: in test_no_showcase_only_identity_helpers
+    assert not hasattr(admin, name)
+E   AssertionError: assert not True
+E    +  where True = hasattr(admin, 'tenant_inventory')
+____________ test_no_showcase_only_identity_helpers[principal_keys] ____________
+tests/unit/refco/test_product_overreach.py:10: in test_no_showcase_only_identity_helpers
+    assert not hasattr(admin, name)
+E   AssertionError: assert not True
+E    +  where True = hasattr(admin, 'principal_keys')
+___________________ test_decision_resource_has_one_list_url ____________________
+tests/unit/refco/test_product_overreach.py:16: in test_decision_resource_has_one_list_url
+    assert "/v1/console/decisions" not in schema["paths"]
+E   assert '/v1/console/decisions' not in {'/': {'get': {'summary': 'Root', 'operationId': 'root__get', 'responses': {'200': {'description': 'Successful Respons...of the caller's tenant: its status, attempts and progress.", 'operationId': 'get_job_v1_jobs__job_id__get', ...}}, ...}
+_______________ test_fixture_uses_operator_credential_inspection _______________
+tests/unit/refco/test_m0_public_reads.py:17: in test_fixture_uses_operator_credential_inspection
+    assert m0.verified_fixture("owner", {"tenant_id": "tenant", "database": "fixture-db"}) == ("fixture", ["legal"])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/showcase/m0.py:73: in verified_fixture
+    if record["database"] != manifest["database"] or record["tenant_id"] != manifest["tenant_id"]:
+       ^^^^^^^^^^^^^^^^^^
+E   KeyError: 'database'
+_________ test_fixture_rejects_mismatch_or_empty_kbs[knowledge_bases] __________
+tests/unit/refco/test_m0_public_reads.py:30: in test_fixture_rejects_mismatch_or_empty_kbs
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_____________ test_decision_lookup_uses_auditor_and_request_filter _____________
+tests/unit/refco/test_m0_public_reads.py:44: in test_decision_lookup_uses_auditor_and_request_filter
+    assert requests[0].url.path == "/v1/decisions"
+E   AssertionError: assert '/v1/console/decisions' == '/v1/decisions'
+E     
+E     - /v1/decisions
+E     + /v1/console/decisions
+E     ?    ++++++++
+_______________________________ test_tree_passes _______________________________
+tests/unit/test_import_contracts.py:29: in test_tree_passes
+    assert "6 kept, 0 broken" in result.stdout
+E   AssertionError: assert '6 kept, 0 broken' in '\n╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐\n╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │\n ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗\n ║║╔══╣╔╗║╔...o not import evidence KEPT\nagent and MCP code use only the gateway package API KEPT\n\nContracts: 7 kept, 0 broken.\n'
+E    +  where '\n╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐\n╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │\n ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗\n ║║╔══╣╔╗║╔...o not import evidence KEPT\nagent and MCP code use only the gateway package API KEPT\n\nContracts: 7 kept, 0 broken.\n' = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-dDxeGklu-py3.11/bin/lint-imports'], retur... evidence KEPT\nagent and MCP code use only the gateway package API KEPT\n\nContracts: 7 kept, 0 broken.\n', stderr='').stdout
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_product_overreach.py::test_no_showcase_only_identity_helpers[identity_admin_lock]
+FAILED tests/unit/refco/test_product_overreach.py::test_no_showcase_only_identity_helpers[tenant_inventory]
+FAILED tests/unit/refco/test_product_overreach.py::test_no_showcase_only_identity_helpers[principal_keys]
+FAILED tests/unit/refco/test_product_overreach.py::test_decision_resource_has_one_list_url
+FAILED tests/unit/refco/test_m0_public_reads.py::test_fixture_uses_operator_credential_inspection
+FAILED tests/unit/refco/test_m0_public_reads.py::test_fixture_rejects_mismatch_or_empty_kbs[knowledge_bases]
+FAILED tests/unit/refco/test_m0_public_reads.py::test_decision_lookup_uses_auditor_and_request_filter
+FAILED tests/unit/test_import_contracts.py::test_tree_passes - AssertionError...
+8 failed, 6 passed in 8.51s
+FFFF......FFF....FFF                                                     [100%]
+=================================== FAILURES ===================================
+__________________________ test_creates_six_personas ___________________________
+tests/integration/refco/test_personas.py:142: in test_creates_six_personas
+    assert personas.main(args) == 0
+E   AssertionError: assert 2 == 0
+E    +  where 2 = <function main at 0x7a3d6d915260>(['--tenant', 'tenant-a', '--tenant-id', '66c08faa-8777-41e4-83f2-892ba69bbdc0', '--state-dir', '/tmp/pytest-of-ubuntu/pytest-105/test_creates_six_personas0/.showcase'])
+E    +    where <function main at 0x7a3d6d915260> = personas.main
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Baseline: the schema that core/database/schema.sql used to define.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Identity and tenancy: tenants, principals, API keys, knowledge bases, tenant_id and row-level security.
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Principal lookup for JWT authentication: one more narrow SECURITY DEFINER function.
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Least privilege for the app role: it only reads the identity tables.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Gateway: versioned tenant policies and the decision record.
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Preview principal lookup: one more narrow SECURITY DEFINER function (Sprint 005, web edge).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Embedding provenance and run provenance (Sprint 006).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Durable jobs, the transactional outbox and consumer dedupe (Sprint 007).
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Trust baseline: the decision hash chain, retention, eval runs and the metrics reads (Sprint 008).
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Sandboxed agent runs: the sandbox event log and the run tokens (Sprint 009).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, Decision record versions, deployment shape probe and module-filtered job claims (Sprint 012).
+----------------------------- Captured stderr call -----------------------------
+FAIL personas: active refco-fixture-owner marker is required; only a fresh tenant may use --claim
+___________________ test_rerun_reuses_and_never_regenerates ____________________
+tests/integration/refco/test_personas.py:179: in test_rerun_reuses_and_never_regenerates
+    assert personas.main(args) == 0
+E   AssertionError: assert 2 == 0
+E    +  where 2 = <function main at 0x7a3d6d915260>(['--tenant', 'tenant-a', '--tenant-id', '217b012c-74c3-432a-9924-4a2564c64327', '--state-dir', '/tmp/pytest-of-ubuntu/pytest-105/test_rerun_reuses_and_never_re0/.showcase'])
+E    +    where <function main at 0x7a3d6d915260> = personas.main
+----------------------------- Captured stderr call -----------------------------
+FAIL personas: active refco-fixture-owner marker is required; only a fresh tenant may use --claim
+___________________________ test_keys_never_printed ____________________________
+tests/integration/refco/test_personas.py:208: in test_keys_never_printed
+    assert returncode == 0  # Do not let pytest print a CompletedProcess containing captured secrets.
+    ^^^^^^^^^^^^^^^^^^^^^^
+E   assert 2 == 0
+_______________ test_missing_mismatched_and_foreign_state_stops ________________
+tests/integration/refco/test_personas.py:230: in test_missing_mismatched_and_foreign_state_stops
+    assert personas.main(args) == 0
+E   AssertionError: assert 2 == 0
+E    +  where 2 = <function main at 0x7a3d6d915260>(['--tenant', 'tenant-a', '--tenant-id', '559a1594-58e1-40b2-be26-864230fc203a', '--state-dir', '/tmp/pytest-of-ubuntu/pytest-105/test_missing_mismatched_and_fo0/.showcase'])
+E    +    where <function main at 0x7a3d6d915260> = personas.main
+----------------------------- Captured stderr call -----------------------------
+FAIL personas: active refco-fixture-owner marker is required; only a fresh tenant may use --claim
+_________________ test_setup_needs_only_slug_and_operator_dsn __________________
+tests/integration/refco/test_personas.py:348: in test_setup_needs_only_slug_and_operator_dsn
+    assert personas.main(["--tenant", tenant.slug, "--state-dir", str(state)]) == 0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/showcase/personas.py:457: in main
+    args = parser.parse_args(argv)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/argparse.py:1862: in parse_args
+    args, argv = self.parse_known_args(args, namespace)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/argparse.py:1895: in parse_known_args
+    namespace, args = self._parse_known_args(args, namespace)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/argparse.py:2131: in _parse_known_args
+    self.error(_('the following arguments are required: %s') %
+scripts/showcase/personas.py:57: in error
+    self.exit(2, "FAIL personas: invalid arguments; use --help\n")
+../../.pyenv/versions/3.11.0/lib/python3.11/argparse.py:2604: in exit
+    _sys.exit(status)
+E   SystemExit: 2
+----------------------------- Captured stderr call -----------------------------
+usage: setup_personas [-h] --tenant TENANT --tenant-id TENANT_ID
+                      [--state-dir STATE_DIR]
+                      [--replace {producer,steward,consumer,operator,auditor,agent-developer} | --claim]
+FAIL personas: invalid arguments; use --help
+____________________ test_manifest_tenant_cannot_be_changed ____________________
+tests/integration/refco/test_personas.py:354: in test_manifest_tenant_cannot_be_changed
+    assert personas.main(args) == 0
+E   AssertionError: assert 2 == 0
+E    +  where 2 = <function main at 0x7a3d6d915260>(['--tenant', 'tenant-a', '--tenant-id', 'b2db0b2a-674c-4ecb-b555-e2d8bb45ec6f', '--state-dir', '/tmp/pytest-of-ubuntu/pytest-105/test_manifest_tenant_cannot_be0/.showcase'])
+E    +    where <function main at 0x7a3d6d915260> = personas.main
+----------------------------- Captured stderr call -----------------------------
+FAIL personas: active refco-fixture-owner marker is required; only a fresh tenant may use --claim
+___________________ test_foreign_saved_key_is_never_revoked ____________________
+tests/integration/refco/test_personas.py:364: in test_foreign_saved_key_is_never_revoked
+    assert personas.main(args) == 0
+E   AssertionError: assert 2 == 0
+E    +  where 2 = <function main at 0x7a3d6d915260>(['--tenant', 'tenant-a', '--tenant-id', '445effa6-3675-45e1-9210-3598e7cb2df5', '--state-dir', '/tmp/pytest-of-ubuntu/pytest-105/test_foreign_saved_key_is_neve0/.showcase'])
+E    +    where <function main at 0x7a3d6d915260> = personas.main
+----------------------------- Captured stderr call -----------------------------
+FAIL personas: active refco-fixture-owner marker is required; only a fresh tenant may use --claim
+____________ test_operator_reads_are_tenant_scoped_and_secret_free _____________
+tests/integration/refco/test_operator_reads.py:31: in test_operator_reads_are_tenant_scoped_and_secret_free
+    assert set(record) == {"tenant_id", "tenant_slug", "principal_id", "principal_kind", "prefix", "scopes"}
+E   AssertionError: assert {'database', ...'scopes', ...} == {'prefix', 'p...'tenant_slug'}
+E     
+E     Extra items in the left set:
+E     'database'
+E     'knowledge_bases'
+E     Use -v to get more diff
+____________________ test_list_principals_is_tenant_scoped _____________________
+tests/integration/refco/test_operator_reads.py:51: in test_list_principals_is_tenant_scoped
+    principals = admin.list_principals(conn, first.slug)
+                 ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'core.identity.admin' has no attribute 'list_principals'
+________________________ test_list_kbs_is_tenant_scoped ________________________
+tests/integration/refco/test_operator_reads.py:64: in test_list_kbs_is_tenant_scoped
+    rows = admin.list_kbs(conn, first.slug)
+           ^^^^^^^^^^^^^^
+E   AttributeError: module 'core.identity.admin' has no attribute 'list_kbs'
+=========================== short test summary info ============================
+FAILED tests/integration/refco/test_personas.py::test_creates_six_personas - ...
+FAILED tests/integration/refco/test_personas.py::test_rerun_reuses_and_never_regenerates
+FAILED tests/integration/refco/test_personas.py::test_keys_never_printed - as...
+FAILED tests/integration/refco/test_personas.py::test_missing_mismatched_and_foreign_state_stops
+FAILED tests/integration/refco/test_personas.py::test_setup_needs_only_slug_and_operator_dsn
+FAILED tests/integration/refco/test_personas.py::test_manifest_tenant_cannot_be_changed
+FAILED tests/integration/refco/test_personas.py::test_foreign_saved_key_is_never_revoked
+FAILED tests/integration/refco/test_operator_reads.py::test_operator_reads_are_tenant_scoped_and_secret_free
+FAILED tests/integration/refco/test_operator_reads.py::test_list_principals_is_tenant_scoped
+FAILED tests/integration/refco/test_operator_reads.py::test_list_kbs_is_tenant_scoped
+10 failed, 10 passed in 34.85s
+
+Full unit tier before documentation grouping correction:
+........................................................................ [  6%]
+........................................................................ [ 12%]
+........................................................................ [ 18%]
+..............................................................F......... [ 24%]
+........................................................................ [ 30%]
+........................................................................ [ 36%]
+........................................................................ [ 42%]
+........................................................................ [ 48%]
+........................................................................ [ 54%]
+........................................................................ [ 60%]
+........................................................................ [ 66%]
+........................................................................ [ 73%]
+........................................................................ [ 79%]
+........................................................................ [ 85%]
+........................................................................ [ 91%]
+........................................................................ [ 97%]
+...............................                                          [100%]
+=================================== FAILURES ===================================
+____________________ test_no_setting_falls_outside_a_group _____________________
+tests/unit/test_docs_generated.py:73: in test_no_setting_falls_outside_a_group
+    assert "### Other" not in gen.settings_block()
+E   AssertionError: assert '### Other' not in '### Mode an... endpoint. |'
+E     
+E     '### Other' is contained here:
+E       races. |
+E       
+E       ### Other
+E       
+E       | Setting | Default | Secret | Purpose |
+E       |---|---|---|---|
+E       | `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | no | Ollama HTTP endpoint shared by the local model catalog and legacy completions. Set OLLAMA_BASE_URL to override it; SDK environment variables do not select this endpoint. |
+=============================== warnings summary ===============================
+tests/unit/test_eval_gate.py::test_the_suite_scores_what_the_baseline_says
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-dDxeGklu-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+tests/unit/test_search_route.py::test_search_request_defaults
+  /home/ubuntu/ai-platform-sprints/014-reference-company/tests/unit/test_search_route.py:14: DeprecationWarning: deprecated
+    assert req.rerank is True
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_docs_generated.py::test_no_setting_falls_outside_a_group
+1 failed, 1182 passed, 943 deselected, 2 warnings in 83.66s (0:01:23)
+
+First isolated refco run (owned child API inherited the default cache endpoint):
+.F................................                                       [100%]
+=================================== FAILURES ===================================
+_________________ test_ollama_reachable_only_through_recorder __________________
+tests/integration/refco/test_m0.py:212: in test_ollama_reachable_only_through_recorder
+    assert result.returncode == 0, result.stdout
+E   AssertionError: PASS fixture: tenant credential and manifest verified
+E     INFO gateway: private server log at /tmp/pytest-of-ubuntu/pytest-111/test_ollama_reachable_only_thr0/.showcase/m0-server.log
+E     FAIL journey: Gateway-only API exited before readiness (ServerReadinessError)
+E     SKIP gateway: prerequisite did not complete
+E     SKIP policy: prerequisite did not complete
+E     SKIP search: prerequisite did not complete
+E     SKIP receipt: prerequisite did not complete
+E     SKIP modules: prerequisite did not complete
+E     SKIP restore: prerequisite did not complete
+E     SKIP restore drill: Sprint 015
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-dDxeGklu-py3.11/bin/python', '-c', '\nimp...erequisite did not complete\nSKIP restore: prerequisite did not complete\nSKIP restore drill: Sprint 015\n', stderr='').returncode
+1 failed, 33 passed in 67.40s (0:01:07)

@@ -1,0 +1,20 @@
+.....................................FF...                               [100%]
+=================================== FAILURES ===================================
+_____________ test_wait_for_lock_observes_backend_before_returning _____________
+tests/unit/refco/test_review_regressions.py:14: in test_wait_for_lock_observes_backend_before_returning
+    cursor = conn.cursor.return_value.__enter__.return_value
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:640: in __getattr__
+    raise AttributeError(name)
+E   AttributeError: __enter__
+_______________________ test_wait_for_lock_timeout_fails _______________________
+tests/unit/refco/test_review_regressions.py:24: in test_wait_for_lock_timeout_fails
+    conn.cursor.return_value.__enter__.return_value.fetchone.return_value = ("Client",)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:640: in __getattr__
+    raise AttributeError(name)
+E   AttributeError: __enter__
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_review_regressions.py::test_wait_for_lock_observes_backend_before_returning
+FAILED tests/unit/refco/test_review_regressions.py::test_wait_for_lock_timeout_fails
+2 failed, 40 passed in 3.12s

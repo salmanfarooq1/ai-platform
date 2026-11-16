@@ -55,7 +55,7 @@ Status: **built** (on `main`, QA signed) · **local** (built and verified, not c
 | M6 Insights | Metrics, dashboards and reports under the viewer's grants | planned 029 |
 | Editions | Gateway, Assurance, Agents, Data, Full; smoke test per edition | local (012) |
 | Console | Overview, Ask, Library, History, Requests, Decisions, Policies, Keys, Usage, Agent runs, Modules, Trust, System | built; Modules page: local |
-| Reference company and showcase | Personas and the M0 script (014); fictional distributor data (021) | next 014 |
+| Reference company and showcase | Personas and the M0 script (014); fictional distributor data (021) | built (014, local); data: 021 |
 | POC lifecycle | Local `poc up/backup/down/status`, maintenance mode, restore drill (015); OpenTofu and cloud VM: cloud track, 031 at the latest | next 015 |
 
 ## How it connects (target request path)
@@ -71,7 +71,7 @@ Built today: credential → gateway → agent or search → model → receipt an
 | MA Agents and insights | Sandboxed margin question with metric and snapshot in the receipt; integration agent; budget breaker; dashboards per viewer | 027 to 029 | planned |
 | ME Enterprise | Signed evidence pack; failover drill on a cloud; each edition installs alone | 030 to 032 | planned |
 
-M0 journey steps today: modules off (done locally in 012) · deny by policy (done) · deny before any inference, receipt names the model and lists stages (013) · personas and `m0.sh` (014) · local `poc up/backup/down/up` (015).
+M0 journey steps today: modules off (done locally in 012) · deny by policy (done) · deny before any inference, receipt names the model and lists stages (013) · personas and `m0.sh` (done locally in 014) · local `poc up/backup/down/up` (015).
 
 ## Agreed with the owner
 - Three pillars, integration first, gateway first, single tenant per deploy by default, hosted models as an equal option (2026-10-11).
@@ -87,8 +87,8 @@ M0 journey steps today: modules off (done locally in 012) · deny by policy (don
 2. Shape the product map (end-state console) once the Architect's draft is ready.
 
 ## Now (2026-11-16)
-- **013 closed (models and providers).** All 22 acceptance rows pass. Unit 1054, e2e 384, ruff clean. Each fix had a review from a different model; no test was weakened (compose and network-guard checks made stricter). Evidence: `planning/sprints/013-models-and-providers/evidence/`.
-- **014 in build (reference company).** WP1 personas: second fix round. WP2 M0 journey: fixes in, re-review running; browser run next.
-- **Open, tracked separately:** `ui/node_modules` symlink in git; order-dependent `test_all_is_the_default_and_gateway_is_mandatory` (passes under `-m unit`).
-- **Next:** guardrail spike for 019 on Terra.
+- **012 closing.** Live tier 880 tests, 0 failed (two runs). Unit 990. Ruff, mypy and import contracts (6 kept) pass. All five editions pass their smoke tests. Modules page done (Vitest 220 x3). Remaining: modules browser journey, docs (WP7), evidence (WP8), container proof, full browser run.
+- **014 accepted (2026-11-16, not committed).** `accept.sh` 8/8: ruff, mypy, contracts (7 kept), unit 1214, refco 39, UI types, Playwright, live M0 on real Ollama (deny before inference, offline receipt, modules off, policy restore). Terra review fixed. Next: owner commits 013 then 014; 015 pack.
+- **Re-plan drafted:** sprint map, 013 to 015 packs, later sprint requirements and program docs revised and reviewed by the Architect. Waiting for owner sign-off.
+- **Product map:** Architect draft after the re-plan.
 - Environment: Docker data disk is on D: (needs at least 25 GB free; check before pulls). Docker Desktop does not start at sign-in; start it after a Windows restart. Local Playwright: `scratch/pw/run.sh`.
