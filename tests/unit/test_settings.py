@@ -11,7 +11,7 @@ pytestmark = pytest.mark.unit
 _ENV_NAMES = [
     "MODE", "DATABASE_URL", "REDIS_URL", "LLM_MODEL", "EMBED_MODEL", "EMBEDDING_DIM",
     "RATE_LIMIT_REQUESTS", "CONFIDENCE_FLOOR", "OTEL_EXPORTER_OTLP_ENDPOINT", "RECEIPT_SIGNING_KEY",
-    "RECEIPT_PREVIOUS_PUBLIC_KEYS", "METRICS_PUBLIC", "DECISION_RETENTION_DAYS",
+    "RECEIPT_PREVIOUS_PUBLIC_KEYS", "RECEIPT_SIGNING_KEY_FILE", "METRICS_PUBLIC", "DECISION_RETENTION_DAYS",
     "MIGRATION_DATABASE_URL", "ENABLED_MODULES", "DEPLOY_SHAPE", "DEPLOY_REGION", "VERIFIER_MODEL",
 ]
 # A well-formed Ed25519 key text (32 zero bytes, base64). Only the shape matters in these tests.
@@ -250,3 +250,51 @@ def test_settings_errors_never_echo_the_secret(monkeypatch):
     with pytest.raises(SettingsError) as exc:
         get_settings()
     assert "topsecretvalue" not in str(exc.value)
+
+
+def test_receipt_signing_key_file(monkeypatch, tmp_path):
+    import base64
+
+    from evidence.receipts import keyring_from_settings
+
+    sentinel = base64.b64encode(bytes(range(32))).decode()
+    path = tmp_path / "receipt-signing.key"
+    path.write_text(sentinel)
+    path.chmod(0o600)
+    monkeypatch.setenv("RECEIPT_SIGNING_KEY_FILE", str(path))
+    settings = get_settings()
+    assert settings.signing_key_text == sentinel
+    assert sentinel not in repr(settings) + settings.model_dump_json()
+    first_id = keyring_from_settings(settings).active_key_id
+    get_settings.cache_clear()
+    assert keyring_from_settings(get_settings()).active_key_id == first_id
+    monkeypatch.setenv("RECEIPT_SIGNING_KEY", KEY_TEXT)
+    get_settings.cache_clear()
+    with pytest.raises(SettingsError, match="only one") as conflict:
+        get_settings()
+    assert sentinel not in str(conflict.value)
+    monkeypatch.delenv("RECEIPT_SIGNING_KEY")
+    for fault in ("missing", "unreadable", "malformed", "symlink"):
+        get_settings.cache_clear()
+        if path.exists() or path.is_symlink():
+            path.unlink()
+        if fault == "unreadable":
+            path.write_text(sentinel)
+            path.chmod(0)
+        elif fault == "malformed":
+            path.write_text("private-file-sentinel!")
+            path.chmod(0o600)
+        elif fault == "symlink":
+            actual = tmp_path / "actual"
+            actual.write_text(sentinel)
+            actual.chmod(0o600)
+            path.symlink_to(actual)
+        with pytest.raises(SettingsError) as error:
+            get_settings()
+        assert sentinel not in str(error.value) and "private-file-sentinel!" not in str(error.value)
+    monkeypatch.delenv("RECEIPT_SIGNING_KEY_FILE")
+    monkeypatch.setenv("RECEIPT_SIGNING_KEY", sentinel)
+    monkeypatch.setenv("RECEIPT_PREVIOUS_PUBLIC_KEYS", KEY_TEXT)
+    get_settings.cache_clear()
+    assert get_settings().previous_receipt_keys == [KEY_TEXT]
+    assert keyring_from_settings(get_settings()).active_key_id == first_id

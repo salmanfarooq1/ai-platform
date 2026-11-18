@@ -1,0 +1,133 @@
+FFFFFFFFFFFFFFFFFF                                                       [100%]
+=================================== FAILURES ===================================
+__________________ test_held_lock_refuses_before_context_load __________________
+tests/unit/test_poc_fix4.py:25: in test_held_lock_refuses_before_context_load
+    action(tmp_path, 'example')
+scripts/poc_lib/lifecycle.py:71: in backup
+    context = load_context(root, stack, runner=runner or LocalRunner(), environ=environ)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_poc_fix4.py:20: in forbidden
+    raise AssertionError('context must not load before lock')
+E   AssertionError: context must not load before lock
+____________________ test_job_deferrals_required_in_schema _____________________
+tests/unit/test_poc_fix4.py:31: in test_job_deferrals_required_in_schema
+    assert 'deferrals' in Job.model_json_schema()['required']
+E   AssertionError: assert 'deferrals' in ['id', 'kind', 'status', 'attempts', 'max_attempts', 'progress', ...]
+________________ test_compose_env_rejects_invalid_operator_url _________________
+tests/unit/test_poc_fix4.py:35: in test_compose_env_rejects_invalid_operator_url
+    with pytest.raises(PocError, match='POC_OLLAMA_BASE_URL'):
+E   Failed: DID NOT RAISE PocError
+_______________ test_accept_uses_poetry_interpreter_for_showcase _______________
+tests/unit/test_poc_fix4.py:41: in test_accept_uses_poetry_interpreter_for_showcase
+    assert 'SHOWCASE_PYTHON=' in source and 'sys.executable' in source
+E   assert ('SHOWCASE_PYTHON=' in '#!/usr/bin/env bash\n# Prepared tools only; never installs. Run alone: live tiers share local Valkey.\n# --baseline c...Exit(int(bool(missing) or skipped))\nPYDRILL\nfi\nprintf \'failures: %s\\n\' "$fails" | tee -a "$OUT"\nexit "$fails"\n')
+_______________ test_showcase_missing_dependency_has_clear_error _______________
+tests/unit/test_poc_fix4.py:50: in test_showcase_missing_dependency_has_clear_error
+    assert 'FAIL m0:' in result.stderr and 'dependencies' in result.stderr
+E   assert ('FAIL m0:' in 'Traceback (most recent call last):\n  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main\n    retu...ycle/scripts/showcase/m0.py", line 19, in <module>\n    import httpx\nModuleNotFoundError: No module named \'httpx\'\n')
+E    +  where 'Traceback (most recent call last):\n  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main\n    retu...ycle/scripts/showcase/m0.py", line 19, in <module>\n    import httpx\nModuleNotFoundError: No module named \'httpx\'\n' = CompletedProcess(args=['bash', 'scripts/showcase/m0.sh', 'example'], returncode=1, stdout='', stderr='Traceback (most ...cle/scripts/showcase/m0.py", line 19, in <module>\n    import httpx\nModuleNotFoundError: No module named \'httpx\'\n').stderr
+_ test_lifecycle_guard_rejects_additional_override_forms[import httpx\nhttpx.post, httpx.get = 1, 2] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   AssertionError: assert []
+E    +  where [] = python_lifecycle_violations('import httpx\nhttpx.post, httpx.get = 1, 2', product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import httpx\ndel httpx.post] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   AssertionError: assert []
+E    +  where [] = python_lifecycle_violations('import httpx\ndel httpx.post', product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import httpx\nfor httpx.post in []: pass] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   AssertionError: assert []
+E    +  where [] = python_lifecycle_violations('import httpx\nfor httpx.post in []: pass', product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import httpx\nwith ctx() as httpx.post: pass] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   AssertionError: assert []
+E    +  where [] = python_lifecycle_violations('import httpx\nwith ctx() as httpx.post: pass', product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import httpx\nx = httpx\nx.post = 1] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   AssertionError: assert []
+E    +  where [] = python_lifecycle_violations('import httpx\nx = httpx\nx.post = 1', product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import sys\nsys.modules['httpx'].post = 1] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   assert []
+E    +  where [] = python_lifecycle_violations("import sys\nsys.modules['httpx'].post = 1", product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import importlib\nimportlib.import_module('httpx').post = 1] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   assert []
+E    +  where [] = python_lifecycle_violations("import importlib\nimportlib.import_module('httpx').post = 1", product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[__import__('httpx').post = 1] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   assert []
+E    +  where [] = python_lifecycle_violations("__import__('httpx').post = 1", product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import httpx\nobject.__setattr__(httpx, 'post', 1)] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   assert []
+E    +  where [] = python_lifecycle_violations("import httpx\nobject.__setattr__(httpx, 'post', 1)", product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import sys\nsetattr(sys.modules['httpx'], 'post', 1)] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   assert []
+E    +  where [] = python_lifecycle_violations("import sys\nsetattr(sys.modules['httpx'], 'post', 1)", product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import httpx\nvars(httpx)['post'] = 1] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   assert []
+E    +  where [] = python_lifecycle_violations("import httpx\nvars(httpx)['post'] = 1", product_imports=True)
+_ test_lifecycle_guard_rejects_additional_override_forms[import httpx\nhttpx.__dict__['post'] = 1] _
+tests/unit/refco/test_public_seams.py:388: in test_lifecycle_guard_rejects_additional_override_forms
+    assert python_lifecycle_violations(source, product_imports=True)
+E   assert []
+E    +  where [] = python_lifecycle_violations("import httpx\nhttpx.__dict__['post'] = 1", product_imports=True)
+____________ test_lifecycle_guard_allows_shadowed_module_parameter _____________
+tests/unit/refco/test_public_seams.py:392: in test_lifecycle_guard_allows_shadowed_module_parameter
+    assert not python_lifecycle_violations('import json\ndef f(json):\n    json.x = 1', product_imports=True)
+E   AssertionError: assert not ['global override of json.x']
+E    +  where ['global override of json.x'] = python_lifecycle_violations('import json\ndef f(json):\n    json.x = 1', product_imports=True)
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc_fix4.py::test_held_lock_refuses_before_context_load
+FAILED tests/unit/test_poc_fix4.py::test_job_deferrals_required_in_schema - A...
+FAILED tests/unit/test_poc_fix4.py::test_compose_env_rejects_invalid_operator_url
+FAILED tests/unit/test_poc_fix4.py::test_accept_uses_poetry_interpreter_for_showcase
+FAILED tests/unit/test_poc_fix4.py::test_showcase_missing_dependency_has_clear_error
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import httpx\nhttpx.post, httpx.get = 1, 2]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import httpx\ndel httpx.post]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import httpx\nfor httpx.post in []: pass]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import httpx\nwith ctx() as httpx.post: pass]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import httpx\nx = httpx\nx.post = 1]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import sys\nsys.modules['httpx'].post = 1]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import importlib\nimportlib.import_module('httpx').post = 1]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[__import__('httpx').post = 1]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import httpx\nobject.__setattr__(httpx, 'post', 1)]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import sys\nsetattr(sys.modules['httpx'], 'post', 1)]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import httpx\nvars(httpx)['post'] = 1]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_additional_override_forms[import httpx\nhttpx.__dict__['post'] = 1]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_allows_shadowed_module_parameter
+18 failed, 106 deselected in 5.67s
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_showcase_missing_dependency_has_clear_error _______________
+tests/unit/test_poc_fix4.py:50: in test_showcase_missing_dependency_has_clear_error
+    assert 'FAIL m0:' in result.stderr and 'dependencies' in result.stderr
+E   assert ('FAIL m0:' in 'Traceback (most recent call last):\n  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main\n    retu...ycle/scripts/showcase/m0.py", line 19, in <module>\n    import httpx\nModuleNotFoundError: No module named \'httpx\'\n')
+E    +  where 'Traceback (most recent call last):\n  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main\n    retu...ycle/scripts/showcase/m0.py", line 19, in <module>\n    import httpx\nModuleNotFoundError: No module named \'httpx\'\n' = CompletedProcess(args=['bash', 'scripts/showcase/m0.sh', 'example'], returncode=1, stdout='', stderr='Traceback (most ...cle/scripts/showcase/m0.py", line 19, in <module>\n    import httpx\nModuleNotFoundError: No module named \'httpx\'\n').stderr
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc_fix4.py::test_showcase_missing_dependency_has_clear_error
+1 failed in 3.35s
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_drill_missing_dependency_has_clear_error _________________
+tests/unit/test_poc_fix4.py:60: in test_drill_missing_dependency_has_clear_error
+    assert 'FAIL prerequisites:' in result.stdout and 'dependencies' in result.stdout
+E   assert ('FAIL prerequisites:' in '')
+E    +  where '' = CompletedProcess(args=['bash', 'scripts/verify/poc-drill.sh', 'example'], returncode=1, stdout='', stderr='Traceback (...ts/verify/poc_drill.py", line 27, in <module>\n    import tomllib\nModuleNotFoundError: No module named \'tomllib\'\n').stdout
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc_fix4.py::test_drill_missing_dependency_has_clear_error
+1 failed in 5.80s

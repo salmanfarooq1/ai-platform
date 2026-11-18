@@ -1,0 +1,118 @@
+......................FFFFFFFFFFFF............................FFF.       [100%]
+=================================== FAILURES ===================================
+___________________ test_create_only_refuses_existing_stack ____________________
+tests/unit/test_poc_up.py:296: in test_create_only_refuses_existing_stack
+    _up(repo, FakeRunner(), create_only=True)
+tests/unit/test_poc_up.py:89: in _up
+    return poc_up.up(repo, stack, runner=runner, resolver=_resolver, port_picker=lambda: 18321,
+E   TypeError: up() got an unexpected keyword argument 'create_only'
+____ test_create_only_refuses_a_state_a_racing_creator_made_after_the_probe ____
+tests/unit/test_poc_up.py:310: in test_create_only_refuses_a_state_a_racing_creator_made_after_the_probe
+    _up(repo, runner, stack="racer", create_only=True, owner_token=TOKEN)
+tests/unit/test_poc_up.py:89: in _up
+    return poc_up.up(repo, stack, runner=runner, resolver=_resolver, port_picker=lambda: 18321,
+E   TypeError: up() got an unexpected keyword argument 'create_only'
+______ test_create_only_refuses_leftover_runtime_volumes_without_a_folder ______
+tests/unit/test_poc_up.py:323: in test_create_only_refuses_leftover_runtime_volumes_without_a_folder
+    _up(repo, WithVolumes(), create_only=True, owner_token=TOKEN)
+tests/unit/test_poc_up.py:89: in _up
+    return poc_up.up(repo, stack, runner=runner, resolver=_resolver, port_picker=lambda: 18321,
+E   TypeError: up() got an unexpected keyword argument 'create_only'
+____________ test_create_only_needs_a_well_formed_owner_token[None] ____________
+tests/unit/test_poc_up.py:330: in test_create_only_needs_a_well_formed_owner_token
+    _up(repo, FakeRunner(), create_only=True, owner_token=token)
+tests/unit/test_poc_up.py:89: in _up
+    return poc_up.up(repo, stack, runner=runner, resolver=_resolver, port_picker=lambda: 18321,
+E   TypeError: up() got an unexpected keyword argument 'create_only'
+______________ test_create_only_needs_a_well_formed_owner_token[] ______________
+tests/unit/test_poc_up.py:330: in test_create_only_needs_a_well_formed_owner_token
+    _up(repo, FakeRunner(), create_only=True, owner_token=token)
+tests/unit/test_poc_up.py:89: in _up
+    return poc_up.up(repo, stack, runner=runner, resolver=_resolver, port_picker=lambda: 18321,
+E   TypeError: up() got an unexpected keyword argument 'create_only'
+___________ test_create_only_needs_a_well_formed_owner_token[short] ____________
+tests/unit/test_poc_up.py:330: in test_create_only_needs_a_well_formed_owner_token
+    _up(repo, FakeRunner(), create_only=True, owner_token=token)
+tests/unit/test_poc_up.py:89: in _up
+    return poc_up.up(repo, stack, runner=runner, resolver=_resolver, port_picker=lambda: 18321,
+E   TypeError: up() got an unexpected keyword argument 'create_only'
+_ test_create_only_needs_a_well_formed_owner_token[GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG] _
+tests/unit/test_poc_up.py:330: in test_create_only_needs_a_well_formed_owner_token
+    _up(repo, FakeRunner(), create_only=True, owner_token=token)
+tests/unit/test_poc_up.py:89: in _up
+    return poc_up.up(repo, stack, runner=runner, resolver=_resolver, port_picker=lambda: 18321,
+E   TypeError: up() got an unexpected keyword argument 'create_only'
+_ test_create_only_needs_a_well_formed_owner_token[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] _
+tests/unit/test_poc_up.py:330: in test_create_only_needs_a_well_formed_owner_token
+    _up(repo, FakeRunner(), create_only=True, owner_token=token)
+tests/unit/test_poc_up.py:89: in _up
+    return poc_up.up(repo, stack, runner=runner, resolver=_resolver, port_picker=lambda: 18321,
+E   TypeError: up() got an unexpected keyword argument 'create_only'
+__ test_create_only_writes_a_private_ownership_token_and_a_normal_up_does_not __
+tests/unit/test_poc_up.py:335: in test_create_only_writes_a_private_ownership_token_and_a_normal_up_does_not
+    _up(repo, FakeRunner(), create_only=True, owner_token=TOKEN)
+tests/unit/test_poc_up.py:89: in _up
+    return poc_up.up(repo, stack, runner=runner, resolver=_resolver, port_picker=lambda: 18321,
+E   TypeError: up() got an unexpected keyword argument 'create_only'
+____ test_a_stack_that_is_absent_is_told_apart_from_one_that_cannot_be_read ____
+tests/unit/test_poc_up.py:345: in test_a_stack_that_is_absent_is_told_apart_from_one_that_cannot_be_read
+    with pytest.raises(poc_up.StackAbsent):
+                       ^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'scripts.poc_lib.up' has no attribute 'StackAbsent'
+_ test_the_status_command_exits_3_for_an_absent_stack_and_1_for_any_other_refusal _
+tests/unit/test_poc_up.py:361: in test_the_status_command_exits_3_for_an_absent_stack_and_1_for_any_other_refusal
+    assert poc_up.main(["status", "nothere", "--json"]) == 3
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:311: in main
+    info = lifecycle.status(root, args.stack, runner=LocalRunner())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_poc_up.py:358: in absent
+    raise poc_up.StackAbsent("no such stack")
+          ^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'scripts.poc_lib.up' has no attribute 'StackAbsent'
+_ test_up_create_only_and_destroy_take_the_token_from_the_environment_never_argv _
+tests/unit/test_poc_up.py:379: in test_up_create_only_and_destroy_take_the_token_from_the_environment_never_argv
+    assert poc_up.main(["up", "demo", "--create-only"]) == 0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:284: in main
+    args = parser.parse_args(argv)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/argparse.py:1865: in parse_args
+    self.error(msg % ' '.join(argv))
+../../.pyenv/versions/3.11.0/lib/python3.11/argparse.py:2617: in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+../../.pyenv/versions/3.11.0/lib/python3.11/argparse.py:2604: in exit
+    _sys.exit(status)
+E   SystemExit: 2
+----------------------------- Captured stderr call -----------------------------
+usage: poc [-h] {up,backup,down,admin,destroy,status} ...
+poc: error: unrecognized arguments: --create-only
+_ test_destroy_with_an_owner_token_only_removes_the_stack_that_carries_that_token _
+tests/unit/test_poc_admin_destroy.py:256: in test_destroy_with_an_owner_token_only_removes_the_stack_that_carries_that_token
+    lifecycle.destroy(tmp_path, "demo", confirm="demo", runner=docker, environ={"PATH": "/usr/bin"}, owner_token=TOKEN)
+E   TypeError: destroy() got an unexpected keyword argument 'owner_token'
+_ test_destroy_refuses_a_stack_whose_owner_token_differs_or_is_missing[00000000000000000000000000000000-fedcba9876543210fedcba9876543210] _
+tests/unit/test_poc_admin_destroy.py:268: in test_destroy_refuses_a_stack_whose_owner_token_differs_or_is_missing
+    lifecycle.destroy(tmp_path, "demo", confirm="demo", runner=docker, environ={"PATH": "/usr/bin"}, owner_token=token)
+E   TypeError: destroy() got an unexpected keyword argument 'owner_token'
+_ test_destroy_refuses_a_stack_whose_owner_token_differs_or_is_missing[fedcba9876543210fedcba9876543210-None] _
+tests/unit/test_poc_admin_destroy.py:268: in test_destroy_refuses_a_stack_whose_owner_token_differs_or_is_missing
+    lifecycle.destroy(tmp_path, "demo", confirm="demo", runner=docker, environ={"PATH": "/usr/bin"}, owner_token=token)
+E   TypeError: destroy() got an unexpected keyword argument 'owner_token'
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc_up.py::test_create_only_refuses_existing_stack - T...
+FAILED tests/unit/test_poc_up.py::test_create_only_refuses_a_state_a_racing_creator_made_after_the_probe
+FAILED tests/unit/test_poc_up.py::test_create_only_refuses_leftover_runtime_volumes_without_a_folder
+FAILED tests/unit/test_poc_up.py::test_create_only_needs_a_well_formed_owner_token[None]
+FAILED tests/unit/test_poc_up.py::test_create_only_needs_a_well_formed_owner_token[]
+FAILED tests/unit/test_poc_up.py::test_create_only_needs_a_well_formed_owner_token[short]
+FAILED tests/unit/test_poc_up.py::test_create_only_needs_a_well_formed_owner_token[GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG]
+FAILED tests/unit/test_poc_up.py::test_create_only_needs_a_well_formed_owner_token[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa]
+FAILED tests/unit/test_poc_up.py::test_create_only_writes_a_private_ownership_token_and_a_normal_up_does_not
+FAILED tests/unit/test_poc_up.py::test_a_stack_that_is_absent_is_told_apart_from_one_that_cannot_be_read
+FAILED tests/unit/test_poc_up.py::test_the_status_command_exits_3_for_an_absent_stack_and_1_for_any_other_refusal
+FAILED tests/unit/test_poc_up.py::test_up_create_only_and_destroy_take_the_token_from_the_environment_never_argv
+FAILED tests/unit/test_poc_admin_destroy.py::test_destroy_with_an_owner_token_only_removes_the_stack_that_carries_that_token
+FAILED tests/unit/test_poc_admin_destroy.py::test_destroy_refuses_a_stack_whose_owner_token_differs_or_is_missing[00000000000000000000000000000000-fedcba9876543210fedcba9876543210]
+FAILED tests/unit/test_poc_admin_destroy.py::test_destroy_refuses_a_stack_whose_owner_token_differs_or_is_missing[fedcba9876543210fedcba9876543210-None]
+15 failed, 51 passed in 5.15s

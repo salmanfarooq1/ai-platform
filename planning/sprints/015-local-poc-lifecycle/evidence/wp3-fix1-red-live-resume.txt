@@ -1,0 +1,14 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_failed_restore_is_resumed_by_up_and_never_starts_an_empty_stack _____
+tests/integration/poc/test_restore.py:417: in test_failed_restore_is_resumed_by_up_and_never_starts_an_empty_stack
+    assert_no_writer_ever(first, "after the pg_restore fault")
+tests/integration/poc/test_restore.py:409: in assert_no_writer_ever
+    assert pending.is_file(), label
+E   AssertionError: after the pg_restore fault
+E   assert False
+E    +  where False = is_file()
+E    +    where is_file = PosixPath('/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/.poc/r659bcb32/restore-pending.json').is_file
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_restore.py::test_failed_restore_is_resumed_by_up_and_never_starts_an_empty_stack
+1 failed in 115.10s (0:01:55)

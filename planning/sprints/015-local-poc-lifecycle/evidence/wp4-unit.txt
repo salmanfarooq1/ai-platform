@@ -1,0 +1,43 @@
+........................................................................ [  4%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+........................................................................ [ 18%]
+........................................................................ [ 23%]
+.................................F...................................... [ 28%]
+........................................................................ [ 33%]
+........................................................................ [ 37%]
+........................................................................ [ 42%]
+........................................................................ [ 47%]
+........................................................................ [ 52%]
+........................................................................ [ 56%]
+........................................................................ [ 61%]
+........................................................................ [ 66%]
+........................................................................ [ 71%]
+........................................................................ [ 75%]
+........................................................................ [ 80%]
+........................................................................ [ 85%]
+........................................................................ [ 90%]
+........................................................................ [ 94%]
+........................................................................ [ 99%]
+......                                                                   [100%]
+=================================== FAILURES ===================================
+______________ test_the_product_docs_have_no_broken_link_or_path _______________
+tests/unit/test_docs_links.py:25: in test_the_product_docs_have_no_broken_link_or_path
+    assert not problems, "\n".join(problems)
+E   AssertionError: docs/operations.md: path does not exist (`manifest.json`)
+E     docs/operations.md: path does not exist (`latest.json`)
+E     docs/operations.md: path does not exist (`marker.json`)
+E   assert not ['docs/operations.md: path does not exist (`manifest.json`)', 'docs/operations.md: path does not exist (`latest.json`)', 'docs/operations.md: path does not exist (`marker.json`)']
+=============================== warnings summary ===============================
+tests/unit/test_eval_gate.py::test_the_suite_scores_what_the_baseline_says
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+tests/unit/test_search_route.py::test_search_request_defaults
+  /home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_search_route.py:14: DeprecationWarning: deprecated
+    assert req.rerank is True
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_docs_links.py::test_the_product_docs_have_no_broken_link_or_path
+1 failed, 1517 passed, 981 deselected, 2 warnings in 128.54s (0:02:08)

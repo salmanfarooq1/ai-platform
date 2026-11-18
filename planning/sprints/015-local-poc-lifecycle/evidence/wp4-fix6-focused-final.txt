@@ -1,0 +1,10 @@
+..F..........................                                            [100%]
+=================================== FAILURES ===================================
+_______________________ test_ui_patch_and_compose_images _______________________
+tests/unit/test_wp4_fix6.py:33: in test_ui_patch_and_compose_images
+    assert service["build"]["context"] == f"docker/{context}"
+           ^^^^^^^^^^^^^^^^
+E   KeyError: 'build'
+=========================== short test summary info ============================
+FAILED tests/unit/test_wp4_fix6.py::test_ui_patch_and_compose_images - KeyErr...
+1 failed, 28 passed in 24.35s

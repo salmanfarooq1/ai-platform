@@ -1,0 +1,104 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 4.73kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11.18-slim-bookworm@sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 296B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [builder 1/6] FROM docker.io/library/python:3.11.18-slim-bookworm@sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39
+#5 resolve docker.io/library/python:3.11.18-slim-bookworm@sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39 0.0s done
+#5 DONE 0.1s
+
+#4 [internal] load build context
+#4 transferring context: 48.88kB 0.1s done
+#4 DONE 0.1s
+
+#6 [runtime 15/18] COPY --from=builder /app/alembic.ini alembic.ini
+#6 CACHED
+
+#7 [runtime  7/18] COPY --from=builder /app/evidence evidence/
+#7 CACHED
+
+#8 [runtime  6/18] COPY --from=builder /app/gateway gateway/
+#8 CACHED
+
+#9 [builder 4/6] COPY pyproject.toml poetry.lock ./
+#9 CACHED
+
+#10 [runtime  3/18] COPY --from=builder /app/.venv .venv
+#10 CACHED
+
+#11 [runtime 12/18] COPY --from=builder /app/config.py config.py
+#11 CACHED
+
+#12 [builder 3/6] WORKDIR /app
+#12 CACHED
+
+#13 [runtime  4/18] COPY --from=builder /app/api api/
+#13 CACHED
+
+#14 [runtime  8/18] COPY --from=builder /app/ports ports/
+#14 CACHED
+
+#15 [runtime 14/18] COPY --from=builder /app/providers.register.toml providers.register.toml
+#15 CACHED
+
+#16 [builder 6/6] COPY . .
+#16 CACHED
+
+#17 [runtime 10/18] COPY --from=builder /app/workers workers/
+#17 CACHED
+
+#18 [runtime 11/18] COPY --from=builder /app/sandbox_agent sandbox_agent/
+#18 CACHED
+
+#19 [runtime  9/18] COPY --from=builder /app/adapters adapters/
+#19 CACHED
+
+#20 [runtime  5/18] COPY --from=builder /app/core core/
+#20 CACHED
+
+#21 [runtime 16/18] COPY --from=builder /app/migrations migrations/
+#21 CACHED
+
+#22 [runtime  2/18] WORKDIR /app
+#22 CACHED
+
+#23 [runtime 13/18] COPY --from=builder /app/models.lock models.lock
+#23 CACHED
+
+#24 [runtime 17/18] COPY --from=builder /app/data data/
+#24 CACHED
+
+#25 [builder 5/6] RUN --mount=type=cache,id=gap-poetry,target=/root/.cache/pypoetry     poetry install --only main --no-root
+#25 CACHED
+
+#26 [builder 2/6] RUN pip install --no-cache-dir pipx &&     pipx install poetry==2.3.3
+#26 CACHED
+
+#27 [runtime 18/18] RUN mkdir -p -m 1777 /data/objects /var/tmp/app
+#27 CACHED
+
+#28 exporting to image
+#28 exporting layers 0.0s done
+#28 exporting manifest sha256:57a7909ee3a7c0cf42261d5001278edbff962bf7506dd66482ed83b42a3d5ad5 done
+#28 exporting config sha256:3042b4b7b46b306c91ed21d9e9d579ec3f89965425933826cc8cabe02bec66ac done
+#28 exporting attestation manifest sha256:ded0587a7058c4f04d253044223b9b71679900ca4ddac91b274d249bd771e6e3
+#28 exporting attestation manifest sha256:ded0587a7058c4f04d253044223b9b71679900ca4ddac91b274d249bd771e6e3 0.0s done
+#28 exporting manifest list sha256:b3032e78ea78573c7ab452861d0dd1cce6348d53581dcdb186421b58536b71a2 0.0s done
+#28 naming to docker.io/library/gap-supply-chain:scan done
+#28 unpacking to docker.io/library/gap-supply-chain:scan 0.0s done
+#28 DONE 0.3s
+Scanning docker:gap-supply-chain:scan
+Image gate failed: docker:gap-supply-chain:scan (exit 124)
+ERROR: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+UI image build failed; continuing independent image checks.

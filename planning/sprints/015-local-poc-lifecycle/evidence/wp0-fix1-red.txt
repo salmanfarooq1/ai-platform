@@ -1,0 +1,20 @@
+..                                                                       [100%]
+2 passed in 6.71s
+================= FAILURES ===================================
+______________ test_poetry_override_is_used_by_all_python_servers ______________
+tests/unit/test_playwright_config.py:63: in test_poetry_override_is_used_by_all_python_servers
+    assert all(shlex.split(command)[0] == str(override) for command in commands)
+E   assert False
+E    +  where False = all(<generator object test_poetry_override_is_used_by_all_python_servers.<locals>.<genexpr> at 0x790af0f0f1f0>)
+_________________ test_restore_journal_survives_commit_failure _________________
+tests/integration/refco/test_m0_restore.py:160: in test_restore_journal_survives_commit_failure
+    assert journal.exists()
+E   AssertionError: assert False
+E    +  where False = exists()
+E    +    where exists = PosixPath('/tmp/pytest-of-ubuntu/pytest-158/test_restore_journal_survives_0/policy-journal.json').exists
+----------------------------- Captured stdout call -----------------------------
+baseline restored as new version
+=========================== short test summary info ============================
+FAILED tests/unit/test_playwright_config.py::test_poetry_override_is_used_by_all_python_servers
+FAILED tests/integration/refco/test_m0_restore.py::test_restore_journal_survives_commit_failure
+2 failed in 8.33s

@@ -1,0 +1,57 @@
+I001 [*] Import block is un-sorted or un-formatted
+   --> scripts/eval/suite.py:171:5
+    |
+169 |   async def run_fake() -> dict[str, float]:
+170 |       """The CI run: the fakes behind the same ports the platform uses."""
+171 | /     from api.services.model_calls import ModelCaller
+172 | |     from core.settings import get_settings
+173 | |     from tests.fakes import FakeDecisionSink, FakeEmbeddings, FakeKnowledgeStore, FakeLLM, FakeModelLimitStore, make_fake_catalog
+174 | |     from tests.gateway_helpers import make_ctx
+    | |______________________________________________^
+175 |
+176 |       store = FakeKnowledgeStore(kbs={TENANT: {NAMESPACE: "fixed eval corpus"}})
+    |
+help: Organize imports
+    |
+172 |     from core.settings import get_settings
+    -     from tests.fakes import FakeDecisionSink, FakeEmbeddings, FakeKnowledgeStore, FakeLLM, FakeModelLimitStore, make_fake_catalog
+173 +     from tests.fakes import (
+174 +         FakeDecisionSink,
+175 +         FakeEmbeddings,
+176 +         FakeKnowledgeStore,
+177 +         FakeLLM,
+178 +         FakeModelLimitStore,
+179 +         make_fake_catalog,
+180 +     )
+181 |     from tests.gateway_helpers import make_ctx
+    |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests/integration/poc/test_keys.py:28:5
+   |
+26 |       monkeypatch.setenv("EMBEDDED_WORKERS", "0")
+27 |       # The API and independent worker both use their production settings/keyring path.
+28 | /     from core.settings import get_settings
+29 | |     from tests import harness
+30 | |
+31 | |     import api.main
+32 | |     import core.database.pool
+   | |_____________________________^
+33 |
+34 |       monkeypatch.setitem(core.database.pool.DATABASE_CONFIG, "url", app_database_url)
+   |
+help: Organize imports
+   |
+27 |     # The API and independent worker both use their production settings/keyring path.
+   -     from core.settings import get_settings
+   -     from tests import harness
+   -
+28 |     import api.main
+29 |     import core.database.pool
+30 +     from core.settings import get_settings
+31 +     from tests import harness
+32 |
+   |
+
+Found 2 errors.
+[*] 2 fixable with the `--fix` option.

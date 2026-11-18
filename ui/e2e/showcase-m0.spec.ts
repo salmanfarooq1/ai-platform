@@ -1,8 +1,13 @@
+import { execFileSync } from 'node:child_process'
 import { expect, test } from '@playwright/test'
 import { ask, readState, signIn } from './fixtures'
 
 test('m0 journey', async ({ page }) => {
   const state = readState('showcase-m0/state.json')
+  const policy = (action: string) => execFileSync(process.env.POETRY || 'poetry', ['run', 'python', '-m', 'scripts.showcase.m0_policy', action, 'ui/e2e/.state/showcase-m0'], { cwd: '..', encoding: 'utf8' })
+  expect(policy('status')).toContain('baseline allowed')
+  try {
+  expect(policy('deny')).toContain('journey deny')
   await signIn(page, state.api_key)
   await page.goto('/app/ask')
   const searchResponse = page.waitForResponse((response) => response.url().endsWith('/v1/search') && response.request().method() === 'POST')
@@ -24,4 +29,7 @@ test('m0 journey', async ({ page }) => {
   await expect(page.getByTestId('verified-fields')).toContainText('model_not_allowed')
   await page.goto('/app/modules')
   await expect(page.getByRole('region', { name: 'Agents' }).getByLabel('Agents: off')).toBeVisible()
+  } finally {
+    expect(policy('restore')).toContain('baseline restored as new version')
+  }
 })

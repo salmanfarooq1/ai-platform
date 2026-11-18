@@ -1,0 +1,9 @@
+PASS docker-compose.yml:grafana list 3 platforms
+PASS docker-compose.yml:kafka index 2 platforms
+PASS docker-compose.yml:ollama index 2 platforms
+PASS docker-compose.yml:ollama-edge list 5 platforms
+PASS docker-compose.yml:ollama-lock-check index 5 platforms
+PASS docker-compose.yml:postgres index 2 platforms
+PASS docker-compose.yml:prometheus list 6 platforms
+PASS docker-compose.yml:seaweedfs index 4 platforms
+PASS docker-compose.yml:valkey index 2 platforms

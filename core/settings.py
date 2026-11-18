@@ -5,14 +5,17 @@ All configuration is read here, once, from the environment (and `.env.local` or
 process never starts half-configured (strict rule 14). Secrets are referred to by
 env var name only and never appear in error messages.
 """
+import os
+import stat
+from contextlib import contextmanager
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Iterator, Literal
 from urllib.parse import urlsplit
 from uuid import UUID
 
 from dotenv import load_dotenv
-from pydantic import Field, SecretStr, ValidationError, field_validator, model_validator
+from pydantic import Field, PrivateAttr, SecretStr, ValidationError, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Mode = Literal["local", "public-preview", "prod"]
@@ -53,10 +56,59 @@ class SettingsError(ValueError):
     """Raised when configuration is missing or invalid."""
 
 
+@contextmanager
+def secret_directory(path: Path) -> Iterator[int]:
+    """Open every path component without following links; caller owns the final fd temporarily."""
+    fd = os.open("/", os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        # Keep `..` until traversal: normalizing first can hide a symlink/.. component.
+        absolute = path if path.is_absolute() else Path.cwd() / path
+        for component in absolute.parts[1:]:
+            child = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+            os.close(fd)
+            fd = child
+        yield fd
+    finally:
+        os.close(fd)
+
+
+def read_secret_at(directory: int, name: str, *, owned: bool = False) -> str:
+    """Read a small private regular file. No links, devices, partial reads, or secret-bearing errors.
+
+    Container root may read a bind-mounted host-owned file; operator lifecycle calls
+    additionally require ownership by their uid.
+    """
+    fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+    try:
+        info = os.fstat(fd)
+        if (not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o600
+                or info.st_nlink != 1 or (owned and info.st_uid != os.getuid())):
+            raise ValueError("unsafe secret file")
+        with os.fdopen(fd, "r", encoding="ascii", closefd=False) as stream:
+            value = stream.read(257)
+        if not value or len(value) > 256:
+            raise ValueError("invalid secret file")
+        return value
+    finally:
+        os.close(fd)
+
+
+def read_signing_key_file(path: str) -> str:
+    """Load validated private key text without revealing the path or its contents on failure."""
+    try:
+        with secret_directory(Path(path).parent) as directory:
+            text = read_secret_at(directory, Path(path).name)
+        _check_key_text(text)
+        return text.strip()
+    except (OSError, ValueError):
+        raise ValueError("RECEIPT_SIGNING_KEY_FILE is missing, unreadable, unsafe or malformed") from None
+
+
 class Settings(BaseSettings):
     """Typed view of the environment. Field names equal env var names (case-insensitive)."""
 
-    model_config = SettingsConfigDict(extra="ignore", case_sensitive=False)
+    model_config = SettingsConfigDict(extra="ignore", case_sensitive=False, hide_input_in_errors=True)
+    _file_signing_key: SecretStr | None = PrivateAttr(default=None)
 
     deploy_shape: DeployShape = Field(
         default="single_tenant", description="Tenant deployment shape: one tenant by default, or `multi_tenant` for multiple tenants.",
@@ -283,8 +335,12 @@ class Settings(BaseSettings):
 
     receipt_signing_key: SecretStr | None = Field(
         default=None,
-        description="Ed25519 private key for receipts: base64 of 32 raw bytes. Required in `public-preview` and `prod`; local mode makes a throwaway key at startup. Set the same key in the API and every worker.",
+        description="Ed25519 private key for receipts: base64 of 32 raw bytes. Set this or RECEIPT_SIGNING_KEY_FILE in `public-preview` and `prod`; local mode with neither makes a throwaway key. Set the same key in the API and every worker.",
         json_schema_extra={"secret": True},
+    )
+    receipt_signing_key_file: str | None = Field(
+        default=None,
+        description="Path to a read-only mounted 0600 file containing a base64 Ed25519 private key (32 raw bytes). Rejects symlinks and unsafe files. Mutually exclusive with RECEIPT_SIGNING_KEY; API and worker must mount the same file. Back up the private file separately from data.",
     )
     receipt_previous_public_keys: str | None = Field(
         default=None,
@@ -400,6 +456,10 @@ class Settings(BaseSettings):
             ]
             if missing_s3:
                 raise ValueError(f"{', '.join(missing_s3)} must be set when OBJECT_STORE=s3")
+        if self.receipt_signing_key_file is not None:
+            if self.receipt_signing_key is not None:
+                raise ValueError("set only one of RECEIPT_SIGNING_KEY and RECEIPT_SIGNING_KEY_FILE")
+            self._file_signing_key = SecretStr(read_signing_key_file(self.receipt_signing_key_file))
         if self.mode != "local" and not self.signing_key_text:
             raise ValueError(f"RECEIPT_SIGNING_KEY must be set when MODE={self.mode}")
         for name in ("receipt_signing_key", "receipt_previous_public_keys"):
@@ -501,7 +561,8 @@ class Settings(BaseSettings):
     @property
     def signing_key_text(self) -> str:
         """The signing key text, or an empty string. Read it here and nowhere else, so it is never printed by accident."""
-        return self.receipt_signing_key.get_secret_value().strip() if self.receipt_signing_key else ""
+        key = self._file_signing_key if self.receipt_signing_key_file is not None else self.receipt_signing_key
+        return key.get_secret_value().strip() if key else ""
 
     @property
     def previous_receipt_keys(self) -> list[str]:

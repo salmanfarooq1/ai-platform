@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="72.223" timestamp="2026-11-17T04:16:48.489594+05:00" hostname="PK-LHR-DTS-123"><testcase classname="tests.integration.poc.test_up" name="test_fresh_up_initializes_default_stack" time="64.986"><failure message="scripts.poc_lib.up.PocError: release manifest refused: local app image changed since the manifest was written">tests/integration/poc/test_up.py:47: in test_fresh_up_initializes_default_stack
+    again = up(ROOT, name, runner=LocalRunner(), environ={**os.environ, "COMPOSE_PROFILES": "models,streams"})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:184: in up
+    _release_manifest(root, stack_dir, runner, env, project, resolver or release.registry_resolver(runner),
+scripts/poc_lib/up.py:151: in _release_manifest
+    raise PocError(f"release manifest refused: {exc}") from None
+E   scripts.poc_lib.up.PocError: release manifest refused: local app image changed since the manifest was written</failure></testcase><testcase classname="tests.integration.poc.test_up" name="test_hardened_services_are_healthy" time="6.952" /></testsuite></testsuites>

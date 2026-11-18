@@ -95,6 +95,8 @@ docker compose up -d worker                                     # the same, in c
 EMBEDDED_WORKERS=1 EMBEDDED_RELAY=true uvicorn api.main:app     # inside the API process, for a single-container host
 ```
 
+- **Port 8000.** The default compose set includes the `api` service, published on `127.0.0.1:${API_HOST_PORT:-8000}`. A host uvicorn on :8000 and the compose `api` cannot share it: start only the named services (`docker compose up -d postgres valkey worker`) or set `API_HOST_PORT` to another port.
+- **Temp files.** `api` and `worker` set `TMPDIR=/var/tmp/app`, on the named volume `app_tmp`, so large ingest uploads are not limited by the 64 MB `/tmp` tmpfs. There is no upload size limit yet (backlog).
 - **Health.** A worker keeps `WORKER_HEALTH_FILE` fresh while it runs, and the compose health check reads it.
 - **Shutdown.** On SIGTERM it stops claiming, gives a running job a grace period, and then releases that job's lease so another worker can take it.
 - **Sandboxed runs.** For `AGENT_RUNTIME=openshell` the worker must run on a host with Docker and an OpenShell gateway. See [operations.md](operations.md#sandboxed-runs-openshell).
@@ -149,3 +151,7 @@ No hosted deployment steps are currently supported. The earlier hosted setup rem
 3. Deploy the new image. Migrations run on start.
 4. Restart the workers on the same image.
 5. Check `/health`, and check `/metrics` or the Trust page for the eval gate and retention.
+
+### Image patch layer
+
+The UI image upgrades Alpine OS packages above its pinned nginx base while upstream rebuilds lag security fixes. Once a rebuilt upstream digest contains the fixes, update the pin, remove the patch layer, and verify the final image. `scripts/supply_chain/image_scan.sh` remains strict and scans final artifacts; it does not grant an exception for this layer. The Kafka and socat patch Dockerfiles are not yet wired into Compose because the scanner's per-service image naming conflicts with the shared local image contract (see `planning/QUESTIONS.md`).

@@ -24,3 +24,4 @@ w8_plan.md
 .env.*
 !.env.example
 .showcase/
+.poc/

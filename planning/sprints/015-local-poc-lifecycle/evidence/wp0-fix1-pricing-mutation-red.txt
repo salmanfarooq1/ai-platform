@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_unknown_model_is_costed_at_the_highest_known_rate ____________
+tests/unit/test_llm.py:178: in test_unknown_model_is_costed_at_the_highest_known_rate
+    assert result.cost_usd > 0.0
+E   assert 0.0 > 0.0
+E    +  where 0.0 = Completion(text='{"answer":"Fines are up to 4 percent.","confidence":0.8,"citations":[]}', model='made-up/model', tokens_in=1000, tokens_out=500, cost_usd=0.0, finish_reason='stop').cost_usd
+=============================== warnings summary ===============================
+../../.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/_pytest/config/__init__.py:1345
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+../../.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/_pytest/config/__init__.py:1345
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; langsmith
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_llm.py::test_unknown_model_is_costed_at_the_highest_known_rate
+1 failed, 2 warnings in 7.20s

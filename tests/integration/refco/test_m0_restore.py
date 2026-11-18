@@ -117,3 +117,77 @@ raise SystemExit(m0.main())
         if process.poll() is None:
             process.kill()
             process.communicate()
+
+
+@pytest.mark.parametrize("concurrent", [False, True])
+def test_explicit_deny_restores_on_failure(database_url, tenant_a, concurrent, capsys, monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    from scripts.showcase import m0
+
+    with admin_connection(database_url) as conn:
+        initial = set_policy(conn, tenant_a.slug, BASELINE, "baseline")
+        baseline = show_policy(conn, tenant_a.slug)["document"]
+    monkeypatch.setenv("MIGRATION_DATABASE_URL", database_url)
+    monkeypatch.setattr(m0, "STATE", tmp_path)
+    monkeypatch.setattr(m0, "prerequisites", lambda: ({"tenant_slug": tenant_a.slug}, {}, None))
+    monkeypatch.setattr(m0, "verified_fixture", lambda *args: (tenant_a.slug, ["default"]))
+    monkeypatch.setattr(m0, "key_headers", lambda *args: {})
+
+    class Server:
+        def __init__(self, *args, **kwargs): pass
+        def poll(self): return None
+        def terminate(self): pass
+        def wait(self, timeout=None): return 0
+
+    class Client:
+        def __init__(self, *args, **kwargs): pass
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def get(self, *args, **kwargs): return SimpleNamespace(status_code=200)
+        def post(self, *args, **kwargs):
+            with admin_connection(database_url) as conn:
+                observed["journey"] = show_policy(conn, tenant_a.slug)["version"]
+                if concurrent:
+                    observed["other"] = set_policy(conn, tenant_a.slug, DENY, "other")
+            raise RuntimeError("injected journey failure")
+
+    observed = {}
+    monkeypatch.setattr(m0.subprocess, "Popen", Server)
+    monkeypatch.setattr(m0.httpx, "Client", Client)
+    assert m0.main() != 0
+    with admin_connection(database_url) as conn:
+        head = show_policy(conn, tenant_a.slug)
+    assert observed["journey"] > initial
+    output = capsys.readouterr().out
+    if concurrent:
+        assert head["version"] == observed["other"]
+        assert "WARN" in output
+    else:
+        assert head["version"] > observed["journey"]
+        assert head["document"] == baseline
+        assert "PASS restore" in output
+
+
+def test_restore_journal_survives_commit_failure(tmp_path, monkeypatch, capsys):
+    import json
+    from contextlib import contextmanager
+
+    from scripts.showcase import m0_policy
+
+    (tmp_path / 'state.json').write_text(json.dumps({'owner_dsn': 'unused', 'tenant': 'fixture'}))
+    journal = tmp_path / 'policy-journal.json'
+    journal.write_text(json.dumps({'baseline': BASELINE, 'version': 2}))
+
+    @contextmanager
+    def failed_commit(_dsn):
+        yield object()
+        raise RuntimeError('injected commit failure')
+
+    monkeypatch.setattr(m0_policy, 'admin_connection', failed_commit)
+    monkeypatch.setattr(m0_policy, 'restore_policy', lambda *args: 3)
+    monkeypatch.setattr(sys, 'argv', ['m0_policy', 'restore', str(tmp_path)])
+    with pytest.raises(RuntimeError, match='commit failure'):
+        m0_policy.main()
+    assert journal.exists()
+    assert 'baseline restored' not in capsys.readouterr().out

@@ -1,0 +1,2 @@
+PASS real Compose render: API/worker share one read-only key path; no private bytes in rendered output
+PENDING product container start/restart and checked down: WP1/WP3 runner/services absent

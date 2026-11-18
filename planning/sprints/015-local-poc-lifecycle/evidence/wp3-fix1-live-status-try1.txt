@@ -1,0 +1,5 @@
+backup rc=1
+down rc=0
+restore rc=1
+up rc=0
+ALLDONE

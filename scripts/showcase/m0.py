@@ -14,18 +14,28 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from typing import cast
 from urllib.parse import urlsplit
 
-import httpx
+try:
+    import httpx
+except ModuleNotFoundError:
+    raise SystemExit("FAIL m0: selected Python lacks project dependencies; use the Poetry environment or SHOWCASE_PYTHON") from None
 
-from core.identity.admin import admin_connection, inspect_credential, list_kbs
-from core.models_files import load_models_lock
-from gateway.admin import PolicyConflict, set_policy, show_policy
-from gateway.policy import DEFAULT_POLICY
-from scripts.showcase.policy_restore import restore_policy
-from scripts.verify.receipt import verify_receipt
+try:
+    from core.identity.admin import admin_connection, inspect_credential, list_kbs
+    from core.models_files import load_models_lock
+    from gateway.admin import PolicyConflict, set_policy, show_policy
+    from gateway.policy import DEFAULT_POLICY
+    from scripts.showcase.policy_restore import restore_policy
+    from scripts.verify.poc_drill import REQUIRED_MARKERS, STACK_NAME
+    from scripts.verify.receipt import verify_receipt
+except ModuleNotFoundError:
+    raise SystemExit("FAIL m0: selected Python lacks project dependencies; use the Poetry environment or SHOWCASE_PYTHON") from None
 
 STATE = Path(".showcase")
+DRILL = Path(__file__).resolve().parents[1] / "verify" / "poc-drill.sh"
+DEFAULT_STACK = "m0drill"
 
 
 def private_state(name):
@@ -38,6 +48,10 @@ def private_state(name):
         if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o600:
             raise ValueError("showcase state files must be owned and mode 0600")
         return stream.read()
+
+
+class ProxyServer(ThreadingHTTPServer):
+    upstream: str
 
 
 class Proxy(BaseHTTPRequestHandler):
@@ -55,7 +69,7 @@ class Proxy(BaseHTTPRequestHandler):
             return
         body = self.rfile.read(int(self.headers.get("Content-Length", "0")))
         try:
-            response = httpx.request(self.command, self.server.upstream + self.path, content=body, timeout=30)
+            response = httpx.request(self.command, cast(ProxyServer, self.server).upstream + self.path, content=body, timeout=30)
             self.send_response(response.status_code)
             self.send_header("Content-Type", response.headers.get("content-type", "application/json"))
             self.end_headers()
@@ -191,7 +205,68 @@ def prerequisites():
     return manifest, keys, None
 
 
-def main():
+def stack_from(argv, environ):
+    """The fixture stack the drill owns: the one command-line argument, else POC_STACK, else `m0drill`."""
+    if len(argv) > 1:
+        raise ValueError("usage: m0.sh [stack]")
+    stack = argv[0] if argv else environ.get("POC_STACK") or DEFAULT_STACK
+    if STACK_NAME.fullmatch(stack) is None:
+        raise ValueError("invalid stack name: use 3-31 characters of a-z, 0-9 and '-', starting with a letter")
+    return stack
+
+
+def run_drill(path, stack, emit):
+    """Run the drill script, handing each output line to `emit` as it comes (the drill takes minutes). Returns its exit status."""
+    env = dict(os.environ, SHOWCASE_PYTHON=sys.executable)  # the drill uses the interpreter this journey runs in
+    process = subprocess.Popen(["bash", str(path), stack], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
+    assert process.stdout is not None
+    for line in process.stdout:
+        emit(line.rstrip("\n"))
+    return process.wait()
+
+
+def finish_with_drill(*, failed, interrupted, stack, drill=DRILL, run_drill=run_drill, out=None):
+    """The required last step of M0: the recovery drill. It never skips. A missing drill, an interrupted journey, a drill
+    that exits nonzero, prints a SKIP or FAIL line, or does not print every required marker makes the entry path fail."""
+    out = out or (lambda line: print(line, flush=True))
+    if interrupted:
+        out("INFO restore drill: not run because the journey was interrupted")
+        return 1
+    if failed:  # the exit status is already nonzero; the drill builds and destroys a whole stack: it only runs after a journey that passed
+        out("INFO restore drill: not run because the journey failed")
+        return 1
+    if not Path(drill).is_file():
+        out("FAIL restore drill: scripts/verify/poc-drill.sh is missing")
+        return 1
+    lines = []
+
+    def emit(line):
+        lines.append(line)
+        out(line)
+
+    status = run_drill(drill, stack, emit)
+    reason = None
+    if status != 0:
+        reason = f"the drill exited with status {status}"
+    elif any(line.startswith("SKIP") for line in lines):
+        reason = "the drill printed a SKIP line"
+    elif any(line.startswith("FAIL") for line in lines):
+        reason = "the drill reported a FAIL line"
+    else:
+        reason = next((f"required marker missing: {marker}" for marker in REQUIRED_MARKERS
+                       if not any(line.startswith(marker) for line in lines)), None)
+    if reason:
+        out(f"FAIL restore drill: {reason}")
+        return 1
+    return 0
+
+
+def main(argv=()):
+    try:
+        stack = stack_from(list(argv), os.environ)
+    except ValueError as exc:
+        print(f"FAIL prerequisites: {exc}", flush=True)
+        return 1
     try:
         manifest, keys, missing = prerequisites()
     except (OSError, ValueError):
@@ -220,7 +295,7 @@ def main():
         parsed_upstream = urlsplit(upstream)
         if parsed_upstream.scheme != "http" or parsed_upstream.hostname not in {"127.0.0.1", "localhost", "::1"} or parsed_upstream.username or parsed_upstream.password or parsed_upstream.path or parsed_upstream.query or parsed_upstream.fragment:
             raise ValueError("Ollama upstream must be a local HTTP origin")
-        proxy = ThreadingHTTPServer(("127.0.0.1", 0), Proxy)
+        proxy = ProxyServer(("127.0.0.1", 0), Proxy)
         proxy.upstream = upstream
         threading.Thread(target=proxy.serve_forever, daemon=True).start()
         proxy_started = True
@@ -308,7 +383,7 @@ def main():
     finally:
         for signum in old_handlers:
             signal.signal(signum, signal.SIG_IGN)
-        if journey is not None and baseline is not None:
+        if journey is not None and baseline is not None and slug is not None:
             completed.add("restore")
             try:
                 with admin_connection(dsn) as conn:
@@ -346,18 +421,8 @@ def main():
                 print(f"SKIP {step}: prerequisite did not complete", flush=True)
         for signum, handler in old_handlers.items():
             signal.signal(signum, handler)
-    drill = Path("scripts/verify/poc-drill.sh")
-    if interrupted:
-        print("SKIP restore drill: journey interrupted")
-    elif not drill.is_file():
-        print("SKIP restore drill: Sprint 015")
-    elif subprocess.run(["bash", str(drill)], check=False).returncode:
-        print("FAIL restore drill")
-        failed = True
-    else:
-        print("PASS restore drill")
-    return int(failed)
+    return finish_with_drill(failed=failed, interrupted=interrupted, stack=stack)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

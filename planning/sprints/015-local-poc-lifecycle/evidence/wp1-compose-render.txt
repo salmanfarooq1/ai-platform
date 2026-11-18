@@ -1,0 +1,7 @@
+services: ['api', 'postgres', 'valkey', 'worker']
+api user= 1000:1000 read_only= True cap_drop= ['ALL'] mounts= ['/data/objects', '/run/secrets/receipt-signing.key'] tmpfs= ['/tmp:rw,noexec,nosuid,size=64m'] key_env= /run/secrets/receipt-signing.key
+worker user= 1000:1000 read_only= True cap_drop= ['ALL'] mounts= ['/data/objects', '/run/secrets/receipt-signing.key'] tmpfs= ['/tmp:rw,noexec,nosuid,size=64m'] key_env= /run/secrets/receipt-signing.key
+ports: {'api': [{'mode': 'ingress', 'host_ip': '127.0.0.1', 'target': 8000, 'published': '18777', 'protocol': 'tcp'}]}
+container_names: [None, None, None, None]
+volumes: ['ai-platform-poc-wp1render_objects', 'ai-platform-poc-wp1render_pgdata_trixie', 'ai-platform-poc-wp1render_valkey_data']
+PASS no key material in render

@@ -1,0 +1,21 @@
+**CHANGES REQUIRED**
+
+- **HIGH — The drill does not prove the required alias-policy deny.** [poc_drill.py:239](/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/verify/poc_drill.py:239) accepts `model_digest_mismatch`; [line 261](/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/verify/poc_drill.py:261) defaults a missing signed model phase to `"admission"` and subsequently reports zero inference. Catalog failures omit the model extension entirely ([enforce.py:122](/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/gateway/enforce.py:122)). This proves receipt/signing persistence, but policy could be broken and the drill would pass. Fix through supported POC model-endpoint configuration to a reachable local runtime; require exact `model_not_allowed`, signed alias/phase, and an observed zero inference count. Update the alias-deny claim in [operations.md:291](/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/docs/operations.md:291).
+
+- **HIGH — Failed status is treated as proof that the drill owns the stack.** [poc_drill.py:182](/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/verify/poc_drill.py:182) accepts every nonzero status result, then treats an idempotent successful `up` as creation. A transient status failure, or another creator between status and up, lets the drill adopt existing data and later destroy its key/backups. An in-memory probe confirmed this sequence. Add an atomic public create-only operation and ownership identity checked during cleanup; distinguish absence from probe failure.
+
+- **HIGH — Destroy releases its lock before deleting recovery material.** [lifecycle.py:186](/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/lifecycle.py:186) exits `lifecycle_lock` before `rmtree`. A concurrent waiting `up` can acquire the lock while destroy deletes its secrets, marker and backups. Use a stable lock outside the deletable directory, hold it through deletion, and revalidate state after acquisition. Add a deterministic concurrent destroy/up regression.
+
+- **MEDIUM — The public-seams guard misses overrides in journey/helper sources.** [test_public_seams.py:268](/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/refco/test_public_seams.py:268) applies the strict scanner only to `poc_drill.py`; showcase files receive SQL checks at line 277 and the older private-import guard. Appending `httpx.post = ...` to `m0.py` in memory passed those guards. Scan journey/helper sources for global overrides and scan `m0.sh`; seed violations through the same checks applied to those files.
+
+- **LOW — Lock documentation contradicts implementation.** [operations.md:285](/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/docs/operations.md:285) says every second lifecycle command refuses, while [up.py:220](/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/up.py:220) uses blocking `LOCK_EX`. Document that `up` waits.
+
+Other checks:
+
+- No actual private imports, product SQL, adapter environment reads or SDK overrides found in WP4’s drill/journey additions.
+- Admin uses argv safely, refuses `--dsn`, and allows only create-tenant/kb/principal/key, revoke-key, list-keys, set/show-policy and set-retention. Secrets stay out of argv.
+- Volume name/project-label/plain-local-driver checks precede removal, including `app_tmp`; ownership races above remain.
+- Migration 0012 is forward-only, defaults existing rows to zero and checks nonnegative counts. Existing table grants/RLS cover the column; OpenAPI and TypeScript changes align. LOW fixes a/b/c are implemented.
+- Journey stubbing, the migration-head update, longer defer waits and package initializer do not weaken existing assertions. Required markers match `accept.sh`; finish rejects missing drill, nonzero exit, FAIL, SKIP and missing markers.
+
+Validation: **132 selected unit tests passed**, Ruff passed, configured mypy passed, new lifecycle/drill script mypy passed, and **7 import contracts passed**. Explicit checking of `m0.py` reports three errors on unchanged statements. Full unit execution was constrained by read-only temporary storage; no Docker or live tests ran. No files edited.

@@ -1,0 +1,1 @@
+PASS generated private-byte sentinel absent from 63 evidence artifacts (baseline synthetic value explicitly redacted)

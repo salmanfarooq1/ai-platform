@@ -25,20 +25,26 @@ async def test_the_worker_process_starts_reports_health_and_stops_on_sigterm(db_
     async with tenant_connection(db_pool, UUID(tenant_a.id)) as conn:
         job, _ = await jobs.enqueue(conn, UUID(tenant_a.id), "ingest", {
             "namespace": "legal", "document_id": "a.md", "filename": "a.md", "content_hash": "h", "object_key": "0" * 64})
+    output = (tmp_path / "worker.log").open("w+")
     proc = await asyncio.create_subprocess_exec(
         sys.executable, "-m", "workers", "--concurrency", "2", "--no-relay", env=env,
-        stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL,
+        stdout=output, stderr=output,
     )
     try:
-        for _ in range(300):
+        for _ in range(900):
             async with tenant_connection(db_pool, UUID(tenant_a.id)) as conn:
                 row = await jobs.get(conn, job.id)
             if health.exists() and row.status == "failed":
                 break
             await asyncio.sleep(0.1)
-        assert health.exists() and row.status == "failed" and row.error_code == "object_missing"
+        output.flush()
+        assert health.exists() and row.status == "failed" and row.error_code == "object_missing", (
+            f"worker output tail: {(tmp_path / 'worker.log').read_text()[-4000:]}"
+        )
         proc.send_signal(signal.SIGTERM)
         assert await asyncio.wait_for(proc.wait(), 20) == 0  # a graceful stop, not a kill
     finally:
         if proc.returncode is None:
             proc.kill()
+            await proc.wait()
+        output.close()

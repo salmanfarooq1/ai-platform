@@ -1126,6 +1126,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Deferrals */
+            deferrals: number;
             /** Error Code */
             error_code: string | null;
             /** Execution Id */

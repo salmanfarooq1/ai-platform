@@ -1,0 +1,78 @@
+## item 1 scanner (red, before fix)
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[import httpx as h\nh.post = lambda *a: None-global override of h.post]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[import urllib.request\nurllib.request.urlopen = None-global override of urllib.request.urlopen]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[import urllib.request as ur\nur.urlopen = None-global override of ur.urlopen]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[from urllib import request\nrequest.urlopen = None-global override of request.urlopen]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[import json\njson.dumps = None-global override of json.dumps]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[import json\njson.dumps += 1-global override of json.dumps]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[import os.path\nos.path.join = None-global override of os.path.join]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[from scripts.showcase import m0\nm0.publish = None-global override of m0.publish]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[import httpx as h\nsetattr(h, 'post', f)-setattr override]
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_guard_rejects_seeded_python_sources[import urllib.request\nsetattr(urllib.request, 'urlopen', f)-setattr override]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/verify/poc_drill.py-\nimport httpx as h\nh.post = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/verify/poc_drill.py-\nimport urllib.request\nurllib.request.urlopen = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/verify/poc_drill.py-\nimport json\njson.dumps = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/showcase/m0.py-\nimport httpx as h\nh.post = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/showcase/m0.py-\nimport urllib.request\nurllib.request.urlopen = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/showcase/m0.py-\nimport json\njson.dumps = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/showcase/m0_policy.py-\nimport httpx as h\nh.post = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/showcase/m0_policy.py-\nimport urllib.request\nurllib.request.urlopen = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/showcase/m0_policy.py-\nimport json\njson.dumps = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/showcase/personas.py-\nimport httpx as h\nh.post = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/showcase/personas.py-\nimport urllib.request\nurllib.request.urlopen = None\n]
+FAILED tests/unit/refco/test_public_seams.py::test_alias_nested_and_any_module_overrides_go_red_in_every_python_file_class[scripts/showcase/personas.py-\nimport json\njson.dumps = None\n]
+22 failed, 84 passed in 3.51s
+
+## item 2 drill messages (red, before fix)
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_a_receipt_without_a_model_phase_or_with_another_phase_fails[None-FAIL deny receipt saved: the signed receipt carries no model phase]
+1 failed, 5 passed, 50 deselected in 3.65s
+
+## item 2 mutant 'phase default' (check removed, default admission) - now red for the right reason
+E   AssertionError: (None, ['PASS up', 'PASS seed', 'FAIL deny receipt saved: KeyError', 'PASS fixture teardown'])
+E   assert (1 != 0 and 'FAIL deny re...ved: KeyError' == 'FAIL deny re...o model phase'
+E     - FAIL deny receipt saved: the signed receipt carries no model phase
+E     + FAIL deny receipt saved: KeyError)
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_a_receipt_without_a_model_phase_or_with_another_phase_fails[None-FAIL deny receipt saved: the signed receipt carries no model phase]
+1 failed, 2 passed, 53 deselected in 3.30s
+
+## item 7 mutant: destroy releases the lifecycle lock before rmtree (scratch mutation, restored after)
+E   assert False is True
+FAILED tests/unit/test_poc_admin_destroy.py::test_destroy_holds_its_lock_through_deletion_so_a_waiting_up_sees_the_state_after_it
+1 failed, 31 deselected in 3.29s
+
+## items 3, 4, 6 (red, before fix)
+E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-ubuntu/pytest-276/test_up_persists_the_non_secre0/.poc/demo/ollama-base-url'
+E   KeyError: 'POC_OLLAMA_BASE_URL'
+E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-ubuntu/pytest-276/test_the_environment_still_win0/.poc/demo/ollama-base-url'
+E   Failed: DID NOT RAISE PocError
+E   Failed: DID NOT RAISE PocError
+E   Failed: DID NOT RAISE PocError
+E   Failed: DID NOT RAISE PocError
+E   Failed: DID NOT RAISE PocError
+E   Failed: DID NOT RAISE PocError
+E   Failed: DID NOT RAISE PocError
+E   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-ubuntu/pytest-276/test_an_unsafe_stored_url_file0/.poc/demo/ollama-base-url'
+E   Failed: DID NOT RAISE PocError
+E   Failed: DID NOT RAISE PocError
+E   AssertionError: assert ['stop_writer...tart_writers'] == []
+E   AssertionError: assert ['stop_writer...tart_writers'] == []
+E   AssertionError: assert not True
+E   AssertionError: assert not True
+FAILED tests/unit/test_poc_fix2.py::test_up_persists_the_non_secret_ollama_url_and_a_later_up_without_it_reuses_it
+FAILED tests/unit/test_poc_fix2.py::test_a_refused_down_restarts_the_writers_with_the_stored_url
+FAILED tests/unit/test_poc_fix2.py::test_the_environment_still_wins_over_the_stored_url_and_is_persisted_by_up
+FAILED tests/unit/test_poc_fix2.py::test_a_malformed_or_credentialed_url_is_refused_before_any_state_is_created[file:///etc/passwd]
+FAILED tests/unit/test_poc_fix2.py::test_a_malformed_or_credentialed_url_is_refused_before_any_state_is_created[ftp://x]
+FAILED tests/unit/test_poc_fix2.py::test_a_malformed_or_credentialed_url_is_refused_before_any_state_is_created[http://user:pw@host:1]
+FAILED tests/unit/test_poc_fix2.py::test_a_malformed_or_credentialed_url_is_refused_before_any_state_is_created[http://]
+FAILED tests/unit/test_poc_fix2.py::test_a_malformed_or_credentialed_url_is_refused_before_any_state_is_created[http://h ost]
+FAILED tests/unit/test_poc_fix2.py::test_a_malformed_or_credentialed_url_is_refused_before_any_state_is_created[http://h\n]
+FAILED tests/unit/test_poc_fix2.py::test_a_malformed_or_credentialed_url_is_refused_before_any_state_is_created[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+FAILED tests/unit/test_poc_fix2.py::test_an_unsafe_stored_url_file_is_refused
+FAILED tests/unit/test_poc_fix2.py::test_backup_reloads_and_revalidates_the_context_after_taking_the_lock[_unsafe_marker]
+FAILED tests/unit/test_poc_fix2.py::test_backup_reloads_and_revalidates_the_context_after_taking_the_lock[_remove_stack]
+FAILED tests/unit/test_poc_fix2.py::test_down_reloads_and_revalidates_the_context_after_taking_the_lock[_unsafe_marker]
+FAILED tests/unit/test_poc_fix2.py::test_down_reloads_and_revalidates_the_context_after_taking_the_lock[_remove_stack]
+FAILED tests/unit/test_poc_fix2.py::test_an_early_create_only_failure_leaves_no_folder_this_invocation_created
+FAILED tests/unit/test_poc_fix2.py::test_an_early_create_only_failure_before_the_secrets_also_cleans_up
+17 failed, 3 passed in 3.55s

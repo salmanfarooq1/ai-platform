@@ -4,6 +4,9 @@ Every pack follows the style of Sprints 009 and 010: short files, plain words, s
 
 **Lighter packs (re-plan 2026-11-08).** Required files: `requirements.md`, `acceptance.md` and `builder-brief.md`. The blueprint, threat model and test spec are sections of the builder brief. They become their own files only when the sprint adds a new trust boundary or a new optional service (ADR-0035).
 
+## `pre-start-review.md`
+Records the Architect's pre-start findings, resolutions and second review.
+
 ## `requirements.md`
 ```
 # Sprint NNN: <title>. Requirements

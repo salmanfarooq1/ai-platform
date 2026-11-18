@@ -1,0 +1,63 @@
+== mutation: all three checks disabled
+files: scripts/poc_backup/catalog.py, scripts/poc_backup/verify.py, scripts/poc_backup/restore.py
+pytest exit code: 1 (non-zero = the test went red)
+restored byte-identical (cmp): True
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_manifest_digest_binding_is_enforced_on_real_snapshots __________
+tests/integration/poc/test_restore.py:237: in test_manifest_digest_binding_is_enforced_on_real_snapshots
+    refused("edited manifest in the snapshot", "incomplete or changed", "does not match")
+tests/integration/poc/test_restore.py:227: in refused
+    with pytest.raises(PocError, match="|".join(patterns)):
+E   Failed: DID NOT RAISE PocError
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_restore.py::test_manifest_digest_binding_is_enforced_on_real_snapshots
+1 failed in 93.35s (0:01:33)
+
+== mutation: only latest_ref
+files: scripts/poc_backup/catalog.py
+pytest exit code: 1 (non-zero = the test went red)
+restored byte-identical (cmp): True
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_manifest_digest_binding_is_enforced_on_real_snapshots __________
+tests/integration/poc/test_restore.py:237: in test_manifest_digest_binding_is_enforced_on_real_snapshots
+    refused("edited manifest in the snapshot", "incomplete or changed", "does not match")
+tests/integration/poc/test_restore.py:227: in refused
+    with pytest.raises(PocError, match="|".join(patterns)):
+E   Failed: DID NOT RAISE PocError
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_restore.py::test_manifest_digest_binding_is_enforced_on_real_snapshots
+1 failed in 96.59s (0:01:36)
+
+== mutation: only verify_snapshot
+files: scripts/poc_backup/verify.py
+pytest exit code: 1 (non-zero = the test went red)
+restored byte-identical (cmp): True
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_manifest_digest_binding_is_enforced_on_real_snapshots __________
+tests/integration/poc/test_restore.py:241: in test_manifest_digest_binding_is_enforced_on_real_snapshots
+    with pytest.raises(PocError, match="does not match the published digest"):
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'does not match the published digest'
+E     Actual message: 'the manifest is incomplete or malformed'
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_restore.py::test_manifest_digest_binding_is_enforced_on_real_snapshots
+1 failed in 102.13s (0:01:42)
+
+== mutation: only restore_latest
+files: scripts/poc_backup/restore.py
+pytest exit code: 1 (non-zero = the test went red)
+restored byte-identical (cmp): True
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_manifest_digest_binding_is_enforced_on_real_snapshots __________
+tests/integration/poc/test_restore.py:239: in test_manifest_digest_binding_is_enforced_on_real_snapshots
+    with pytest.raises(PocError, match="does not match the published digest"):
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'does not match the published digest'
+E     Actual message: 'the manifest is incomplete or malformed'
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_restore.py::test_manifest_digest_binding_is_enforced_on_real_snapshots
+1 failed in 99.15s (0:01:39)

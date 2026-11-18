@@ -1,0 +1,12 @@
+## unit
+
+=========================== short test summary info ============================
+ERROR tests/unit/test_poc.py
+ERROR tests/unit/test_poc_backup.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+2 errors in 1.01s
+## integration (collect)
+ImportError while loading conftest '/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/integration/poc/conftest.py'.
+tests/integration/poc/conftest.py:20: in <module>
+    from scripts.poc_lib import lifecycle
+E   ImportError: cannot import name 'lifecycle' from 'scripts.poc_lib' (/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/__init__.py)

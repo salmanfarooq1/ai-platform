@@ -1,0 +1,42 @@
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+___________________ test_fresh_up_initializes_default_stack ____________________
+tests/integration/poc/test_up.py:47: in test_fresh_up_initializes_default_stack
+    again = up(ROOT, name, runner=LocalRunner(), environ={**os.environ, "COMPOSE_PROFILES": "models,streams"})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:184: in up
+    _release_manifest(root, stack_dir, runner, env, project, resolver or release.registry_resolver(runner),
+scripts/poc_lib/up.py:151: in _release_manifest
+    raise PocError(f"release manifest refused: {exc}") from None
+E   scripts.poc_lib.up.PocError: release manifest refused: local app image changed since the manifest was written
+==================================== PASSES ====================================
+--------------------------- Captured stderr teardown ---------------------------
+ Container ai-platform-poc-t62e97696-api-1 Stopping 
+ Container ai-platform-poc-t62e97696-worker-1 Stopping 
+ Container ai-platform-poc-t62e97696-worker-1 Stopped 
+ Container ai-platform-poc-t62e97696-worker-1 Removing 
+ Container ai-platform-poc-t62e97696-worker-1 Removed 
+ Container ai-platform-poc-t62e97696-api-1 Stopped 
+ Container ai-platform-poc-t62e97696-api-1 Removing 
+ Container ai-platform-poc-t62e97696-api-1 Removed 
+ Container ai-platform-poc-t62e97696-postgres-1 Stopping 
+ Container ai-platform-poc-t62e97696-valkey-1 Stopping 
+ Container ai-platform-poc-t62e97696-postgres-1 Stopped 
+ Container ai-platform-poc-t62e97696-postgres-1 Removing 
+ Container ai-platform-poc-t62e97696-postgres-1 Removed 
+ Container ai-platform-poc-t62e97696-valkey-1 Stopped 
+ Container ai-platform-poc-t62e97696-valkey-1 Removing 
+ Container ai-platform-poc-t62e97696-valkey-1 Removed 
+ Volume ai-platform-poc-t62e97696_valkey_data Removing 
+ Volume ai-platform-poc-t62e97696_pgdata_trixie Removing 
+ Network ai-platform-poc-t62e97696_default Removing 
+ Volume ai-platform-poc-t62e97696_valkey_data Removed 
+ Volume ai-platform-poc-t62e97696_objects Removing 
+ Volume ai-platform-poc-t62e97696_pgdata_trixie Removed 
+ Volume ai-platform-poc-t62e97696_objects Removed 
+ Network ai-platform-poc-t62e97696_default Removed 
+=========================== short test summary info ============================
+PASSED tests/integration/poc/test_up.py::test_hardened_services_are_healthy
+FAILED tests/integration/poc/test_up.py::test_fresh_up_initializes_default_stack
+1 failed, 1 passed in 72.97s (0:01:12)
+rc=1

@@ -1,0 +1,4 @@
+
+> ai-platform-ui@2.0.0 lint
+> eslint . --max-warnings 0
+

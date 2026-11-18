@@ -1,0 +1,13 @@
+............F........................................................... [ 97%]
+..                                                                       [100%]
+=================================== FAILURES ===================================
+___________________ test_rate_limit_is_retried_then_succeeds ___________________
+tests/unit/test_llm.py:211: in test_rate_limit_is_retried_then_succeeds
+    answer, _ = await _governed_citations(LLM, "q", CHUNKS)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2266: in assert_awaited_once_with
+    raise AssertionError(msg)
+E   AssertionError: Expected mock to have been awaited once. Awaited 0 times.
+=========================== short test summary info ============================
+FAILED tests/unit/test_llm.py::test_rate_limit_is_retried_then_succeeds - Ass...
+1 failed, 73 passed in 177.05s (0:02:57)

@@ -1,0 +1,31 @@
+FFF.                                                                     [100%]
+=================================== FAILURES ===================================
+__________________________ test_restic_build_security __________________________
+tests/unit/test_poc_image_security.py:13: in test_restic_build_security
+    text = (ROOT / 'docker/restic/Dockerfile').read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/docker/restic/Dockerfile'
+_________________________ test_restic_compose_security _________________________
+tests/unit/test_poc_image_security.py:25: in test_restic_compose_security
+    assert service['build']['context'] == 'docker/restic'
+           ^^^^^^^^^^^^^^^^
+E   KeyError: 'build'
+___________________________ test_no_old_python_pins ____________________________
+tests/unit/test_poc_image_security.py:32: in test_no_old_python_pins
+    assert not files, files
+E   AssertionError: ['Dockerfile', 'docker-compose.yml', 'tests/unit/test_compose.py']
+E   assert not ['Dockerfile', 'docker-compose.yml', 'tests/unit/test_compose.py']
+----------------------------- Captured stderr call -----------------------------
+warning: Empty last update token.
+warning: Empty last update token.
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc_image_security.py::test_restic_build_security - Fi...
+FAILED tests/unit/test_poc_image_security.py::test_restic_compose_security - ...
+FAILED tests/unit/test_poc_image_security.py::test_no_old_python_pins - Asser...
+3 failed, 1 passed in 4.69s

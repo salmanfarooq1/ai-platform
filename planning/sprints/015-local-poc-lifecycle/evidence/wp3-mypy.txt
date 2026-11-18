@@ -1,0 +1,4 @@
+Success: no issues found in 20 source files
+tests/e2e/conftest.py: note:     b) adding `__init__.py` somewhere,
+tests/e2e/conftest.py: note:     c) using `--explicit-package-bases` or adjusting `MYPYPATH`
+Found 1 error in 1 file (errors prevented further checking)

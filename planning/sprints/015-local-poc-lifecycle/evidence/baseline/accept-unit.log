@@ -1,0 +1,176 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+.................................................................F...... [ 29%]
+........................................................................ [ 34%]
+........................................................................ [ 40%]
+........................................................................ [ 46%]
+........................................................................ [ 52%]
+........................................................................ [ 58%]
+...............FFFFFFFF................................................. [ 63%]
+.............................................................FFFFFFFFFFF [ 69%]
+FFF..................................................................... [ 75%]
+........................................................................ [ 81%]
+........................................................................ [ 87%]
+...........F............................................................ [ 93%]
+........................................................................ [ 98%]
+..............                                                           [100%]
+=================================== FAILURES ===================================
+______________ test_the_gate_runs_as_a_command_the_way_ci_runs_it ______________
+tests/unit/test_eval_gate.py:115: in test_the_gate_runs_as_a_command_the_way_ci_runs_it
+    assert run_.returncode == 0 and run_.stdout.strip().endswith("PASSED"), run_.stdout + run_.stderr
+E   AssertionError: error: governed caller and context are required
+E     
+E   assert (2 == 0)
+E    +  where 2 = CompletedProcess(args=['/home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/bin/python', 'scripts/eval/run_gate.py'], returncode=2, stdout='', stderr='error: governed caller and context are required\n').returncode
+__ test_missing_governed_caller_fails_closed[kwargs0-generate_with_citations] __
+tests/unit/test_llm.py:246: in test_missing_governed_caller_fails_closed
+    ???
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+___ test_missing_governed_caller_fails_closed[kwargs0-generate_with_routing] ___
+tests/unit/test_llm.py:246: in test_missing_governed_caller_fails_closed
+    ???
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+__ test_missing_governed_caller_fails_closed[kwargs1-generate_with_citations] __
+tests/unit/test_llm.py:246: in test_missing_governed_caller_fails_closed
+    ???
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+___ test_missing_governed_caller_fails_closed[kwargs1-generate_with_routing] ___
+tests/unit/test_llm.py:246: in test_missing_governed_caller_fails_closed
+    ???
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+_ test_missing_governance_context_fails_closed[kwargs0-generate_with_citations] _
+tests/unit/test_llm.py:256: in test_missing_governance_context_fails_closed
+    await bundle.llm.complete([{"role": "user", "content": "test"}], model="ollama/example", max_tokens=10)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+_ test_missing_governance_context_fails_closed[kwargs0-generate_with_routing] __
+tests/unit/test_llm.py:256: in test_missing_governance_context_fails_closed
+    await bundle.llm.complete([{"role": "user", "content": "test"}], model="ollama/example", max_tokens=10)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+_ test_missing_governance_context_fails_closed[kwargs1-generate_with_citations] _
+tests/unit/test_llm.py:256: in test_missing_governance_context_fails_closed
+    await bundle.llm.complete([{"role": "user", "content": "test"}], model="ollama/example", max_tokens=10)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+_ test_missing_governance_context_fails_closed[kwargs1-generate_with_routing] __
+tests/unit/test_llm.py:256: in test_missing_governance_context_fails_closed
+    await bundle.llm.complete([{"role": "user", "content": "test"}], model="ollama/example", max_tokens=10)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+___________________ test_key_created_once_and_survives_down ____________________
+tests/unit/test_poc_keys.py:19: in test_key_created_once_and_survives_down
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+_________________ test_refuses_unsafe_secret_files[root-link] __________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+_______________ test_refuses_unsafe_secret_files[ancestor-link] ________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+________________ test_refuses_unsafe_secret_files[parent-link] _________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+_________________ test_refuses_unsafe_secret_files[file-link] __________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+___________________ test_refuses_unsafe_secret_files[owner] ____________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+________________ test_refuses_unsafe_secret_files[parent-owner] ________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+____________________ test_refuses_unsafe_secret_files[mode] ____________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+________________ test_refuses_unsafe_secret_files[parent-mode] _________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+_________________ test_refuses_unsafe_secret_files[malformed] __________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+_______________ test_refuses_unsafe_secret_files[password-mode] ________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+____________________ test_refuses_unsafe_secret_files[fifo] ____________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+__________________ test_refuses_unsafe_secret_files[hardlink] __________________
+tests/unit/test_poc_keys.py:48: in test_refuses_unsafe_secret_files
+    from scripts.poc_lib.keys import ensure_stack_secrets
+E   ModuleNotFoundError: No module named 'scripts.poc_lib'
+________________________ test_secrets_never_leave_files ________________________
+tests/unit/test_poc_keys.py:98: in test_secrets_never_leave_files
+    from scripts.poc_backup.keys import validate_restore_key
+E   ModuleNotFoundError: No module named 'scripts.poc_backup'
+________________________ test_receipt_signing_key_file _________________________
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_settings.py:266: in test_receipt_signing_key_file
+    assert settings.signing_key_text == sentinel
+E   AssertionError: assert '' == 'AAECAwQFBgcI...XGBkaGxwdHh8='
+E     
+E     - [REDACTED SYNTHETIC TEST SENTINEL]
+=============================== warnings summary ===============================
+tests/unit/test_eval_gate.py::test_the_suite_scores_what_the_baseline_says
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+tests/unit/test_search_route.py::test_search_request_defaults
+  /home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_search_route.py:14: DeprecationWarning: deprecated
+    assert req.rerank is True
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_eval_gate.py::test_the_gate_runs_as_a_command_the_way_ci_runs_it
+FAILED tests/unit/test_llm.py::test_missing_governed_caller_fails_closed[kwargs0-generate_with_citations]
+FAILED tests/unit/test_llm.py::test_missing_governed_caller_fails_closed[kwargs0-generate_with_routing]
+FAILED tests/unit/test_llm.py::test_missing_governed_caller_fails_closed[kwargs1-generate_with_citations]
+FAILED tests/unit/test_llm.py::test_missing_governed_caller_fails_closed[kwargs1-generate_with_routing]
+FAILED tests/unit/test_llm.py::test_missing_governance_context_fails_closed[kwargs0-generate_with_citations]
+FAILED tests/unit/test_llm.py::test_missing_governance_context_fails_closed[kwargs0-generate_with_routing]
+FAILED tests/unit/test_llm.py::test_missing_governance_context_fails_closed[kwargs1-generate_with_citations]
+FAILED tests/unit/test_llm.py::test_missing_governance_context_fails_closed[kwargs1-generate_with_routing]
+FAILED tests/unit/test_poc_keys.py::test_key_created_once_and_survives_down
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[root-link]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[ancestor-link]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[parent-link]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[file-link]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[owner]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[parent-owner]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[mode] - ...
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[parent-mode]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[malformed]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[password-mode]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[fifo] - ...
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[hardlink]
+FAILED tests/unit/test_poc_keys.py::test_secrets_never_leave_files - ModuleNo...
+FAILED tests/unit/test_settings.py::test_receipt_signing_key_file - Assertion...
+24 failed, 1214 passed, 953 deselected, 2 warnings in 142.60s (0:02:22)

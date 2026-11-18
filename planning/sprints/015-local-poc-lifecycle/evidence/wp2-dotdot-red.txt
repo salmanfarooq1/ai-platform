@@ -1,0 +1,4 @@
+F                                                                        [100%]
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[ancestor-dotdot-link]
+1 failed in 5.38s

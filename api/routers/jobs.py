@@ -24,7 +24,7 @@ router = APIRouter(tags=["jobs"])
 
 def job_view(row: JobRow) -> Job:
     return Job(
-        id=row.id, kind=row.kind, status=row.status, attempts=row.attempts, max_attempts=row.max_attempts,  # type: ignore[arg-type]
+        id=row.id, kind=row.kind, status=row.status, attempts=row.attempts, max_attempts=row.max_attempts, deferrals=row.deferrals,  # type: ignore[arg-type]
         progress=JobProgress(done=row.progress_done, total=row.progress_total), error_code=row.error_code,
         resource=row.resource, execution_id=row.execution_id, created_at=row.created_at, updated_at=row.updated_at,
     )

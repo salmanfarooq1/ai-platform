@@ -1,0 +1,2 @@
+PASS Settings regression integrity: 25 existing tests and 39 existing assertions retained
+PASS WP2 added tests have no skip or xfail

@@ -4,7 +4,8 @@ A receipt says: this decision was recorded, at this position of the tenant's cha
 signed text (`canonical`) is the canonical JSON of `{"chain": {prev_hash, row_hash, position}, "decision": record}`,
 where the record is `evidence.chain.decision_record`. It holds no input text: only the SHA-256 on the row.
 
-Keys: the active private key comes from `RECEIPT_SIGNING_KEY` (base64, 32 raw bytes). In `local` mode with no key, a
+Keys: the active private key comes from `RECEIPT_SIGNING_KEY_FILE` or `RECEIPT_SIGNING_KEY` (base64, 32 raw bytes).
+Settings loads the private file once without exporting its bytes. In `local` mode with no key, a
 key is generated at startup and only its `key_id` is logged; receipts signed with it stop verifying after a restart.
 Old public keys (`RECEIPT_PREVIOUS_PUBLIC_KEYS`) stay in the key list, so a receipt signed before a rotation still
 verifies. A `key_id` is the first 16 hex characters of the SHA-256 of the raw public key.

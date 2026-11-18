@@ -1,0 +1,30 @@
+.F.                                                                      [100%]
+=================================== FAILURES ===================================
+__________________ test_online_manifest_matches_dump_snapshot __________________
+tests/integration/poc/test_backup.py:139: in test_online_manifest_matches_dump_snapshot
+    live.ingest(key, " " * 400 + "\n")
+tests/integration/poc/conftest.py:76: in ingest
+    return self.call("POST", "/v1/ingest?namespace=default", key, data=body,
+tests/integration/poc/conftest.py:69: in call
+    with urllib.request.urlopen(request, timeout=30) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py:216: in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py:525: in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py:634: in http_response
+    response = self.parent.error(
+../../.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py:563: in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py:496: in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/urllib/request.py:643: in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+E   urllib.error.HTTPError: HTTP Error 429: Too Many Requests
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_backup.py::test_online_manifest_matches_dump_snapshot
+1 failed, 2 passed in 209.18s (0:03:29)

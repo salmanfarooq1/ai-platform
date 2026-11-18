@@ -1,0 +1,33 @@
+ImportError while importing test module '/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_poc_admin_destroy.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.11.0/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_poc_admin_destroy.py:14: in <module>
+    from scripts.poc_lib import admin, lifecycle
+E   ImportError: cannot import name 'admin' from 'scripts.poc_lib' (/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/__init__.py)
+________ ERROR collecting tests/integration/refco/test_m0_lifecycle.py _________
+ImportError while importing test module '/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/integration/refco/test_m0_lifecycle.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.11.0/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/refco/test_m0_lifecycle.py:15: in <module>
+    from scripts.verify import poc_drill
+E   ImportError: cannot import name 'poc_drill' from 'scripts.verify' (unknown location)
+=========================== short test summary info ============================
+ERROR tests/unit/refco/test_m0_lifecycle.py
+ERROR tests/unit/test_poc_admin_destroy.py
+ERROR tests/integration/refco/test_m0_lifecycle.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!
+3 errors in 4.86s
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/verify/poc-drill.sh'
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_public_seams.py::test_lifecycle_uses_public_seams
+1 failed, 79 passed in 2.72s

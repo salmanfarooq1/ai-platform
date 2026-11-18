@@ -1,0 +1,60 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+__ test_missing_governed_caller_fails_closed[kwargs0-generate_with_citations] __
+tests/unit/test_llm.py:246: in test_missing_governed_caller_fails_closed
+    provider.complete.assert_not_awaited()
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+___ test_missing_governed_caller_fails_closed[kwargs0-generate_with_routing] ___
+tests/unit/test_llm.py:246: in test_missing_governed_caller_fails_closed
+    provider.complete.assert_not_awaited()
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+__ test_missing_governed_caller_fails_closed[kwargs1-generate_with_citations] __
+tests/unit/test_llm.py:246: in test_missing_governed_caller_fails_closed
+    provider.complete.assert_not_awaited()
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+___ test_missing_governed_caller_fails_closed[kwargs1-generate_with_routing] ___
+tests/unit/test_llm.py:246: in test_missing_governed_caller_fails_closed
+    provider.complete.assert_not_awaited()
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+_ test_missing_governance_context_fails_closed[kwargs0-generate_with_citations] _
+tests/unit/test_llm.py:256: in test_missing_governance_context_fails_closed
+    provider.complete.assert_not_awaited()
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+_ test_missing_governance_context_fails_closed[kwargs0-generate_with_routing] __
+tests/unit/test_llm.py:256: in test_missing_governance_context_fails_closed
+    provider.complete.assert_not_awaited()
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+_ test_missing_governance_context_fails_closed[kwargs1-generate_with_citations] _
+tests/unit/test_llm.py:256: in test_missing_governance_context_fails_closed
+    provider.complete.assert_not_awaited()
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+_ test_missing_governance_context_fails_closed[kwargs1-generate_with_routing] __
+tests/unit/test_llm.py:256: in test_missing_governance_context_fails_closed
+    provider.complete.assert_not_awaited()
+../../.pyenv/versions/3.11.0/lib/python3.11/unittest/mock.py:2333: in assert_not_awaited
+    raise AssertionError(msg)
+E   AssertionError: Expected complete to not have been awaited. Awaited 1 times.
+=========================== short test summary info ============================
+FAILED tests/unit/test_llm.py::test_missing_governed_caller_fails_closed[kwargs0-generate_with_citations]
+FAILED tests/unit/test_llm.py::test_missing_governed_caller_fails_closed[kwargs0-generate_with_routing]
+FAILED tests/unit/test_llm.py::test_missing_governed_caller_fails_closed[kwargs1-generate_with_citations]
+FAILED tests/unit/test_llm.py::test_missing_governed_caller_fails_closed[kwargs1-generate_with_routing]
+FAILED tests/unit/test_llm.py::test_missing_governance_context_fails_closed[kwargs0-generate_with_citations]
+FAILED tests/unit/test_llm.py::test_missing_governance_context_fails_closed[kwargs0-generate_with_routing]
+FAILED tests/unit/test_llm.py::test_missing_governance_context_fails_closed[kwargs1-generate_with_citations]
+FAILED tests/unit/test_llm.py::test_missing_governance_context_fails_closed[kwargs1-generate_with_routing]
+8 failed, 27 deselected in 6.19s

@@ -1,0 +1,11 @@
+Sprint 015 mode=1 source=9612ea3 (includes working tree)
+ruff             rc=1
+mypy             rc=0
+imports          rc=0
+ddl              rc=0
+docs             rc=0
+eval             rc=0
+pins             rc=0
+licences         rc=1
+image-scan       rc=1
+unit             rc=1

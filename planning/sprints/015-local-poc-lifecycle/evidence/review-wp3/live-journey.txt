@@ -1,0 +1,7 @@
+preflight: C:\             200G  144G   57G  72% /mnt/c
+before: 0 poc volumes; dev: ai-platform-ollama-edge-1 ollama postgres ai-platform-valkey-1 litellm_db litellm-prometheus-1 
+..                                                                       [100%]
+2 passed in 149.97s (0:02:29)
+after: poc volumes:  poc containers: 
+dev volumes intact: ai-platform_pgdata ai-platform_pgdata_trixie 
+dev containers: ai-platform-ollama-edge-1 Up 17 hours;ollama Up 17 hours (healthy);postgres Up 17 hours (healthy);ai-platform-valkey-1 Up 17 hours (healthy);litellm_db Up 17 hours (healthy);litellm-prometheus-1 Up 17 hours;

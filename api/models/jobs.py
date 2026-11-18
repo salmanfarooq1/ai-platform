@@ -20,6 +20,9 @@ class Job(BaseModel):
     status: JobStatus
     attempts: int
     max_attempts: int
+    # How often the job was put off to run later without failing (for example while a backup held a lock). A
+    # deferral does not use an attempt.
+    deferrals: int
     progress: JobProgress
     # A stable code when the job failed, was stopped or died: `unsupported_file`, `object_missing`,
     # `agent_run_failed`, `stopped`, `lease_expired`, `internal_error`. None otherwise. A retry that is waiting

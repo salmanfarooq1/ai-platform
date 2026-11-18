@@ -208,6 +208,7 @@ from scripts.showcase import m0
 m0.STATE = Path(os.environ["TEST_STATE_DIR"])
 m0.STATE.mkdir(mode=0o700)
 m0.private_state = lambda name: os.environ["TEST_MANIFEST"] if name == "manifest.json" else os.environ["TEST_KEYS"]
+m0.finish_with_drill = lambda **kwargs: int(kwargs["failed"])  # this test is the journey; the drill has its own live test
 raise SystemExit(m0.main())
 '''
         decoy.requests.clear()
@@ -256,3 +257,69 @@ async def test_gateway_only_auditor_reads_request_decisions(database_url, app_da
         foreign_rows = await client.get("/v1/decisions", params={"request_id": request_id},
                                         headers={"Authorization": "Bearer " + other_auditor.token})
         assert foreign_rows.status_code == 200 and foreign_rows.json()["items"] == []
+
+
+def test_reference_company_seed_allows_models(database_url, tmp_path):
+    import time
+
+    from core.identity.admin import admin_connection
+    from gateway.admin import show_policy
+
+    state_file = tmp_path / "state.json"
+    process = subprocess.Popen(
+        [sys.executable, "-m", "scripts.e2e.serve", "--reference-company", "--enabled-modules", "gateway",
+         "--port", "0", "--state-dir", str(tmp_path)],
+        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+    )
+    try:
+        deadline = time.monotonic() + 90
+        while not state_file.exists() and process.poll() is None and time.monotonic() < deadline:
+            time.sleep(0.1)
+        assert state_file.exists(), "reference-company startup did not publish state"
+        state = json.loads(state_file.read_text())
+        with admin_connection(state["owner_dsn"]) as conn:
+            head = show_policy(conn, state["tenant"])
+            with conn.cursor() as cur:
+                cur.execute("SELECT version, document FROM policies WHERE tenant_id = (SELECT id FROM tenants WHERE slug = %s) ORDER BY version", (state["tenant"],))
+                history = cur.fetchall()
+        assert head["version"] == 1
+        assert head["document"]["allowed_models"] == "*"
+        assert len(history) == 1
+    finally:
+        process.terminate()
+        process.communicate(timeout=30)
+
+
+async def test_journey_denies_only_selected_alias(database_url, db_pool, tenant_a):
+    from core.identity.admin import admin_connection
+    from core.models_files import load_models_lock
+    from gateway.admin import set_policy, show_policy
+    from scripts.showcase.m0 import publish_journey_policy
+
+    aliases = [entry.alias for entry in load_models_lock()]
+    assert len(aliases) > 1
+    baseline = {"allowed_kbs": "*", "allowed_tools": "*", "allowed_models": "*"}
+    with admin_connection(database_url) as conn:
+        set_policy(conn, tenant_a.slug, baseline, "test")
+        before, version, _ = publish_journey_policy(conn, tenant_a.slug, ["default"], aliases[0])
+        head = show_policy(conn, tenant_a.slug)
+    assert head["version"] == version
+    assert aliases[0] not in head["document"]["allowed_models"]
+    assert aliases[1] in head["document"]["allowed_models"]
+    assert {**head["document"], "allowed_models": "*"} == before
+    from unittest.mock import AsyncMock
+
+    from api.services.model_calls import ModelCaller
+    from core.settings import Settings
+    from gateway import GatewayDenied
+    from ports.models import ModelUse
+    from tests.fakes import FakeCatalog, FakeModelLimitStore, fake_resolved_model
+    from tests.integration.test_gateway import context_for
+
+    provider = AsyncMock()
+    resolved = fake_resolved_model(aliases[0], ModelUse.COMPLETION)
+    caller = ModelCaller(FakeCatalog({aliases[0]: resolved}), provider, FakeModelLimitStore(), settings=Settings())
+    with pytest.raises(GatewayDenied) as denied:
+        await caller.complete(await context_for(db_pool, tenant_a), aliases[0], [], max_tokens=1)
+    assert denied.value.decision.reason == "model_not_allowed"
+    provider.complete_resolved.assert_not_awaited()

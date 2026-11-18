@@ -3,7 +3,7 @@
 For anyone who runs the platform. It lists every setting, what it does, its default, and whether it is a secret.
 
 ## How settings are read
-- **Source.** Settings come from environment variables, or from a `.env` file in local development. The names are the setting names in upper case. `.env.example` is a starting point. Never put a real secret in a file in the repository.
+- **Source.** Settings come from environment variables, or from a `.env` file in local development. The names are the setting names in upper case. `.env.example` is a starting point. Never put a real secret in a tracked file.
 - **One object.** `core/settings.py` defines one validated `Settings` object. Every module reads it and nothing reads `os.environ` directly.
 - **Fail fast.** A wrong type, an unknown `MODE`, or a value that a mode requires but is missing stops the process at startup. The error names the variable and never prints its value.
 - **Secrets.** Secret values are held as secret types, so they do not appear in logs, errors or reprs.
@@ -14,7 +14,7 @@ For anyone who runs the platform. It lists every setting, what it does, its defa
 | Mode | For | Required beyond the defaults |
 |---|---|---|
 | `local` | development on one machine | none. Database and Redis default to the compose services, and an ephemeral receipt-signing key is generated |
-| `public-preview` | a hosted instance open to visitors, with an optional read-only preview session | `DATABASE_URL`, `REDIS_URL` and `RECEIPT_SIGNING_KEY`. Every configured model must have a price, or the process refuses to start |
+| `public-preview` | a hosted instance open to visitors, with an optional read-only preview session | `DATABASE_URL`, `REDIS_URL` and either `RECEIPT_SIGNING_KEY_FILE` or `RECEIPT_SIGNING_KEY`. Every configured model must have a price, or the process refuses to start |
 | `prod` | a production instance | the same as `public-preview`. `PREVIEW_PRINCIPAL_ID` is refused |
 
 Some values become required by another choice:
@@ -25,11 +25,21 @@ Some values become required by another choice:
 
 Model provider keys (for example `GEMINI_API_KEY`) are read by LiteLLM from the environment. `MIGRATION_DATABASE_URL` falls back to `DATABASE_URL`, but in a hosted setup it should be the owner role while `DATABASE_URL` is `gap_app`.
 
-When the API and a separate worker run, they must share the same `RECEIPT_SIGNING_KEY`, or purge checkpoints are signed with a key the API does not list. To make a key:
+The API and every worker must share the same signing key so receipt and purge
+checkpoint signatures have one public identity. Prefer a read-only private file
+selected by `RECEIPT_SIGNING_KEY_FILE`. The file contains base64 of 32 raw Ed25519
+private bytes, has mode 0600, and cannot be a symlink. Configuring both file and
+inline sources refuses startup. File contents are cached at startup and excluded
+from settings serialization. For a local operator stack, create private files
+without printing their contents:
 
 ```bash
-python -c "import base64,os;print(base64.b64encode(os.urandom(32)).decode())"
+poetry run python -c 'from pathlib import Path; from scripts.poc_lib.keys import ensure_stack_secrets; ensure_stack_secrets(Path.cwd(), "local-poc")'
 ```
+
+See [persistent local receipt keys](operations.md#persistent-local-receipt-keys)
+for separate offline key backup and rotation recovery. Existing deployments may
+continue using the inline setting.
 
 ## Tenant policy
 Per-tenant limits live in the tenant's policy, not in settings. A policy can only narrow the platform values below. For example, `daily_cost_cap_usd` can be lower than `DAILY_COST_CAP_USD`, never higher. The policy fields are described in [api/README.md](api/README.md#policies).
@@ -150,7 +160,8 @@ This table is generated from `core/settings.py` by `scripts/docs/generate.py`. D
 
 | Setting | Default | Secret | Purpose |
 |---|---|---|---|
-| `RECEIPT_SIGNING_KEY` | unset | yes | Ed25519 private key for receipts: base64 of 32 raw bytes. Required in `public-preview` and `prod`; local mode makes a throwaway key at startup. Set the same key in the API and every worker. |
+| `RECEIPT_SIGNING_KEY` | unset | yes | Ed25519 private key for receipts: base64 of 32 raw bytes. Set this or RECEIPT_SIGNING_KEY_FILE in `public-preview` and `prod`; local mode with neither makes a throwaway key. Set the same key in the API and every worker. |
+| `RECEIPT_SIGNING_KEY_FILE` | unset | no | Path to a read-only mounted 0600 file containing a base64 Ed25519 private key (32 raw bytes). Rejects symlinks and unsafe files. Mutually exclusive with RECEIPT_SIGNING_KEY; API and worker must mount the same file. Back up the private file separately from data. |
 | `RECEIPT_PREVIOUS_PUBLIC_KEYS` | unset | no | Comma separated base64 public keys of earlier signing keys. They stay listed after a rotation so older receipts still verify. |
 | `DECISION_RETENTION_DAYS` | `90` | no | Days decision records are kept. A tenant may set its own value. The minimum is 30. |
 | `PURGE_BATCH_SIZE` | `1,000` | no | Decision rows one purge step deletes. |

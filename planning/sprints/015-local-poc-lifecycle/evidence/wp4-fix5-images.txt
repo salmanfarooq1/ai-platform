@@ -1,0 +1,26 @@
+Docker Hub registry API tag manifest Docker-Content-Digest:
+python:3.11.18-slim-bookworm sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39
+golang:1.26.11-alpine3.24 sha256:ecb67f987aa1a57794c91d19ade7ae0209f2f0f5496aaef9e6ae85ddf92d02ab
+Verified by requesting a Docker Hub bearer token and GET /v2/library/{python,golang}/manifests/{tag} with OCI index and Docker manifest list Accept headers.
+
+Restic release checksum verification:
+curl -fsSL https://restic.net/gpg-key-alex.asc -o /tmp/wp4-key.asc
+curl -fsSL https://github.com/restic/restic/releases/download/v0.19.1/SHA256SUMS -o /tmp/wp4-SHA256SUMS
+curl -fsSL https://github.com/restic/restic/releases/download/v0.19.1/SHA256SUMS.asc -o /tmp/wp4-SHA256SUMS.asc
+gpg --homedir /tmp/wp4-gnupg --import /tmp/wp4-key.asc
+gpg --homedir /tmp/wp4-gnupg --verify /tmp/wp4-SHA256SUMS.asc /tmp/wp4-SHA256SUMS
+Good signature, key fingerprint CF8F 18F2 8445 7597 3F79 D4E1 91A6 868B D3F7 A907 (key obtained from restic.net; local trust not certified).
+SHA256SUMS: bb9b1a19040744d26d8a79be029d4e6b189c45ccc9d8831d7fe367d3c33df725  restic-0.19.1.tar.gz
+Release tag resolves to commit 6aa3a516ce654808a1f28f9fa21e9b7c8e6e90bf via GitHub API.
+
+PENDING: Docker WSL bridge fails with UtilBindVsockAnyPort socket failed 1; image build, version and scan could not run. Architect commands (from repo root):
+docker compose --project-name gap-supply-chain --profile backup build restic
+docker run --rm gap-supply-chain-restic version
+grype docker:gap-supply-chain-restic --only-fixed --fail-on critical
+
+Captured sandbox build attempt:
+$ DOCKER_CONFIG=/tmp/wp4-docker-config docker compose --project-name gap-supply-chain --profile backup build restic
+Image gap-supply-chain-restic Building
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+
+Reference-company suite: 284 passed, 40 skipped, 1 failed. The live recovery drill returned "another creator made this stack first; the drill never adopts or destroys it" at its stack-creation safety check. PENDING independent live drill with a reachable Docker daemon; do not adopt or remove another stack.

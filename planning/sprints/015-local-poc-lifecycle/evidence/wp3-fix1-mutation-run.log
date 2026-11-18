@@ -1,0 +1,4 @@
+all three checks disabled 1 True
+only latest_ref 1 True
+only verify_snapshot 1 True
+only restore_latest 1 True

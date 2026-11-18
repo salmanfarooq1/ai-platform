@@ -1,0 +1,34 @@
+library/python 3.11.18-slim-bookworm digest sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39 updated 2026-11-05T17:07:01.217734Z
+restic/restic 0.19.2 HTTPError HTTP Error 404: Not Found
+restic/restic 0.20.0 HTTPError HTTP Error 404: Not Found
+Report 0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+CVE-2026-115557 [{'ref': 'pkg:generic/python@3.11.17?package-id=e0558c9a7e516623', 'versions': [{'version': '3.11.17', 'status': 'affected'}, {'range': 'vers:generic/>=3.11.18', 'status': 'unaffected'}, {'range': 'vers:generic/>=3.12.16', 'status': 'unaffected'}, {'range': 'vers:generic/>=3.13.18', 'status': 'unaffected'}, {'range': 'vers:generic/>=3.14.10', 'status': 'unaffected'}, {'range': 'vers:generic/>=3.15.2', 'status': 'unaffected'}, {'range': 'vers:generic/>=3.16.0', 'status': 'unaffected'}]}]
+Report 136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510
+CVE-2026-63073 [{'ref': 'pkg:apk/alpine/libcrypto3@3.5.7-r0?arch=x86_64&distro=alpine-3.24.1&package-id=e23c248c64dfa980&upstream=openssl', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+CVE-2026-63073 [{'ref': 'pkg:apk/alpine/libssl3@3.5.7-r0?arch=x86_64&distro=alpine-3.24.1&package-id=7de879f497a38539&upstream=openssl', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+GO-2026-6612 [{'ref': 'pkg:golang/golang.org/x/net@v0.55.0?package-id=cc45f625bf77ef2c', 'versions': [{'version': 'v0.55.0', 'status': 'affected'}, {'range': 'vers:golang/>=0.60.0', 'status': 'unaffected'}]}]
+GO-2026-6612 [{'ref': 'pkg:golang/stdlib@1.26.4?package-id=d00c865f0badd313', 'versions': [{'version': 'go1.26.4', 'status': 'affected'}, {'range': 'vers:golang/>=1.26.9', 'status': 'unaffected'}]}]
+CVE-2026-60002 [{'ref': 'pkg:apk/alpine/openssh-client-common@10.3_p1-r0?arch=x86_64&distro=alpine-3.24.1&package-id=4c4237b97bf12677&upstream=openssh', 'versions': [{'version': '10.3_p1-r0', 'status': 'affected'}, {'range': 'vers:apk/>=10.3_p1-r1', 'status': 'unaffected'}]}]
+CVE-2026-60002 [{'ref': 'pkg:apk/alpine/openssh-client-default@10.3_p1-r0?arch=x86_64&distro=alpine-3.24.1&package-id=6a72512565995914&upstream=openssh', 'versions': [{'version': '10.3_p1-r0', 'status': 'affected'}, {'range': 'vers:apk/>=10.3_p1-r1', 'status': 'unaffected'}]}]
+CVE-2026-60002 [{'ref': 'pkg:apk/alpine/openssh-keygen@10.3_p1-r0?arch=x86_64&distro=alpine-3.24.1&package-id=ee534463ad96c895&upstream=openssh', 'versions': [{'version': '10.3_p1-r0', 'status': 'affected'}, {'range': 'vers:apk/>=10.3_p1-r1', 'status': 'unaffected'}]}]
+CVE-2026-4738 [{'ref': 'pkg:apk/alpine/zlib@1.3.2-r0?arch=x86_64&distro=alpine-3.24.1&package-id=eb222fe89d397776', 'versions': [{'version': '1.3.2-r0', 'status': 'affected'}, {'range': 'vers:apk/>=1.4-r0', 'status': 'unaffected'}]}]
+CVE-2026-75803 [{'ref': 'pkg:apk/alpine/libcrypto3@3.5.7-r0?arch=x86_64&distro=alpine-3.24.1&package-id=e23c248c64dfa980&upstream=openssl', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+CVE-2026-75803 [{'ref': 'pkg:apk/alpine/libssl3@3.5.7-r0?arch=x86_64&distro=alpine-3.24.1&package-id=7de879f497a38539&upstream=openssl', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+Candidate pinned Python registry scan, original gate settings
+<3>WSL (20 - ) ERROR: UtilBindVsockAnyPort:307: socket failed 1
+[0013]  WARN error updating db error=unable to update vulnerability database: unable to create db client temp dir: mkdir /home/ubuntu/.cache/grype/db/grype-db-download2679842040: read-only file system
+grype exit=124
+GO-2026-6612 ['critical', None] [{'ref': 'pkg:golang/golang.org/x/net@v0.58.0?package-id=055b56a82ba1d0a4', 'versions': [{'version': 'v0.58.0', 'status': 'affected'}, {'range': 'vers:golang/>=0.60.0', 'status': 'unaffected'}]}]
+GO-2026-6612 ['critical', None] [{'ref': 'pkg:golang/stdlib@1.26.8?package-id=b4b72ffd5d39ad5d', 'versions': [{'version': 'go1.26.8', 'status': 'affected'}, {'range': 'vers:golang/>=1.26.9', 'status': 'unaffected'}]}]
+CVE-2026-63073 ['critical', None] [{'ref': 'pkg:apk/alpine/libcrypto3@3.5.7-r0?arch=x86_64&distro=alpine-3.23.4&package-id=9a1394d3c4afe71a&upstream=openssl', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+CVE-2026-63073 ['critical', None] [{'ref': 'pkg:apk/alpine/libssl3@3.5.7-r0?arch=x86_64&distro=alpine-3.23.4&package-id=2f07d3293434c63c&upstream=openssl', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+CVE-2026-63073 ['critical', None] [{'ref': 'pkg:apk/alpine/openssl@3.5.7-r0?arch=x86_64&distro=alpine-3.23.4&package-id=628e53c025dca0aa', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+CVE-2026-75803 ['critical', None] [{'ref': 'pkg:apk/alpine/libcrypto3@3.5.7-r0?arch=x86_64&distro=alpine-3.23.4&package-id=9a1394d3c4afe71a&upstream=openssl', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+CVE-2026-75803 ['critical', None] [{'ref': 'pkg:apk/alpine/libssl3@3.5.7-r0?arch=x86_64&distro=alpine-3.23.4&package-id=2f07d3293434c63c&upstream=openssl', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+CVE-2026-75803 ['critical', None] [{'ref': 'pkg:apk/alpine/openssl@3.5.7-r0?arch=x86_64&distro=alpine-3.23.4&package-id=628e53c025dca0aa', 'versions': [{'version': '3.5.7-r0', 'status': 'affected'}, {'range': 'vers:apk/>=3.5.8-r0', 'status': 'unaffected'}]}]
+Retry registry scan with existing read-only vulnerability database, no auto-update
+<3>WSL (18 - ) ERROR: UtilBindVsockAnyPort:307: socket failed 1
+[0017] ERROR failed to catalog: errors occurred attempting to resolve 'python:3.11.18-slim-bookworm@sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39':
+  - oci-registry: failed to get image descriptor from registry: error getting credentials - err: exit status 1, out: ``
+  - oci-model: not an OCI model artifact (config media type: )
+grype exit=1

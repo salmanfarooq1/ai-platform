@@ -1,0 +1,11 @@
+F
+=================================== FAILURES ===================================
+_____________ test_killing_the_lock_session_makes_the_backup_fail ______________
+tests/integration/poc/test_backup.py:268: in test_killing_the_lock_session_makes_the_backup_fail
+    with pytest.raises(PocError, match="lock"):
+E   Failed: DID NOT RAISE PocError
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_backup.py::test_killing_the_lock_session_makes_the_backup_fail
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 96.92s (0:01:36)
+done

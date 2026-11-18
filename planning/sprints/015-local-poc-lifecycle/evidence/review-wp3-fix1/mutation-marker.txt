@@ -1,0 +1,23 @@
+# Reviewer mutation: remove the restore-pending marker check from up() (scripts/poc_lib/up.py:219)
+## diff
+219c219
+<         restoring = pending.read_pending(stack_dir) is not None or _restoring(root, stack, runner, environ)
+---
+>         restoring = _restoring(root, stack, runner, environ)  # MUTATION: marker check removed
+## run: tests/unit/test_poc_restore_pending.py tests/unit/test_poc_up.py tests/unit/test_poc.py
+_ test_failed_restore_keeps_marker_and_up_resumes_without_the_normal_path[compare_state] _
+tests/unit/test_poc_restore_pending.py:228: in test_failed_restore_keeps_marker_and_up_resumes_without_the_normal_path
+_ test_failed_restore_keeps_marker_and_up_resumes_without_the_normal_path[copy_objects] _
+tests/unit/test_poc_restore_pending.py:228: in test_failed_restore_keeps_marker_and_up_resumes_without_the_normal_path
+_ test_failed_restore_keeps_marker_and_up_resumes_without_the_normal_path[load_into_empty_database] _
+tests/unit/test_poc_restore_pending.py:228: in test_failed_restore_keeps_marker_and_up_resumes_without_the_normal_path
+FAILED tests/unit/test_poc_restore_pending.py::test_failed_restore_keeps_marker_and_up_resumes_without_the_normal_path[compare_state]
+FAILED tests/unit/test_poc_restore_pending.py::test_failed_restore_keeps_marker_and_up_resumes_without_the_normal_path[copy_objects]
+FAILED tests/unit/test_poc_restore_pending.py::test_failed_restore_keeps_marker_and_up_resumes_without_the_normal_path[load_into_empty_database]
+FAILED tests/unit/test_poc_restore_pending.py::test_resume_restores_the_snapshot_named_in_the_marker_not_a_newer_latest
+FAILED tests/unit/test_poc_restore_pending.py::test_resume_refuses_when_the_snapshot_in_the_marker_is_missing_and_removes_nothing
+FAILED tests/unit/test_poc_restore_pending.py::test_resume_removal_failure_stops_before_restoring
+6 failed, 102 passed in 9.43s
+## restore
+cmp: byte-identical to original
+scripts/poc_lib/up.py: OK

@@ -1,0 +1,43 @@
+=== grafana/grafana stable releases ===
+curl: (28) Operation timed out after 30000 milliseconds with 509265 bytes received
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Unterminated string starting at: line 8301 column 19 (char 509215)
+=== ollama/ollama stable releases ===
+curl: (92) HTTP/2 stream 0 was not closed cleanly: CANCEL (err 8)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.pyenv/versions/3.11.0/lib/python3.11/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Unterminated string starting at: line 6959 column 9 (char 395173)
+=== grafana/grafana/v13.3.1 go.mod ===
+go 1.27.3
+	github.com/andybalholm/brotli v1.2.7 // @grafana/data-sources-plugins
+	golang.org/x/net v0.62.0 // @grafana/data-sources-plugins
+	golang.org/x/crypto v0.58.0 // indirect
+=== ollama/ollama/v0.40.16 go.mod ===
+go 1.26.10
+	golang.org/x/crypto v0.58.0
+	golang.org/x/net v0.61.0 // indirect

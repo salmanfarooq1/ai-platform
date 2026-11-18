@@ -1,0 +1,12 @@
+
+=========================== short test summary info ============================
+ERROR tests/unit/test_release_manifest.py
+ERROR tests/unit/test_poc_up.py
+ERROR tests/integration/poc/test_up.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!
+3 errors in 1.03s
+FF...............                                                        [100%]
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc_compose.py::test_default_services_and_hardening - ...
+FAILED tests/unit/test_poc_compose.py::test_poc_override_resets_names_and_ports
+2 failed, 15 passed in 3.02s

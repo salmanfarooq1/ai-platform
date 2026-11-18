@@ -5,6 +5,7 @@ job, run the handler, and renew the lease every beat while it runs. The same bea
 stops the handler when somebody asked. The outcome is written under `tenant_connection`, as the app role:
 - the handler returned: `succeeded`, with its result and its events in the outbox, in one transaction;
 - a `PermanentJobError`: `failed`, no retry;
+- a `DeferJob`: back to `queued` for later, the attempt not counted (a wait, not a failure);
 - any other error: back to `queued` after a backoff, or `dead` after the last attempt;
 - the worker is shutting down and the job did not end within the grace time: the lease is released.
 
@@ -26,7 +27,7 @@ from core.database import jobs
 from core.database.jobs import JobRow
 from core.database.tenant import DbPool, tenant_connection
 from ports.events import EventBus
-from workers.types import Handler, JobContext, JobOutput, PermanentJobError
+from workers.types import DeferJob, Handler, JobContext, JobOutput, PermanentJobError
 
 logger = logging.getLogger("workers.loop")
 
@@ -172,6 +173,8 @@ class Worker:
         error = run.exception()
         if error is None:
             await self._finish_ok(slot_id, job, run.result())
+        elif isinstance(error, DeferJob):
+            await self._finish_deferred(slot_id, job, error)
         elif isinstance(error, PermanentJobError):
             await self._finish_failed(slot_id, job, error.code, error.detail, retry=False)
         else:
@@ -217,6 +220,15 @@ class Worker:
             await self._finish_failed(slot_id, job, "outcome_not_recorded", None, retry=True)
             return
         logger.info("job %s succeeded", job.id)
+
+    async def _finish_deferred(self, slot_id: str, job: JobRow, deferral: DeferJob) -> None:
+        async with tenant_connection(self._pool, job.tenant_id) as conn:
+            status = await jobs.defer(conn, job.id, slot_id, deferral.delay_seconds, deferral.code, deferral.detail)
+            row = await jobs.get(conn, job.id) if status is not None else None
+        logger.info("job %s deferred %.1fs (%s, deferral %d)", job.id, deferral.delay_seconds, deferral.code,
+                    row.deferrals if row is not None else job.deferrals + 1)
+        if status is None:
+            logger.warning("job %s: deferred but no longer held", job.id)
 
     async def _finish_failed(self, slot_id: str, job: JobRow, code: str, detail: str | None, *, retry: bool) -> None:
         async with tenant_connection(self._pool, job.tenant_id) as conn:

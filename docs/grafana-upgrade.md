@@ -1,6 +1,6 @@
 # Grafana state transition
 
-The observability profile uses Grafana 13.2.4 distroless-slim. Its configured Prometheus datasource and provisioned Platform trust dashboard are supported. The local image omits optional bundled plugins. Existing custom plugins require a separate compatibility and security check.
+The observability profile uses Grafana 13.3.1 distroless-slim. Its configured Prometheus datasource and provisioned Platform trust dashboard are supported. The local image omits optional bundled plugins. Existing custom plugins require a separate compatibility and security check.
 
 Fresh installations use `grafana_data_v13`. The previous `grafana_data` volume remains untouched. Do not start the new image over that original volume: Grafana applies database migrations, and older versions cannot safely read the migrated state.
 

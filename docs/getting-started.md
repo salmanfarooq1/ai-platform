@@ -19,6 +19,8 @@ bash scripts/setup_db.sh
 
 `setup_db.sh` creates the `rag_platform` database, makes sure the app role `gap_app` exists, and applies every migration as the owner role. It prints `SETUP_DONE` at the end.
 
+> **The compose `api` service shares port 8000 with a host uvicorn.** A plain `docker compose up -d` also starts the containerised `api` (on `127.0.0.1:8000`) and `worker`. If you run uvicorn on the host (step 4), either start only the stores and worker (`docker compose up -d postgres valkey worker`) or move the container with `API_HOST_PORT=18000 docker compose up -d`. The two cannot both listen on :8000.
+
 ## 2. Create a principal and a key for the seeded tenant
 
 A fresh database migration creates the `default` tenant and its `legal` knowledge base. Use them for the first setup:
@@ -128,3 +130,15 @@ Existing Postgres data requires the [logical upgrade procedure](postgres-upgrade
 - How the parts fit: [architecture.md](architecture.md)
 - Every setting: [configuration.md](configuration.md)
 - Routes, errors and reason codes: [api/README.md](api/README.md)
+
+## A local stack in one command: `poc`
+```bash
+poetry run python scripts/poc up demo        # Postgres, Valkey, API and worker, isolated, one command
+poetry run python scripts/poc admin demo create-principal default service me
+poetry run python scripts/poc backup demo    # prints POC_RECOVERY_REF=<id>
+POC_RECOVERY_REF=<id> poetry run python scripts/poc down demo   # checked teardown; key and backups stay
+poetry run python scripts/poc up demo        # restores the backup before anything writes
+poetry run python scripts/poc status demo --json
+poetry run python scripts/poc destroy demo --confirm demo       # removes everything, key and backups too
+```
+Details, limits and the recovery drill are in [operations.md](operations.md#backup-checked-down-restore-destroy-and-the-drill).

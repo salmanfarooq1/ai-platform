@@ -54,7 +54,7 @@ Stage pipeline order (first deny wins). Sprint 013 order is `principal` → `mod
 
 Principal precedes module so missing credentials/scopes keep their existing 401/403 behavior before an authenticated disabled-module denial.
 
-The one accepted exception to "every call recorded" (015): during maintenance capture, non-health requests receive 503 `maintenance` before `enforce()` and write no decision row, because the database is being captured. Turning maintenance on and off is itself a recorded decision.
+Sprint 015 captures backups online. Governed calls keep going through `enforce()` and recording decisions; there is no maintenance capture exception. Purge shares an advisory lock with backup. Maintenance mode is deferred to the cloud track.
 
 The ask-your-data answer has no action kind of its own. Its receipt fields ride on the answer step's `model.invoke` decision (request path step 9).
 

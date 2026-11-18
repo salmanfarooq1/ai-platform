@@ -1,0 +1,14 @@
+F..F.................................................................... [100%]
+=================================== FAILURES ===================================
+__________________ test_rejects_unpinned_and_platform_images ___________________
+tests/unit/test_release_manifest.py:119: in test_rejects_unpinned_and_platform_images
+    with pytest.raises(bm.ManifestError):
+E   Failed: DID NOT RAISE ManifestError
+_________________ test_real_repository_inputs_are_all_covered __________________
+tests/unit/test_release_manifest.py:228: in test_real_repository_inputs_are_all_covered
+    assert "docker/kafka/Dockerfile:1" in locations
+E   AssertionError: assert 'docker/kafka/Dockerfile:1' in {'Dockerfile:4', 'Dockerfile:43', 'docker-compose.yml:grafana', 'docker-compose.yml:ollama', 'docker-compose.yml:ollama-init', 'docker-compose.yml:ollama-lock-check', ...}
+=========================== short test summary info ============================
+FAILED tests/unit/test_release_manifest.py::test_rejects_unpinned_and_platform_images
+FAILED tests/unit/test_release_manifest.py::test_real_repository_inputs_are_all_covered
+2 failed, 70 passed in 11.32s

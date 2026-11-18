@@ -45,14 +45,13 @@ def test_snapshot_has_typed_module_and_versioned_decision_models():
 
 def test_update_script_rewrites_the_snapshot(tmp_path):
     before = SNAPSHOT_PATH.read_text()
-    SNAPSHOT_PATH.write_text("{}\n")
-    try:
-        out = subprocess.run([sys.executable, str(ROOT / "scripts" / "update_openapi.py")],
-                             capture_output=True, text=True, cwd=ROOT)
-        assert out.returncode == 0, out.stderr
-        assert SNAPSHOT_PATH.read_text() == before
-    finally:
-        SNAPSHOT_PATH.write_text(before)
+    output = tmp_path / "openapi.json"
+    output.write_text("{}\n")
+    out = subprocess.run([sys.executable, str(ROOT / "scripts" / "update_openapi.py"), "--output", str(output)],
+                         capture_output=True, text=True, cwd=ROOT)
+    assert out.returncode == 0, out.stderr
+    assert output.read_text() == render_openapi() == before
+    assert SNAPSHOT_PATH.read_text() == before
 
 
 def test_ddl_check_passes_on_the_repo_and_fails_on_a_violation(tmp_path):

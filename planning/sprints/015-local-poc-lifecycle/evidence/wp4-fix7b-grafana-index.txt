@@ -1,0 +1,16 @@
+Name:      docker.io/grafana/grafana:13.3.1-distroless-slim
+MediaType: application/vnd.docker.distribution.manifest.list.v2+json
+Digest:    sha256:c18a355197217a972f5e05c42894be0528c862061b1a21c9aabaeaf43d161a34
+           
+Manifests: 
+  Name:      docker.io/grafana/grafana:13.3.1-distroless-slim@sha256:9387987fcac57cadb0aaeea10beac8bf0c771b64ba2dce08d8cb49f086476e7e
+  MediaType: application/vnd.docker.distribution.manifest.v2+json
+  Platform:  linux/amd64
+             
+  Name:      docker.io/grafana/grafana:13.3.1-distroless-slim@sha256:acddc8eebfb3c2bfeb8cd6ca4bd0bb00376dbc5063a500529513f9411aedc32a
+  MediaType: application/vnd.docker.distribution.manifest.v2+json
+  Platform:  linux/arm64
+             
+  Name:      docker.io/grafana/grafana:13.3.1-distroless-slim@sha256:e672f8a7a99b837b285b34c901864e291e0546fb4192143938d619bb2617e4db
+  MediaType: application/vnd.docker.distribution.manifest.v2+json
+  Platform:  linux/arm/v7

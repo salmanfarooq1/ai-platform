@@ -31,6 +31,17 @@ All notable changes, newest first, in the [Keep a Changelog](https://keepachange
 - **Documentation** in one standard set: getting started, architecture, configuration, deployment, operations, API, contracts and security. Reference tables are generated from the code.
 
 ### Changed
+- **Sprint 015: Local POC lifecycle.** One command set runs an isolated proof-of-concept stack per client and keeps its evidence across teardown.
+  - Bump the Grafana observability image to 13.3.1, pinned by digest and scanned for fixed critical vulnerabilities.
+  - Known issue, deferred to Sprint 016: Ollama 0.40.7 and SeaweedFS 4.47 carry fixed critical CVEs; bump to 0.40.16 and 4.54 after a clean Grype scan.
+  - `scripts/poc` with `up` (and `up --create-only` with an owner token), `status`, `backup`, `down` (checked teardown: refuses unless the latest restic backup verifies and a scratch restore matches), `admin` and `destroy`. Each stack is Compose project `ai-platform-poc-<stack>` and never touches the developer project.
+  - Backups: restic with `check --read-data`, a restore-pending marker so an interrupted restore resumes and never migrates an empty database, and a per-stack lifecycle lock plus a Postgres advisory lock shared with the retention purge.
+  - Private receipt signing key and recovery-key validation per stack; saved receipts verify offline after restore.
+  - A release manifest per stack names every external image by digest (`scripts/release/build_manifest.py`, with a bounded retry on transient registry errors).
+  - `scripts/verify/poc-drill.sh`: the whole journey on a fixture stack (governed deny, backup, down, restore, offline verify, destroy), one PASS or FAIL line per step, never SKIP.
+  - Citation generation now requires governed model calls. Policy publication is compare-and-swap.
+  - Image patch layer: the UI, Kafka and socat images are built from their digest-pinned bases with `apk upgrade`, until upstream rebuilds those bases. Bounded UI test workers, isolated OpenAPI regeneration tests.
+  - **Upgrade notes:** apply migration 0012 (`jobs.deferrals`, an integer, default 0) before starting the updated workers. A job deferred on a held lock goes back to `queued` without using an attempt.
 - Showcase rotation revokes only its recorded issued prefix and warns about untouched active keys; lost state causes fresh issuance without revocation. Tenant key listing sets RLS context after operator tenant resolution; fresh app-role slug resolution still requires a migration scope decision. Generic SQL guards, observed policy lock contention and portable M0 Poetry lookup close review findings.
 - **Sprint 012: Pillars and boundaries.** Module editions, pillar metadata, version 2 decision records, and explicit single- or multi-tenant deployment shape.
   - **Upgrade notes:**

@@ -1,0 +1,11 @@
+PASS bash -n accept.sh
+PASS embedded Python syntax: PY
+PASS embedded Python syntax: PYDRILL
+PASS 36 specified pytest nodes; 24 exact threat nodes matched
+PASS requested pack files exist; retired brief absent
+PASS readiness/log contain none of the removed topics
+PASS old sprint slug absent from documents and sprint map
+PASS MAP length 95/160 and Now section limit
+PASS all working-tree changes are under planning/
+PASS git diff --check
+NOT RUN product acceptance: planning-only drafting task

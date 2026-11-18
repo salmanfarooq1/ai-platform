@@ -1,0 +1,17 @@
+..F...                                                                   [100%]
+=================================== FAILURES ===================================
+_______________ test_restic_check_and_scratch_restore_gate_down ________________
+tests/integration/poc/test_restore.py:170: in test_restic_check_and_scratch_restore_gate_down
+    _flip_a_byte(pack)
+tests/integration/poc/test_restore.py:146: in _flip_a_byte
+    path.write_bytes(bytes(data))
+../../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:1067: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   PermissionError: [Errno 13] Permission denied: '/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/.poc/t17028940/backups/data/1d/1dd37f0b92053c2d94ceda82a9ec13743e29d069b5c3d981c696fedda56bc1c0'
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_restore.py::test_restic_check_and_scratch_restore_gate_down
+1 failed, 5 passed in 194.20s (0:03:14)

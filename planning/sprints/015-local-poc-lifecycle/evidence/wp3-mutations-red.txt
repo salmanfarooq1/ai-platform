@@ -1,0 +1,15 @@
+## mutation 1: down skips live-state gate
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc.py::test_down_checks_in_order - AssertionError: as...
+FAILED tests/unit/test_poc.py::test_down_refuses_writes_after_backup - Failed...
+2 failed, 69 passed in 3.17s
+## mutation 2: down skips verify
+.......................................................F...............  [100%]
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc.py::test_down_checks_in_order - AssertionError: as...
+1 failed, 70 passed in 3.25s
+## mutation 3: purge_guard is a no-op
+F                                                                        [100%]
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_backup.py::test_purge_waits_during_backup
+1 failed in 4.86s

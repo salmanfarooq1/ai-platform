@@ -1,0 +1,24 @@
+== mutation a1: remove 'backup public key is not trusted' (keys.py:26-27)
+diff --git a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/keys.py.orig b/scripts/poc_backup/keys.py
+index e12d844..aad6850 100644
+--- a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/keys.py.orig
++++ b/scripts/poc_backup/keys.py
+@@ -23,7 +23,6 @@ def validate_restore_key(identity: Mapping[str, str], settings: Settings) -> Non
+         if key_id_of(public) != kid:
+             raise ValueError("public key id mismatch")
+         ring = Keyring.from_private_text(private, [decode_key(key) for key in settings.previous_receipt_keys])
+-        if ring.public_raw(kid) != public:
+-            raise ValueError("backup public key is not trusted")
++        pass  # MUTATION a1
+     except (KeyError, TypeError, ValueError):
+         raise ValueError("restore requires the matching active key or exact trusted previous public key and an existing private key") from None
+...............F                                                         [100%]
+=================================== FAILURES ===================================
+________________ test_wrong_key_id_requires_previous_public_key ________________
+tests/integration/poc/test_restore.py:19: in test_wrong_key_id_requires_previous_public_key
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_restore.py::test_wrong_key_id_requires_previous_public_key
+1 failed, 15 passed in 2.72s
+RESTORED-IDENTICAL

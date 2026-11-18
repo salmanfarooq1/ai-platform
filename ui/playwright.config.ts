@@ -1,3 +1,5 @@
+import { accessSync, constants } from 'node:fs'
+import { delimiter, join } from 'node:path'
 import { defineConfig, devices } from '@playwright/test'
 
 // Cross-stack tests: the real API with LLM and embedding fakes (scripts/e2e/serve.py), real Postgres and Redis,
@@ -15,6 +17,15 @@ const GATEWAY_API_PORT = 8002
 const GATEWAY_UI_PORT = 4175
 const SHOWCASE_API_PORT = 8003
 const SHOWCASE_UI_PORT = 4176
+function resolvePoetry(): string {
+  const requested = process.env.POETRY || 'poetry'
+  const candidates = requested.includes('/') ? [requested] : (process.env.PATH || '').split(delimiter).map((dir) => join(dir, requested))
+  for (const candidate of candidates) {
+    try { accessSync(candidate, constants.X_OK); return candidate } catch { /* try the next PATH entry */ }
+  }
+  throw new Error(`Poetry executable not found: ${requested}`)
+}
+const poetry = `'${resolvePoetry().replace(/'/g, "'\\''")}'`
 const showcaseOnly = process.argv.some((arg) => arg === '--project=showcase-m0' || arg === 'showcase-m0')
 
 export default defineConfig({
@@ -52,7 +63,7 @@ export default defineConfig({
   ],
   webServer: showcaseOnly ? [
     {
-      command: `/home/ubuntu/.local/share/poetry233/bin/poetry run python scripts/e2e/serve.py --reference-company --enabled-modules gateway --port ${SHOWCASE_API_PORT} --state-dir ui/e2e/.state/showcase-m0`,
+      command: `${poetry} run python scripts/e2e/serve.py --reference-company --enabled-modules gateway --port ${SHOWCASE_API_PORT} --state-dir ui/e2e/.state/showcase-m0`,
       cwd: '..',
       url: `http://127.0.0.1:${SHOWCASE_API_PORT}/v1/health`,
       timeout: 180_000,
@@ -67,7 +78,7 @@ export default defineConfig({
     },
   ] : [
     {
-      command: `poetry run python scripts/e2e/serve.py --port ${API_PORT}`,
+      command: `${poetry} run python scripts/e2e/serve.py --port ${API_PORT}`,
       cwd: '..',
       url: `http://127.0.0.1:${API_PORT}/v1/health`,
       timeout: 180_000,
@@ -81,7 +92,7 @@ export default defineConfig({
       reuseExistingServer: !!process.env.E2E_REUSE,
     },
     {
-      command: `poetry run python scripts/e2e/serve.py --preview --port ${PREVIEW_API_PORT} --state-dir ui/e2e/.state/preview`,
+      command: `${poetry} run python scripts/e2e/serve.py --preview --port ${PREVIEW_API_PORT} --state-dir ui/e2e/.state/preview`,
       cwd: '..',
       url: `http://127.0.0.1:${PREVIEW_API_PORT}/v1/health`,
       timeout: 180_000,
@@ -95,7 +106,7 @@ export default defineConfig({
       reuseExistingServer: !!process.env.E2E_REUSE,
     },
     {
-      command: `poetry run python scripts/e2e/serve.py --enabled-modules gateway --port ${GATEWAY_API_PORT} --state-dir ui/e2e/.state/gateway`,
+      command: `${poetry} run python scripts/e2e/serve.py --enabled-modules gateway --port ${GATEWAY_API_PORT} --state-dir ui/e2e/.state/gateway`,
       cwd: '..',
       url: `http://127.0.0.1:${GATEWAY_API_PORT}/v1/health`,
       timeout: 180_000,
@@ -109,7 +120,7 @@ export default defineConfig({
       reuseExistingServer: !!process.env.E2E_REUSE,
     },
     {
-      command: `/home/ubuntu/.local/share/poetry233/bin/poetry run python scripts/e2e/serve.py --reference-company --enabled-modules gateway --port ${SHOWCASE_API_PORT} --state-dir ui/e2e/.state/showcase-m0`,
+      command: `${poetry} run python scripts/e2e/serve.py --reference-company --enabled-modules gateway --port ${SHOWCASE_API_PORT} --state-dir ui/e2e/.state/showcase-m0`,
       cwd: '..',
       url: `http://127.0.0.1:${SHOWCASE_API_PORT}/v1/health`,
       timeout: 180_000,

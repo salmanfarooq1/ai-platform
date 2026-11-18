@@ -40,6 +40,8 @@ async def generate_with_citations(
     caller: ModelCaller | None = None,
     ctx: EnforcementContext | None = None,
 ) -> tuple[GeneratedAnswer, dict]:
+    if caller is None or ctx is None:
+        raise ValueError("governed caller and context are required")
     context_with_ids = "\n\n".join([
         f"[chunk_{i}] (from {c.get('source_filename') or 'unknown'}, score {c.get('score', 0.0):.2f}):\n{c['text']}"
         for i, c in enumerate(chunks)
@@ -47,41 +49,15 @@ async def generate_with_citations(
 
     model_to_use = model or LLM_CONFIG["model"]
 
-    completion = None
-    if caller is not None and ctx is not None:
-        completion = await caller.complete(
-            ctx, model_to_use, [{
-                "role": "user",
-                "content": GENERATION_PROMPT.format(context_with_ids=context_with_ids, question=query),
-            }], max_tokens=GENERATION_MAX_TOKENS,
-            estimated_tokens=estimate_tokens(query, GENERATION_MAX_TOKENS),
-            input_text=query, input_origin="caller", response_format=GeneratedAnswer,
-        )
-    else:
-        for attempt in range(3):
-            try:
-                completion = await llm.complete(
-                    [{
-                        "role": "user",
-                        "content": GENERATION_PROMPT.format(
-                            context_with_ids=context_with_ids,
-                            question=query
-                        )
-                    }],
-                    model=model_to_use,
-                    max_tokens=GENERATION_MAX_TOKENS,
-                    response_format=GeneratedAnswer,
-                )
-                break
-            except Exception as e:
-                if "rate_limit" in str(e).lower() and attempt < 2:
-                    import asyncio
-                    await asyncio.sleep(35)
-                else:
-                    raise
+    completion = await caller.complete(
+        ctx, model_to_use, [{
+            "role": "user",
+            "content": GENERATION_PROMPT.format(context_with_ids=context_with_ids, question=query),
+        }], max_tokens=GENERATION_MAX_TOKENS,
+        estimated_tokens=estimate_tokens(query, GENERATION_MAX_TOKENS),
+        input_text=query, input_origin="caller", response_format=GeneratedAnswer,
+    )
 
-    if completion is None:  # unreachable: the loop either breaks with a completion or raises
-        raise RuntimeError("LLM call returned no response")
     if completion.finish_reason == "length":
         logger.warning("[llm] response truncated at max_tokens limit: model=%s", model_to_use)
         raise ValueError("LLM response was truncated (finish_reason=length).")

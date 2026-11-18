@@ -1,0 +1,16 @@
+E   AttributeError: module 'core.database.jobs' has no attribute 'defer'
+E   AssertionError: only 3 lock timeouts
+E   assert 67975.588786838 < 67975.569628033
+E    +  where 67975.588786838 = <built-in function monotonic>()
+E    +    where <built-in function monotonic> = time.monotonic
+ERROR [workers.loop] job 3cd53368-cffc-4a86-80f6-dfaae6cbd22e failed: BackupLockTimeout
+ERROR [workers.loop] job 3cd53368-cffc-4a86-80f6-dfaae6cbd22e failed: BackupLockTimeout
+ERROR [workers.loop] job 3cd53368-cffc-4a86-80f6-dfaae6cbd22e failed: BackupLockTimeout
+ERROR    workers.loop:loop.py:178 job 3cd53368-cffc-4a86-80f6-dfaae6cbd22e failed: BackupLockTimeout
+ERROR    workers.loop:loop.py:178 job 3cd53368-cffc-4a86-80f6-dfaae6cbd22e failed: BackupLockTimeout
+ERROR    workers.loop:loop.py:178 job 3cd53368-cffc-4a86-80f6-dfaae6cbd22e failed: BackupLockTimeout
+E   ImportError: cannot import name 'DeferJob' from 'workers.types' (/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/workers/types.py)
+FAILED tests/integration/test_job_defer.py::test_defer_puts_a_claimed_job_back_without_using_an_attempt
+FAILED tests/integration/test_job_defer.py::test_six_lock_timeouts_leave_the_purge_job_queued_not_dead
+FAILED tests/integration/test_job_defer.py::test_a_handler_raising_defer_job_is_deferred_by_the_queue
+3 failed in 69.18s (0:01:09)

@@ -1,0 +1,2 @@
+PASS two fixture container readers share the mounted key identity across recreation; no network or inference
+PENDING actual API/worker service restart and down/up lifecycle: WP1/WP3 not present

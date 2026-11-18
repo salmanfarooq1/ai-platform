@@ -1,0 +1,16 @@
+MUTATION b1: verify.py:38 dump sha256 check disabled (if False and ...)
+warning: Empty last update token.
+--- unit tier focused
+.......                                                                  [100%]
+7 passed in 2.60s
+--- live tamper test
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_manifest_tampering_blocks_health _____________________
+tests/integration/poc/test_restore.py:133: in test_manifest_tampering_blocks_health
+    with pytest.raises(PocError):
+E   Failed: DID NOT RAISE PocError
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_restore.py::test_manifest_tampering_blocks_health
+1 failed in 91.88s (0:01:31)
+RESTORED-IDENTICAL verify.py

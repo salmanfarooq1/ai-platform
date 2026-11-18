@@ -133,7 +133,7 @@ async def seed(store: KnowledgeStore, embeddings: EmbeddingPort) -> None:
         )
 
 
-async def answer(store: KnowledgeStore, embeddings: EmbeddingPort, llm: LLMPort, case: Case) -> LLMTestCase:
+async def answer(store: KnowledgeStore, embeddings: EmbeddingPort, llm: LLMPort, case: Case, caller, ctx) -> LLMTestCase:
     """One question through the platform's retrieval and generation, as a DeepEval test case."""
     query_embedding = await embed_query(embeddings, case.question)
     chunks = await retrieve(
@@ -145,7 +145,7 @@ async def answer(store: KnowledgeStore, embeddings: EmbeddingPort, llm: LLMPort,
     if not prepared:
         return LLMTestCase(input=case.question, actual_output="", expected_output=case.fact, retrieval_context=[],
                            metadata={"source": case.source})
-    generated, _ = await generate_with_routing(llm, case.question, prepared)
+    generated, _ = await generate_with_routing(llm, case.question, prepared, caller=caller, ctx=ctx)
     return LLMTestCase(
         input=case.question, actual_output=generated.answer, expected_output=case.fact,
         retrieval_context=[f"{c['source_filename']}: {c['text']}" for c in prepared], metadata={"source": case.source},
@@ -160,18 +160,33 @@ def score(test_cases: list[LLMTestCase]) -> dict[str, float]:
     }
 
 
-async def run_suite(store: KnowledgeStore, embeddings: EmbeddingPort, llm: LLMPort) -> dict[str, float]:
+async def run_suite(store: KnowledgeStore, embeddings: EmbeddingPort, llm: LLMPort, *, caller, ctx) -> dict[str, float]:
     await seed(store, embeddings)
-    cases = [await answer(store, embeddings, llm, case) for case in CASES]
+    cases = [await answer(store, embeddings, llm, case, caller, ctx) for case in CASES]
     return score(cases)
 
 
 async def run_fake() -> dict[str, float]:
     """The CI run: the fakes behind the same ports the platform uses."""
-    from tests.fakes import FakeEmbeddings, FakeKnowledgeStore, FakeLLM
+    from api.services.model_calls import ModelCaller
+    from core.settings import get_settings
+    from tests.fakes import (
+        FakeDecisionSink,
+        FakeEmbeddings,
+        FakeKnowledgeStore,
+        FakeLLM,
+        FakeModelLimitStore,
+        make_fake_catalog,
+    )
+    from tests.gateway_helpers import make_ctx
 
     store = FakeKnowledgeStore(kbs={TENANT: {NAMESPACE: "fixed eval corpus"}})
-    return await run_suite(store, FakeEmbeddings(), FakeLLM())
+    llm = FakeLLM()
+    settings = get_settings()
+    caller = ModelCaller(make_fake_catalog(settings), llm, FakeModelLimitStore(), settings=settings)
+    ctx = make_ctx()
+    ctx.runtime.decisions = FakeDecisionSink()
+    return await run_suite(store, FakeEmbeddings(), llm, caller=caller, ctx=ctx)
 
 
 if __name__ == "__main__":

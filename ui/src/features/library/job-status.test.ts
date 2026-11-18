@@ -3,7 +3,7 @@ import type { Job } from '@/api/types'
 import { anyActive, docState, failureSentence, latestByDocument } from './job-status'
 
 const job = (over: Partial<Job> = {}): Job => ({
-  id: 'j', kind: 'ingest', status: 'queued', attempts: 0, max_attempts: 5, progress: { done: 0, total: 0 }, error_code: null,
+  id: 'j', kind: 'ingest', status: 'queued', attempts: 0, deferrals: 0, max_attempts: 5, progress: { done: 0, total: 0 }, error_code: null,
   resource: 'legal/a.md', execution_id: null, created_at: '2026-09-14T09:30:00Z', updated_at: '2026-09-14T09:30:00Z', ...over,
 })
 

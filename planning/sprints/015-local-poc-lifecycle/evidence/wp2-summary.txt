@@ -1,0 +1,2 @@
+wp2.xml: tests=45 failed=0 skipped=0
+wp2-unit.xml: tests=1241 failed=0 skipped=0

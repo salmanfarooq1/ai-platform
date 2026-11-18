@@ -90,3 +90,17 @@ async def test_l3_the_recursion_limit_warning_never_logs_the_question(caplog):
         out = await make_agent_runner(lambda: Graph())(spec)
     assert out.result is None
     assert caplog.records and "jane-doe-4711" not in caplog.text and str(spec.execution_id) in caplog.text
+
+
+def test_the_job_read_model_exposes_the_deferral_count():
+    """015 WP3 fix-round review, LOW (a): how often a job was put off (not failed) is part of what a reader of the job sees."""
+    from api.routers.jobs import job_view
+
+    now = datetime.now(timezone.utc)
+    kwargs = dict(
+        id=uuid4(), tenant_id=uuid4(), kind="ingest", status="queued", payload={}, idempotency_key=None, attempts=0,
+        max_attempts=3, run_after=now, lease_until=None, locked_by=None, progress_done=0, progress_total=0,
+        error_code="busy", error_detail=None, resource=None, execution_id=None, result=None, cancel_requested=False,
+        created_at=now, updated_at=now, started_at=None, finished_at=None, principal_id=None, namespace=None)
+    assert job_view(jobs.JobRow(**kwargs, deferrals=7)).deferrals == 7
+    assert jobs.JobRow(**kwargs).deferrals == 0

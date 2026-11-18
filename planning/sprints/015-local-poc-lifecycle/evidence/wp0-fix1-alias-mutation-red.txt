@@ -1,0 +1,19 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_governed_unknown_alias_is_denied _____________________
+tests/unit/test_llm.py:197: in test_governed_unknown_alias_is_denied
+    with pytest.raises(GatewayDenied) as denied:
+E   Failed: DID NOT RAISE GatewayDenied
+=============================== warnings summary ===============================
+../../.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/_pytest/config/__init__.py:1345
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+../../.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/_pytest/config/__init__.py:1345
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; langsmith
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_llm.py::test_governed_unknown_alias_is_denied - Failed...
+1 failed, 2 warnings in 4.39s

@@ -2,6 +2,10 @@
 
 An index, one line per decision, newest first. The reasoning lives in `docs/adr/` and, for Decisions 1 to 30, in `planning/history/ARCHITECTURE_LOG.md`. This file only points to it. Log entries may carry the date they were recorded.
 
+## Sprint 015 local lifecycle (owner, 2026-11-17)
+- Default Compose gains API; online backup uses a shared purge lock and pinned restic service. No maintenance/audit exception. Signing key persists outside volumes; data backups contain public identity only. Ordered teardown gates and a real M0 restore drill close `v0.15.0` for owner tagging.
+- WP0/WP1/WP4 use Terra; WP2/WP3 use Sol; the other model reviews each launch. The exact contract is `sprints/015-local-poc-lifecycle/`. Builders never commit.
+
 ## 2026-11-02 re-plan (owner)
 - Re-plan for the earliest sellable gateway: M0 stays local, and the gateway sprint order is 016, 019, 020, 017, 018.
 - Land 011 and 012 before builders start on 013.
@@ -113,3 +117,7 @@ An index, one line per decision, newest first. The reasoning lives in `docs/adr/
 
 ## Before Sprint 000
 - **Decisions 1–23:** labs, retrieval, caching, the agent, MCP, cost tracking and the free-tier deploy. See `planning/history/ARCHITECTURE_LOG.md`.
+
+- **S015-backup-age (2026-11-17):** Default to 86400 seconds and require live state to match the backup before teardown.
+- **S015-ownership (2026-11-17):** Use isolated per-stack Compose projects and remove only marker-listed volumes with matching project labels.
+- **S015-image-defer (2026-11-19, owner):** Close Sprint 015 with the image-scan check red on two images (Ollama 0.40.7, SeaweedFS 4.47; fixed critical CVEs upstream). Bumping and scanning Ollama 0.40.16 and SeaweedFS 4.54 is Sprint 016's first item. The gate, Grype config and exception list stay unchanged; no exception is recorded.

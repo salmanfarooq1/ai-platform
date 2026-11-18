@@ -26,6 +26,10 @@ def test_the_limits_module_uses_the_same_api_prefix_as_the_app():
 
 
 def test_the_compose_file_has_a_worker_service_running_the_same_image_with_the_worker_command():
-    compose = (ROOT / "docker-compose.yml").read_text()
-    worker = compose.split("  worker:", 1)[1].split("\n  ollama:", 1)[0]
-    assert "build: ." in worker and '"python", "-m", "workers"' in worker and "healthcheck" in worker
+    import yaml
+
+    # The worker merges the shared app definition (`x-app`), so read the parsed file, not the text slice.
+    services = yaml.safe_load((ROOT / "docker-compose.yml").read_text())["services"]
+    worker = services["worker"]
+    assert worker["build"] == "." == services["api"]["build"]
+    assert worker["command"][:3] == ["python", "-m", "workers"] and worker["healthcheck"]

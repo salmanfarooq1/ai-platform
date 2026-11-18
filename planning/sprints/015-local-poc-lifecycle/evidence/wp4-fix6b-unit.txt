@@ -1,0 +1,59 @@
+........................................................................ [  4%]
+........................................................................ [  8%]
+........................................................................ [ 13%]
+........................................................................ [ 17%]
+........................................................................ [ 22%]
+........................................................................ [ 26%]
+........................................................................ [ 30%]
+........................................................................ [ 35%]
+........................................................................ [ 39%]
+........................................................................ [ 44%]
+........................................................................ [ 48%]
+........................................................................ [ 53%]
+........................................................................ [ 57%]
+........................................................................ [ 61%]
+........................................................................ [ 66%]
+........................................................................ [ 70%]
+........................................................................ [ 75%]
+........................................................................ [ 79%]
+.............................................F..F....................... [ 84%]
+........................................................................ [ 88%]
+........................................................................ [ 92%]
+................................F....................................... [ 97%]
+............................................                             [100%]
+=================================== FAILURES ===================================
+__________________ test_rejects_unpinned_and_platform_images ___________________
+tests/unit/test_release_manifest.py:90: in test_rejects_unpinned_and_platform_images
+    assert {"prometheus", "ollama", "kafka", "seaweedfs"} <= set(victims)  # optional profiles are checked too
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert {'kafka', 'ol..., 'seaweedfs'} <= {'grafana', '...metheus', ...}
+E     
+E     Extra items in the left set:
+E     'kafka'
+_________________ test_real_repository_inputs_are_all_covered __________________
+tests/unit/test_release_manifest.py:223: in test_real_repository_inputs_are_all_covered
+    assert f"docker-compose.yml:{name}" in locations
+E   AssertionError: assert 'docker-compose.yml:kafka' in {'Dockerfile:4', 'Dockerfile:43', 'docker-compose.yml:grafana', 'docker-compose.yml:ollama', 'docker-compose.yml:ollama-init', 'docker-compose.yml:ollama-lock-check', ...}
+___________ test_build_inventory_includes_restic_and_app_dockerfile ____________
+tests/unit/test_supply_chain_controls.py:326: in test_build_inventory_includes_restic_and_app_dockerfile
+    assert built_services(ROOT) == ["api", "restic", "worker"]
+E   AssertionError: assert ['api', 'kafk...ic', 'worker'] == ['api', 'restic', 'worker']
+E     
+E     At index 1 diff: 'kafka' != 'restic'
+E     Left contains 3 more items, first extra item: 'ollama-edge'
+E     Use -v to get more diff
+=============================== warnings summary ===============================
+tests/unit/test_eval_gate.py::test_the_suite_scores_what_the_baseline_says
+  /home/ubuntu/.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:1480: UserWarning: Item 'summary' on TypedDict class 'ChatCompletionReasoningItem' is using the `ReadOnly` qualifier. Pydantic will not protect items from any mutation on dictionary instances.
+    warnings.warn(
+
+tests/unit/test_search_route.py::test_search_request_defaults
+  /home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_search_route.py:14: DeprecationWarning: deprecated
+    assert req.rerank is True
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_release_manifest.py::test_rejects_unpinned_and_platform_images
+FAILED tests/unit/test_release_manifest.py::test_real_repository_inputs_are_all_covered
+FAILED tests/unit/test_supply_chain_controls.py::test_build_inventory_includes_restic_and_app_dockerfile
+3 failed, 1625 passed, 981 deselected, 2 warnings in 109.21s (0:01:49)

@@ -1,0 +1,28 @@
+# One isolated local POC stack per Compose project (`ai-platform-poc-<stack>`), used by `scripts/poc`.
+# It clears everything that would collide with the developer stack or a second POC stack:
+# fixed container names and the Postgres/Valkey host ports. Only the API is published, on loopback.
+# `scripts/poc up` sets POC_API_PORT (a free port, recorded in the stack marker) and POC_UID/POC_GID so the
+# read-only key mount is readable by the unprivileged process. It never reads the developer .env or .env.local.
+# POC_OLLAMA_BASE_URL (optional, set it the same on every `poc up` of a stack) points the API and the worker at a model
+# runtime outside the stack, e.g. http://host.docker.internal:11434 for Ollama on the host (it must listen beyond loopback).
+services:
+  postgres:
+    container_name: !reset null
+    ports: !reset []
+  valkey:
+    ports: !reset []
+  api:
+    ports: !override
+      - "127.0.0.1:${POC_API_PORT:?set by poc up}:8000"
+    user: "${POC_UID:-1000}:${POC_GID:-1000}"
+    env_file: !reset []
+    environment:
+      OLLAMA_BASE_URL: "${POC_OLLAMA_BASE_URL:-http://127.0.0.1:11434}"
+    extra_hosts: ["host.docker.internal:host-gateway"]
+  worker:
+    container_name: !reset null
+    user: "${POC_UID:-1000}:${POC_GID:-1000}"
+    env_file: !reset []
+    environment:
+      OLLAMA_BASE_URL: "${POC_OLLAMA_BASE_URL:-http://127.0.0.1:11434}"
+    extra_hosts: ["host.docker.internal:host-gateway"]

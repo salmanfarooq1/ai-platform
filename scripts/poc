@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""Local POC operator CLI. Run inside the project environment: `poetry run python scripts/poc up <stack>`."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.poc_lib.up import main  # noqa: E402
+
+raise SystemExit(main(sys.argv[1:]))

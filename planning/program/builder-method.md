@@ -5,7 +5,7 @@ How every sprint is built from 012 on. The owner set this on 2026-10-26.
 ## Roles
 - **Architect (Claude).** Owns the result. Builders do the implementation work, including diagnosing failing tests; the Architect fixes only the environment. Reviews and may revise any sprint pack, writes the test criteria before any code, writes the builder brief, launches builders, reviews every result, runs the live checks and writes the QA verdict.
 - **Builder (Codex CLI, model `gpt-6-luna`).** Builds one work package per run. It never commits, pushes or changes branches.
-- **Owner.** Approves each builder launch, answers open questions and runs the commits.
+- **Owner.** Gives one go-ahead per sprint, answers open questions and runs the commits.
 
 ## What Luna is
 The facts below come from public sources (2026-10-26) and our own runs. Unverified figures are marked as such.
@@ -22,6 +22,18 @@ What this means for the method:
 4. A builder's own report is not evidence. The Architect re-runs every check and reads every diff.
 5. When a task writes a format read by an external tool, the brief either quotes the tool's docs or tells the builder to run the tool.
 6. Each brief says that it wins over `AGENTS.md` and `CODEX.md` where they conflict.
+
+## Pre-start review
+Before any builder starts, the Architect:
+1. Checks that the pack serves the milestone goal and makes sense.
+2. Checks the pack against the real code.
+3. Runs a cheap web-research agent on the external facts.
+4. Lists blockers, overbuilt parts and stale content.
+5. Puts only owner-level decisions to the owner, each with its why.
+6. Has the pack rewritten.
+7. Reviews it a second time.
+
+Record the review in `pre-start-review.md` in the sprint folder.
 
 ## Readiness gate (before the first builder of a sprint)
 A sprint pack is ready only when all of these hold:
@@ -70,7 +82,7 @@ codex exec -C <worktree> -m gpt-6-luna -c model_reasoning_effort=high -c service
 8. **Limit.** At most two fix rounds per package. After that, the Architect splits the package smaller. Changing the model needs the owner.
 
 ## Environment rules
-- **One compose project.** Every container runs in the compose project `ai-platform`, from the repo's `docker-compose.yml`. Use no other project name and no ad-hoc `docker run` containers. Tests use throwaway databases inside that one Postgres.
+- **One compose project.** Every container runs in the compose project `ai-platform`, from the repo's `docker-compose.yml`. Use no other project name and no ad-hoc `docker run` containers unless a sprint pack records a deviation. Tests normally use throwaway databases inside that Postgres. Sprint 015 uses isolated `ai-platform-poc-<stack>` projects for its lifecycle drill, as recorded in its pre-start review.
 - **Valkey port.** On this machine, Windows Memurai holds port 6379. Set `VALKEY_HOST_PORT=16379` and point `REDIS_URL` and `TEST_REDIS_URL` at `redis://localhost:16379/0`.
 - **Postgres port.** Another project's Postgres holds 5432. Set `POSTGRES_HOST_PORT=15432` and point `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `TEST_DATABASE_ADMIN_URL` at port 15432.
 - **Node.** CI uses Node 24. The host default is Node 20, which breaks jsdom. Use `~/.local/share/node-v24.22.0-linux-x64/bin` first on `PATH`.
@@ -79,5 +91,5 @@ codex exec -C <worktree> -m gpt-6-luna -c model_reasoning_effort=high -c service
 - **Cleanup.** Leave no stray containers after a check.
 
 ## Owner gates
-- The owner approves each builder launch.
+- The owner gives one go-ahead per sprint; the Architect launches builders.
 - The owner runs every commit.

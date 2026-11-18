@@ -1,0 +1,42 @@
+### mutant: missing phase defaults to admission (old behaviour)
+......................................................                   [100%]
+54 passed in 3.35s
+### mutant: digest mismatch accepted as a deny (old behaviour)
+......................................................                   [100%]
+54 passed in 3.34s
+### mutant: any nonzero probe treated as absent (old behaviour)
+_________________ test_probe_failure_never_starts_or_destroys __________________
+tests/unit/refco/test_m0_lifecycle.py:539: in test_probe_failure_never_starts_or_destroys
+    assert code != 0 and any(m.startswith("FAIL up") and "probe failed" in m for m in markers(lines)), lines
+E   AssertionError: ['PASS up', 'PASS seed', 'PASS deny receipt saved', 'PASS baseline restored', 'PASS backup', 'PASS checked down', ...]
+E   assert (0 != 0)
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_probe_failure_never_starts_or_destroys
+1 failed, 53 passed in 3.73s
+### mutant: destroy without owner token
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_every_failed_step_is_fatal_prints_one_fail_and_still_tears_down[restore up]
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_every_failed_step_is_fatal_prints_one_fail_and_still_tears_down[second search not denied]
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_every_failed_step_is_fatal_prints_one_fail_and_still_tears_down[verify]
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_the_comparison_is_made_before_any_new_traffic
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_destroy_carries_the_same_owner_token_the_stack_was_created_with
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_a_stack_made_while_a_failed_create_only_up_was_running_is_only_torn_down_with_our_token
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_the_drill_reports_an_observed_zero_inference_count
+19 failed, 35 passed in 3.92s
+### mutant: plain up instead of create-only
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_every_failed_step_is_fatal_prints_one_fail_and_still_tears_down[second search not denied]
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_every_failed_step_is_fatal_prints_one_fail_and_still_tears_down[verify]
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_the_comparison_is_made_before_any_new_traffic
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_a_creator_racing_between_probe_and_up_makes_create_only_refuse_and_is_never_destroyed
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_destroy_carries_the_same_owner_token_the_stack_was_created_with
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_a_stack_made_while_a_failed_create_only_up_was_running_is_only_torn_down_with_our_token
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_the_drill_reports_an_observed_zero_inference_count
+20 failed, 34 passed in 3.95s
+### mutant: no inference check
+__ test_any_inference_request_seen_by_the_runtime_or_the_usage_summary_fails ___
+tests/unit/refco/test_m0_lifecycle.py:610: in test_any_inference_request_seen_by_the_runtime_or_the_usage_summary_fails
+    assert code != 0 and any(m.startswith("FAIL deny receipt saved") and "model was reached" in m for m in markers(lines)), lines
+E   AssertionError: ['PASS up', 'PASS seed', 'PASS deny receipt saved', 'PASS baseline restored', 'PASS backup', 'PASS checked down', ...]
+E   assert (0 != 0)
+=========================== short test summary info ============================
+FAILED tests/unit/refco/test_m0_lifecycle.py::test_any_inference_request_seen_by_the_runtime_or_the_usage_summary_fails
+1 failed, 53 passed in 3.56s

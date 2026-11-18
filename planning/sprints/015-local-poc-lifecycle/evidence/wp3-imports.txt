@@ -1,0 +1,12 @@
+Analyzed 238 files, 651 dependencies.
+-------------------------------------
+
+product packages do not import scripts KEPT
+ports imports no platform package KEPT
+core imports no module package KEPT
+evidence does not import gateway, api or workers KEPT
+gateway does not import evidence, api or workers KEPT
+agent and MCP code do not import evidence KEPT
+agent and MCP code use only the gateway package API KEPT
+
+Contracts: 7 kept, 0 broken.

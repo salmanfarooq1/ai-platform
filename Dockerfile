@@ -1,7 +1,7 @@
 # ============================================================================
 # Stage 1: Builder — install Poetry, resolve deps, build the virtualenv
 # ============================================================================
-FROM python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89 AS builder
+FROM python:3.11.18-slim-bookworm@sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39 AS builder
 
 # Poetry needs these env vars to behave correctly in CI/Docker:
 #   POETRY_NO_INTERACTION: never prompt for input
@@ -40,7 +40,7 @@ COPY . .
 # ============================================================================
 # Stage 2: Runtime — lean image with only the virtualenv and app code
 # ============================================================================
-FROM python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89 AS runtime
+FROM python:3.11.18-slim-bookworm@sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39 AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -66,6 +66,11 @@ COPY --from=builder /app/providers.register.toml providers.register.toml
 COPY --from=builder /app/alembic.ini alembic.ini
 COPY --from=builder /app/migrations migrations/
 COPY --from=builder /app/data data/
+
+# The object store directory is a mount point that any non-root runtime user may write: the local POC runs the
+# containers as the host user (read-only root, no capabilities). Content is addressed by SHA-256 and verified on read.
+# `/var/tmp/app` is the TMPDIR volume (ingest uploads spool there; /tmp is a small tmpfs), writable the same way.
+RUN mkdir -p -m 1777 /data/objects /var/tmp/app
 
 # Activate the virtualenv by prepending it to PATH.
 # This is the Docker equivalent of `source .venv/bin/activate`.

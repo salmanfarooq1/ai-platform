@@ -1,0 +1,12 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_all_is_the_default_and_gateway_is_mandatory _______________
+tests/unit/test_settings_modules.py:26: in test_all_is_the_default_and_gateway_is_mandatory
+    assert settings.deploy_shape == "single_tenant"
+E   AssertionError: assert 'multi_tenant' == 'single_tenant'
+E     
+E     - single_tenant
+E     + multi_tenant
+=========================== short test summary info ============================
+FAILED tests/unit/test_settings_modules.py::test_all_is_the_default_and_gateway_is_mandatory
+1 failed, 17 deselected in 8.45s

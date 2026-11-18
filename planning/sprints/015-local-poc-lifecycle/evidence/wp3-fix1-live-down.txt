@@ -1,0 +1,6 @@
+..                                                                       [100%]
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/integration/poc/test_down.py::test_down_never_touches_dev_project_volumes
+PASSED tests/integration/poc/test_down.py::test_ownership_and_lifecycle_races_refuse
+2 passed in 3.39s

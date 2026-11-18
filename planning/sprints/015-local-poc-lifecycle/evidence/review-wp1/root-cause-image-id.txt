@@ -1,0 +1,9 @@
+# root cause of live repeat-up failure
+driver-type: [["driver-type","io.containerd.snapshotter.v1"]]
+manifest local_app:
+{"build_inputs": ["python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89"], "content_id": "sha256:4f9acbe854ddc84685174240940648e6c3a5b673109a1a934010652bf4a56e8c", "services": {"api": {"image_id": "sha256:34925d85551697be915d4bb21c39ffe9d9cde1dc98d57e749019c5eb1dd81a39"}, "worker": {"image_id": "sha256:f8d6d837c2d27280bdc1db53419203756a1f9eeeadf393245b52c96f8ba86508"}}, "source": "local-build"}
+current api:
+Id=sha256:007274aa6e9357e24cfef2b57ee4c760437ca5b12bd10e2a364493a8a76bb243 Descriptor={"digest":"sha256:007274aa6e9357e24cfef2b57ee4c760437ca5b12bd10e2a364493a8a76bb243","mediaType":"application/vnd.oci.image.index.v1+json","size":856}
+current worker:
+Id=sha256:cdfa9fb9365acf0a50589062fc8ec7566e4f1604f3f06da23de371464c922e44
+content_id unchanged (layers identical); image_id = OCI index digest under containerd store, changes on every cached rebuild (provenance attestation)

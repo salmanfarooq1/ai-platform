@@ -1,0 +1,74 @@
+FFF............FFFF..F..FFFFFFFFFFF...FF                                 [100%]
+=================================== FAILURES ===================================
+E   scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/up.py:151: scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+E   scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/up.py:151: scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+E   scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/up.py:151: scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+E   scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/up.py:151: scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+E   scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/up.py:151: scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+E   scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/up.py:151: scripts.poc_lib.up.PocError: release manifest refused: ai-platform-poc-demo-api: cannot read image layers
+E   AssertionError: Regex pattern did not match.
+      Expected regex: 'index'
+      Actual message: 'release manifest refused: ai-platform-poc-demo-api: cannot read image layers'
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_poc_up.py:213: AssertionError: Regex pattern did not match.
+E   scripts.release.build_manifest.ManifestError: local app image changed since the manifest was written
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:178: scripts.release.build_manifest.ManifestError: local app image changed since the manifest was written
+E   scripts.release.build_manifest.ManifestError: x: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:190: scripts.release.build_manifest.ManifestError: x: cannot read image layers
+E   scripts.release.build_manifest.ManifestError: x: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:190: scripts.release.build_manifest.ManifestError: x: cannot read image layers
+E   scripts.release.build_manifest.ManifestError: x: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:190: scripts.release.build_manifest.ManifestError: x: cannot read image layers
+E   scripts.release.build_manifest.ManifestError: x: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:190: scripts.release.build_manifest.ManifestError: x: cannot read image layers
+E   scripts.release.build_manifest.ManifestError: x: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:190: scripts.release.build_manifest.ManifestError: x: cannot read image layers
+E   scripts.release.build_manifest.ManifestError: x: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:190: scripts.release.build_manifest.ManifestError: x: cannot read image layers
+E   scripts.release.build_manifest.ManifestError: x: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:190: scripts.release.build_manifest.ManifestError: x: cannot read image layers
+E   scripts.release.build_manifest.ManifestError: x: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:190: scripts.release.build_manifest.ManifestError: x: cannot read image layers
+E   scripts.release.build_manifest.ManifestError: x: cannot read image layers
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/release/build_manifest.py:190: scripts.release.build_manifest.ManifestError: x: cannot read image layers
+E   TypeError: inspect_local_image() got an unexpected keyword argument 'platform'
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_release_manifest.py:281: TypeError: inspect_local_image() got an unexpected keyword argument 'platform'
+E   AssertionError: assert ['objects:/data/objects'] == ['objects:/da.../var/tmp/app']
+      
+      Right contains one more item: 'app_tmp:/var/tmp/app'
+      Use -v to get more diff
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_poc_compose.py:73: AssertionError: assert ['objects:/data/objects'] == ['objects:/da.../var/tmp/app']
+E   KeyError: 'TMPDIR'
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_poc_compose.py:142: KeyError: 'TMPDIR'
+E   AssertionError: password must not be a psql argument
+    assert not True
+     +  where True = any(<generator object test_bootstrap_keeps_the_password_out_of_argv.<locals>.<genexpr> at 0x7aacfd83bc60>)
+/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/tests/unit/test_poc_compose.py:155: AssertionError: password must not be a psql argument
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc_up.py::test_up_orders_steps_with_argument_arrays
+FAILED tests/unit/test_poc_up.py::test_up_isolates_environment_and_never_puts_secrets_in_argv
+FAILED tests/unit/test_poc_up.py::test_repeat_up_is_idempotent_and_keeps_state
+FAILED tests/unit/test_poc_up.py::test_up_refuses_remote_docker_and_foreign_marker
+FAILED tests/unit/test_poc_up.py::test_up_refuses_stale_release_manifest_and_unhealthy_stack
+FAILED tests/unit/test_poc_up.py::test_repeat_up_accepts_a_rebuild_with_new_local_ids_but_the_same_content
+FAILED tests/unit/test_poc_up.py::test_unavailable_index_proof_refuses_first_up
+FAILED tests/unit/test_release_manifest.py::test_manifest_binds_local_build_and_indexes
+FAILED tests/unit/test_release_manifest.py::test_content_id_ignores_the_local_store_id_and_compose_labels
+FAILED tests/unit/test_release_manifest.py::test_content_id_changes_with_runtime_config[Entrypoint-value0]
+FAILED tests/unit/test_release_manifest.py::test_content_id_changes_with_runtime_config[Cmd-value1]
+FAILED tests/unit/test_release_manifest.py::test_content_id_changes_with_runtime_config[Env-value2]
+FAILED tests/unit/test_release_manifest.py::test_content_id_changes_with_runtime_config[User-0]
+FAILED tests/unit/test_release_manifest.py::test_content_id_changes_with_runtime_config[WorkingDir-/srv]
+FAILED tests/unit/test_release_manifest.py::test_content_id_changes_with_runtime_config[ExposedPorts-value5]
+FAILED tests/unit/test_release_manifest.py::test_content_id_changes_with_runtime_config[Labels-value6]
+FAILED tests/unit/test_release_manifest.py::test_content_id_changes_with_layers_and_their_order
+FAILED tests/unit/test_release_manifest.py::test_manifest_labels_the_local_id_and_records_a_resolvable_platform_digest
+FAILED tests/unit/test_poc_compose.py::test_default_services_and_hardening - ...
+FAILED tests/unit/test_poc_compose.py::test_temp_files_live_on_a_volume_not_on_the_small_tmpfs
+FAILED tests/unit/test_poc_compose.py::test_bootstrap_keeps_the_password_out_of_argv
+21 failed, 19 passed in 5.58s

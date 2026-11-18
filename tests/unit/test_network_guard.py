@@ -77,12 +77,22 @@ async def test_fake_embeddings_records_calls_through_the_port():
     assert (resp.model, resp.dim) == ("m", 768)
 
 
-async def test_fake_llm_answers_from_context_and_records_calls():
+async def _governed_generation(llm, query, chunks):
     from api.services.llm import generate_with_citations
+    from api.services.model_calls import ModelCaller
+    from core.settings import get_settings
+    from tests.fakes import FakeModelLimitStore, make_fake_catalog
+    from tests.gateway_helpers import make_ctx
 
+    settings = get_settings()
+    caller = ModelCaller(make_fake_catalog(settings), llm, FakeModelLimitStore(), settings=settings)
+    return await generate_with_citations(llm, query, chunks, caller=caller, ctx=make_ctx())
+
+
+async def test_fake_llm_answers_from_context_and_records_calls():
     fake = FakeLLM()
     chunks = [{"document_id": "d1", "source_filename": "a.md", "text": "Alpha beta gamma.", "score": 0.5}]
-    answer, usage = await generate_with_citations(fake, "what is alpha?", chunks)
+    answer, usage = await _governed_generation(fake, "what is alpha?", chunks)
     assert answer.answer.startswith("According to a.md: Alpha beta gamma.")
     assert [c.document_id for c in answer.citations] == ["d1"]
     assert fake.kinds == ["synthesis"]
@@ -107,8 +117,6 @@ async def test_patching_litellm_itself_replaces_the_guard_and_the_adapter_uses_t
     fake = FakeLLM()
     monkeypatch.setattr(litellm, "acompletion", fake.acompletion)  # litellm itself, not a port fake
     chunks = [{"document_id": "d1", "source_filename": "a.md", "text": "Alpha beta.", "score": 0.5}]
-    from api.services.llm import generate_with_citations
-
-    answer, _ = await generate_with_citations(LitellmLLM({}), "what is alpha?", chunks)
+    answer, _ = await _governed_generation(LitellmLLM({}), "what is alpha?", chunks)
     assert answer.answer.startswith("According to a.md: Alpha beta.")
     assert fake.kinds == ["synthesis"]  # the call went through litellm.acompletion

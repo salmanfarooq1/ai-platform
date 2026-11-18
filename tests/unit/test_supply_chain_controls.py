@@ -320,10 +320,10 @@ def test_unpinned_ui_dockerfile_is_rejected(tmp_path):
     assert "ui/Dockerfile.ui:1: expected a tag and complete sha256 digest" in result.stdout
 
 
-def test_build_inventory_keeps_only_worker_and_app_dockerfile():
+def test_build_inventory_includes_restic_and_app_dockerfile():
     from scripts.supply_chain.check_pins import built_services, dockerfile_references
 
-    assert built_services(ROOT) == ["worker"]
+    assert built_services(ROOT) == ["api", "kafka", "kafka-topics", "ollama-edge", "restic", "worker"]
     app_images = [image for location, image in dockerfile_references(ROOT, ROOT / "Dockerfile")
                   if location.startswith("Dockerfile:")]
     assert len(app_images) == 2

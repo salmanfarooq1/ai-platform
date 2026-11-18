@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from uuid import UUID
 
-from core.database.jobs import JobRow
+from core.database.jobs import JobRow, bounded_defer_delay
 from core.database.tenant import DbPool
 from core.settings import Settings
 from gateway import GatewayRuntime
@@ -20,6 +20,19 @@ class PermanentJobError(Exception):
     def __init__(self, code: str, detail: str | None = None) -> None:
         super().__init__(code if detail is None else f"{code}: {detail}")
         self.code = code
+        self.detail = detail
+
+
+class DeferJob(Exception):
+    """Not now, and not a failure: run the job again after `delay_seconds`. The queue puts the job back as `queued` for
+    that later time WITHOUT counting the attempt, so a job that must wait for something outside itself (a backup holding
+    a lock) is never used up by waiting. `code` and `detail` are stored as the job's last note. The delay must be a
+    finite number (else `ValueError`) and is raised to at least one second; each deferral is counted on the job."""
+
+    def __init__(self, code: str, delay_seconds: float, detail: str | None = None) -> None:
+        super().__init__(code if detail is None else f"{code}: {detail}")
+        self.code = code
+        self.delay_seconds = bounded_defer_delay(delay_seconds)
         self.detail = detail
 
 

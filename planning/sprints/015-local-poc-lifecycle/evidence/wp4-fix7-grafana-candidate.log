@@ -1,0 +1,72 @@
+=== grafana/grafana:13.3.1-distroless-slim ===
+13.3.1-distroless-slim: Pulling from grafana/grafana
+08d5687b2bde: Pulling fs layer
+d557676654e5: Pulling fs layer
+b84bc69f1cbd: Pulling fs layer
+d82bc7a76a83: Pulling fs layer
+68e4cd60e60f: Pulling fs layer
+b191399e0c4e: Pulling fs layer
+0783a66ae749: Pulling fs layer
+451a64956ffd: Pulling fs layer
+efae86a3fb38: Pulling fs layer
+411e1c946a02: Pulling fs layer
+9d2753d762cc: Pulling fs layer
+0dab866abc12: Pulling fs layer
+0f8b424aa0b9: Pulling fs layer
+b58707700d0f: Pulling fs layer
+0917767a310f: Pulling fs layer
+1da2299393b8: Pulling fs layer
+36fda1e4ce58: Pulling fs layer
+e4a344b72a7b: Pulling fs layer
+46ec47567198: Pulling fs layer
+bca600acc642: Pulling fs layer
+47dc6da13945: Pulling fs layer
+0ff21017e05a: Pulling fs layer
+f6eb86693289: Pulling fs layer
+2e51ef383507: Pulling fs layer
+5b3013706a46: Pulling fs layer
+9d2753d762cc: Already exists
+d557676654e5: Already exists
+68e4cd60e60f: Already exists
+d82bc7a76a83: Already exists
+0783a66ae749: Already exists
+411e1c946a02: Already exists
+efae86a3fb38: Already exists
+5b3013706a46: Already exists
+b84bc69f1cbd: Already exists
+0f8b424aa0b9: Already exists
+451a64956ffd: Download complete
+0917767a310f: Download complete
+0dab866abc12: Download complete
+b191399e0c4e: Download complete
+08d5687b2bde: Download complete
+b58707700d0f: Download complete
+08d5687b2bde: Pull complete
+0f8b424aa0b9: Pull complete
+451a64956ffd: Pull complete
+9d2753d762cc: Pull complete
+d557676654e5: Pull complete
+68e4cd60e60f: Pull complete
+d82bc7a76a83: Pull complete
+0783a66ae749: Pull complete
+efae86a3fb38: Pull complete
+411e1c946a02: Pull complete
+0dab866abc12: Pull complete
+b58707700d0f: Pull complete
+0917767a310f: Pull complete
+46ec47567198: Download complete
+36fda1e4ce58: Download complete
+e4a344b72a7b: Download complete
+1da2299393b8: Download complete
+36fda1e4ce58: Pull complete
+e4a344b72a7b: Pull complete
+1da2299393b8: Pull complete
+46ec47567198: Pull complete
+47dc6da13945: Download complete
+0ff21017e05a: Download complete
+bca600acc642: Download complete
+bca600acc642: Pull complete
+47dc6da13945: Pull complete
+0ff21017e05a: Pull complete
+2e51ef383507: Download complete
+Docker pull interrupted after extended stall; candidate was not scanned.

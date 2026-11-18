@@ -7,6 +7,9 @@ COPY . .
 RUN npm run build
 
 FROM nginx:1.30.2-alpine@sha256:5f979dcfed4ce6461873f087e8c980d6e29b084b9e8776d9704a7e989b5f4898
+# Patch OS packages until upstream rebuilds the pinned base; remove this line then.
+# See docs/deployment.md "image patch layer".
+RUN apk upgrade --no-cache
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80

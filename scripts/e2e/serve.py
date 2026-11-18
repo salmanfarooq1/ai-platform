@@ -279,12 +279,6 @@ def main() -> int:
         harness.clean_redis()
 
     asyncio.run(ingest_and_close_seed_key(owner_dsn, seeded))
-    if args.reference_company:
-        from core.identity.admin import admin_connection
-        from gateway.admin import set_policy
-
-        with admin_connection(owner_dsn) as conn:
-            set_policy(conn, TENANT_SLUG, {**POLICY, "allowed_models": []}, "showcase-m0")
     from core.settings import get_settings
 
     sandbox_runs = asyncio.run(seed_sandbox_runs(owner_dsn, seeded)) if "agents" in get_settings().enabled_module_names else {}
@@ -294,7 +288,7 @@ def main() -> int:
     args.state_dir.mkdir(parents=True, exist_ok=True)
     state = {
         "api_key": seeded["api_key"], "writer_key": seeded["writer_key"], "principal_id": seeded["principal_id"], "tenant": TENANT_SLUG,
-        "allowed_kb": ALLOWED_KB, "denied_kb": DENIED_KB, "preview": args.preview,
+        "allowed_kb": ALLOWED_KB, "denied_kb": DENIED_KB, "preview": args.preview, "owner_dsn": owner_dsn,
         "base_url": f"http://{args.host}:{args.port}",
         "sandbox_runs": sandbox_runs,
     }

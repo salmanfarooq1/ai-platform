@@ -1,0 +1,128 @@
+ Image gap-wp1-build-worker Building 
+ Image gap-wp1-build-api Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.05kB done
+#1 DONE 0.0s
+
+#2 [worker internal] load build definition from Dockerfile
+#2 transferring dockerfile: 4.60kB 0.0s done
+#2 DONE 0.0s
+
+#3 [worker internal] load metadata for docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#3 DONE 0.2s
+
+#4 [worker internal] load .dockerignore
+#4 transferring context: 296B done
+#4 DONE 0.0s
+
+#5 [worker builder 1/6] FROM docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+#5 resolve docker.io/library/python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89 0.0s done
+#5 DONE 0.0s
+
+#6 [worker internal] load build context
+#6 transferring context: 96.74MB 1.1s done
+#6 DONE 1.1s
+
+#7 [api builder 2/6] RUN pip install --no-cache-dir pipx &&     pipx install poetry==2.3.3
+#7 CACHED
+
+#8 [api builder 3/6] WORKDIR /app
+#8 CACHED
+
+#9 [api builder 4/6] COPY pyproject.toml poetry.lock ./
+#9 CACHED
+
+#10 [api builder 5/6] RUN --mount=type=cache,id=gap-poetry,target=/root/.cache/pypoetry     poetry install --only main --no-root
+#10 CACHED
+
+#11 [api builder 6/6] COPY . .
+#11 DONE 1.1s
+
+#12 [api runtime  2/18] WORKDIR /app
+#12 CACHED
+
+#13 [api runtime  3/18] COPY --from=builder /app/.venv .venv
+#13 CACHED
+
+#14 [api runtime  4/18] COPY --from=builder /app/api api/
+#14 DONE 0.1s
+
+#12 [worker runtime  2/18] WORKDIR /app
+#12 CACHED
+
+#13 [worker runtime  3/18] COPY --from=builder /app/.venv .venv
+#13 CACHED
+
+#15 [worker runtime  5/18] COPY --from=builder /app/core core/
+#15 DONE 0.1s
+
+#16 [api runtime  6/18] COPY --from=builder /app/gateway gateway/
+#16 DONE 0.1s
+
+#17 [api runtime  7/18] COPY --from=builder /app/evidence evidence/
+#17 DONE 0.1s
+
+#18 [api runtime  8/18] COPY --from=builder /app/ports ports/
+#18 DONE 0.1s
+
+#19 [api runtime  9/18] COPY --from=builder /app/adapters adapters/
+#19 DONE 0.1s
+
+#20 [worker runtime 10/18] COPY --from=builder /app/workers workers/
+#20 DONE 0.1s
+
+#21 [api runtime 11/18] COPY --from=builder /app/sandbox_agent sandbox_agent/
+#21 DONE 0.1s
+
+#22 [api runtime 12/18] COPY --from=builder /app/config.py config.py
+#22 DONE 0.1s
+
+#23 [worker runtime 13/18] COPY --from=builder /app/models.lock models.lock
+#23 DONE 0.1s
+
+#24 [api runtime 14/18] COPY --from=builder /app/providers.register.toml providers.register.toml
+#24 DONE 0.0s
+
+#25 [api runtime 15/18] COPY --from=builder /app/alembic.ini alembic.ini
+#25 DONE 0.1s
+
+#26 [api runtime 16/18] COPY --from=builder /app/migrations migrations/
+#26 DONE 0.1s
+
+#27 [api runtime 17/18] COPY --from=builder /app/data data/
+#27 DONE 0.1s
+
+#28 [worker runtime 18/18] RUN mkdir -p -m 1777 /data/objects
+#28 DONE 0.5s
+
+#29 [worker] exporting to image
+#29 exporting layers
+#29 exporting layers 0.8s done
+#29 exporting manifest sha256:f4b17784b7f16b9669b22fb8cb44a96ac71f9bc6d1f6156814907f724bc92180 0.0s done
+#29 exporting config sha256:d4d73aed63a98655cfce2a0a385a8e693f455747e6b5eff01d70c04a27b6a33a 0.0s done
+#29 exporting attestation manifest sha256:d452375877c7dea0a5239dd7a8b79808bc0259d81acca7a5cca6d21d9397ef46 0.0s done
+#29 exporting manifest list sha256:568ec87b4f5df112ced7c127da0ac7d0f1d97660f193c8f65bb57aaefe77b5fc
+#29 exporting manifest list sha256:568ec87b4f5df112ced7c127da0ac7d0f1d97660f193c8f65bb57aaefe77b5fc 0.0s done
+#29 naming to docker.io/library/gap-wp1-build-worker:latest done
+#29 unpacking to docker.io/library/gap-wp1-build-worker:latest
+#29 unpacking to docker.io/library/gap-wp1-build-worker:latest 0.3s done
+#29 DONE 1.3s
+
+#30 [api] exporting to image
+#30 exporting layers 0.8s done
+#30 exporting manifest sha256:35a55691023f2d13267bca2d0c75dfb3a2f47405b8bcbe7788b0c58d6819c8f8 0.0s done
+#30 exporting config sha256:a37c2e024208fff9d5fd7700709d34ef26f6cfea7c83a5ce14df4c6567cfe5d0 0.0s done
+#30 exporting attestation manifest sha256:9cc3337520816228ae576e304a0e80d0b98bf176bc32f33bce385beada6d4bb4 0.0s done
+#30 exporting manifest list sha256:d77e0d76c19ae28919b9077751d91eeb5730855462c2fe2d16c034147c2fe852 0.0s done
+#30 naming to docker.io/library/gap-wp1-build-api:latest done
+#30 unpacking to docker.io/library/gap-wp1-build-api:latest 0.3s done
+#30 DONE 1.3s
+
+#31 [api] resolving provenance for metadata file
+#31 DONE 0.0s
+
+#32 [worker] resolving provenance for metadata file
+#32 DONE 0.0s
+ Image gap-wp1-build-api Built 
+ Image gap-wp1-build-worker Built 
+rc=0

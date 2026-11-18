@@ -220,3 +220,75 @@ These check the platform against real services that the test suite replaces with
 | An agent query answers `202` | The run takes longer than `AGENT_SYNC_WAIT_SECONDS`. Poll `/v1/agent/runs/{execution_id}` |
 | Search returns nothing after a model change | The old chunks are stale. Check `stale_vectors` and ingest again |
 | The UI signs in, but governance screens are empty | The key lacks `audit:read` |
+
+## Persistent local receipt keys
+
+Keep `.poc/<stack>/receipt-signing.key` and `restic-password` outside runtime
+volumes. The operator key helper creates these files once with mode 0600 inside
+0700 directories; unsafe files refuse reuse. A restore requires the original
+files. Removing runtime volumes must preserve the entire `.poc/<stack>/` directory.
+
+Set `RECEIPT_SIGNING_KEY_FILE` to the mounted file path in both API and worker.
+The key helper's Compose override binds that same host file read-only at
+`/run/secrets/receipt-signing.key` in both services and refuses a missing source.
+Only the path goes into Compose or the environment. Do not also configure
+`RECEIPT_SIGNING_KEY`. Stop and restart both processes after changing the file.
+
+Copy the private key and repository password separately to protected offline
+storage. Preserve mode 0600 and private parent directories. Never include either
+in the data snapshot, build context, logs or evidence. Protect the two offline
+copies independently; losing the repository password prevents reading the backup.
+Before recovery, derive the public identity from the recovered private file and
+compare its key id **and public bytes** with the saved public metadata.
+
+The data manifest may contain only `key_id` and base64 `public_key`. A different
+active key is accepted only if `RECEIPT_PREVIOUS_PUBLIC_KEYS` explicitly contains
+the exact previous public bytes and their derived id matches the manifest.
+A previous public key cannot replace a missing active private file. Keep trusted
+public keys with saved receipts so offline verification survives rotation.
+
+## Local POC stack: `poc up`
+`poetry run python scripts/poc up <stack>` starts one isolated stack: Postgres, Valkey, API and worker, and nothing
+else (optional profiles stay off, whatever `COMPOSE_PROFILES` says). The stack name is 3 to 31 characters (`a-z`, `0-9`,
+`-`, starting with a letter). Each stack is Compose project `ai-platform-poc-<stack>` with `docker/poc.override.yml`:
+no fixed container names, no database host ports, and only the API published, on `127.0.0.1` at the free port stored in
+`.poc/<stack>/marker.json`. It never touches the developer project `ai-platform` or its volumes.
+
+`up` builds the one app image used by the API and worker, writes `.poc/<stack>/release-manifest.json` (every external
+image proven to be a multi-arch index, the local build identified as `local-build`), creates the database and the
+`gap_app` role, migrates as the owner role, then starts the API and worker as `gap_app` with a read-only root, no
+capabilities and no privilege escalation. A repeat `up` changes nothing. The identity `up` compares is `content_id`: the
+ordered layer digests plus the runtime config that changes behaviour (Entrypoint, Cmd, Env, User, WorkingDir,
+ExposedPorts, Labels without the Compose-generated ones). The Docker store image ID is recorded as information only
+("local store id (not stable across rebuilds)"): under the containerd image store it changes on every rebuild. If the
+layers or config changed since the manifest was written, `up` refuses; run `up <stack> --refresh-release` after a
+deliberate change. `up` needs the registry once, to
+prove the image indexes. Docker must be the local engine (no `DOCKER_HOST` over TCP). Compose selection (`COMPOSE_*`) and optional profiles from
+your environment are ignored, but `APP_DB_PASSWORD` and `POSTGRES_PASSWORD` are not: they reach Compose interpolation
+(defaults `gap_app` and `postgres`). Set them the same on every `up` of a stack, because the database role keeps the
+password it was created with. The stack never reads `.env` or `.env.local`.
+
+### Backup, checked down, restore, destroy and the drill
+All commands are `poetry run python scripts/poc <command> <stack>`.
+
+| Command | What it does |
+|---|---|
+| `backup` | Online backup while the stack runs. Takes the shared backup lock, runs `pg_dump -Fc` inside the Postgres container, copies and hash-checks the referenced objects, writes its manifest (counts, chain heads, checkpoints, today's cost counters, public key id) and stores ONE restic snapshot. Prints `POC_RECOVERY_REF=<snapshot id>`. the `latest` pointer moves only after restic stored the snapshot; any failure publishes nothing. |
+| `down` | Checked teardown. Needs `POC_RECOVERY_REF=<the latest snapshot id>`. It stops the API and worker, then checks in order: marker, the reference is the latest backup, live row counts, chain heads, checkpoints, schema head and object list equal the manifest (else "data written after backup; run poc backup"), the backup is not older than `POC_BACKUP_MAX_AGE_SECONDS` (default 86400), then `restic check --read-data` and a scratch restore. Only then are the containers and the marker-listed volumes removed. Any refusal restarts the services and removes nothing. The receipt key, repository password, backups and marker are kept. |
+| `up` after `down` | Sees the marker, a published backup and no runtime volumes, so it restores before any writer starts: verifies the manifest, loads the dump into an empty database, copies the objects, compares counts, heads and checkpoints, re-applies same-UTC-day cost counters with `INCRBY`, then starts the API and worker. It prints `RESTORED ...` and what an empty Valkey lost (rate-limit windows, cache, sessions, token counters, breaker state, leases). Queued jobs, leases and the outbox are in Postgres and resume. |
+| `up <stack> --create-only` | The atomic "I am the creator" form of `up`. Under the lifecycle lock it refuses (exit 2) when any state of the stack exists (a `.poc/<stack>` folder or runtime volumes), and otherwise records `POC_OWNER_TOKEN` (32 to 64 lowercase hex characters, from the environment, never argv) in `.poc/<stack>/owner.token` before anything else. A plain `up` writes no token. |
+| `status [--json]` | Non-secret facts: services, the latest backup (id, age, counts, heads, checkpoints), the last restore report, a pending restore. Exit 3 means no `.poc/<stack>` folder exists at all; any other nonzero exit is a failed probe (remote Docker, unsafe folder, no marker), not proof of absence. |
+| `admin <stack> <command> ...` | The identity and policy CLI (`create-principal`, `create-key`, `set-policy <tenant> -` with the policy on stdin, ...) against the stack's own database, run in the app image. `--dsn` is refused. |
+| `destroy <stack> --confirm <stack>` | The explicit, total end: containers, runtime and scratch volumes, the two built images, then the whole `.poc/<stack>` folder including the key and every backup. Refuses a foreign volume or a symlinked folder, and anything while another lifecycle command holds the lock; it holds that lock until the folder is gone. With `POC_OWNER_TOKEN` set it removes only a stack whose `owner.token` matches (a stack made without `--create-only` is refused). Not reversible. |
+
+**Restore-pending marker.** `up` writes `.poc/<stack>/restore-pending.json` (snapshot id and manifest digest) before any new runtime volume exists and clears it only after the restored data verified, before the writers start. While it exists `up` never migrates an empty database: it resumes the restore from the same snapshot, after removing only this stack's partial volumes. `backup`, `down` and `admin` refuse while it exists, so `latest` can never move to a partial state. `status` shows it.
+
+**Lock behaviour.** One lifecycle command (`up`, `backup`, `down`, `destroy`) per stack at a time. `up` WAITS for the lock (it blocks, then decides on the state the holder left); `backup`, `down` and `destroy` REFUSE at once with "another lifecycle command ... is running" if it is held. The lock file is `.poc/.locks/<stack>.lock`, outside the stack folder, so `destroy` keeps the lock through every deletion and a waiting `up` never sees half-deleted secrets or backups. A backup also holds a Postgres advisory lock. The retention purge takes the same key shared, waits at most 30 s, and on a timeout is deferred, not failed: the job goes back to `queued` for later (at least 1 s, 60 s for purge), the attempt is not used, and `jobs.deferrals` counts it (visible on the job and in the worker log). A backup that loses its lock session before it publishes fails and moves nothing.
+
+**Compose API port.** A POC stack publishes only the API, on `127.0.0.1:<port>` from the stack marker. The developer project's `api` service also wants `127.0.0.1:8000`; run only one of them there, or set `API_HOST_PORT`.
+
+The backup profile builds restic 0.19.1 from the checksum-verified source in `docker/restic`. Compose builds the local image on its first run; subsequent backup and restore operations use the local image offline.
+
+**TMPDIR.** `api` and `worker` spool uploads to `TMPDIR=/var/tmp/app` (volume `app_tmp`, scratch only, removed by `destroy`). On the host, restic restore and the scratch directories live under `.poc/<stack>/`; make sure the disk holding the repository has room for one dump plus the objects, and set `TMPDIR` for `poc` itself only if `/tmp` is small.
+
+**The drill.** `bash scripts/verify/poc-drill.sh <stack>` (also the last step of `scripts/showcase/m0.sh [stack]`, default `m0drill`) runs the whole journey on a fixture stack it creates itself: a status probe (exit 3 = absent; any other nonzero exit aborts, a stack that exists is never adopted), `up --create-only` with a fresh owner token, seed an operator and an auditor, publish a policy that omits the chat alias, and make one governed search that must be denied with exactly `model_not_allowed` (any other reason, including `model_digest_mismatch`, fails). The stack is pointed (`POC_OLLAMA_BASE_URL`, set on every `up`) at a metadata-only runtime the drill starts on the host: it lists the reviewed digests from `models.lock`, so the alias resolves, and it refuses and counts every inference request. The drill requires the signed receipt to carry the alias and the `admission` phase (a missing phase fails), and an observed zero: no inference request at that runtime and `totals.requests` 0 in `/v1/usage/summary`. Then it saves the receipt and public keys, restores the baseline policy, backs up, checked down, restores, compares the restored counts and chain heads with the backup before any new traffic, verifies the saved receipt offline, makes a new governed deny with the same checks, and destroys the fixture with the owner token (a stack it did not create is refused). It uses only `poc` commands, the public API and `scripts/verify/receipt.py`. It prints one `PASS <step>` or `FAIL <step>` line per step and never SKIP. To point your own stack at Ollama on the host, set `POC_OLLAMA_BASE_URL=http://host.docker.internal:11434` on `up` (Ollama must listen beyond loopback). `up` validates it (http or https, a host, no credentials) and stores it, not secret, in `.poc/<stack>/ollama-base-url` (0600), so a later `up` without it and a `down` that restarts the writers after a refusal use the same URL; a value in the environment still wins, and the next `up` stores it.

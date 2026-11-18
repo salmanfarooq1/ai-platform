@@ -1,0 +1,44 @@
+I001 [*] Import block is un-sorted or un-formatted
+   --> tests/integration/refco/test_m0.py:262:5
+    |
+261 |   def test_reference_company_seed_allows_models():
+262 | /     from scripts.e2e import serve
+263 | |     import inspect
+    | |__________________^
+264 |       assert serve.POLICY["allowed_models"] == "*"
+265 |       assert '"allowed_models": []' not in inspect.getsource(serve.main)
+    |
+help: Organize imports
+    |
+261 | def test_reference_company_seed_allows_models():
+    -     from scripts.e2e import serve
+262 |     import inspect
+263 +
+264 +     from scripts.e2e import serve
+265 |     assert serve.POLICY["allowed_models"] == "*"
+    |
+
+I001 [*] Import block is un-sorted or un-formatted
+   --> tests/integration/refco/test_m0.py:269:5
+    |
+268 |   def test_journey_denies_only_selected_alias(database_url, tenant_a):
+269 | /     from core.identity.admin import admin_connection
+270 | |     from gateway.admin import set_policy, show_policy
+271 | |     from scripts.showcase.m0 import publish_journey_policy
+272 | |     from core.models_files import load_models_lock
+    | |__________________________________________________^
+273 |
+274 |       aliases = [entry.alias for entry in load_models_lock()]
+    |
+help: Organize imports
+    |
+269 |     from core.identity.admin import admin_connection
+270 +     from core.models_files import load_models_lock
+271 |     from gateway.admin import set_policy, show_policy
+272 |     from scripts.showcase.m0 import publish_journey_policy
+    -     from core.models_files import load_models_lock
+273 |
+    |
+
+Found 2 errors.
+[*] 2 fixable with the `--fix` option.

@@ -21,8 +21,9 @@ def test_the_five_editions_resolve_to_the_reviewed_module_sets(edition):
     assert all(info["enabled"] == (info["name"] in enabled) for info in module_metadata(enabled))
 
 
-def test_all_is_the_default_and_gateway_is_mandatory():
-    settings = Settings()
+def test_all_is_the_default_and_gateway_is_mandatory(monkeypatch):
+    monkeypatch.delenv("DEPLOY_SHAPE", raising=False)
+    settings = Settings(_env_file=None)
     assert settings.deploy_shape == "single_tenant"
     assert settings.enabled_module_names == parse_enabled_modules("all")
     assert parse_enabled_modules("agents,gateway") == frozenset({"agents", "gateway"})

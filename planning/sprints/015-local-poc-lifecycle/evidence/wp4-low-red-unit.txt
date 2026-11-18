@@ -1,0 +1,40 @@
+E   assert False
+E    +  where False = all(<generator object test_first_up_creates_secrets_inside_the_lifecycle_lock.<locals>.<genexpr> at 0x73fed9927ca0>)
+_____ test_first_up_creates_only_a_private_folder_before_it_takes_the_lock _____
+tests/unit/test_poc_up.py:289: in test_first_up_creates_only_a_private_folder_before_it_takes_the_lock
+    assert names[0] == [] and names[1] == 0o700  # an empty private folder when the lock is first opened
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert (['receipt-sig...tic-password'] == []
+E     
+E     Left contains 2 more items, first extra item: 'receipt-signing.key'
+E     Use -v to get more diff)
+________ test_backup_proves_the_lock_by_pid_and_key_before_it_finishes _________
+tests/unit/test_poc_backup.py:265: in test_backup_proves_the_lock_by_pid_and_key_before_it_finishes
+    assert "mode = 'ExclusiveLock'" in sql  # a shared (purge) hold of the same key is not the backup's exclusive lock
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   assert "mode = 'ExclusiveLock'" in "SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND granted AND objsubid = 1 AND pid = 4242 AND classid = 5263171 AND objid = 1111573323"
+=========================== short test summary info ============================
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_rejects_a_non_finite_or_non_numeric_delay[nan]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_rejects_a_non_finite_or_non_numeric_delay[inf]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_rejects_a_non_finite_or_non_numeric_delay[-inf]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_rejects_a_non_finite_or_non_numeric_delay[soon]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_rejects_a_non_finite_or_non_numeric_delay[None]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_clamps_the_delay_to_at_least_one_second[0-1.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_clamps_the_delay_to_at_least_one_second[0.0-1.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_clamps_the_delay_to_at_least_one_second[-5-1.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_clamps_the_delay_to_at_least_one_second[0.05-1.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_clamps_the_delay_to_at_least_one_second[1-1.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_defer_job_clamps_the_delay_to_at_least_one_second[60-60.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_queue_defer_clamps_and_counts_the_deferral[0.0-1.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_queue_defer_clamps_and_counts_the_deferral[-3.0-1.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_queue_defer_clamps_and_counts_the_deferral[0.2-1.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_queue_defer_clamps_and_counts_the_deferral[45.0-45.0]
+FAILED tests/unit/test_purge_lock_wait.py::test_queue_defer_refuses_a_non_finite_delay_before_any_statement[nan]
+FAILED tests/unit/test_purge_lock_wait.py::test_queue_defer_refuses_a_non_finite_delay_before_any_statement[inf]
+FAILED tests/unit/test_purge_lock_wait.py::test_job_row_carries_the_deferral_count_with_zero_as_default
+FAILED tests/unit/test_purge_lock_wait.py::test_worker_logs_the_deferral_count
+FAILED tests/unit/test_jobs_units.py::test_the_job_read_model_exposes_the_deferral_count
+FAILED tests/unit/test_poc_up.py::test_first_up_creates_secrets_inside_the_lifecycle_lock
+FAILED tests/unit/test_poc_up.py::test_first_up_creates_only_a_private_folder_before_it_takes_the_lock
+FAILED tests/unit/test_poc_backup.py::test_backup_proves_the_lock_by_pid_and_key_before_it_finishes
+23 failed, 49 passed in 4.93s

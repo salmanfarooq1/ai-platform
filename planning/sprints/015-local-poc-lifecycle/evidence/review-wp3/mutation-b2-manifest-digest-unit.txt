@@ -1,0 +1,46 @@
+== mutation b2 (unit tier): disable every manifest-digest check: catalog.py:88, verify.py:185, restore.py:142
+diff --git a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/catalog.py.orig b/scripts/poc_backup/catalog.py
+index 6f3605d..f650d4c 100644
+--- a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/catalog.py.orig
++++ b/scripts/poc_backup/catalog.py
+@@ -85,6 +85,6 @@ def latest_ref(context: StackContext) -> BackupRef | None:
+     if not rows or rows[0]["id"] != pointer["snapshot_id"]:
+         raise PocError("the latest backup changed: the repository has a different newest snapshot; run poc backup")
+     manifest, digest = read_manifest_from_snapshot(context, pointer["snapshot_id"])
+-    if digest != pointer["manifest_sha256"] or f"manifest-{digest}" not in rows[0].get("tags", []):
++    if False:  # MUTATION b2
+         raise PocError("the latest backup is incomplete or changed: its manifest does not match the published digest")
+     return ref_from(manifest, pointer["snapshot_id"], digest)
+diff --git a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/verify.py.orig b/scripts/poc_backup/verify.py
+index f3632f0..94da314 100644
+--- a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/verify.py.orig
++++ b/scripts/poc_backup/verify.py
+@@ -92,7 +92,7 @@ def verify_snapshot(context: StackContext, ref: BackupRef, *, before_scratch_res
+     try:
+         directory = restic.restore(ref)
+         raw = (directory / "manifest.json").read_bytes()
+-        if hashlib.sha256(raw).hexdigest() != ref.manifest_sha256:
++        if False:  # MUTATION b2
+             raise PocError("the restored manifest does not match the published digest")
+         verify_restore_set(context, directory, json.loads(raw))
+     finally:
+diff --git a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/restore.py.orig b/scripts/poc_backup/restore.py
+index 9a2024b..7d67346 100644
+--- a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/restore.py.orig
++++ b/scripts/poc_backup/restore.py
+@@ -110,7 +110,7 @@ def restore_latest(context: StackContext, *, clock: Callable[[], datetime]) -> d
+         directory = restic.restore(ref)
+         raw = (directory / "manifest.json").read_bytes()
+         manifest = json.loads(raw)
+-        if hashlib.sha256(raw).hexdigest() != ref.manifest_sha256:
++        if False:  # MUTATION b2
+             raise PocError("the restored manifest does not match the published digest")
+         verify.verify_restore_set(context, directory, manifest, check_database=False)
+         if schema_head_of_release(context) != manifest["schema_head"]:
+    assert req.rerank is True
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1361 passed, 2 warnings in 80.70s (0:01:20)
+RESTORED-IDENTICAL catalog.py
+RESTORED-IDENTICAL verify.py
+RESTORED-IDENTICAL restore.py

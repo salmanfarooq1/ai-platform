@@ -1,0 +1,5 @@
+eval gate, suite fixed-12, tolerance 0.02
+  retrieval_hit: 0.8333 (baseline 0.8333)
+  answer_fact: 0.8333 (baseline 0.8333)
+  citation_ok: 0.8333 (baseline 0.8333)
+PASSED

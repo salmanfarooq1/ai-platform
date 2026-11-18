@@ -14,6 +14,7 @@ ONE_SHOT_SERVICES = {
     "ollama-lock-check": "verifies model digests before exposing the endpoint",
     "kafka-topics": "creates Kafka topics",
     "seaweedfs-init": "initializes the object store",
+    "restic": "a one-off `run --rm` tool of the `backup` profile (Sprint 015): runs to completion per command, never restarts",
 }
 
 # Long-running services without a probe. Each needs a reason, and no service may wait on it.
@@ -32,7 +33,7 @@ def test_compose_profiles_render_with_loopback_ports(profile):
         for port in service.get("ports", []):
             assert port.get("host_ip") == "127.0.0.1"
     if not profile:
-        assert set(config["services"]) == {"postgres", "valkey", "worker"}
+        assert set(config["services"]) == {"postgres", "valkey", "api", "worker"}
 
 
 def test_images_health_dependencies_and_preserved_old_volumes():
@@ -86,8 +87,9 @@ def test_ollama_serves_read_only_store():
     assert compose["networks"]["models_internal"]["internal"] is True
 
     edge = compose["services"]["ollama-edge"]
-    assert edge["image"] == "alpine/socat:1.8.0.3@sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e"
-    assert re.fullmatch(digest, edge["image"])
+    assert edge["build"] == {"context": "docker/socat"}
+    assert "image" not in edge
+    assert (ROOT / "docker/socat/Dockerfile").read_text().splitlines()[0] == "FROM alpine/socat:1.8.0.3@sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e"
     assert edge["command"] == ["TCP-LISTEN:11434,fork,reuseaddr", "TCP:ollama:11434"]
     assert edge["ports"] == ["127.0.0.1:11434:11434"]
     assert edge["networks"] == ["default", "models_internal"]
@@ -97,7 +99,7 @@ def test_ollama_serves_read_only_store():
     assert edge["cap_drop"] == ["ALL"] and edge["security_opt"] == ["no-new-privileges:true"]
 
     lock_check = compose["services"]["ollama-lock-check"]
-    assert lock_check["image"] == "python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89"
+    assert lock_check["image"] == "python:3.11.18-slim-bookworm@sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39"
     assert re.fullmatch(digest, lock_check["image"])
     assert lock_check["command"] == ["/scripts/check_lock.sh"]
     assert lock_check["environment"] == {"MODEL_LOCK": "/app/models.lock", "OLLAMA_URL": "http://ollama:11434"}
@@ -123,8 +125,6 @@ def test_runtime_image_copies_evidence():
 def test_optional_security_services_use_digest_pinned_upstream_images():
     compose = yaml.safe_load((ROOT / "docker-compose.yml").read_text())
     expected = {
-        "kafka": "apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837",
-        "kafka-topics": "apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837",
         "ollama": "ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b",
         "ollama-init": "ollama/ollama:0.40.7@sha256:2e6cc92ffa43b4b1a2e70e315407e00ac97ec125afc71277d73c7efe01c4f31b",
         "seaweedfs": "chrislusf/seaweedfs:4.47@sha256:ce9e796f1fe6f06968f4c04bdaf8f678dad9c8acdfef3d244133d71bfa6bf882",
@@ -134,6 +134,10 @@ def test_optional_security_services_use_digest_pinned_upstream_images():
         service = compose["services"][name]
         assert service["image"] == image
         assert "build" not in service
+    for name in ("kafka", "kafka-topics"):
+        assert compose["services"][name]["build"] == {"context": "docker/kafka"}
+        assert "image" not in compose["services"][name]
+    assert (ROOT / "docker/kafka/Dockerfile").read_text().splitlines()[0] == "FROM apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837"
     assert "./docker/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro" in compose["services"]["seaweedfs"]["volumes"]
 
 

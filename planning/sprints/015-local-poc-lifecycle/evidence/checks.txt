@@ -1,0 +1,27 @@
+Sprint 015 mode=0 source=9612ea3 (includes working tree)
+ruff             rc=0
+mypy             rc=0
+imports          rc=0
+ddl              rc=0
+docs             rc=0
+eval             rc=0
+pins             rc=0
+licences         rc=0
+image-scan       rc=1
+unit             rc=0
+all              rc=0
+skip-guard       rc=0
+unit-no-skips    rc=0
+new-live         rc=0
+new-no-skips     rc=0
+ui-tokens        rc=0
+ui-lint          rc=0
+ui-types         rc=0
+ui-unit          rc=0
+ui-build         rc=0
+ui-chunks        rc=0
+ui-copy          rc=0
+playwright       rc=0
+live-m0          rc=0
+drill-output     rc=0
+failures: 1

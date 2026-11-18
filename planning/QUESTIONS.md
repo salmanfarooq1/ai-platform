@@ -141,3 +141,22 @@ These supersede the historical open states above; final sprint acceptance remain
 The requested list_keys regression on a fresh gap_app connection fails because tenants itself has RLS (0002): _tenant_id cannot resolve the slug before a tenant UUID is set. Setting _as_tenant before reading keys fixes owner-role reads but cannot bootstrap a tenant slug under gap_app. A general operator tenant-ID lookup through a narrow SECURITY DEFINER function needs a forward-only migration, which Sprint 014 requirements list out of scope. Scope decision requested; do not weaken RLS or initialize the test with prior tenant context. Evidence: sprints/014-reference-company/evidence/review-six-integration.txt (8 passed, 2 failed). Other five findings and checks proceed.
 
 **Resolved (Architect, 2026-11-16):** no migration. `core/identity/admin.py` runs as the owner role by contract, so the app-role premise was wrong. The test now proves `list_keys` sets its own tenant context on a fresh owner connection. RLS unchanged.
+
+## Sprint 015: resolved lifecycle inputs
+- **S015-backup-age resolved:** use an overridable 86400-second default and compare live counts and chain heads before teardown.
+- **S015-ownership resolved:** isolated per-stack Compose projects and marker-listed, label-checked volumes protect developer data.
+
+## Sprint 015 WP0: manual real-provider eval
+- `scripts/eval/run_real.py` previously invoked the legacy generation path without a governed caller. The offline eval gate now uses a governed fake caller. The manual real-provider run needs a real authenticated context, decision sink and model catalog before it can run; it currently fails closed at the required suite arguments. Its verification would spend money, so it remains outside WP0 pending an authorized design and funded run.
+
+## Sprint 015 WP4 fix4: pending verification
+- The live POC integration fixtures create and remove Docker resources, contrary to this round's read-only Docker restriction. The Architect must run the held-lock race and full live suite, plus the M0 journey and drill.
+- The image gate needs verified, patched images. The Python candidate registry scan timed out with a read-only Grype cache; no fixed restic release was confirmed. The existing exception policy forbids exceptions for default-profile images. The Architect must verify candidate digests and scan final artifacts before changing pins or approving any exception. See `sprints/015-local-poc-lifecycle/evidence/wp4-fix4-images.txt`.
+
+## Sprint 015 WP4 fix6
+- Resolved by Architect decision.
+
+## Sprint 015 WP4 fix7: image verification, DEFERRED to Sprint 016 (owner, 2026-11-19)
+- Grafana is resolved (13.3.1, digest-pinned, Grype clean). Ollama and SeaweedFS below move to Sprint 016 as its first work item; the gate is unchanged and no exception was added.
+- **Ollama:** CVE-2026-78663 / GO-2026-6612 affects `golang.org/x/net` and Go stdlib; CVE-2026-39834 and CVE-2026-39831 affect `golang.org/x/crypto`. Upstream 0.40.16 declares newer dependencies, but its image pull stalled, so its binary and final image scan are unverified. Retry the pull and Grype scan before pinning, or investigate an approved rebuild if the upstream artifact remains unavailable; do not add an exception.
+- **SeaweedFS:** The refreshed full gate also fails on the existing 4.47 image, including CVE-2026-111497 / GO-2026-6888 in Brotli and GO-2026-6612 in Go. Review all fixed-critical findings in the scan report and verify an upstream replacement or an approved rebuild; no exception was added.

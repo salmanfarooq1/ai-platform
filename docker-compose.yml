@@ -1,3 +1,31 @@
+x-app: &app
+  build: .
+  depends_on:
+    postgres:
+      condition: service_healthy
+    valkey:
+      condition: service_healthy
+  environment: &app-env
+    MODE: "local"
+    DATABASE_URL: "postgresql://gap_app:${APP_DB_PASSWORD:-gap_app}@postgres:5432/rag_platform"
+    REDIS_URL: "redis://valkey:6379"
+    OBJECT_STORE_DIR: "/data/objects"
+    EMBEDDED_WORKERS: "0"  # the worker service runs the jobs; the API does not
+    HOME: "/tmp"
+    TMPDIR: "/var/tmp/app"  # uploads spool here (a volume), not on the 64 MB tmpfs below
+  env_file:
+    - path: .env.local
+      required: false
+  volumes:
+    - "objects:/data/objects"
+    - "app_tmp:/var/tmp/app"
+  tmpfs:
+    - "/tmp:rw,noexec,nosuid,size=64m"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  restart: unless-stopped
+
 services:
   postgres:
     image: pgvector/pgvector:0.8.7-pg16-trixie@sha256:40d828eda66737aaacb934387a337babf1455ebd56e9bdd13fc08e211257c972
@@ -35,38 +63,68 @@ services:
       retries: 10
     restart: unless-stopped
 
+  # The API and the worker run ONE app artifact (the Dockerfile) with the same hardening: read-only root, no
+  # capabilities, no privilege escalation. Only the object store volume and a tmpfs are writable. Migrations run as the
+  # database owner outside these services (`scripts/poc up`, or `scripts/setup_db.sh` on the host); both run as `gap_app`.
+  # A local stack in one command: `scripts/poc up <stack>`. Optional profiles stay off unless you ask for them.
+  api:
+    <<: *app
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "65"]
+    ports:
+      - "127.0.0.1:${API_HOST_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
+      interval: 15s
+      timeout: 6s
+      retries: 3
+      start_period: 40s
+
   # Runs the jobs (ingestion, agent runs) and relays the outbox. Same image as the API (the Dockerfile), another command.
   # The API answers 202 for an ingest and waits for a worker for an agent run, so run one when you run the API:
   #   docker compose up -d postgres valkey worker      (or `poetry run python -m workers` on the host)
   # Needs the migrated database (`scripts/setup_db.sh`). Model keys come from the environment, as for the API.
   worker:
-    build: .
+    <<: *app
     container_name: worker
     command: ["python", "-m", "workers", "--concurrency", "2"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-      valkey:
-        condition: service_healthy
     environment:
-      MODE: "local"
-      DATABASE_URL: "postgresql://gap_app:${APP_DB_PASSWORD:-gap_app}@postgres:5432/rag_platform"
-      REDIS_URL: "redis://valkey:6379"
-      OBJECT_STORE_DIR: "/data/objects"
+      <<: *app-env
       WORKER_HEALTH_FILE: "/tmp/worker-health"
       WORKER_METRICS_PORT: "9100"  # the worker's own series, for the `observability` profile (not published to the host)
-    env_file:
-      - path: .env.local
-        required: false
-    volumes:
-      - "objects:/data/objects"
     healthcheck:
       test: ["CMD", "python", "-c", "import os, sys, time; sys.exit(0 if time.time() - os.path.getmtime('/tmp/worker-health') < 30 else 1)"]
       interval: 15s
       timeout: 5s
       retries: 3
       start_period: 20s
-    restart: unless-stopped
+
+  # POC backups (Sprint 015): restic 0.19.1 built from verified source in docker/restic, started on demand by `scripts/poc backup|down|up` as a one-off container
+  # (`--profile backup run --rm`). Never part of the default four services. A local repository only (restic also speaks
+  # S3 natively; no rclone), the password comes from a read-only mounted file, there is no Docker socket and no network.
+  # The host paths come from POC_STACK_DIR, which `scripts/poc` sets to `.poc/<stack>`.
+  restic:
+    profiles: ["backup"]
+    build:
+      context: docker/restic
+    entrypoint: ["/restic"]
+    restart: "no"
+    user: "${POC_UID:-1000}:${POC_GID:-1000}"
+    network_mode: none
+    environment:
+      RESTIC_REPOSITORY: "/repo"
+      RESTIC_PASSWORD_FILE: "/run/secrets/restic-password"
+      RESTIC_CACHE_DIR: "/tmp/restic-cache"
+      HOME: "/tmp"
+    volumes:
+      - "${POC_STACK_DIR:-./.poc/_unset}/backups:/repo"
+      - "${POC_STACK_DIR:-./.poc/_unset}/staging:/staging:ro"
+      - "${POC_STACK_DIR:-./.poc/_unset}/restore:/restore"
+      - "${POC_STACK_DIR:-./.poc/_unset}/restic-password:/run/secrets/restic-password:ro"
+    tmpfs:
+      - "/tmp:rw,noexec,nosuid,size=256m"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
 
   # Optional metrics, behind a profile (Sprint 008):  docker compose --profile observability up -d
   # Prometheus scrapes the API (on the host, :8000) and the worker. Grafana has one provisioned dashboard, "Platform
@@ -92,7 +150,7 @@ services:
 
   grafana:
     profiles: ["observability"]
-    image: grafana/grafana:13.2.4-distroless-slim@sha256:3838fe4d1cb7fef51a91b9a72011a7a68736b6052785594d437ec65d441acd8b
+    image: grafana/grafana:13.3.1-distroless-slim@sha256:c18a355197217a972f5e05c42894be0528c862061b1a21c9aabaeaf43d161a34
     container_name: grafana
     depends_on:
       prometheus:
@@ -138,7 +196,8 @@ services:
 
   ollama-edge:
     profiles: ["models"]
-    image: alpine/socat:1.8.0.3@sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e
+    build:
+      context: docker/socat
     command: ["TCP-LISTEN:11434,fork,reuseaddr", "TCP:ollama:11434"]
     ports:
       - "127.0.0.1:11434:11434"
@@ -160,7 +219,7 @@ services:
 
   ollama-lock-check:
     profiles: ["models"]
-    image: python:3.11.17-slim-bookworm@sha256:0a310eeecf4e1f5a0743f9a6520c90c88d089c903ca5fd283f501e3a805f5f89
+    image: python:3.11.18-slim-bookworm@sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39
     command: ["/scripts/check_lock.sh"]
     environment:
       MODEL_LOCK: /app/models.lock
@@ -194,7 +253,8 @@ services:
   # Optional single-node KRaft broker. EVENT_BUS remains outbox unless explicitly changed.
   kafka:
     profiles: ["streams"]
-    image: apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+    build:
+      context: docker/kafka
     ports:
       - "127.0.0.1:19092:19092"
     environment:
@@ -227,7 +287,8 @@ services:
 
   kafka-topics:
     profiles: ["streams"]
-    image: apache/kafka:4.3.1@sha256:77e3df9054047a88b520d0cc46e16696d3b22022e1d580aeccd2632df6532837
+    build:
+      context: docker/kafka
     depends_on:
       kafka:
         condition: service_healthy
@@ -281,6 +342,7 @@ services:
 
 volumes:
   objects:
+  app_tmp:
   pgdata:
   pgdata_trixie:
   redis_data:  # Retained for manual rollback; never mounted by Valkey.

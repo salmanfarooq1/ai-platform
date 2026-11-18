@@ -1,0 +1,8 @@
+=== ollama/ollama:0.40.16 ===
+0.40.16: Pulling from ollama/ollama
+bcd29a192d4b: Pulling fs layer
+0f9ace102f52: Pulling fs layer
+7a48b8f0e5c7: Pulling fs layer
+44e04c92ea2a: Pulling fs layer
+0f9ace102f52: Download complete
+pull failed or timed out

@@ -1,0 +1,182 @@
+........................................................................ [ 24%]
+........................................................................ [ 48%]
+........................................................................ [ 72%]
+................................................................sEEEEFFs [ 96%]
+.EEEEEEFEEE                                                              [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_purge_waits_while_the_real_backup_lock_session_is_held _
+../../.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/pytest_asyncio/plugin.py:926: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+_________ ERROR at setup of test_online_manifest_matches_dump_snapshot _________
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+_______ ERROR at setup of test_missing_or_corrupt_object_refuses_backup ________
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+____ ERROR at setup of test_killing_the_lock_session_makes_the_backup_fail _____
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+___________ ERROR at setup of test_manifest_tampering_blocks_health ____________
+../../.cache/pypoetry/virtualenvs/ai-platform-gZEyR1dw-py3.11/lib/python3.11/site-packages/pytest_asyncio/plugin.py:926: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+______ ERROR at setup of test_restic_check_and_scratch_restore_gate_down _______
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+_ ERROR at setup of test_manifest_digest_binding_is_enforced_on_real_snapshots _
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+______ ERROR at setup of test_restore_reproduces_manifest_before_writers _______
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+________ ERROR at setup of test_valkey_loss_and_postgres_work_recovery _________
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+_____ ERROR at setup of test_valkey_loss_does_not_reset_spending_authority _____
+tests/integration/poc/conftest.py:147: in poc_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+__________ ERROR at setup of test_fresh_up_initializes_default_stack ___________
+tests/integration/poc/test_up.py:31: in stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+_ ERROR at setup of test_worker_completes_a_durable_job_through_the_public_api _
+tests/integration/poc/test_up.py:31: in stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+_____________ ERROR at setup of test_hardened_services_are_healthy _____________
+tests/integration/poc/test_up.py:31: in stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+=================================== FAILURES ===================================
+_________________ test_down_never_touches_dev_project_volumes __________________
+tests/integration/poc/test_down.py:68: in test_down_never_touches_dev_project_volumes
+    make_volume(f"{project}_objects", labels={"com.docker.compose.project": "ai-platform"})
+tests/integration/poc/test_down.py:46: in make_volume
+    _docker(*command, volume)
+tests/integration/poc/test_down.py:23: in _docker
+    return subprocess.run(["docker", *args], capture_output=True, text=True, check=check)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/subprocess.py:569: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['docker', 'volume', 'create', '--label', 'com.docker.compose.project=ai-platform', 'ai-platform-poc-tda1035313_objects']' returned non-zero exit status 1.
+__________________ test_ownership_and_lifecycle_races_refuse ___________________
+tests/integration/poc/test_down.py:88: in test_ownership_and_lifecycle_races_refuse
+    make_volume(f"{project}_objects", labels=label, options={"type": "none", "o": "bind", "device": "/tmp"})
+tests/integration/poc/test_down.py:46: in make_volume
+    _docker(*command, volume)
+tests/integration/poc/test_down.py:23: in _docker
+    return subprocess.run(["docker", *args], capture_output=True, text=True, check=check)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.pyenv/versions/3.11.0/lib/python3.11/subprocess.py:569: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['docker', 'volume', 'create', '--label', 'com.docker.compose.project=ai-platform-poc-td449096bc', '--opt', 'type=none', '--opt', 'o=bind', '--opt', 'device=/tmp', 'ai-platform-poc-td449096bc_objects']' returned non-zero exit status 1.
+_____ test_failed_restore_is_resumed_by_up_and_never_starts_an_empty_stack _____
+tests/integration/poc/test_restore.py:389: in test_failed_restore_is_resumed_by_up_and_never_starts_an_empty_stack
+    live = start_live_stack("r")
+           ^^^^^^^^^^^^^^^^^^^^^
+tests/integration/poc/conftest.py:125: in start_live_stack
+    marker = up(ROOT, name, runner=LocalRunner())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/up.py:329: in up
+    runner.run([*base, "build", "api", "worker"], env=env)
+scripts/poc_lib/runner.py:116: in run
+    raise CommandError(argv, result.returncode, result.stderr)
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+=========================== short test summary info ============================
+FAILED tests/integration/poc/test_down.py::test_down_never_touches_dev_project_volumes
+FAILED tests/integration/poc/test_down.py::test_ownership_and_lifecycle_races_refuse
+FAILED tests/integration/poc/test_restore.py::test_failed_restore_is_resumed_by_up_and_never_starts_an_empty_stack
+ERROR tests/integration/poc/test_backup.py::test_purge_waits_while_the_real_backup_lock_session_is_held
+ERROR tests/integration/poc/test_backup.py::test_online_manifest_matches_dump_snapshot
+ERROR tests/integration/poc/test_backup.py::test_missing_or_corrupt_object_refuses_backup
+ERROR tests/integration/poc/test_backup.py::test_killing_the_lock_session_makes_the_backup_fail
+ERROR tests/integration/poc/test_restore.py::test_manifest_tampering_blocks_health
+ERROR tests/integration/poc/test_restore.py::test_restic_check_and_scratch_restore_gate_down
+ERROR tests/integration/poc/test_restore.py::test_manifest_digest_binding_is_enforced_on_real_snapshots
+ERROR tests/integration/poc/test_restore.py::test_restore_reproduces_manifest_before_writers
+ERROR tests/integration/poc/test_restore.py::test_valkey_loss_and_postgres_work_recovery
+ERROR tests/integration/poc/test_restore.py::test_valkey_loss_does_not_reset_spending_authority
+ERROR tests/integration/poc/test_up.py::test_fresh_up_initializes_default_stack
+ERROR tests/integration/poc/test_up.py::test_worker_completes_a_durable_job_through_the_public_api
+ERROR tests/integration/poc/test_up.py::test_hardened_services_are_healthy - ...
+3 failed, 281 passed, 2 skipped, 13 errors in 37.39s

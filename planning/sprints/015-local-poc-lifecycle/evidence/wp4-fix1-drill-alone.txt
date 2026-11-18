@@ -1,0 +1,15 @@
+PASS up
+PASS seed
+PASS deny receipt saved
+PASS baseline restored
+PASS backup
+PASS checked down
+PASS restored counts and heads tables=19 rows=28 heads=1 checkpoints=1
+PASS saved receipts offline
+PASS new governed call
+PASS fixture teardown
+PASS restore drill
+
+real	3m30.175s
+user	1m2.424s
+sys	0m8.368s

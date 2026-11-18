@@ -9,6 +9,7 @@ A job is `queued`, then `running` under a lease, then `succeeded`, `failed` (it 
 used its last attempt). A failed attempt that may be retried goes back to `queued` with a later `run_after`.
 """
 import json
+import math
 import random
 from dataclasses import dataclass
 from datetime import datetime
@@ -25,12 +26,13 @@ STATUSES = ("queued", "running", "succeeded", "failed", "dead")
 TERMINAL = ("succeeded", "failed", "dead")
 MAX_TEXT_BYTES = 4096  # no string in a payload is longer: raw bytes go to the object store
 ERROR_DETAIL_CHARS = 500
+MIN_DEFER_SECONDS = 1.0  # a deferral waits at least this long: a zero delay would make the job spin against what it waits for
 STOPPED = "stopped"  # the error code of a job somebody stopped
 
 _COLUMNS = (
     "id, tenant_id, kind, status, payload, idempotency_key, attempts, max_attempts, run_after, lease_until, "
     "locked_by, progress_done, progress_total, error_code, error_detail, resource, execution_id, result, "
-    "cancel_requested, created_at, updated_at, started_at, finished_at, principal_id, namespace"
+    "cancel_requested, created_at, updated_at, started_at, finished_at, principal_id, namespace, deferrals"
 )
 
 
@@ -65,10 +67,21 @@ class JobRow:
     finished_at: datetime | None
     principal_id: UUID | None
     namespace: str | None
+    deferrals: int = 0  # how often the job was put off (not failed) since it was queued; see `defer`
 
     @property
     def terminal(self) -> bool:
         return self.status in TERMINAL
+
+
+def bounded_defer_delay(delay_seconds: Any) -> float:
+    """The delay of a deferral as a finite number of seconds, at least `MIN_DEFER_SECONDS`.
+
+    Raises `ValueError` for NaN, infinity and anything that is not a real number (a bool is not one): such a value
+    would store a meaningless `run_after`, or none at all, and the job would never run or run at once, forever."""
+    if isinstance(delay_seconds, bool) or not isinstance(delay_seconds, int | float) or not math.isfinite(delay_seconds):
+        raise ValueError("a deferral delay must be a finite number of seconds")
+    return max(float(delay_seconds), MIN_DEFER_SECONDS)
 
 
 def _json(value: Any) -> Any:
@@ -292,6 +305,26 @@ async def fail(
         job_id, new_status, error_code, (detail or "")[:ERROR_DETAIL_CHARS] or None, delay,
     )
     return new_status
+
+
+async def defer(
+    conn: Connection, job_id: UUID, worker_id: str, delay_seconds: float, code: str, detail: str | None = None,
+) -> str | None:
+    """Put a running job back as `queued` for `delay_seconds` later (finite, at least `MIN_DEFER_SECONDS`) and give the
+    attempt back: waiting for something outside the job (not a failure) never uses up its tries. Each deferral is
+    counted on the job (`deferrals`). Returns "queued", or None when this worker no longer holds it."""
+    delay = bounded_defer_delay(delay_seconds)
+    status = await conn.execute(
+        """
+        UPDATE jobs SET status = 'queued', attempts = GREATEST(attempts - 1, 0), deferrals = deferrals + 1,
+               error_code = $3, error_detail = $4,
+               lease_until = NULL, locked_by = NULL, run_after = NOW() + make_interval(secs => $5), updated_at = NOW(),
+               finished_at = NULL
+        WHERE id = $1 AND locked_by = $2 AND status = 'running'
+        """,
+        job_id, worker_id, code, (detail or "")[:ERROR_DETAIL_CHARS] or None, delay,
+    )
+    return "queued" if status.endswith("1") else None
 
 
 async def release(conn: Connection, job_id: UUID, worker_id: str) -> bool:

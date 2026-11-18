@@ -1,0 +1,76 @@
+
+> ai-platform-ui@2.0.0 chunk-report
+> node scripts/chunk-report.mjs
+
+Chunks (raw and gzip), largest last
+app/shared  time-range-BpH6G2fq.js                           0.2 kB     0.2 kB
+app/shared  walkthrough-store-CMuV9Tm6.js                    0.2 kB     0.2 kB
+app/shared  stages-UorP1m-x.js                               0.3 kB     0.2 kB
+app/shared  density-D1tfL_P2.js                              0.3 kB     0.2 kB
+app/shared  select-B8-XiSFu.js                               0.4 kB     0.3 kB
+app/shared  input-BbCHJ4PV.js                                0.6 kB     0.4 kB
+app/shared  governance-text-Nc_yji7e.js                      0.7 kB     0.4 kB
+app/shared  reasons-CUamS-GC.js                              0.9 kB     0.5 kB
+app/shared  useInfiniteQuery-C2Q_XJ_g.js                     1.1 kB     0.5 kB
+app/shared  receipt-IBSgccX_.js                              1.2 kB     0.6 kB
+app/shared  history-page-DrlO0Wj4.js                         1.5 kB     0.8 kB
+app/shared  X.es-Bp6M4ZRI.js                                 1.9 kB     0.6 kB
+app/shared  keys-page-Jzsy6NOl.js                            1.9 kB     0.9 kB
+marketing   hero-scene-DlO9yN3w.js                           1.9 kB     1.0 kB
+app/shared  deny-callout-FfRR_q6y.js                         2.1 kB     0.8 kB
+app/shared  trace-timeline-DVQfTR_v.js                       2.2 kB     1.0 kB
+app/shared  copy-value-CEjCN7Jj.js                           2.4 kB     1.0 kB
+app/shared  signin-page-BmK3OX1V.js                          2.4 kB     1.2 kB
+app/shared  modules-page-BM9bTSqJ.js                         2.5 kB     1.1 kB
+app/shared  policies-page-DIceNh5J.js                        2.6 kB     1.2 kB
+app/shared  system-page-DYMa5C9x.js                          2.6 kB     1.0 kB
+marketing   landing-motion-_4fCSAsx.js                       2.6 kB     1.3 kB
+app/shared  useMutation-C3hBPK2y.js                          3.2 kB     1.3 kB
+app/shared  segmented-Dd21KCJ8.js                            3.3 kB     1.4 kB
+marketing   marketing-shell-BaG1bCMO.js                      3.8 kB     1.6 kB
+app/shared  usage-page-CzRGdwUg.js                           5.5 kB     1.8 kB
+marketing   how-it-works-page-C3dcAZfJ.js                    5.7 kB     2.2 kB
+app/shared  walkthrough-page-xuLXQ5Ot.js                     5.7 kB     2.3 kB
+app/shared  overview-page-DrSemhvw.js                        6.8 kB     2.4 kB
+app/shared  states-Cj31pHuo.js                               8.6 kB     2.5 kB
+app/shared  decisions-page-Cg6DypZx.js                       9.2 kB     3.4 kB
+app/shared  verdict-badge-8tKv9USY.js                       10.1 kB     2.8 kB
+app/shared  requests-page-B-_G4AmR.js                       10.1 kB     3.7 kB
+app/shared  library-page-rCPQv_f8.js                        11.6 kB     4.3 kB
+app/shared  trust-page-BQIDDPBF.js                          16.2 kB     5.0 kB
+marketing   landing-page-Dp7t9yBi.js                        16.4 kB     5.5 kB
+app/shared  runs-page-DxPidYJm.js                           22.3 kB     7.2 kB
+app/shared  react-CxfcT2zT.js                              167.5 kB    54.9 kB
+app/shared  ask-page-DKg7AR0B.js                           183.3 kB    55.7 kB
+app/shared  index-B8mTHPbG.js                              243.6 kB    75.0 kB
+marketing   webgl-gc836SuQ.js                              858.0 kB   229.6 kB
+
+total app/shared 735.0 kB, total marketing 888.5 kB, 41 chunks
+
+Each route is its own chunk
+ok   /                  landing-page-Dp7t9yBi.js (16.4 kB)
+ok   /how-it-works      how-it-works-page-C3dcAZfJ.js (5.7 kB)
+ok   /signin            signin-page-BmK3OX1V.js (2.4 kB)
+ok   /app               overview-page-DrSemhvw.js (6.8 kB)
+ok   /app/walkthrough   walkthrough-page-xuLXQ5Ot.js (5.7 kB)
+ok   /app/ask           ask-page-DKg7AR0B.js (183.3 kB)
+ok   /app/library       library-page-rCPQv_f8.js (11.6 kB)
+ok   /app/history       history-page-DrlO0Wj4.js (1.5 kB)
+ok   /app/requests      requests-page-B-_G4AmR.js (10.1 kB)
+ok   /app/decisions     decisions-page-Cg6DypZx.js (9.2 kB)
+ok   /app/policies      policies-page-DIceNh5J.js (2.6 kB)
+ok   /app/keys          keys-page-Jzsy6NOl.js (1.9 kB)
+ok   /app/usage         usage-page-CzRGdwUg.js (5.5 kB)
+ok   /app/runs          runs-page-DxPidYJm.js (22.3 kB)
+ok   /app/trust         trust-page-BQIDDPBF.js (16.2 kB)
+ok   /app/system        system-page-DYMa5C9x.js (2.6 kB)
+
+No GSAP or WebGL in the chunks that load under /app (every chunk outside the marketing group)
+checked 35 chunks, grep for: WebGLRenderer|@react-three|THREE\.|ScrollTrigger|SplitText|gsap\.registerPlugin|getContext\(["']webgl
+ok   index.html preloads no marketing chunk
+
+Where GSAP and WebGL live
+     landing-page-Dp7t9yBi.js
+     webgl-gc836SuQ.js
+
+PASS

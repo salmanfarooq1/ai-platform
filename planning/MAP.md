@@ -77,7 +77,7 @@ M0 journey steps today: modules off (done locally in 012) · deny by policy (don
 ## Agreed with the owner
 - Three pillars, integration first, gateway first, single tenant per deploy by default, hosted models as an equal option (2026-10-11).
 - 36 sprints condensed to 22. SCIM and SIEM are in the plan. Pins younger than 14 days are not used (security patches excepted, recorded per case).
-- Builders are GPT-6 Luna through Codex; the Claude Architect plans, reviews and proves with real requests (2026-10-26, 2026-10-28).
+- Builders use the program default except Sprint 015: Terra for WP0/WP1/WP4, Sol for WP2/WP3; each launch gets review by the other model. Owner approves launches and runs commits.
 - No commit or push without the owner's go.
 - Gateway breadth (per-stage evidence, guardrails on model calls and output, OpenAI-style API with streaming, virtual models with breakers, MCP upstream proxy, Gateway Test screen, guardrail console, central sign-in, delegation tickets, spans per stage) goes into existing sprints as plain requirements, not new sprints (2026-10-30).
 - Planning docs describe our product in our own terms: no names of, or comparisons with, other codebases (2026-11-02).
@@ -85,11 +85,12 @@ M0 journey steps today: modules off (done locally in 012) · deny by policy (don
 - 2026-11-02, after the planning audit (`scratch/planning-audit.md`): re-plan for the earliest sellable gateway (trim 014 and 015; gateway order 016, 019, 020, 017, 018; SIEM, signing and pen test pulled into MG). M0 stays local; the first real cloud run moves to a later milestone. Per-stage evidence and the model-call input guardrail go into 013. The old root plans are archived; the Architect drafts a product map; the D: disk file is compacted. Commits for 011 and 012 are prepared after 012 passes; the owner approves them.
 
 ## Open for the owner
-1. Sign off the 2026-11-08 re-plan diff, then the lighter 013 to 015 packs.
+1. Sign off the remaining 2026-11-08 re-plan diff; Sprint 015 local design is approved.
 2. Shape the product map (end-state console) once the Architect's draft is ready.
 
-## Now (2026-11-17)
-- **013 and 014 committed locally** (`c7cdba8`, `3de7489`). 014 accepted: `accept.sh` 8/8, live M0 on real Ollama.
-- **015 approved** (owner, 2026-11-17). Branch `sprint/015-local-poc-lifecycle` = 014 + the 2026-11-08 re-plan (ADR-0035). Pack under Architect rewrite: api service in compose, persistent local signing key, online backup (no maintenance mode), restic as a pinned compose service, real restore drill in `m0.sh`, WP0 demo-policy fix.
-- **Open:** 012 close items (modules browser journey, docs, evidence); owner sign-off of the re-plan diff; product map draft.
-- Environment: Docker data disk is on D: (needs at least 25 GB free; check before pulls). Docker Desktop does not start at sign-in; start it after a Windows restart. Local Playwright: `scratch/pw/run.sh`.
+## Now (2026-11-19)
+- **015 closed** (local POC lifecycle): default Compose API, persistent receipt key, online backup, checked teardown, real M0 restore drill. `accept.sh` 24/25; owner commits.
+- **Carried to 016 (owner decision S015-image-defer):** bump and scan Ollama 0.40.16 and SeaweedFS 4.54; image gate unchanged, no exception.
+- **Next:** 016 gateway service and proxy, single-builder method (Terra builds, Sol reviews).
+- **Open:** 012 close items; owner sign-off of the re-plan diff; product map draft.
+- Environment: Docker data disk on D: (25 GB free before pulls). WSL `systemd=false` fixes the Docker integration race. Local Playwright: `scratch/pw/run.sh`.

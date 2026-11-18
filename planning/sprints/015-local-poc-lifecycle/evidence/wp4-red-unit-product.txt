@@ -1,0 +1,6 @@
+    from scripts.poc_lib import admin, lifecycle
+E   ImportError: cannot import name 'admin' from 'scripts.poc_lib' (/home/ubuntu/ai-platform-sprints/015-local-poc-lifecycle/scripts/poc_lib/__init__.py)
+=========================== short test summary info ============================
+ERROR tests/unit/test_poc_admin_destroy.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 1.50s

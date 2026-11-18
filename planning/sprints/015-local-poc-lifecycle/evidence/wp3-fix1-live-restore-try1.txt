@@ -1,0 +1,37 @@
+.......F                                                                 [100%]
+=================================== FAILURES ===================================
+_____ test_failed_restore_is_resumed_by_up_and_never_starts_an_empty_stack _____
+tests/integration/poc/test_restore.py:425: in test_failed_restore_is_resumed_by_up_and_never_starts_an_empty_stack
+    up(ROOT, name, runner=second)
+scripts/poc_lib/up.py:248: in up
+    _restore_before_writers(context, ref)
+scripts/poc_lib/up.py:180: in _restore_before_writers
+    report = restore.restore_latest(context, clock=lambda: datetime.now(timezone.utc), ref=ref)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_backup/restore.py:156: in restore_latest
+    counters = apply_counters(context, counters_to_apply(manifest, begun.strftime("%Y-%m-%d")))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_backup/restore.py:103: in apply_counters
+    context.valkey("EXPIRE", key, str(COUNTER_TTL_SECONDS))
+scripts/poc_lib/context.py:52: in valkey
+    return self.compose("exec", "-T", "valkey", "valkey-cli", *args).text
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/poc_lib/context.py:43: in compose
+    return self.runner.run(self.argv(*args, profile=profile), env=self.env, input=input, check=check,
+tests/integration/poc/test_restore.py:378: in run
+    raise CommandError(argv, 1, b"injected fault")
+E   scripts.poc_lib.runner.CommandError: command failed (1): docker compose --project-directory
+==================================== PASSES ====================================
+______________ test_valkey_loss_does_not_reset_spending_authority ______________
+------------------------------ Captured log call -------------------------------
+WARNING  gateway.limits:limits.py:92 [cost] tenant=00000000-0000-0000-0000-000000000001 reached its daily cost cap (10.000000 of 10.00 USD)
+=========================== short test summary info ============================
+PASSED tests/integration/poc/test_restore.py::test_wrong_key_id_requires_previous_public_key
+PASSED tests/integration/poc/test_restore.py::test_manifest_tampering_blocks_health
+PASSED tests/integration/poc/test_restore.py::test_restic_check_and_scratch_restore_gate_down
+PASSED tests/integration/poc/test_restore.py::test_manifest_digest_binding_is_enforced_on_real_snapshots
+PASSED tests/integration/poc/test_restore.py::test_restore_reproduces_manifest_before_writers
+PASSED tests/integration/poc/test_restore.py::test_valkey_loss_and_postgres_work_recovery
+PASSED tests/integration/poc/test_restore.py::test_valkey_loss_does_not_reset_spending_authority
+FAILED tests/integration/poc/test_restore.py::test_failed_restore_is_resumed_by_up_and_never_starts_an_empty_stack
+1 failed, 7 passed in 570.77s (0:09:30)

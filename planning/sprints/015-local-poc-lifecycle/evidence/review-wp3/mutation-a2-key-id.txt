@@ -1,0 +1,18 @@
+== mutation a2: remove 'public key id mismatch' (keys.py:23-24)
+diff --git a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/keys.py.orig b/scripts/poc_backup/keys.py
+index e12d844..3d9ed57 100644
+--- a/tmp/claude-1000/-home-ubuntu-ai-platform/e556db60-5f76-41cb-bb89-1ac8ea73ab9a/scratchpad/keys.py.orig
++++ b/scripts/poc_backup/keys.py
+@@ -20,8 +20,7 @@ def validate_restore_key(identity: Mapping[str, str], settings: Settings) -> Non
+             raise ValueError("missing private key")
+         public = decode_key(identity["public_key"])
+         kid = identity["key_id"]
+-        if key_id_of(public) != kid:
+-            raise ValueError("public key id mismatch")
++        pass  # MUTATION a2
+         ring = Keyring.from_private_text(private, [decode_key(key) for key in settings.previous_receipt_keys])
+         if ring.public_raw(kid) != public:
+             raise ValueError("backup public key is not trusted")
+................                                                         [100%]
+16 passed in 2.81s
+RESTORED-IDENTICAL

@@ -13,7 +13,7 @@ vi.mock('@/app/session', async (importOriginal) => ({
 const config = { namespaces: { legal: 'Legal' }, confidence_floor: 0.5, max_query_length: 1000, daily_token_budget: 1, rate_limit_rpm: 1, rate_limit_window_seconds: 60, agent_defaults: { max_iterations: 1, enable_verifier: false, max_verify_retries: 0 } } as PlatformConfig
 const doc = (id: string) => ({ document_id: id, namespace: 'legal', source_filename: id, chunk_count: 4, content_hash: 'a'.repeat(64), last_ingested_at: '2026-09-14T09:30:00Z' })
 const job = (over: Partial<Job>): Job => ({
-  id: 'j', kind: 'ingest', status: 'queued', attempts: 0, max_attempts: 5, progress: { done: 0, total: 0 }, error_code: null,
+  id: 'j', kind: 'ingest', status: 'queued', attempts: 0, deferrals: 0, max_attempts: 5, progress: { done: 0, total: 0 }, error_code: null,
   resource: 'legal/new.md', execution_id: null, created_at: '2026-09-14T09:30:00Z', updated_at: '2026-09-14T09:30:00Z', ...over,
 })
 

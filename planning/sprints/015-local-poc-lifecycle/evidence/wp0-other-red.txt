@@ -1,0 +1,45 @@
+FF...F                                                                   [100%]
+=================================== FAILURES ===================================
+____________________ test_poetry_resolves_from_environment _____________________
+tests/unit/test_playwright_config.py:13: in test_poetry_resolves_from_environment
+    assert "/home/ubuntu/" not in config
+E   AssertionError: assert '/home/ubuntu/' not in 'import { de...\n  ],\n})\n'
+E     
+E     '/home/ubuntu/' is contained here:
+E       command: `/home/ubuntu/.local/share/poetry233/bin/poetry run python scripts/e2e/serve.py --reference-company --enabled-modules gateway --port ${SHOWCASE_API_PORT} --state-dir ui/e2e/.state/showcase-m0`,
+E     ?           +++++++++++++
+E             cwd: '..',
+E             url: `http://127.0.0.1:${SHOWCASE_API_PORT}/v1/health`,
+E             timeout: 180_000,...
+E     
+E     ...Full output truncated (68 lines hidden), use '-vv' to show
+__________________ test_reference_company_seed_allows_models ___________________
+tests/integration/refco/test_m0.py:265: in test_reference_company_seed_allows_models
+    assert '"allowed_models": []' not in inspect.getsource(serve.main)
+E   assert '"allowed_models": []' not in 'def main() ...  return 0\n'
+E     
+E     '"allowed_models": []' is contained here:
+E       **POLICY, "allowed_models": []}, "showcase-m0")
+E           from core.settings import get_settings
+E       
+E           sandbox_runs = asyncio.run(seed_sandbox_runs(owner_dsn, seeded)) if "agents" in get_settings().enabled_module_names else {}
+E           if not args.reference_company:...
+E     
+E     ...Full output truncated (20 lines hidden), use '-vv' to show
+________________ test_citation_generation_records_every_attempt ________________
+tests/integration/test_llm_governance.py:19: in test_citation_generation_records_every_attempt
+    await generate_with_citations(provider, "q", [{"document_id": "a", "text": "context"}], model=alias, caller=caller, ctx=ctx)
+api/services/llm.py:52: in generate_with_citations
+    completion = await caller.complete(
+api/services/model_calls.py:344: in complete
+    return await self._run_aliases(ctx, aliases, invoke, estimated_tokens=estimated_tokens,
+api/services/model_calls.py:269: in _run_aliases
+    result, last_model, _ = await self._attempt(
+api/services/model_calls.py:181: in _attempt
+    raise GatewayDenied(decision)
+E   gateway.types.GatewayDenied: model: model_unknown
+=========================== short test summary info ============================
+FAILED tests/unit/test_playwright_config.py::test_poetry_resolves_from_environment
+FAILED tests/integration/refco/test_m0.py::test_reference_company_seed_allows_models
+FAILED tests/integration/test_llm_governance.py::test_citation_generation_records_every_attempt
+3 failed, 3 passed in 9.96s

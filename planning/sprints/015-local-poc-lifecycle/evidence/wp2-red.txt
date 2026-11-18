@@ -1,0 +1,20 @@
+FFFFFFFFFFFFFF...........................FFF                             [100%]
+=========================== short test summary info ============================
+FAILED tests/unit/test_poc_keys.py::test_key_created_once_and_survives_down
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[root-link]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[ancestor-link]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[parent-link]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[file-link]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[owner]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[parent-owner]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[mode] - ...
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[parent-mode]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[malformed]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[password-mode]
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[fifo] - ...
+FAILED tests/unit/test_poc_keys.py::test_refuses_unsafe_secret_files[hardlink]
+FAILED tests/unit/test_poc_keys.py::test_secrets_never_leave_files - ModuleNo...
+FAILED tests/unit/test_settings.py::test_receipt_signing_key_file - Assertion...
+FAILED tests/integration/poc/test_keys.py::test_api_worker_share_key_across_restart
+FAILED tests/integration/poc/test_restore.py::test_wrong_key_id_requires_previous_public_key
+17 failed, 27 passed in 11.12s

@@ -1,0 +1,4 @@
+ai-platform-poc-t62e97696-api-1	276.8MiB / 3.823GiB	0.17%
+ai-platform-poc-t62e97696-postgres-1	67.7MiB / 3.823GiB	0.55%
+ai-platform-poc-t62e97696-valkey-1	21.6MiB / 3.823GiB	0.68%
+ai-platform-poc-t62e97696-worker-1	250.2MiB / 3.823GiB	0.40%
