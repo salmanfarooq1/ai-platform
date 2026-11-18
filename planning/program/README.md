@@ -27,7 +27,7 @@ Every call leaves verifiable evidence. The platform is integration first: it con
 - **Runs anywhere, from one command.** Local Compose is the development and showcase vehicle. Real deployments run on cloud with one OpenTofu module per cloud and the same core (from 015). POCs start and stop on demand.
 - **Integration first.** Clients connect their sources, warehouses, streams and agents through existing connectors. We do not write connectors where an open-source one exists.
 - **The existing rules hold.** The 15 strict rules in `docs/architecture.md` section 2 and the working agreements in `AGENTS.md` apply to every sprint.
-- **No commits by a model.** Every sprint ends with proposed commit blocks in `report.md`. A human runs them.
+- **Commits need the owner's approval.** Builders never commit. The Architect shows the exact command and runs it only after the owner approves.
 
 ## Status
 - Research, plan and six-perspective review: done (2026-10-08). Owner review and coherence audit: done (2026-10-09).

@@ -1,27 +1,33 @@
-# Builder method: Architect and GPT-6 Luna
+# Builder method: Architect, Codex and Gemini builders
 
-How every sprint is built from 012 on. The owner set this on 2026-10-26.
+How every sprint is built from 012 on. The owner set the method on 2026-10-26 and updated the builder line-up on 2026-11-18.
 
 ## Roles
 - **Architect (Claude).** Owns the result. Builders do the implementation work, including diagnosing failing tests; the Architect fixes only the environment. Reviews and may revise any sprint pack, writes the test criteria before any code, writes the builder brief, launches builders, reviews every result, runs the live checks and writes the QA verdict.
-- **Builder (Codex CLI, model `gpt-6-luna`).** Builds one work package per run. It never commits, pushes or changes branches.
-- **Owner.** Gives one go-ahead per sprint, answers open questions and runs the commits.
+- **Builder.** Codex CLI with the model picked by task (gpt-6.1-sol: hard packages and drafting packs; gpt-6.1-terra: bounded builds, independent reviews, evidence runs; gpt-6-luna: mechanical work) or Gemini Flash 3.8 (high) through the Antigravity CLI `agy`, for builds and cross-model reviews. It never commits, pushes or changes branches. Claude models are never builders or reviewers (owner, 2026-11-18).
+- **Owner.** Gives one go-ahead per sprint (CLAUDE.md rule 4), answers open questions and approves each commit. The Architect shows the exact command and runs it only after approval.
 
-## What Luna is
+## What the builders are like
 The facts below come from public sources (2026-10-26) and our own runs. Unverified figures are marked as such.
+
+### Luna
 - **Positioning.** OpenAI calls Luna its most efficient model "for focused, high-volume tasks, including summarization, extraction, and focused coding." Sol and Astra are the stronger coding tiers.
 - **Coding agent score.** A third party reports an Artificial Analysis Coding Agent Index of 41 for Luna at max effort, 2 points below GPT-5.6 Luna. This figure is not verified at the primary source.
 - **Instruction sensitivity.** OpenAI's GPT-6 guide says the model is more sensitive to `AGENTS.md` and skill files. It also says to state which instruction wins in a conflict, that the model tends to over-test, and that it may stop to ask questions.
 - **Persistence past warnings.** The October safety card reports unwanted persistence past warnings in 15.9% of Luna rollouts. It also reports no auto-review violations for Luna.
 - **Our runs.** In 011 round 2, one Luna run finished all six items. Review found three defects: a config format for an external tool written without running the tool, a wrong instruction from the brief followed literally, and a test that was not hermetic.
 
+### Gemini Flash
+- **Our runs, 2026-11-18.** Follows precise, file-listed, checklist briefs well; broad briefs give shallow reports.
+
 What this means for the method:
-1. Give Luna small work packages, each with a clear pass or fail test.
-2. The brief must be right, because Luna follows it literally. The Architect checks every path, name and fact in the brief against the code before launch.
+1. Give the builder small work packages, each with a clear pass or fail test.
+2. The brief must be right, because the builder follows it literally. The Architect checks every path, name and fact in the brief against the code before launch.
 3. The Architect specifies the tests before any code is written. The builder writes exactly those tests and may add more. It never changes a specified one.
 4. A builder's own report is not evidence. The Architect re-runs every check and reads every diff.
 5. When a task writes a format read by an external tool, the brief either quotes the tool's docs or tells the builder to run the tool.
 6. Each brief says that it wins over `AGENTS.md` and `CODEX.md` where they conflict.
+7. One builder per sprint: `gpt-6.1-terra` builds the whole sprint; `gpt-6.1-sol` only reviews and never codes. Gemini Flash is never the main reviewer. The Architect works at sprint start and close, runs the acceptance once and sends all failures back to the same builder in one batch (owner, 2026-11-18).
 
 ## Pre-start review
 Before any builder starts, the Architect:
@@ -63,10 +69,16 @@ Every brief has the same sections, in this order:
 Write briefs in plain words, with no jargon and no "consider". Each "must" is something a check can test.
 
 ## Run
+Codex:
 ```bash
-codex exec -C <worktree> -m gpt-6-luna -c model_reasoning_effort=high -c service_tier='"priority"' -s workspace-write -c sandbox_workspace_write.network_access=true --json -o <scratch>/wpN-last.txt "Read planning/sprints/<sprint>/luna-brief.md and do WP N only." < /dev/null
+codex exec -C <worktree> -m <model> -c model_reasoning_effort=high -s workspace-write -c sandbox_workspace_write.network_access=true --json -o <scratch>/<tag>.last.txt "<brief>" < /dev/null
 ```
-- `service_tier="priority"` is Luna's fast tier ("Fast", 1.5x speed, more usage). The owner asked for it on 2026-10-28.
+Gemini:
+```bash
+agy -p "<brief>" --model gemini-3.8-flash-high --sandbox --dangerously-skip-permissions --output-format json --print-timeout 90m
+```
+- Normal speed. Do not pass service_tier=priority (owner, CLAUDE.md rule 3).
+- Launch through the retry wrapper `scratch/bin/run-retry.sh`, which waits out network drops and usage limits and resumes with a continuation note.
 - Run one package per call. A fix round resumes the same thread: put the flags before `resume <thread_id>`.
 - The sandbox is `workspace-write` with network on. It has no Docker CLI. The live tiers reach the stack through `localhost` ports when the sandbox allows it. The Architect runs them in any case.
 - Never use `danger-full-access`.
@@ -91,5 +103,5 @@ codex exec -C <worktree> -m gpt-6-luna -c model_reasoning_effort=high -c service
 - **Cleanup.** Leave no stray containers after a check.
 
 ## Owner gates
-- The owner gives one go-ahead per sprint; the Architect launches builders.
+- The owner gives one go-ahead per sprint; the Architect then launches its builders without asking again (CLAUDE.md rule 4).
 - The owner runs every commit.

@@ -1,6 +1,6 @@
 # Branching, commits and releases
 
-No model runs `git commit`, `git push` or `git merge`. Models write the proposed commands in `report.md`. A human runs them.
+Builders never run `git commit`, `git push` or `git merge`; they write proposed commands in `report.md`. The Architect may run a commit or push only after the owner approves the exact command.
 
 ## What happened before (and why this changes)
 Sprints 005 to 010 were built in one working tree, saved as git tree objects (`COMMIT_PLAN.md`), stacked on sprint branches, and landed together in one pull request. That worked once, but it hid each sprint's diff and depended on tree ids that live in one machine's `.git`. Program 2 moves to one branch and one pull request per sprint. Sprint 011 moves `COMMIT_PLAN.md` to `planning/history/`.

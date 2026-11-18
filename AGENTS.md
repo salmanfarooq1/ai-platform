@@ -84,7 +84,7 @@ Read `planning/DOMAIN.md`, `docs/adr/` and `docs/architecture.md` when the task 
 The 15 strict rules are in `docs/architecture.md` section 2. Never break one. If a task seems to need it, stop, and write it in `planning/QUESTIONS.md`.
 
 ## Working agreements
-1. **No model runs `git commit` or `git push`.** Put the proposed commands in `report.md`, and a human runs them.
+1. **Builders never commit or push.** Only the Architect commits, and only after the owner approves the exact command. Builders put proposed commands in `report.md`.
 2. **Milestones, not time.** No dates or durations in plans. Log entries in `DECISIONS.md` and `CHANGELOG.md` may carry the date they were recorded. A sprint is done when its acceptance checks pass.
 3. **Be concise.** Short files, plain words, specifics.
 4. **No invented facts or business rules.** Write unknowns in `planning/QUESTIONS.md` and continue.
@@ -94,7 +94,8 @@ The 15 strict rules are in `docs/architecture.md` section 2. Never break one. If
 8. **No brand name on the platform.** Use functional names. Names belong only to use cases built on top.
 9. **Never reference any employer or employer product.** The working method is adapted from the public 120x Operators Kit.
 10. **Branch per sprint:** `sprint/NNN-slug`. Nothing goes straight to `main`.
-11. **Showcases use only public seams.** Showcase and reference-company code calls the product only through what a real client or operator could use (API, CLI, public admin functions). Never private imports, raw SQL into product tables, env reads inside adapters or global SDK overrides. If the showcase needs something the product lacks, add it to the product with tests, or write it in `planning/QUESTIONS.md`.
+11. **Architect only: the work vault.** The Architect keeps run logs, code bundles and verified processes in the owner's vault, outside the repo (path in the Architect's memory). Builders ignore it. Sprint proof stays in `evidence/`.
+12. **Showcases use only public seams.** Showcase and reference-company code calls the product only through what a real client or operator could use (API, CLI, public admin functions). Never private imports, raw SQL into product tables, env reads inside adapters or global SDK overrides. If the showcase needs something the product lacks, add it to the product with tests, or write it in `planning/QUESTIONS.md`.
 
 ## Builder autonomy policy
 The Builder works continuously until the sprint is complete. It never pauses to ask for review.
