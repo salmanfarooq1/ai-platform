@@ -5,6 +5,7 @@ hosted provider model id is the alias after its first `/` (adapters/model_catalo
 rows with the bare alias, so a hosted deploy counted every row as stale and refused search. This appends the hosted
 model id to each bare hosted label. Local (`ollama/`) labels and labels that already carry `@` are left alone, so the
 migration is idempotent. Each tenant is updated under its own `app.tenant_id`, as in 0007, so row-level security holds.
+The SQL has no `%`: alembic runs it through the driver's parameter formatting, which reads `%` as a placeholder.
 """
 from alembic import op
 
@@ -23,7 +24,7 @@ BEGIN
         SET embedding_model = embedding_model || '@' || substring(embedding_model FROM position('/' IN embedding_model) + 1)
         WHERE tenant_id = t
           AND position('@' IN embedding_model) = 0
-          AND embedding_model NOT LIKE 'ollama/%'
+          AND left(embedding_model, 7) <> 'ollama/'
           AND position('/' IN embedding_model) > 1
           AND position('/' IN embedding_model) < length(embedding_model);
     END LOOP;
