@@ -138,9 +138,10 @@ class RegisterCatalog:
 class CompositeCatalog:
     """Route aliases to the lock or hosted provider register."""
 
-    def __init__(self, local: LockCatalog, hosted: RegisterCatalog) -> None:
+    def __init__(self, local: LockCatalog, hosted: RegisterCatalog, *, probe_local: bool = True) -> None:
         self.local = local
         self.hosted = hosted
+        self.probe_local = probe_local
 
     async def resolve(self, alias: str, *, use: ModelUse) -> ResolvedModel:
         if alias.startswith("ollama/"):
@@ -148,7 +149,10 @@ class CompositeCatalog:
         return await self.hosted.resolve(alias, use=use)
 
     async def probe(self) -> CatalogHealth:
-        local_health, hosted_health = await self.local.probe(), await self.hosted.probe()
+        hosted_health = await self.hosted.probe()
+        if not self.probe_local:
+            return hosted_health
+        local_health = await self.local.probe()
         if not local_health.healthy:
             return local_health
         return hosted_health
@@ -158,6 +162,7 @@ def build_model_catalog(settings: Any, *, model_pricing: Mapping[str, Any]) -> C
     """Build the app's metadata catalog from validated settings and reviewed files."""
     register = load_provider_register()
     scopes = {key: "unknown" for key in register}
+    scopes.update(settings.processing_scopes)
     ollama_endpoint = settings.ollama_base_url
     endpoints = {
         "ollama": ollama_endpoint,
@@ -174,6 +179,8 @@ def build_model_catalog(settings: Any, *, model_pricing: Mapping[str, Any]) -> C
     configured_uses: dict[str, set[ModelUse]] = {}
     for alias, use in (
         (settings.llm_model, ModelUse.CHAT),
+        # Search, agents and the sandbox admit the primary model as a completion, so it is configured for both uses.
+        (settings.llm_model, ModelUse.COMPLETION),
         (settings.embed_model, ModelUse.EMBEDDING),
         (getattr(settings, "verifier_model", None), ModelUse.CHAT),
         *((alias, ModelUse.EMBEDDING) for alias in settings.embed_fallbacks),
@@ -186,7 +193,8 @@ def build_model_catalog(settings: Any, *, model_pricing: Mapping[str, Any]) -> C
         credential_refs=credentials,
         model_uses=configured_uses,
     )
-    return CompositeCatalog(local, hosted)
+    uses_local = any(alias.startswith("ollama/") for alias in configured_uses)
+    return CompositeCatalog(local, hosted, probe_local=uses_local)
 
 
 def _data_use(value: str) -> Literal["training", "no_training", "unknown"]:

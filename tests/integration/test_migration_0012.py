@@ -22,7 +22,7 @@ def test_the_column_is_added_with_zero_for_every_existing_job(blank_db):
     tenant = _exec(blank_db, "SELECT id FROM tenants ORDER BY created_at LIMIT 1")[0][0]
     _exec(blank_db, "INSERT INTO jobs (tenant_id, kind, status, payload) VALUES (%s, 'ingest', 'queued', '{}'::jsonb)", (tenant,))
     assert _exec(blank_db, "SELECT count(*) FROM information_schema.columns WHERE table_name = 'jobs' AND column_name = 'deferrals'") == [(0,)]
-    harness.migrate(blank_db)
+    harness.migrate(blank_db, "0012")
     assert _exec(blank_db, "SELECT version_num FROM alembic_version") == [("0012",)]
     assert _exec(blank_db, "SELECT data_type, is_nullable, column_default FROM information_schema.columns "
                            "WHERE table_name = 'jobs' AND column_name = 'deferrals'") == [("integer", "NO", "0")]

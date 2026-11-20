@@ -37,7 +37,7 @@ PORTS_DOC = ROOT / "docs" / "contracts" / "ports.md"
 # Settings groups, in reading order: (title, exact names, prefixes). A setting that matches none goes to "Other".
 GROUPS: tuple[tuple[str, tuple[str, ...], tuple[str, ...]], ...] = (
     ("Mode and data stores", ("mode", "database_url", "migration_database_url", "redis_url"), ()),
-    ("Models and embeddings", ("llm_model", "verifier_model", "ollama_base_url", "deploy_region", "embed_model", "embedding_dim", "embed_fallback_models", "model_allowed_hosts", "model_max_concurrent_per_tenant", "model_call_timeout_seconds", "model_lease_ttl_margin_seconds", "model_breaker_failure_threshold", "model_breaker_open_seconds"), ("azure_", "groq_")),
+    ("Models and embeddings", ("llm_model", "verifier_model", "ollama_base_url", "deploy_region", "model_processing_scopes", "embed_model", "embedding_dim", "embed_fallback_models", "model_allowed_hosts", "model_max_concurrent_per_tenant", "model_call_timeout_seconds", "model_lease_ttl_margin_seconds", "model_breaker_failure_threshold", "model_breaker_open_seconds"), ("azure_", "groq_")),
     ("Object store", (), ("object_store", "s3_")),
     ("Events", ("event_bus",), ("kafka_", "outbox_")),
     ("Agent runtime and sandbox", ("enabled_modules",), ("agent_", "sandbox_", "openshell_")),

@@ -195,7 +195,7 @@ async def main():
         "no_routing_cost_usd": round(no_routing_cost, 6),
         "with_routing_cost_usd": round(with_routing_cost, 6),
         "cost_savings_pct": round(savings_pct, 1),
-        "simple_model": LLM_CONFIG.get("fallbacks", [LLM_CONFIG["model"]])[0],
+        "simple_model": (LLM_CONFIG.get("fallbacks") or [LLM_CONFIG["model"]])[0],
         "complex_model": LLM_CONFIG["model"],
     }
 

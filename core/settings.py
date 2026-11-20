@@ -163,6 +163,10 @@ class Settings(BaseSettings):
         default=None,
         description="Deployment processing region used as the identity region for local models and required when a hosted model provider is configured.",
     )
+    model_processing_scopes: str | None = Field(
+        default=None,
+        description="Reviewed processing scope per hosted provider, as comma-separated `provider=scope` pairs, e.g. `gemini=gemini:global`. Each scope must exist for that provider in providers.register.toml. A provider not listed stays `unknown`, and the gateway denies its models with `residency_unknown`.",
+    )
     embed_model: str | None = Field(
         default=None,
         description="LiteLLM model name for embeddings. Default by mode: `ollama/nomic-embed-text` (local), `gemini/gemini-embedding-001` (public-preview), `azure/text-embedding-3-small` (prod). Chunks record the model that made them, and search ignores chunks of another model.",
@@ -484,6 +488,13 @@ class Settings(BaseSettings):
             for details in provider.processing_scopes.values()
             if details.get("region") not in (None, "unknown")
         }
+        register = load_provider_register()
+        for provider_key, scope in self.processing_scopes.items():
+            entry = register.get(provider_key)
+            if entry is None or provider_key == "ollama":
+                raise ValueError(f"MODEL_PROCESSING_SCOPES names an unknown hosted provider: {provider_key}")
+            if scope not in entry.processing_scopes:
+                raise ValueError(f"MODEL_PROCESSING_SCOPES names a scope not in providers.register.toml: {provider_key}={scope}")
         if self.deploy_region and self.deploy_region not in provider_regions:
             raise ValueError("DEPLOY_REGION must match a region name in providers.register.toml")
         aliases = [self.llm_model, self.embed_model, self.verifier_model, *self.embed_fallbacks]
@@ -504,6 +515,19 @@ class Settings(BaseSettings):
                     if minimum and self.deploy_region not in {minimum, "global"}:
                         raise ValueError(f"DEPLOY_REGION is narrower than the Bedrock model scope required by {minimum}.")
         return self
+
+    @property
+    def processing_scopes(self) -> dict[str, str]:
+        """Operator-reviewed processing scope per hosted provider, from MODEL_PROCESSING_SCOPES."""
+        scopes: dict[str, str] = {}
+        for part in (self.model_processing_scopes or "").split(","):
+            if not part.strip():
+                continue
+            provider_key, separator, scope = part.partition("=")
+            if not separator or not provider_key.strip() or not scope.strip():
+                raise ValueError("MODEL_PROCESSING_SCOPES must be comma-separated provider=scope pairs")
+            scopes[provider_key.strip()] = scope.strip()
+        return scopes
 
     @property
     def enabled_module_names(self) -> frozenset[str]:

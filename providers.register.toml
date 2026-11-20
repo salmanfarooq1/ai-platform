@@ -13,9 +13,9 @@ reviewed = "2026-11-10"
 name = "Google Gemini API"
 trains_on_data = "unknown"
 retention = "unknown"
-processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." } }
+processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." }, "gemini:global" = { region = "global", description = "Gemini Developer API: no processing-region choice; Google may process requests in any of its regions." } }
 storage_geography = "unknown"
-sources = ["https://ai.google.dev/gemini-api/docs"]
+sources = ["https://ai.google.dev/gemini-api/docs", "https://ai.google.dev/gemini-api/terms"]
 reviewed = "2026-11-10"
 
 [provider.groq]

@@ -49,8 +49,9 @@ def completion_fallbacks_for_mode(mode: str) -> list[str]:
     """Return the configured completion fallback aliases for a deployment mode."""
     fallbacks = {
         "local": ["ollama/qwen3:1.7b"],
-        "public-preview": ["ollama/llama3"],
-        "prod": ["ollama/llama3"],
+        # Hosted modes run without an Ollama sidecar, so a local fallback could never be admitted.
+        "public-preview": [],
+        "prod": [],
     }
     try:
         return list(fallbacks[mode])
