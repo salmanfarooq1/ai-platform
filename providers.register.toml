@@ -16,6 +16,7 @@ retention = "unknown"
 processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." }, "gemini:global" = { region = "global", description = "Gemini Developer API: no processing-region choice; Google may process requests in any of its regions." } }
 storage_geography = "unknown"
 sources = ["https://ai.google.dev/gemini-api/docs", "https://ai.google.dev/gemini-api/terms"]
+api_host = "generativelanguage.googleapis.com"
 reviewed = "2026-11-10"
 
 [provider.groq]
@@ -25,6 +26,7 @@ retention = "unknown"
 processing_scopes = { unknown = { region = "unknown", description = "Processing scope has not been configured or verified." } }
 storage_geography = "unknown"
 sources = ["https://console.groq.com/docs/overview"]
+api_host = "api.groq.com"
 reviewed = "2026-11-10"
 
 [provider.azure-openai]

@@ -97,6 +97,8 @@ class ModelRoute:
     credential: SecretRef | None
     params: Mapping[str, JsonValue]
     fingerprint: str = field(init=False)
+    # The host the call reaches: the configured endpoint's host, else the provider's reviewed default API host.
+    host: str | None = None
 
     def __post_init__(self) -> None:
         params = _freeze_json(self.params)

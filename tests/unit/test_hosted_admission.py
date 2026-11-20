@@ -4,6 +4,8 @@ Before this test, every search on a hosted deploy was denied with `model_unknown
 as a completion, but the catalog configured it for chat only, and the hosted fallback was a local Ollama model that a
 hosted deploy cannot have. Local mode hid both because the Ollama lock lists every use.
 """
+from pathlib import Path
+
 import pytest
 
 from adapters.model_catalog import build_model_catalog
@@ -72,3 +74,23 @@ async def test_hosted_only_catalog_does_not_probe_ollama() -> None:
 def test_hosted_modes_have_no_local_fallback() -> None:
     for mode in ("public-preview", "prod"):
         assert not any(alias.startswith("ollama/") for alias in completion_fallbacks_for_mode(mode))
+
+
+@pytest.mark.asyncio
+async def test_hosted_route_without_an_endpoint_carries_the_reviewed_api_host() -> None:
+    """The allow-list checks route.host; a hosted provider with no configured endpoint must still name its host."""
+    settings = preview_settings(model_processing_scopes="gemini=gemini:global")
+    catalog = build_model_catalog(settings, model_pricing=MODEL_PRICING)
+    for alias, use in admitted_by_routes(settings):
+        resolved = await catalog.resolve(alias, use=use)
+        assert resolved.route.endpoint == ""
+        assert resolved.route.host == "generativelanguage.googleapis.com", alias
+
+
+def test_provider_register_rejects_an_invalid_api_host(tmp_path) -> None:
+    from core.models_files import ModelFileError, load_provider_register
+    source = (Path(__file__).resolve().parents[2] / "providers.register.toml").read_text()
+    bad = tmp_path / "providers.register.toml"
+    bad.write_text(source.replace('api_host = "api.groq.com"', 'api_host = "https://api.groq.com/v1"'))
+    with pytest.raises(ModelFileError):
+        load_provider_register(bad)

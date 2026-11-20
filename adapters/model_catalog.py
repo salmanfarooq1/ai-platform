@@ -128,7 +128,8 @@ class RegisterCatalog:
             provider_model_id=model_id, processing_scope=scope, region=scope_details.get("region", "unknown"),
             storage_geography=entry.storage_geography,
         )
-        route = ModelRoute(identity, endpoint, self.credential_refs.get(provider_key), {})
+        host = urlparse(endpoint).hostname if endpoint else entry.api_host
+        route = ModelRoute(identity, endpoint, self.credential_refs.get(provider_key), {}, host=host)
         return ResolvedModel(identity, route, use, price_ref, _data_use(entry.trains_on_data))
 
     async def probe(self) -> CatalogHealth:

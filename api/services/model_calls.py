@@ -106,7 +106,7 @@ class ModelCaller:
         try:
             resolved = await self.catalog.resolve(alias, use=use)
             if resolved.identity.source == "hosted":
-                host = urlparse(resolved.route.endpoint).hostname
+                host = resolved.route.host or urlparse(resolved.route.endpoint).hostname
                 if host is None or host.lower() not in self.allowed_hosts:
                     failure = ModelHostNotAllowed("model endpoint host is not in MODEL_ALLOWED_HOSTS")
         except _CATALOG_FAILURES as exc:

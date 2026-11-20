@@ -49,6 +49,7 @@ class ProviderEntry:
     storage_geography: str
     sources: tuple[str, ...]
     reviewed: str
+    api_host: str | None = None
 
 
 def load_models_lock(path: str | Path | None = None) -> tuple[LockedModel, ...]:
@@ -122,7 +123,7 @@ def load_provider_register(path: str | Path | None = None) -> dict[str, Provider
         if not isinstance(row, dict):
             raise ModelFileError(f"provider {key} must be a table")
         required = {"name", "trains_on_data", "retention", "processing_scopes", "storage_geography", "sources", "reviewed"}
-        if set(row) != required:
+        if not required <= set(row) <= required | {"api_host"}:
             raise ModelFileError(f"provider {key} has missing or unknown fields")
         if row["trains_on_data"] not in {"yes", "no", "unknown"}:
             raise ModelFileError(f"provider {key} has invalid trains_on_data")
@@ -159,7 +160,10 @@ def load_provider_register(path: str | Path | None = None) -> dict[str, Provider
         for field in ("name", "retention", "storage_geography"):
             if not isinstance(row[field], str) or not row[field]:
                 raise ModelFileError(f"provider {key} requires {field}")
-        result[key] = ProviderEntry(key, row["name"], row["trains_on_data"], row["retention"], parsed_scopes, row["storage_geography"], tuple(sources), reviewed)
+        api_host = row.get("api_host")
+        if api_host is not None and (not isinstance(api_host, str) or re.fullmatch(r"[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+", api_host) is None):
+            raise ModelFileError(f"provider {key} api_host must be a lowercase hostname")
+        result[key] = ProviderEntry(key, row["name"], row["trains_on_data"], row["retention"], parsed_scopes, row["storage_geography"], tuple(sources), reviewed, api_host)
     return result
 
 
